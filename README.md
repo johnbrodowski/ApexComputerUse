@@ -97,14 +97,14 @@ The initial map render is a one-time cost per session. Everything after it is ne
 | | Screen Capture | Map Approach |
 |---|---|---|
 | Per-interaction cost | 10,000–40,000 tokens (image) | 5–20 tokens (text reference) |
-| Session setup cost | none — image sent every time | 400–1,800 tokens (one-time map render) |
+| Session setup cost | none — image sent every time | ~200–30,000 tokens (one-time map render, reusable within session) |
 | Interactions per person/day | 100 | 100 |
 
 ---
 
 ### Example 1 — Small App *(Calculator, tray utility, simple tool)*
 
-> Screenshot: **15,000 tokens each** · Initial map: **400 tokens** · Per-action after map: **8 tokens**
+> Screenshot: **15,000 tokens each** · Initial map: **~400 tokens** (one-time per session, small UI) · Per-action after map: **8 tokens**
 
 **By time period — 1 person:**
 
