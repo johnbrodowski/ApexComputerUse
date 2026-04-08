@@ -88,7 +88,7 @@ Map rendering isn't just a debugging convenience — it has compounding implicat
 
 ### The Core Difference
 
-With screen-capture-based AI automation, every interaction requires sending a fresh image to the model. At typical resolutions that's **2,000–30,000+ tokens per capture** — every single time, for every action. With ApexUIBridge's map approach, the UI is rendered once as a structured, text-based representation. After that initial render, each individual interaction references elements by name, costing **5–20 tokens on average** — comparable to the overhead of a single API tool call.
+With screen-capture-based AI automation, every interaction requires sending a fresh image to the model. At typical resolutions that's **10,000–40,000+ tokens per capture** — every single time, for every action. With ApexUIBridge's map approach, the UI is rendered once as a structured, text-based representation. After that initial render, each individual interaction references elements by name, costing **5–20 tokens on average** — comparable to the overhead of a single API tool call.
 
 The initial map render is a one-time cost per session. Everything after it is nearly free by comparison.
 
@@ -96,7 +96,7 @@ The initial map render is a one-time cost per session. Everything after it is ne
 
 | | Screen Capture | Map Approach |
 |---|---|---|
-| Per-interaction cost | 2,500–10,000 tokens (image) | 5–20 tokens (text reference) |
+| Per-interaction cost | 10,000–40,000 tokens (image) | 5–20 tokens (text reference) |
 | Session setup cost | none — image sent every time | 400–1,800 tokens (one-time map render) |
 | Interactions per person/day | 100 | 100 |
 
@@ -104,23 +104,23 @@ The initial map render is a one-time cost per session. Everything after it is ne
 
 ### Example 1 — Small App *(Calculator, tray utility, simple tool)*
 
-> Screenshot: **2,500 tokens each** · Initial map: **400 tokens** · Per-action after map: **8 tokens**
+> Screenshot: **15,000 tokens each** · Initial map: **400 tokens** · Per-action after map: **8 tokens**
 
 **By time period — 1 person:**
 
 | Timeframe | Screen Capture | Map Approach | Tokens Saved |
 |---|---|---|---|
-| 1 day | 250,000 | 1,192 | 248,808 |
-| 1 week | 1,750,000 | 8,344 | 1,741,656 |
-| 1 year | 91,250,000 | 435,080 | 90,814,920 |
+| 1 day | 1,500,000 | 1,200 | 1,498,800 |
+| 1 week | 10,500,000 | 8,400 | 10,491,600 |
+| 1 year | 547,500,000 | 438,000 | 547,062,000 |
 
 **Annual totals — by team size:**
 
 | Team Size | Screen Capture | Map Approach | Reduction Factor |
 |---|---|---|---|
-| 1 person | 91,250,000 | 435,080 | **~210x** |
-| 10 people | 912,500,000 | 4,350,800 | **~210x** |
-| 50 people | 4,562,500,000 | 21,754,000 | **~210x** |
+| 1 person | 547,500,000 | 438,000 | **~1,250x** |
+| 10 people | 5,475,000,000 | 4,380,000 | **~1,250x** |
+| 50 people | 27,375,000,000 | 21,900,000 | **~1,250x** |
 
 ---
  
