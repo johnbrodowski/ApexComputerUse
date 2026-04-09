@@ -73,11 +73,14 @@ namespace ApexComputerUse
             var contains = all.Where(w => w.Name.Contains(title, StringComparison.OrdinalIgnoreCase)).ToArray();
             if (contains.Length == 1) { matchedTitle = contains[0].Name; isExact = false; return contains[0].AsWindow(); }
 
-            // 3. Closest Levenshtein
+            // 3. Closest Levenshtein (with distance threshold)
             var closest = all.MinBy(w => Levenshtein(title.ToLower(), w.Name.ToLower()));
-            matchedTitle = closest?.Name ?? "";
+            if (closest == null) { matchedTitle = ""; isExact = false; return null; }
+            int bestDist = Levenshtein(title.ToLower(), closest.Name.ToLower());
+            if (bestDist > (int)(title.Length * 0.6)) { matchedTitle = ""; isExact = false; return null; }
+            matchedTitle = closest.Name;
             isExact = false;
-            return closest?.AsWindow();
+            return closest.AsWindow();
         }
 
         // ── Element fuzzy find ────────────────────────────────────────────
@@ -101,8 +104,8 @@ namespace ApexComputerUse
             if (all.Length == 0) { matchedValue = ""; isExact = false; return null; }
 
             Func<AutomationElement, string> getValue = searchById
-                ? el => el.AutomationId ?? ""
-                : el => el.Name ?? "";
+                ? el => el.Properties.AutomationId.ValueOrDefault ?? ""
+                : el => el.Properties.Name.ValueOrDefault ?? "";
 
             var exactEl = all.FirstOrDefault(el =>
                 getValue(el).Equals(searchText, StringComparison.OrdinalIgnoreCase));
@@ -117,6 +120,9 @@ namespace ApexComputerUse
             if (cands.Length == 0) { matchedValue = ""; isExact = false; return null; }
 
             var closest2 = cands.MinBy(el => Levenshtein(searchText.ToLower(), getValue(el).ToLower()))!;
+            int bestDist2 = Levenshtein(searchText.ToLower(), getValue(closest2).ToLower());
+            if (bestDist2 > (int)(searchText.Length * 0.6))
+                { matchedValue = ""; isExact = false; return null; }
             matchedValue = getValue(closest2);
             isExact = false;
             return closest2;
@@ -551,6 +557,24 @@ namespace ApexComputerUse
         {
             el.Focus();
             Thread.Sleep(FocusDelayMs);
+
+            // Handle "Modifier+{KEY}" mixed notation — convert to "{MODIFIER}{KEY}" for SendBraceKeys
+            if (keys.Contains('+') && keys.Contains('{'))
+            {
+                int plusIdx  = keys.IndexOf('+');
+                int braceIdx = keys.IndexOf('{');
+                if (plusIdx < braceIdx)
+                {
+                    string modWord = keys[..plusIdx].Trim();
+                    string rest    = keys[(plusIdx + 1)..].Trim();
+                    var modVk = ParseVirtualKey(modWord);
+                    if (modVk != null && rest.StartsWith('{'))
+                    {
+                        SendBraceKeys("{" + modWord.ToUpper() + "}" + rest);
+                        return;
+                    }
+                }
+            }
 
             if (keys.Contains('{'))
             {

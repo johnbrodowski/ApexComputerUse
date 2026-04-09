@@ -10,6 +10,7 @@ namespace ApexComputerUse
         public string? AutomationId { get; set; }
         public string? ElementName  { get; set; }
         public string? SearchType   { get; set; }   // "All" or a ControlType name
+        public bool    OnscreenOnly { get; set; }   // true = exclude IsOffscreen elements
         public string? Action       { get; set; }
         public string? Value        { get; set; }
         public string? ModelPath    { get; set; }   // ai init — LLM model .gguf path
@@ -264,7 +265,7 @@ namespace ApexComputerUse
                 _elementMap.Clear();
             }
 
-            var root = ScanElementsIntoMap(CurrentWindow, null, null);
+            var root = ScanElementsIntoMap(CurrentWindow, null, null, onscreenOnly: req.OnscreenOnly);
 
             string json = System.Text.Json.JsonSerializer.Serialize(root,
                 new System.Text.Json.JsonSerializerOptions
@@ -622,9 +623,15 @@ namespace ApexComputerUse
         private const int ScanMaxDepth    = 25;
         private const int ScanChildTimeout = 2000; // ms per FindAllChildren call
 
-        private ElementNode? ScanElementsIntoMap(AutomationElement el, string? parentHash, int? parentId, int siblingIndex = 0, int depth = 0)
+        private ElementNode? ScanElementsIntoMap(AutomationElement el, string? parentHash, int? parentId, int siblingIndex = 0, int depth = 0, bool onscreenOnly = false)
         {
             if (depth > ScanMaxDepth) return null;
+
+            // Onscreen filter — skip element and its entire subtree if off-viewport.
+            // depth == 0 is always the Window root; never filter it out.
+            if (onscreenOnly && depth > 0 && el.Properties.IsOffscreen.ValueOrDefault)
+                return null;
+
             try
             {
                 var ct = el.Properties.ControlType.ValueOrDefault;
@@ -649,7 +656,7 @@ namespace ApexComputerUse
                 {
                     for (int i = 0; i < children.Length; i++)
                     {
-                        var child = ScanElementsIntoMap(children[i], hash, id, i, depth + 1);
+                        var child = ScanElementsIntoMap(children[i], hash, id, i, depth + 1, onscreenOnly);
                         if (child != null)
                         {
                             childNodes ??= new List<ElementNode>();

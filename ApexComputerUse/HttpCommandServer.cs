@@ -92,8 +92,10 @@ namespace ApexComputerUse
                     ("GET",  "/help")        => _processor.Process(new CommandRequest { Command = "help" }),
                     ("GET",  "/elements")    => _processor.Process(new CommandRequest
                     {
-                        Command    = "elements",
-                        SearchType = req.QueryString["type"]
+                        Command      = "elements",
+                        SearchType   = req.QueryString["type"],
+                        OnscreenOnly = string.Equals(req.QueryString["onscreen"], "true",
+                                           StringComparison.OrdinalIgnoreCase)
                     }),
                     ("GET",  "/ai/status")   => _processor.Process(new CommandRequest { Command = "ai", Action = "status" }),
                     ("POST", "/find")        => _processor.Process(FromJson(body, "find")),

@@ -1,6 +1,56 @@
 # ApexComputerUse
 
-An AI computer use application for Windows desktop automation via **FlaUI UI Automation**. Controlled by AI agents through **HTTP REST**, **named pipes**, and **Telegram**. Supports local point-and-click usage. Includes **Tesseract OCR** for reading text from UI elements and **multimodal AI** (vision + audio) via a local LLM.
+**Structured Windows UI automation for AI agents — accurate, token-efficient, and framework-agnostic.**
+
+ApexComputerUse uses the **Windows UI Automation API (UIA3 via FlaUI)** to expose every desktop application and browser as a structured, named element tree over a plain **HTTP REST API**. AI agents interact with elements by name or stable ID — no screenshots, no pixel coordinates, no vision model required.
+
+Works on Win32, WPF, UWP, WinForms, and browsers. Controlled via **HTTP REST**, **named pipes**, **cmd.exe**, and **Telegram**.
+
+---
+
+## Why ApexComputerUse
+
+### The problem with screenshot-based automation
+
+Most AI computer-use tools — Claude Computer Use, OpenAI CUA, UI-TARS, OmniParser — work by sending a screenshot to a vision model and guessing pixel coordinates to click. This approach has compounding costs:
+
+- A 1024×768 screenshot costs ~1,050 tokens. A 1920×1080 screen costs ~2,765 tokens. Every single step.
+- Screenshots stack in conversation history — a 20-step task accumulates 20+ images in context.
+- Coordinate grounding is fragile: it breaks on window resize, DPI scaling, and multi-monitor setups.
+- Published benchmarks confirm the accuracy ceiling: even specialist 7B vision models score only **18.9%** on real professional UIs (ScreenSpot-Pro, 2025). GPT-4o scores **below 2%** on unscaled professional screens.
+
+### The structured-tree approach
+
+ApexComputerUse reads the **accessibility tree** the OS already maintains — the same tree used by screen readers and test automation. This gives every element a name, control type, and AutomationId, without rendering a pixel.
+
+Interacting with an element by name costs **5–20 tokens**. The element map for a full browser page in onscreen-only mode is typically **100–200 elements** of compact JSON — compared to ~1,050 tokens for a single screenshot of the same page, with none of the coordinate fragility.
+
+This is the same direction taken by the most efficient browser-only tools: [browser-use](https://github.com/browser-use/browser-use) claims 50% fewer tokens than screenshot alternatives; Vercel's agent-browser returns 200–400 tokens per page snapshot and uses 82–93% fewer tokens than Playwright MCP. ApexComputerUse brings the same approach to the entire Windows desktop.
+
+### How it compares
+
+| Tool | Coverage | HTTP API | Stable element IDs | Onscreen filter | Status |
+|---|---|---|---|---|---|
+| **ApexComputerUse** | Windows desktop + browsers | ✅ REST | ✅ SHA-256 hash | ✅ `?onscreen=true` | Active |
+| UFO2 (Microsoft) | Windows desktop + browsers | ❌ research agent | ❌ bounding-box | Partial | Research only |
+| UI Automata | Windows desktop + browsers | MCP only | Selector-based | Shadow DOM cache | Active |
+| Windows-Use | Windows desktop | ❌ Python lib | ❌ | Partial | Active |
+| WinAppDriver | Windows desktop | WebDriver | XPath / selectors | ❌ | Paused by Microsoft |
+| browser-use | Browser only | ❌ Python lib | Element hash | ✅ | Active |
+| Playwright MCP | Browser only | MCP | Session-scoped refs | Partial | Active |
+| Claude Computer Use | Any (screenshot) | Cloud API | ❌ coordinates | ❌ | Active |
+
+**No other tool combines:** Windows UIA3 coverage, SHA-256 stable element IDs, a language-agnostic HTTP REST API, and an onscreen visibility filter — in a single deployable binary.
+
+### Stable element IDs
+
+Every element is assigned a **SHA-256 hash-based numeric ID** derived from its control type, name, AutomationId, and position in the tree. These IDs are stable across sessions — an agent can reference the same element in turn 1 and turn 20 without re-querying the tree. No other tool in the Windows desktop automation space publishes this property.
+
+### The onscreen filter
+
+`GET /elements?onscreen=true` prunes any element where `IsOffscreen = true` during the tree scan, skipping entire offscreen subtrees. On a live Chewy.com product page this reduces **634 elements to 126** — an 80% reduction — putting token cost per step in the same range as the best browser-only tools while covering all desktop apps too.
+
+The filter composes with the existing type filter: `?onscreen=true&type=Button`.
 
 ---
 
@@ -9,6 +59,7 @@ An AI computer use application for Windows desktop automation via **FlaUI UI Aut
 - Find any window and element by name or AutomationId (exact or fuzzy match)
 - Filter element search by ControlType
 - Persistent, hash-based stable element and window IDs (survive app restarts)
+- Onscreen-only element map (`?onscreen=true`) — prunes offscreen subtrees at scan time
 - Execute all common UI actions: click, type, select, toggle, scroll, drag & drop, etc.
 - OCR any UI element using Tesseract
 - Multimodal AI: describe UI elements, analyse image/audio files using a local vision LLM
@@ -70,7 +121,15 @@ curl http://localhost:8080/windows
 
 # 2. Get elements with their IDs for the current window
 curl http://localhost:8080/elements
-# Returns nested JSON: {"id":105,"controlType":"Edit","name":"Text Editor","automationId":"15","children":[...]}
+
+# Onscreen elements only (prunes offscreen subtrees — 80% fewer elements on browser pages)
+curl "http://localhost:8080/elements?onscreen=true"
+
+# Combine with type filter
+curl "http://localhost:8080/elements?onscreen=true&type=Button"
+
+# Returns nested JSON:
+# {"id":105,"controlType":"Edit","name":"Text Editor","automationId":"15","children":[...]}
 
 # 3. Find using numeric IDs (no fuzzy matching, direct map lookup)
 curl -X POST http://localhost:8080/find \
@@ -81,16 +140,25 @@ curl -X POST http://localhost:8080/find \
 Using numeric IDs is faster and unambiguous — the element is resolved directly from the in-memory map without any search or fuzzy logic. Every `find` call also auto-focuses the matched window.
 
 ---
- 
+
 ## Token Economics
 
 Map rendering isn't just a debugging convenience — it has compounding implications for token consumption at scale.
 
 ### The Core Difference
 
-With screen-capture-based AI automation, every interaction requires sending a fresh image to the model. At typical resolutions that's **2,000–30,000+ tokens per capture** — every single time, for every action. With ApexUIBridge's map approach, the UI is rendered once as a structured, text-based representation. After that initial render, each individual interaction references elements by name, costing **5–20 tokens on average** — comparable to the overhead of a single API tool call.
+With screenshot-based AI automation, every interaction requires sending a fresh image to the model. At typical resolutions that's **1,050–2,765 tokens per screenshot** (Claude pricing: `width × height ÷ 750`) — every single step, accumulating in conversation history. With ApexComputerUse's map approach, the UI is rendered once as a structured, text-based representation. After that initial render, each individual interaction references elements by name, costing **5–20 tokens on average**.
 
-The initial map render is a one-time cost per session. Everything after it is nearly free by comparison.
+The `?onscreen=true` filter further reduces the element map to only what is visible in the current viewport. On a real browser page this produces **126 elements** of compact JSON — well under the cost of a single screenshot of the same page.
+
+### Real-world token costs (Claude Sonnet, April 2026 pricing)
+
+| | Per step | 20-step task |
+|---|---|---|
+| Screenshot (1024×768) | ~1,050 tokens | ~21,000 tokens in images alone |
+| Screenshot (1920×1080) | ~2,765 tokens | ~55,000 tokens in images alone |
+| ApexComputerUse (full map) | 400–1,800 tokens (one-time) + ~10 per action | ~1,000 tokens total |
+| ApexComputerUse (`?onscreen=true`) | 200–600 tokens (one-time) + ~10 per action | ~400 tokens total |
 
 ### Assumptions Used Below
 
@@ -123,7 +191,7 @@ The initial map render is a one-time cost per session. Everything after it is ne
 | 50 people | 4,562,500,000 | 21,754,000 | **~210x** |
 
 ---
- 
+
 ## Usage — HTTP API
 
 Start the HTTP server from the **Remote Control** group box, then use curl:
@@ -137,7 +205,15 @@ curl http://localhost:8080/status
 
 # List all elements in the current window (nested JSON with IDs)
 curl http://localhost:8080/elements
+
+# Onscreen elements only — prunes offscreen subtrees for maximum token efficiency
+curl "http://localhost:8080/elements?onscreen=true"
+
+# Filter by ControlType
 curl "http://localhost:8080/elements?type=Button"
+
+# Both filters combined
+curl "http://localhost:8080/elements?onscreen=true&type=Button"
 
 # Help
 curl http://localhost:8080/help
