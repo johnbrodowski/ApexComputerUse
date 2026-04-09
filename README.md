@@ -14,7 +14,7 @@ Works on Win32, WPF, UWP, WinForms, and browsers. Controlled via **HTTP REST**, 
 
 Most AI computer-use tools — Claude Computer Use, OpenAI CUA, UI-TARS, OmniParser — work by sending a screenshot to a vision model and guessing pixel coordinates to click. This approach has compounding costs:
 
-- A 1024×768 screenshot costs ~1,050 tokens. A 1920×1080 screen costs ~2,765 tokens. Every single step.
+- Screenshot token costs scale with resolution and vary by provider. A 1024×768 image runs ~765 tokens (OpenAI) to ~1,050 tokens (Anthropic). At 1920×1080 that rises to ~1,840 tokens (Anthropic) or ~2,125 tokens (OpenAI). At 2048×2048, OpenAI charges ~2,765 tokens and Anthropic ~2,500–3,500 tokens. Gemini is the exception, typically staying under 1,000 tokens even for ~4K images. And this cost is paid on every single step.
 - Screenshots stack in conversation history — a 20-step task accumulates 20+ images in context.
 - Coordinate grounding is fragile: it breaks on window resize, DPI scaling, and multi-monitor setups.
 - Published benchmarks confirm the accuracy ceiling: even specialist 7B vision models score only **18.9%** on real professional UIs (ScreenSpot-Pro, 2025). GPT-4o scores **below 2%** on unscaled professional screens.
@@ -147,18 +147,21 @@ Map rendering isn't just a debugging convenience — it has compounding implicat
 
 ### The Core Difference
 
-With screenshot-based AI automation, every interaction requires sending a fresh image to the model. At typical resolutions that's **1,050–2,765 tokens per screenshot** (Claude pricing: `width × height ÷ 750`) — every single step, accumulating in conversation history. With ApexComputerUse's map approach, the UI is rendered once as a structured, text-based representation. After that initial render, each individual interaction references elements by name, costing **5–20 tokens on average**.
+With screenshot-based AI automation, every interaction requires sending a fresh image to the model. At typical desktop resolutions that's **1,000–3,500 tokens per screenshot** depending on the provider and resolution — every single step, accumulating in conversation history. With ApexComputerUse's map approach, the UI is rendered once as a structured, text-based representation. After that initial render, each individual interaction references elements by name, costing **5–20 tokens on average**.
 
 The `?onscreen=true` filter further reduces the element map to only what is visible in the current viewport. On a real browser page this produces **126 elements** of compact JSON — well under the cost of a single screenshot of the same page.
 
-### Real-world token costs (Claude Sonnet, April 2026 pricing)
+### Real-world token costs (approximate — varies by provider and resolution)
 
 | | Per step | 20-step task |
 |---|---|---|
-| Screenshot (1024×768) | ~1,050 tokens | ~21,000 tokens in images alone |
-| Screenshot (1920×1080) | ~2,765 tokens | ~55,000 tokens in images alone |
+| Screenshot (1024×768) | ~765–1,050 tokens | ~15,000–21,000 tokens in images alone |
+| Screenshot (1920×1080) | ~1,840–2,125 tokens | ~37,000–43,000 tokens in images alone |
+| Screenshot (2048×2048) | ~2,765–3,500 tokens | ~55,000–70,000 tokens in images alone |
 | ApexComputerUse (full map) | 400–1,800 tokens (one-time) + ~10 per action | ~1,000 tokens total |
 | ApexComputerUse (`?onscreen=true`) | 200–600 tokens (one-time) + ~10 per action | ~400 tokens total |
+
+> **Provider breakdown:** at 1024×768, Anthropic ≈ 1,050 tokens / OpenAI ≈ 765 tokens. At 1920×1080, Anthropic ≈ 1,840 / OpenAI ≈ 2,125. At 2048×2048, OpenAI ≈ 2,765 / Anthropic ≈ 2,500–3,500. Gemini is notably more efficient — typically under 1,000 tokens even for ~4K images. All providers compound costs across steps: every screenshot remains in context for the life of the conversation.
 
 ### Assumptions Used Below
 
