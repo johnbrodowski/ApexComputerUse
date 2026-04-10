@@ -444,7 +444,26 @@ namespace ApexComputerUse
                 cvp.SetValue(value.ToString("G"));
                 return;
             }
-            throw new InvalidOperationException("Neither RangeValue nor writable Value pattern is supported");
+            // Keyboard fallback for controls like WinForms TrackBar whose Value pattern is
+            // present but read-only (pattern writes are silently ignored). Press Home to reach
+            // the minimum, probe the actual step size with one Right press, then advance to target.
+            el.Focus();
+            Thread.Sleep(FocusDelayMs);
+            Keyboard.Press(VirtualKeyShort.HOME); Keyboard.Release(VirtualKeyShort.HOME);
+            Thread.Sleep(50);
+            if (!double.TryParse(GetRangeValue(el), out double min)) min = 0;
+            Keyboard.Press(VirtualKeyShort.RIGHT); Keyboard.Release(VirtualKeyShort.RIGHT);
+            Thread.Sleep(50);
+            double step = double.TryParse(GetRangeValue(el), out double afterOne) && afterOne > min
+                          ? afterOne - min : 1;
+            Keyboard.Press(VirtualKeyShort.HOME); Keyboard.Release(VirtualKeyShort.HOME);
+            Thread.Sleep(30);
+            int steps = (int)Math.Round((value - min) / step);
+            for (int i = 0; i < Math.Max(0, steps); i++)
+            {
+                Keyboard.Press(VirtualKeyShort.RIGHT); Keyboard.Release(VirtualKeyShort.RIGHT);
+                Thread.Sleep(10);
+            }
         }
 
         public string GetRangeValue(AutomationElement el)
@@ -924,6 +943,14 @@ namespace ApexComputerUse
 
         public string GetComboBoxSelected(AutomationElement el)
         {
+            // Value pattern is the most reliable for WinForms combos — check it first
+            // to avoid triggering FlaUI's ComboBox.Expand() which throws NullReferenceException
+            // when the ExpandCollapse pattern is absent.
+            if (el.Patterns.Value.TryGetPattern(out var vpEarly))
+            {
+                var v = vpEarly.Value.ValueOrDefault;
+                if (!string.IsNullOrEmpty(v)) return v;
+            }
             var combo = el.AsComboBox();
             if (combo != null)
             {
@@ -932,7 +959,7 @@ namespace ApexComputerUse
                     string? sel = combo.SelectedItem?.Text;
                     if (sel != null) return sel;
                 }
-                catch { /* SelectionItem pattern not supported — fall through to Value */ }
+                catch { /* SelectionItem pattern not supported — fall through */ }
             }
             var listBox = el.AsListBox();
             if (listBox != null)
@@ -944,8 +971,6 @@ namespace ApexComputerUse
                 }
                 catch { /* fall through */ }
             }
-            // Fallback: get Value pattern (handles WinForms ComboBox / editable combos)
-            if (el.Patterns.Value.TryGetPattern(out var vp)) return vp.Value.ValueOrDefault ?? "";
             return "(none)";
         }
 

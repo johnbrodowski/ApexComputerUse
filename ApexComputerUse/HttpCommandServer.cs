@@ -997,12 +997,28 @@ namespace ApexComputerUse
 
         // ── JSON parsing ──────────────────────────────────────────────────
 
+        // HttpListenerRequest.QueryString decodes '+' as space (form-encoding), which breaks
+        // key combo strings like "Ctrl+A". Parse 'value' from the raw URL to preserve '+'.
+        private static string? RawQueryValue(HttpListenerRequest req)
+        {
+            var raw = req.Url?.Query;
+            if (raw == null) return null;
+            foreach (var part in raw.TrimStart('?').Split('&'))
+            {
+                var eq = part.IndexOf('=');
+                if (eq < 0) continue;
+                if (Uri.UnescapeDataString(part[..eq]) == "value")
+                    return Uri.UnescapeDataString(part[(eq + 1)..]);
+            }
+            return null;
+        }
+
         private static CommandRequest FromQueryString(HttpListenerRequest req, string command, string? action = null)
             => new()
             {
                 Command      = command,
                 Action       = req.QueryString["action"]       ?? action,
-                Value        = req.QueryString["value"],
+                Value        = RawQueryValue(req),
                 Window       = req.QueryString["window"],
                 AutomationId = req.QueryString["id"]           ?? req.QueryString["automationId"]
                              ?? req.QueryString["element"],
