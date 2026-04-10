@@ -85,6 +85,7 @@ namespace ApexComputerUse
                         "status"            => CmdStatus(),
                         "windows"           => CmdListWindows(),
                         "elements"          => CmdListElements(req),
+                        "uimap"             => CmdRenderMap(),
                         "help"              => CmdHelp(),
                         "capture"           => CmdCapture(req),
                         _ => Fail($"Unknown command '{req.Command}'. Try 'help'.")
@@ -224,6 +225,43 @@ namespace ApexComputerUse
                 default: // "element"
                     if (CurrentElement == null) return Fail("No element selected. Use 'find' first.");
                     return Ok("Captured element", _helper.CaptureElementToBase64(CurrentElement));
+            }
+        }
+
+        private CommandResponse CmdRenderMap()
+        {
+            if (CurrentWindow == null) return Fail("No window selected. Use 'find window=X' first.");
+
+            var elemResponse = CmdListElements(new CommandRequest { Command = "elements" });
+            if (!elemResponse.Success || string.IsNullOrWhiteSpace(elemResponse.Data))
+                return Fail("Could not scan elements: " + elemResponse.Message);
+
+            string json = elemResponse.Data!;
+
+            var renderer = new UiMapRenderer(new[]
+            {
+                "Button", "Document", "Text", "Window", "Pane", "MenuItem", "TitleBar",
+                "CheckBox", "ComboBox", "DataGrid", "Edit", "Group", "Hyperlink", "List",
+                "ListItem", "Menu", "MenuBar", "Slider", "Spinner", "StatusBar", "ScrollBar",
+                "Tab", "ToolTip", "ToolBar", "TabItem", "Image", "AppBar", "Calendar",
+                "Custom", "DataItem", "Header", "HeaderItem", "ProgressBar", "RadioButton",
+                "SemanticZoom", "Separator", "SplitButton", "Table", "Thumb", "Tree",
+                "TreeItem", "Unknown"
+            });
+
+            var screen = System.Windows.Forms.Screen.PrimaryScreen?.Bounds
+                         ?? new System.Drawing.Rectangle(0, 0, 1920, 1080);
+
+            string tmp = Path.GetTempFileName();
+            try
+            {
+                renderer.Render(json, tmp, screen.Width, screen.Height);
+                string b64 = Convert.ToBase64String(File.ReadAllBytes(tmp));
+                return Ok($"UI map: {_elementMap.Count} element(s)", b64);
+            }
+            finally
+            {
+                try { File.Delete(tmp); } catch { /* best effort */ }
             }
         }
 
@@ -406,6 +444,7 @@ namespace ApexComputerUse
             status
             windows
             elements [type=<ControlType>]
+            uimap
             help
 
             Actions (for exec):

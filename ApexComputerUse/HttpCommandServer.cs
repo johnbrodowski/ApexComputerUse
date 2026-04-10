@@ -128,6 +128,8 @@ namespace ApexComputerUse
                                 OnscreenOnly = string.Equals(req.QueryString["onscreen"], "true",
                                                    StringComparison.OrdinalIgnoreCase)
                             })),
+                        ("GET", "/uimap")
+                            => ApexResult.From("uimap",      _processor.Process(new CommandRequest { Command = "uimap" })),
                         ("GET", "/ai/status")
                             => ApexResult.From("ai/status",  _processor.Process(new CommandRequest { Command = "ai", Action = "status" })),
                         ("POST", "/find")
@@ -534,6 +536,7 @@ namespace ApexComputerUse
                           <button class="a cap" onclick="doCapture('window')">window</button>
                           <button class="a cap" onclick="doCapture('screen')">screen</button>
                           <button class="a cap" onclick="doOcr()">OCR</button>
+                          <button class="a cap" onclick="doUiMap()">UI map</button>
                         </div>
 
                         <div class="grp">
@@ -748,6 +751,17 @@ namespace ApexComputerUse
                     log(r);
                   } catch (e) {
                     appendLog('ocr', false, String(e));
+                  }
+                }
+
+                // ── UI Map ──────────────────────────────────────────────────
+                async function doUiMap() {
+                  appendLog('uimap', true, 'Rendering UI map\u2026');
+                  try {
+                    const r = await call('GET', '/uimap');
+                    logCapture(r, 'uimap');
+                  } catch (e) {
+                    appendLog('uimap', false, String(e));
                   }
                 }
 

@@ -70,7 +70,7 @@ The filter composes with the existing type filter: `?onscreen=true&type=Button`.
 - Remote control via Telegram bot
 - Screenshot capture of elements, windows, and full screen (returned as base64 PNG)
 - **Interactive HTTP test console** — served at `GET /`, includes live windows list, element tree browser, grouped command builder, inline capture/OCR/AI vision buttons, and a response log
-- **UI Map Renderer** — renders the element tree as a colour-coded overlay drawn directly on screen, and optionally exports a PNG image; accessible via Tools → Render UI Map
+- **UI Map Renderer** — renders the element tree as a colour-coded overlay drawn directly on screen, and optionally exports a PNG image; accessible via Tools → Render UI Map or `GET /uimap` (returns base64 PNG)
 - **Format-adaptive responses** — every endpoint serves HTML, plain text, or JSON via `?format=` or `Accept` header; default is an HTML page with embedded JSON readable by any AI that can fetch a URL
 - **System utility routes** — `/ping`, `/sysinfo`, `/env`, `/ls`, `/run` for AI agents that need OS-level context without a separate tool
 
@@ -223,7 +223,7 @@ Opening the root URL in any browser launches a dark-themed console with:
 
 - **Windows panel** — live list of all open windows; click to select and auto-load its element tree
 - **Elements panel** — nested element tree flattened with indentation; onscreen-only toggle; ControlType filter; click any element to select it
-- **Command builder** — grouped action buttons (Click, Text, Keys, State, Scroll, Toggle, Select, Window, Capture, AI Vision); Value input with context hints; ▶ Execute button
+- **Command builder** — grouped action buttons (Click, Text, Keys, State, Scroll, Toggle, Select, Window, Capture, AI Vision); Capture group includes a **UI map** button that renders the current window's element tree as a base64 PNG inline; Value input with context hints; ▶ Execute button
 - **AI Vision buttons** — `status` (check model), `describe` (capture element → vision model), `ask` (question about element); requires model loaded on the Model tab
 - **Response log** — newest result at top; captures rendered as inline images (click to zoom)
 
@@ -315,6 +315,9 @@ curl "http://localhost:8080/elements?type=Button"
 
 # Both filters combined
 curl "http://localhost:8080/elements?onscreen=true&type=Button"
+
+# Render the current window's UI element tree as a colour-coded PNG (returns base64)
+curl http://localhost:8080/uimap
 
 # Help
 curl http://localhost:8080/help
@@ -605,9 +608,20 @@ Select an element in the Elements panel first, then click **describe** or **ask*
 
 ## UI Map Renderer
 
-**Tools → Render UI Map** scans the current window's accessibility tree and renders every element's bounding rectangle as a colour-coded overlay drawn directly on top of the screen. Each control type gets a deterministic, visually distinct colour. Element names are drawn inside the bounding box.
+The UI Map Renderer scans the current window's accessibility tree and renders every element's bounding rectangle as a colour-coded overlay. Each control type gets a deterministic, visually distinct colour. Element names are drawn inside the bounding box.
 
-The overlay auto-closes after 5 seconds (or press Escape). A Save dialog lets you export the annotated layout as a PNG image before the overlay appears.
+### Via HTTP API
+
+```bash
+# Returns base64-encoded PNG of the current window's element tree
+curl http://localhost:8080/uimap
+```
+
+Requires a prior `find` call to select a window. The response `data.result` field contains the base64 PNG — identical format to the `/capture` endpoints. In the interactive test console, the **UI map** button (in the Capture group) renders the result inline in the response log.
+
+### Via the desktop UI
+
+**Tools → Render UI Map** draws the overlay directly on screen for 5 seconds (press Escape to dismiss early) and offers to save it as a PNG file. This also triggers a live screen overlay, which is not available via the HTTP API.
 
 **Tools → Output UI Map** logs the raw nested JSON element tree to the console tab — useful for inspecting the tree structure or copying it for use with an AI agent.
 
