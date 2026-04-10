@@ -1,3 +1,6 @@
+<img width="1536" height="875" alt="7e2a4e1e-91b3-4aef-a9b3-59c76cc3e665" src="https://github.com/user-attachments/assets/75363e02-0179-421a-a4ac-9eacf3588224" />
+
+
 # ApexComputerUse
 
 > **Give AI agents control of any Windows app — no vision model, no screenshots, no cloud.**
