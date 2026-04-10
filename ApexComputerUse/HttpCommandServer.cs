@@ -1109,15 +1109,12 @@ namespace ApexComputerUse
         private static (byte[], string, int) AsUtf8(string body, string ct, bool ok)
             => (Encoding.UTF8.GetBytes(body), ct, ok ? 200 : 400);
 
-        private static (string, string, int) RenderJson(ApexResult r)
-        {
-            string json = JsonSerializer.Serialize(
+        private static string RenderJson(ApexResult r) =>
+            JsonSerializer.Serialize(
                 new { success = r.Success, action = r.Action, data = r.Data, error = r.Error },
                 new JsonSerializerOptions { WriteIndented = true });
-            return (json, "application/json; charset=utf-8", r.Success ? 200 : 400);
-        }
 
-        private static (string, string, int) RenderText(ApexResult r)
+        private static string RenderText(ApexResult r)
         {
             var sb = new StringBuilder();
             sb.AppendLine($"success: {r.Success}");
@@ -1126,10 +1123,10 @@ namespace ApexComputerUse
             if (r.Data  is not null)
                 foreach (var kv in r.Data)
                     sb.AppendLine($"{kv.Key}: {kv.Value}");
-            return (sb.ToString(), "text/plain; charset=utf-8", r.Success ? 200 : 400);
+            return sb.ToString();
         }
 
-        private static (string, string, int) RenderHtml(ApexResult r)
+        private static string RenderHtml(ApexResult r)
         {
             string embeddedJson = JsonSerializer.Serialize(
                 new { success = r.Success, action = r.Action, data = r.Data, error = r.Error },
@@ -1164,7 +1161,7 @@ namespace ApexComputerUse
                 </script>
                 </body></html>
                 """;
-            return (html, "text/html; charset=utf-8", r.Success ? 200 : 400);
+            return html;
         }
 
         private static (byte[], string, int) RenderPdf(ApexResult r)
