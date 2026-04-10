@@ -1076,6 +1076,8 @@ namespace ApexComputerUse
 
     internal static class FormatAdapter
     {
+        private static readonly JsonSerializerOptions s_indented = new() { WriteIndented = true };
+
         public static string Negotiate(HttpListenerRequest req, string? extHint = null)
         {
             // 1. URL file extension takes highest priority

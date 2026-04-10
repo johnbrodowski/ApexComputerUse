@@ -1,10 +1,50 @@
 # ApexComputerUse
 
-**Structured Windows UI automation for AI agents — accurate, token-efficient, and framework-agnostic.**
+> **Give AI agents control of any Windows app — no vision model, no screenshots, no cloud.**
 
-ApexComputerUse uses the **Windows UI Automation API (UIA3 via FlaUI)** to expose every desktop application and browser as a structured, named element tree over a plain **HTTP REST API**. AI agents interact with elements by name or stable ID — no screenshots, no pixel coordinates, no vision model required.
+![.NET](https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet) ![Platform](https://img.shields.io/badge/platform-Windows-0078D4?logo=windows) ![License](https://img.shields.io/badge/license-MIT-green)
+
+<!-- SCREENSHOT: animated GIF showing the web UI — select a window, browse elements, click a button, see the response log update. Suggested filename: docs/images/demo.gif -->
+![ApexComputerUse demo](docs/images/demo.gif)
+
+ApexComputerUse reads the **Windows accessibility tree** (the same data the OS exposes to screen readers) and serves it over a plain **HTTP REST API**. Any AI agent — in any language, on any machine — can find, inspect, and control any desktop app or browser by making simple HTTP requests. No screenshots. No pixel coordinates. No cloud dependency.
+
+**5–20 tokens per action** instead of 1,000–3,500 for a screenshot. A full browser page in onscreen-only mode is ~126 elements of compact JSON — less than the cost of a single screenshot of the same page.
 
 Works on Win32, WPF, UWP, WinForms, and browsers. Controlled via **HTTP REST**, **named pipes**, **cmd.exe**, and **Telegram**.
+
+---
+
+## Quickstart
+
+**Requirements:** Windows 10/11 · [.NET 10 SDK](https://dotnet.microsoft.com/download)
+
+```bash
+git clone https://github.com/your-org/ApexComputerUse
+cd ApexComputerUse
+dotnet build
+dotnet run --project ApexComputerUse
+```
+
+1. The app opens. In the **Remote Control** tab, click **Start HTTP**.
+2. Open `http://localhost:8080/` in a browser — the interactive console appears.
+3. Pick any open window from the **Windows** panel on the left.
+4. Browse its element tree, click an action button, see the result.
+
+Or go straight to curl:
+
+```bash
+# Confirm the server is up
+curl http://localhost:8080/ping
+
+# Find Notepad and read its text editor content
+curl -X POST http://localhost:8080/find -H "Content-Type: application/json" -d '{"window":"Notepad"}'
+curl http://localhost:8080/exec?action=gettext
+```
+
+> **OCR:** requires `eng.traineddata` — download from [github.com/tesseract-ocr/tessdata](https://github.com/tesseract-ocr/tessdata) and place it in `tessdata\` next to the executable.
+>
+> **AI Vision:** requires a GGUF vision model and projector — see [Usage — AI](#usage--ai-multimodal).
 
 ---
 
@@ -78,17 +118,25 @@ The filter composes with the existing type filter: `?onscreen=true&type=Button`.
 
 ## Setup
 
-### 1. tessdata (required for OCR)
+### 1. Build and run
 
-Place `eng.traineddata` (and any other language files) in:
+```bash
+git clone https://github.com/your-org/ApexComputerUse
+cd ApexComputerUse
+dotnet run --project ApexComputerUse
+```
+
+### 2. OCR (optional)
+
+Download `eng.traineddata` (and any other language files) from [github.com/tesseract-ocr/tessdata](https://github.com/tesseract-ocr/tessdata) and place them in a `tessdata\` folder next to the executable:
 
 ```
-bin\Debug\net10.0-windows\tessdata\
+tessdata\
+  eng.traineddata
+  (other languages...)
 ```
 
-The file is already included in the project and copied on build. Additional languages can be downloaded from [github.com/tesseract-ocr/tessdata](https://github.com/tesseract-ocr/tessdata).
-
-### 2. Telegram Bot (optional)
+### 3. Telegram Bot (optional)
 
 1. Message [@BotFather](https://t.me/BotFather) on Telegram and create a bot with `/newbot`.
 2. Copy the token (format: `123456789:ABC-DEF...`).
@@ -97,6 +145,9 @@ The file is already included in the project and copied on build. Additional lang
 ---
 
 ## Usage — UI
+
+<!-- SCREENSHOT: the main WinForms window showing the Find & Execute tab with a window selected, element found, and an action result in the log. Suggested filename: docs/images/ui-main.png -->
+![Desktop UI](docs/images/ui-main.png)
 
 | Field | Description |
 |---|---|
@@ -218,6 +269,9 @@ The `?onscreen=true` filter further reduces the element map to only what is visi
 Start the HTTP server from the **Remote Control** group box, then use curl or open `http://localhost:8080/` in a browser to access the interactive test console.
 
 ### Interactive Test Console (`GET /`)
+
+<!-- SCREENSHOT: the web console at localhost:8080 — left sidebar showing windows and elements, right panel showing command builder buttons and a response in the log. Suggested filename: docs/images/web-console.png -->
+![Web Console](docs/images/web-console.png)
 
 Opening the root URL in any browser launches a dark-themed console with:
 
@@ -635,6 +689,9 @@ Select an element in the Elements panel first, then click **describe** or **ask*
 
 ## UI Map Renderer
 
+<!-- SCREENSHOT: the live colour-coded overlay drawn on top of a real app window, showing labelled bounding boxes for buttons, text fields, menus, etc. Suggested filename: docs/images/uimap-overlay.png -->
+![UI Map overlay](docs/images/uimap-overlay.png)
+
 The UI Map Renderer scans the current window's accessibility tree and renders every element's bounding rectangle as a colour-coded overlay. Each control type gets a deterministic, visually distinct colour. Element names are drawn inside the bounding box.
 
 ### Via HTTP API
@@ -847,7 +904,7 @@ $r = Send-FlaUICommand @{ command='capture'; action='screen' }
 
 ## OCR
 
-OCR uses Tesseract. The `tessdata` folder must contain the language file (default: `eng.traineddata`).
+OCR uses [Tesseract](https://github.com/tesseract-ocr/tesseract). Download language files from [github.com/tesseract-ocr/tessdata](https://github.com/tesseract-ocr/tessdata) and place them in a `tessdata\` folder next to the executable (e.g. `tessdata\eng.traineddata`). Additional languages work the same way.
 
 Captures saved by **OCR Element + Save** go to `Desktop\Apex_Captures\`.
 
@@ -871,16 +928,17 @@ ApexComputerUse/
 ├── CommandProcessor.cs            — Shared remote command logic (used by all server types)
 ├── HttpCommandServer.cs           — HTTP REST server (System.Net.HttpListener)
 │     ├── ApexResult               — Canonical {success, action, data, error} result type
-│     └── FormatAdapter            — Format negotiation and HTML/text/JSON renderers
+│     ├── FormatAdapter            — Format negotiation (HTML / JSON / text / PDF)
+│     └── PdfWriter                — Minimal PDF generator (no external dependencies)
 ├── PipeCommandServer.cs           — Named-pipe server
 ├── TelegramController.cs          — Telegram bot (Telegram.Bot)
 ├── OcrHelper.cs                   — Tesseract OCR wrapper
 ├── MtmdHelper.cs                  — Stateless multimodal LLM wrapper (LLamaSharp MTMD)
 ├── MtmdInteractiveModeExecute.cs  — Interactive AI computer use mode (Tools menu)
 ├── UiMapRenderer.cs               — Renders element trees as colour-coded screen overlays and PNG images
-├── tessdata/
-│   └── eng.traineddata
 └── Scripts/
     ├── ApexComputerUse.psm1       — PowerShell module (pipe-based)
     └── apex.cmd                   — cmd.exe helper (HTTP-based)
 ```
+
+> **OCR:** place Tesseract language files in a `tessdata\` folder next to the executable. Not included in the repo — download from [github.com/tesseract-ocr/tessdata](https://github.com/tesseract-ocr/tessdata).
