@@ -23,14 +23,14 @@ namespace ApexComputerUse
         private CancellationTokenSource? _downloadCts;
 
         // ── Persistent settings ───────────────────────────────────────────
-        private static readonly string SettingsDir  =
+        private static readonly string SettingsDir =
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ApexComputerUse");
         private static readonly string SettingsFile = Path.Combine(SettingsDir, "settings.json");
 
         private sealed class AppSettings
         {
             public string ModelPath { get; set; } = "";
-            public string ProjPath  { get; set; } = "";
+            public string ProjPath { get; set; } = "";
         }
 
         private void LoadSettings()
@@ -41,7 +41,7 @@ namespace ApexComputerUse
                 var s = JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(SettingsFile));
                 if (s == null) return;
                 if (!string.IsNullOrWhiteSpace(s.ModelPath)) txtModelPath.Text = s.ModelPath;
-                if (!string.IsNullOrWhiteSpace(s.ProjPath))  txtProjPath.Text  = s.ProjPath;
+                if (!string.IsNullOrWhiteSpace(s.ProjPath)) txtProjPath.Text = s.ProjPath;
             }
             catch { /* ignore corrupt settings */ }
         }
@@ -246,7 +246,7 @@ namespace ApexComputerUse
         private CommandRequest? ParseCommandLine(string input)
         {
             var parts = input.Trim().Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
-            string cmd  = parts[0].ToLowerInvariant();
+            string cmd = parts[0].ToLowerInvariant();
             string args = parts.Length > 1 ? parts[1] : "";
             var kv = ParseKvArgs(args);
 
@@ -254,43 +254,43 @@ namespace ApexComputerUse
             {
                 "find" => new CommandRequest
                 {
-                    Command      = "find",
-                    Window       = kv.Get("window", "w"),
+                    Command = "find",
+                    Window = kv.Get("window", "w"),
                     AutomationId = kv.Get("id", "automationid"),
-                    ElementName  = kv.Get("name", "n"),
-                    SearchType   = kv.Get("type", "t")
+                    ElementName = kv.Get("name", "n"),
+                    SearchType = kv.Get("type", "t")
                 },
                 "exec" or "execute" => new CommandRequest
                 {
                     Command = "execute",
-                    Action  = kv.Get("action", "a"),
-                    Value   = kv.Get("value", "v")
+                    Action = kv.Get("action", "a"),
+                    Value = kv.Get("value", "v")
                 },
                 "ocr" => new CommandRequest
                 {
                     Command = "ocr",
-                    Value   = kv.Get("value", "region") ?? (args.Contains(',') ? args : null)
+                    Value = kv.Get("value", "region") ?? (args.Contains(',') ? args : null)
                 },
                 "ai" => new CommandRequest
                 {
-                    Command      = "ai",
-                    Action       = kv.Get("action", "a")
+                    Command = "ai",
+                    Action = kv.Get("action", "a")
                                    ?? args.Split(' ', StringSplitOptions.RemoveEmptyEntries)
                                          .FirstOrDefault()?.ToLowerInvariant(),
-                    ModelPath    = kv.Get("model"),
-                    MmProjPath   = kv.Get("proj"),
-                    Value        = kv.Get("value", "path", "v"),
-                    Prompt       = kv.Get("prompt", "p")
+                    ModelPath = kv.Get("model"),
+                    MmProjPath = kv.Get("proj"),
+                    Value = kv.Get("value", "path", "v"),
+                    Prompt = kv.Get("prompt", "p")
                 },
-                "status"   => new CommandRequest { Command = "status" },
-                "windows"  => new CommandRequest { Command = "windows" },
+                "status" => new CommandRequest { Command = "status" },
+                "windows" => new CommandRequest { Command = "windows" },
                 "elements" => new CommandRequest
                 {
-                    Command    = "elements",
+                    Command = "elements",
                     SearchType = kv.Get("type", "t") ?? (args.Length > 0 ? args.Trim() : null)
                 },
                 "help" => new CommandRequest { Command = "help" },
-                _      => null
+                _ => null
             };
         }
 
@@ -637,8 +637,8 @@ namespace ApexComputerUse
             if (_pipe?.IsRunning == true)
             {
                 _pipe.Stop();
-                btnStartPipe.Text     = "Start Pipe";
-                lblPipeStatus.Text    = "Stopped";
+                btnStartPipe.Text = "Start Pipe";
+                lblPipeStatus.Text = "Stopped";
                 lblPipeStatus.ForeColor = Color.Gray;
                 return;
             }
@@ -655,8 +655,8 @@ namespace ApexComputerUse
                 _pipe = new PipeCommandServer(name, _processor);
                 _pipe.OnLog += msg => BeginInvoke(() => Log(msg));
                 _pipe.Start();
-                btnStartPipe.Text     = "Stop Pipe";
-                lblPipeStatus.Text    = $"Running: {name}";
+                btnStartPipe.Text = "Stop Pipe";
+                lblPipeStatus.Text = $"Running: {name}";
                 lblPipeStatus.ForeColor = Color.Green;
             }
             catch (Exception ex) { Log($"Pipe start error: {ex.Message}"); }
@@ -752,7 +752,7 @@ namespace ApexComputerUse
         private void btnBrowseModel_Click(object sender, EventArgs e)
         {
             using var dlg = new OpenFileDialog
-                { Filter = "GGUF Model|*.gguf|All Files|*.*", Title = "Select LLM Model (.gguf)" };
+            { Filter = "GGUF Model|*.gguf|All Files|*.*", Title = "Select LLM Model (.gguf)" };
             if (dlg.ShowDialog() == DialogResult.OK)
                 txtModelPath.Text = dlg.FileName;
         }
@@ -760,7 +760,7 @@ namespace ApexComputerUse
         private void btnBrowseProj_Click(object sender, EventArgs e)
         {
             using var dlg = new OpenFileDialog
-                { Filter = "GGUF Projector|*.gguf|All Files|*.*", Title = "Select Multimodal Projector (.gguf)" };
+            { Filter = "GGUF Projector|*.gguf|All Files|*.*", Title = "Select Multimodal Projector (.gguf)" };
             if (dlg.ShowDialog() == DialogResult.OK)
                 txtProjPath.Text = dlg.FileName;
         }
@@ -768,12 +768,12 @@ namespace ApexComputerUse
         private async void btnLoadModel_Click(object sender, EventArgs e)
         {
             string model = txtModelPath.Text.Trim();
-            string proj  = txtProjPath.Text.Trim();
+            string proj = txtProjPath.Text.Trim();
             if (string.IsNullOrWhiteSpace(model)) { Log("Enter a model path."); return; }
-            if (string.IsNullOrWhiteSpace(proj))  { Log("Enter a projector path."); return; }
+            if (string.IsNullOrWhiteSpace(proj)) { Log("Enter a projector path."); return; }
 
-            btnLoadModel.Enabled     = false;
-            lblModelStatus.Text      = "Loading…";
+            btnLoadModel.Enabled = false;
+            lblModelStatus.Text = "Loading…";
             lblModelStatus.ForeColor = Color.DarkOrange;
 
             try
@@ -782,20 +782,20 @@ namespace ApexComputerUse
                 Log(resp.ToText());
                 if (resp.Success)
                 {
-                    lblModelStatus.Text      = "Loaded ✓";
+                    lblModelStatus.Text = "Loaded ✓";
                     lblModelStatus.ForeColor = Color.Green;
                     SaveSettings();
                 }
                 else
                 {
-                    lblModelStatus.Text      = "Failed — see Console tab";
+                    lblModelStatus.Text = "Failed — see Console tab";
                     lblModelStatus.ForeColor = Color.Red;
                 }
             }
             catch (Exception ex)
             {
                 Log($"[Load Model] Unhandled: {ex}");
-                lblModelStatus.Text      = "Failed — see Console tab";
+                lblModelStatus.Text = "Failed — see Console tab";
                 lblModelStatus.ForeColor = Color.Red;
             }
             finally
@@ -826,9 +826,9 @@ namespace ApexComputerUse
 
             using var saveDlg = new SaveFileDialog
             {
-                Title      = "Save Vision Model As",
-                Filter     = "GGUF Model|*.gguf|All Files|*.*",
-                FileName   = fileName,
+                Title = "Save Vision Model As",
+                Filter = "GGUF Model|*.gguf|All Files|*.*",
+                FileName = fileName,
                 InitialDirectory = defaultDir
             };
             if (saveDlg.ShowDialog() != DialogResult.OK) return;
@@ -848,7 +848,7 @@ namespace ApexComputerUse
                 resp.EnsureSuccessStatusCode();
 
                 long total = resp.Content.Headers.ContentLength ?? -1;
-                using var src  = await resp.Content.ReadAsStreamAsync(_downloadCts.Token);
+                using var src = await resp.Content.ReadAsStreamAsync(_downloadCts.Token);
                 using var dest = File.Create(destPath);
 
                 var buffer = new byte[81920];
@@ -924,11 +924,11 @@ namespace ApexComputerUse
         private async void runAIComputerUseToolStripMenuItem_Click(object sender, EventArgs e)
         {
             using var modelDlg = new OpenFileDialog
-                { Filter = "GGUF Model|*.gguf", Title = "Select LLM Model (.gguf)" };
+            { Filter = "GGUF Model|*.gguf", Title = "Select LLM Model (.gguf)" };
             if (modelDlg.ShowDialog() != DialogResult.OK) return;
 
             using var projDlg = new OpenFileDialog
-                { Filter = "GGUF Projector|*.gguf", Title = "Select Multimodal Projector (.gguf)" };
+            { Filter = "GGUF Projector|*.gguf", Title = "Select Multimodal Projector (.gguf)" };
             if (projDlg.ShowDialog() != DialogResult.OK) return;
 
             await MtmdInteractiveModeExecute.RunComputerUseMode(modelDlg.FileName, projDlg.FileName);
@@ -939,7 +939,7 @@ namespace ApexComputerUse
             // Sync the GUI tab's window to the processor whenever they differ
             if (_targetWindow != null)
             {
-                var targetHwnd    = _targetWindow.Properties.NativeWindowHandle.ValueOrDefault;
+                var targetHwnd = _targetWindow.Properties.NativeWindowHandle.ValueOrDefault;
                 var processorHwnd = _processor.CurrentWindow?.Properties.NativeWindowHandle.ValueOrDefault ?? IntPtr.Zero;
                 if (targetHwnd != processorHwnd)
                     _processor.Process(new CommandRequest { Command = "find", Window = _targetWindow.Name });
@@ -947,6 +947,59 @@ namespace ApexComputerUse
 
             var response = _processor.Process(new CommandRequest { Command = "elements" });
             Log(response.ToText());
+        }
+
+
+
+
+        private UiMapRenderer CreateUiMapRenderer() => new(includedControlTypes: new[] {
+        "Button", "Document", "Text", "Window", "Pane", "MenuItem", "TitleBar",
+        "CheckBox", "ComboBox", "DataGrid", "Edit", "Group", "Hyperlink", "List",
+        "ListItem", "Menu", "MenuBar", "Slider", "Spinner", "StatusBar", "ScrollBar",
+        "Tab", "ToolTip", "ToolBar", "TabItem", "Image", "AppBar", "Calendar",
+        "Custom", "DataItem", "Header", "HeaderItem", "ProgressBar", "RadioButton",
+        "SemanticZoom", "Separator", "SplitButton", "Table", "Thumb", "Tree",
+        "TreeItem", "Unknown"
+    });
+
+        private void renderTestToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Sync the GUI tab's selected window to the processor if they differ
+            if (_targetWindow != null)
+            {
+                var targetHwnd    = _targetWindow.Properties.NativeWindowHandle.ValueOrDefault;
+                var processorHwnd = _processor.CurrentWindow?.Properties.NativeWindowHandle.ValueOrDefault ?? IntPtr.Zero;
+                if (targetHwnd != processorHwnd)
+                    _processor.Process(new CommandRequest { Command = "find", Window = _targetWindow.Name });
+            }
+
+            var response = _processor.Process(new CommandRequest { Command = "elements" });
+            if (!response.Success || string.IsNullOrWhiteSpace(response.Data))
+            {
+                Log("Render UI Map: no elements — select a window first.");
+                return;
+            }
+
+            string json     = response.Data;
+            var    renderer = CreateUiMapRenderer();
+            string winName  = _processor.CurrentWindow?.Properties.Name.ValueOrDefault ?? "window";
+            string safeName = string.Concat(winName.Split(Path.GetInvalidFileNameChars()));
+
+            using var dlg = new SaveFileDialog
+            {
+                Title    = "Save UI Map Image",
+                Filter   = "PNG Image (*.png)|*.png",
+                FileName = $"ui_map_{safeName}"
+            };
+
+            if (dlg.ShowDialog() == DialogResult.OK)
+            {
+                var screen = Screen.PrimaryScreen?.Bounds ?? new Rectangle(0, 0, 1920, 1080);
+                renderer.Render(json, dlg.FileName, screen.Width, screen.Height);
+                Log($"UI Map saved: {dlg.FileName}");
+            }
+
+            renderer.ShowOverlay(json, 5000);
         }
     }
 }

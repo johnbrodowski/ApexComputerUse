@@ -78,6 +78,7 @@ namespace ApexComputerUse
             lblStatRam = new ToolStripStatusLabel();
             lblStatModel = new ToolStripStatusLabel();
             lblStatNet = new ToolStripStatusLabel();
+            renderTestToolStripMenuItem = new ToolStripMenuItem();
             menuStrip1.SuspendLayout();
             tabMain.SuspendLayout();
             tabPageConsole.SuspendLayout();
@@ -101,7 +102,7 @@ namespace ApexComputerUse
             // 
             // toolsToolStripMenuItem
             // 
-            toolsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { runAIComputerUseToolStripMenuItem, outputUiMapToolStripMenuItem });
+            toolsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { runAIComputerUseToolStripMenuItem, outputUiMapToolStripMenuItem, renderTestToolStripMenuItem });
             toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             toolsToolStripMenuItem.Size = new Size(47, 20);
             toolsToolStripMenuItem.Text = "Tools";
@@ -689,6 +690,13 @@ namespace ApexComputerUse
             lblStatNet.Text = "Net: --";
             lblStatNet.TextAlign = ContentAlignment.MiddleRight;
             // 
+            // renderTestToolStripMenuItem
+            // 
+            renderTestToolStripMenuItem.Name = "renderTestToolStripMenuItem";
+            renderTestToolStripMenuItem.Size = new Size(222, 22);
+            renderTestToolStripMenuItem.Text = "RenderTest";
+            renderTestToolStripMenuItem.Click += renderTestToolStripMenuItem_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -800,5 +808,6 @@ namespace ApexComputerUse
         private System.Windows.Forms.TextBox   txtPipeName;
         private System.Windows.Forms.Button    btnStartPipe;
         private System.Windows.Forms.Label     lblPipeStatus;
+        private ToolStripMenuItem renderTestToolStripMenuItem;
     }
 }

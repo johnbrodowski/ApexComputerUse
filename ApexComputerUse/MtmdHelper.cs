@@ -75,6 +75,7 @@ namespace ApexComputerUse
             EnsureInitialized();
             EnsureVision();
 
+            _clipModel!.ClearMedia();
             var embed = _clipModel!.LoadMedia(imagePath);
             return await RunInferenceAsync($"{_mediaMarker} {prompt}", [embed]);
         }
@@ -87,6 +88,7 @@ namespace ApexComputerUse
             EnsureInitialized();
             EnsureVision();
 
+            _clipModel!.ClearMedia();
             var embed = _clipModel!.LoadMedia(new ReadOnlySpan<byte>(imageBytes));
             return await RunInferenceAsync($"{_mediaMarker} {prompt}", [embed]);
         }
@@ -99,6 +101,7 @@ namespace ApexComputerUse
             EnsureInitialized();
             EnsureVision();
 
+            _clipModel!.ClearMedia();
             var embeds  = new List<SafeMtmdEmbed>();
             var markers = new StringBuilder();
 
@@ -121,6 +124,7 @@ namespace ApexComputerUse
             EnsureInitialized();
             EnsureAudio();
 
+            _clipModel!.ClearMedia();
             var embed = _clipModel!.LoadMedia(audioPath);
             return await RunInferenceAsync($"{_mediaMarker} {prompt}", [embed]);
         }
@@ -133,6 +137,7 @@ namespace ApexComputerUse
             EnsureInitialized();
             EnsureAudio();
 
+            _clipModel!.ClearMedia();
             var embed = _clipModel!.LoadMedia(new ReadOnlySpan<byte>(audioBytes));
             return await RunInferenceAsync($"{_mediaMarker} {prompt}", [embed]);
         }
@@ -163,6 +168,7 @@ namespace ApexComputerUse
             EnsureInitialized();
             EnsureVision();
 
+            _clipModel!.ClearMedia();
             var embed = _clipModel!.LoadMedia(new ReadOnlySpan<byte>(CaptureElementToPng(element)));
             return await RunInferenceAsync($"{_mediaMarker} {prompt}", [embed]);
         }
@@ -175,6 +181,7 @@ namespace ApexComputerUse
             EnsureInitialized();
             EnsureVision();
 
+            _clipModel!.ClearMedia();
             var embeds  = new List<SafeMtmdEmbed>();
             var markers = new StringBuilder();
 
@@ -196,7 +203,6 @@ namespace ApexComputerUse
             {
                 // Clear KV cache so every request starts completely fresh
                 _context!.NativeHandle.MemoryClear();
-                _clipModel!.ClearMedia();
 
                 // Fresh executor per request — no state carried over
                 var executor = new InteractiveExecutor(_context, _clipModel);

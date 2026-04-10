@@ -60,14 +60,19 @@ The filter composes with the existing type filter: `?onscreen=true&type=Button`.
 - Filter element search by ControlType
 - Persistent, hash-based stable element and window IDs (survive app restarts)
 - Onscreen-only element map (`?onscreen=true`) — prunes offscreen subtrees at scan time
+- Element nodes include `boundingRectangle` (x, y, width, height) for spatial context and visual rendering
 - Execute all common UI actions: click, type, select, toggle, scroll, drag & drop, etc.
 - OCR any UI element using Tesseract
-- Multimodal AI: describe UI elements, analyse image/audio files using a local vision LLM
+- Multimodal AI: describe UI elements, ask questions about them, analyse image/audio files using a local vision LLM (LLamaSharp MTMD)
 - Remote control via HTTP REST API (curl-friendly JSON)
 - Remote control via named pipe (PowerShell module included)
 - Remote control via cmd.exe batch helper (`apex.cmd`)
 - Remote control via Telegram bot
-- Screenshot capture of elements and screen
+- Screenshot capture of elements, windows, and full screen (returned as base64 PNG)
+- **Interactive HTTP test console** — served at `GET /`, includes live windows list, element tree browser, grouped command builder, inline capture/OCR/AI vision buttons, and a response log
+- **UI Map Renderer** — renders the element tree as a colour-coded overlay drawn directly on screen, and optionally exports a PNG image; accessible via Tools → Render UI Map
+- **Format-adaptive responses** — every endpoint serves HTML, plain text, or JSON via `?format=` or `Accept` header; default is an HTML page with embedded JSON readable by any AI that can fetch a URL
+- **System utility routes** — `/ping`, `/sysinfo`, `/env`, `/ls`, `/run` for AI agents that need OS-level context without a separate tool
 
 ---
 
@@ -106,7 +111,13 @@ The file is already included in the project and copied on build. Additional lang
 **Find Element** — locates the window and element, logs what was found.
 **Execute Action** — runs the selected action against the last found element.
 
-Use **Tools → Output UI Map** to capture the full element tree of the current window as nested JSON.
+### Tools menu
+
+| Item | Description |
+|---|---|
+| **Run AI Computer Use Mode** | Launches the interactive multimodal AI agent loop (requires model loaded on the Model tab). |
+| **Output UI Map** | Scans the current window's element tree and logs it as nested JSON to the console tab. |
+| **Render UI Map** | Scans the current window's element tree, draws a colour-coded bounding-box overlay on screen for 5 seconds, and offers to save the overlay as a PNG image. |
 
 ---
 
@@ -128,8 +139,15 @@ curl "http://localhost:8080/elements?onscreen=true"
 # Combine with type filter
 curl "http://localhost:8080/elements?onscreen=true&type=Button"
 
-# Returns nested JSON:
-# {"id":105,"controlType":"Edit","name":"Text Editor","automationId":"15","children":[...]}
+# Returns nested JSON including bounding rectangles:
+# {
+#   "id": 105,
+#   "controlType": "Edit",
+#   "name": "Text Editor",
+#   "automationId": "15",
+#   "boundingRectangle": { "x": 0, "y": 30, "width": 800, "height": 600 },
+#   "children": [...]
+# }
 
 # 3. Find using numeric IDs (no fuzzy matching, direct map lookup)
 curl -X POST http://localhost:8080/find \
@@ -197,7 +215,87 @@ The `?onscreen=true` filter further reduces the element map to only what is visi
 
 ## Usage — HTTP API
 
-Start the HTTP server from the **Remote Control** group box, then use curl:
+Start the HTTP server from the **Remote Control** group box, then use curl or open `http://localhost:8080/` in a browser to access the interactive test console.
+
+### Interactive Test Console (`GET /`)
+
+Opening the root URL in any browser launches a dark-themed console with:
+
+- **Windows panel** — live list of all open windows; click to select and auto-load its element tree
+- **Elements panel** — nested element tree flattened with indentation; onscreen-only toggle; ControlType filter; click any element to select it
+- **Command builder** — grouped action buttons (Click, Text, Keys, State, Scroll, Toggle, Select, Window, Capture, AI Vision); Value input with context hints; ▶ Execute button
+- **AI Vision buttons** — `status` (check model), `describe` (capture element → vision model), `ask` (question about element); requires model loaded on the Model tab
+- **Response log** — newest result at top; captures rendered as inline images (click to zoom)
+
+### Format negotiation
+
+Every endpoint supports three response formats, selected by priority:
+
+1. `?format=` query parameter (`html`, `text`, or `json`)
+2. `Accept` request header (`text/html`, `text/plain`, or `application/json`)
+3. Default: `html`
+
+```bash
+# HTML response (default — works in any browser or AI that can fetch a page)
+curl http://localhost:8080/ping
+
+# Plain text — compact key:value lines
+curl "http://localhost:8080/ping?format=text"
+
+# JSON — structured data
+curl "http://localhost:8080/ping?format=json"
+
+# Via Accept header
+curl -H "Accept: application/json" http://localhost:8080/ping
+```
+
+The HTML response includes a `<pre>` block for human readability and an embedded `<script type="application/json" id="apex-result">` block containing the full result as JSON — allowing any AI that can fetch a webpage to extract structured data without a vision model.
+
+### Response format
+
+All endpoints return the same canonical structure:
+
+```json
+{
+  "success": true,
+  "action": "ping",
+  "data": { "key": "value", ... },
+  "error": null
+}
+```
+
+HTTP status: **200** on success, **400** on error.
+
+---
+
+### System / utility routes
+
+```bash
+# Health check
+curl http://localhost:8080/ping
+
+# System information (OS, machine, user, CPU, CLR)
+curl http://localhost:8080/sysinfo
+
+# All environment variables
+curl http://localhost:8080/env
+
+# Directory listing (defaults to current working directory)
+curl http://localhost:8080/ls
+curl "http://localhost:8080/ls?path=C:\Users"
+
+# Run a shell command (cmd.exe /c); 30-second timeout
+curl "http://localhost:8080/run?cmd=whoami"
+curl -X POST http://localhost:8080/run \
+     -H "Content-Type: application/json" \
+     -d '{"value":"dir C:\\"}'
+```
+
+`/run` response data fields: `cmd`, `stdout`, `stderr`, `exit_code`.
+
+---
+
+### UI automation routes
 
 ```bash
 # List all open windows (with stable IDs)
@@ -206,7 +304,7 @@ curl http://localhost:8080/windows
 # Get current state
 curl http://localhost:8080/status
 
-# List all elements in the current window (nested JSON with IDs)
+# List all elements in the current window (nested JSON with IDs and bounding rectangles)
 curl http://localhost:8080/elements
 
 # Onscreen elements only — prunes offscreen subtrees for maximum token efficiency
@@ -280,7 +378,8 @@ curl -X POST http://localhost:8080/ai/init \
      -H "Content-Type: application/json" \
      -d '{"model":"C:\\models\\vision.gguf","proj":"C:\\models\\mmproj.gguf"}'
 
-# Describe the currently selected UI element (requires a prior /find)
+# Describe the currently selected UI element using the vision model
+# Captures the element as an image and sends it to the LLM
 curl -X POST http://localhost:8080/ai/describe
 
 # Describe with a custom prompt
@@ -312,18 +411,6 @@ curl -X POST http://localhost:8080/ai/file \
 | `model` | `modelPath` | AI: path to LLM `.gguf` file |
 | `proj` | `mmProjPath` | AI: path to multimodal projector `.gguf` file |
 | `prompt` | — | AI: question or instruction text |
-
-### Response format
-
-```json
-{
-  "success": true,
-  "message": "Window: Notepad (exact) | Element (exact)",
-  "data": "Name=Text Editor  ControlType=Edit  AutomationId=15 ..."
-}
-```
-
-HTTP status: **200** on success, **400** on error. `data` may be `null` for void actions.
 
 ---
 
@@ -496,11 +583,45 @@ Download a vision-capable GGUF model and its multimodal projector (e.g. LFM2-VL 
 |---|---|---|---|
 | `init` | `model=<path>` `proj=<path>` | — | Load the LLM and projector into memory |
 | `status` | — | — | Report whether the model is loaded and which modalities it supports |
-| `describe` | — (uses current element) | `prompt=<text>` | Capture the current UI element and ask the model to describe it |
-| `ask` | `prompt=<text>` | — | Ask a specific question about the current UI element |
+| `describe` | — (uses current element) | `prompt=<text>` | Capture the current UI element as an image and ask the vision model to describe it |
+| `ask` | `prompt=<text>` | — | Ask a specific question about the current UI element (captures element image) |
 | `file` | `value=<file path>` | `prompt=<text>` | Send an image or audio file from disk to the model |
 
-> **Note:** `describe`, `ask`, and `file` require a prior `find` command to select a window/element (for `describe` and `ask`). The model must be initialized with `init` before any inference call.
+> **Note:** `describe`, `ask`, and `file` require a prior `find` command to select a window/element. The model must be initialized with `init` before any inference call. Each inference call starts completely fresh — no chat history is retained between calls.
+
+### AI Vision in the test console
+
+The HTTP test console (`GET /`) has a dedicated **AI Vision** button group (purple-tinted):
+
+| Button | Endpoint | Value field |
+|---|---|---|
+| **status** | `GET /ai/status` | — |
+| **describe** | `POST /ai/describe` | Optional prompt (e.g. `list all buttons`) |
+| **ask** | `POST /ai/ask` | Required question (e.g. `what number is shown?`) |
+
+Select an element in the Elements panel first, then click **describe** or **ask**. The console shows a "Running vision model…" notice immediately and updates with the result when inference completes.
+
+---
+
+## UI Map Renderer
+
+**Tools → Render UI Map** scans the current window's accessibility tree and renders every element's bounding rectangle as a colour-coded overlay drawn directly on top of the screen. Each control type gets a deterministic, visually distinct colour. Element names are drawn inside the bounding box.
+
+The overlay auto-closes after 5 seconds (or press Escape). A Save dialog lets you export the annotated layout as a PNG image before the overlay appears.
+
+**Tools → Output UI Map** logs the raw nested JSON element tree to the console tab — useful for inspecting the tree structure or copying it for use with an AI agent.
+
+Element JSON includes bounding rectangles:
+```json
+{
+  "id": 105,
+  "controlType": "Button",
+  "name": "OK",
+  "automationId": "btn_ok",
+  "boundingRectangle": { "x": 120, "y": 340, "width": 80, "height": 30 },
+  "children": []
+}
+```
 
 ---
 
@@ -523,7 +644,7 @@ Download a vision-capable GGUF model and its multimodal projector (e.g. LFM2-VL 
 | `focus` | — | — | Set keyboard focus |
 | `keys` | — | text | Send keystrokes; supports `{CTRL}`, `{ALT}`, `{SHIFT}`, `{F5}`, `Ctrl+A`, `Alt+F4`, etc. |
 | `screenshot` | `capture` | — | Save element image to `Desktop\Apex_Captures` |
-| `describe` | — | — | Return full element property description |
+| `describe` | — | — | Return full element property description (UIA properties — not AI vision) |
 | `patterns` | — | — | List automation patterns supported by the element |
 | `bounds` | — | — | Return bounding rectangle |
 | `isenabled` | — | — | Returns `True` or `False` |
@@ -693,7 +814,7 @@ Captures saved by **OCR Element + Save** go to `Desktop\Apex_Captures\`.
 
 ## AI (Multimodal)
 
-The AI command set is backed by `MtmdHelper` using LLamaSharp's multimodal (MTMD) API. Supports vision and audio modalities depending on the model.
+The AI command set is backed by `MtmdHelper` using LLamaSharp's multimodal (MTMD) API. Supports vision and audio modalities depending on the model. Every inference call is fully stateless — no chat history is retained between calls.
 
 Download a vision-capable GGUF model and its multimodal projector (e.g. LFM2-VL from LM Studio) and note the paths to both `.gguf` files. Then call `ai init` before any inference commands.
 
@@ -703,16 +824,19 @@ Download a vision-capable GGUF model and its multimodal projector (e.g. LFM2-VL 
 
 ```
 ApexComputerUse/
-├── Form1.cs / Form1.Designer.cs   — Main UI
+├── Form1.cs / Form1.Designer.cs   — Main UI (tabs: Console, Find & Execute, Remote Control, Model)
 ├── FlaUIHelper.cs                 — All FlaUI automation wrappers
 ├── ElementIdGenerator.cs          — Stable SHA-256 hash-based element ID mapping
-├── CommandProcessor.cs            — Shared remote command logic
+├── CommandProcessor.cs            — Shared remote command logic (used by all server types)
 ├── HttpCommandServer.cs           — HTTP REST server (System.Net.HttpListener)
+│     ├── ApexResult               — Canonical {success, action, data, error} result type
+│     └── FormatAdapter            — Format negotiation and HTML/text/JSON renderers
 ├── PipeCommandServer.cs           — Named-pipe server
 ├── TelegramController.cs          — Telegram bot (Telegram.Bot)
 ├── OcrHelper.cs                   — Tesseract OCR wrapper
-├── MtmdHelper.cs                  — Multimodal LLM wrapper (LLamaSharp MTMD)
-├── MtmdInteractiveModeExecute.cs  — Interactive AI computer use mode
+├── MtmdHelper.cs                  — Stateless multimodal LLM wrapper (LLamaSharp MTMD)
+├── MtmdInteractiveModeExecute.cs  — Interactive AI computer use mode (Tools menu)
+├── UiMapRenderer.cs               — Renders element trees as colour-coded screen overlays and PNG images
 ├── tessdata/
 │   └── eng.traineddata
 └── Scripts/

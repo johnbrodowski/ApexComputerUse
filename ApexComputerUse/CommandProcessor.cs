@@ -665,13 +665,25 @@ namespace ApexComputerUse
                     }
                 }
 
+                var bounds = el.BoundingRectangle;
+                var boundingRect = (bounds.Width > 0 || bounds.Height > 0)
+                    ? new BoundingRect
+                    {
+                        X      = (int)bounds.X,
+                        Y      = (int)bounds.Y,
+                        Width  = (int)bounds.Width,
+                        Height = (int)bounds.Height
+                    }
+                    : null;
+
                 return new ElementNode
                 {
-                    Id           = id,
-                    ControlType  = ct.ToString(),
-                    Name         = el.Properties.Name.ValueOrDefault ?? "",
-                    AutomationId = el.Properties.AutomationId.ValueOrDefault ?? "",
-                    Children     = childNodes
+                    Id                = id,
+                    ControlType       = ct.ToString(),
+                    Name              = el.Properties.Name.ValueOrDefault ?? "",
+                    AutomationId      = el.Properties.AutomationId.ValueOrDefault ?? "",
+                    BoundingRectangle = boundingRect,
+                    Children          = childNodes
                 };
             }
             catch { return null; } // element became stale mid-scan — skip silently
@@ -679,11 +691,20 @@ namespace ApexComputerUse
 
         private sealed class ElementNode
         {
-            public int                 Id           { get; init; }
-            public string              ControlType  { get; init; } = "";
-            public string              Name         { get; init; } = "";
-            public string              AutomationId { get; init; } = "";
-            public List<ElementNode>?  Children     { get; init; }
+            public int                 Id                { get; init; }
+            public string              ControlType       { get; init; } = "";
+            public string              Name              { get; init; } = "";
+            public string              AutomationId      { get; init; } = "";
+            public BoundingRect?       BoundingRectangle { get; init; }
+            public List<ElementNode>?  Children          { get; init; }
+        }
+
+        private sealed class BoundingRect
+        {
+            public int X      { get; init; }
+            public int Y      { get; init; }
+            public int Width  { get; init; }
+            public int Height { get; init; }
         }
 
         // ── Helpers ───────────────────────────────────────────────────────
