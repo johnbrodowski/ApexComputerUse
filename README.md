@@ -69,9 +69,9 @@ The filter composes with the existing type filter: `?onscreen=true&type=Button`.
 - Remote control via cmd.exe batch helper (`apex.cmd`)
 - Remote control via Telegram bot
 - Screenshot capture of elements, windows, and full screen (returned as base64 PNG)
-- **Interactive HTTP test console** — served at `GET /`, includes live windows list, element tree browser, grouped command builder, inline capture/OCR/AI vision buttons, and a response log
+- **Interactive HTTP test console** — served at `GET /`, includes live windows list, element tree browser, grouped command builder covering every action, inline capture/OCR/AI vision/UI map buttons, format selector (JSON/HTML/Text/PDF), format demo links, and a response log
 - **UI Map Renderer** — renders the element tree as a colour-coded overlay drawn directly on screen, and optionally exports a PNG image; accessible via Tools → Render UI Map or `GET /uimap` (returns base64 PNG)
-- **Format-adaptive responses** — every endpoint serves HTML, plain text, or JSON via `?format=` or `Accept` header; default is an HTML page with embedded JSON readable by any AI that can fetch a URL
+- **Format-adaptive responses** — every endpoint serves HTML, plain text, JSON, or **PDF** via URL extension (`.json`, `.html`, `.txt`, `.pdf`), `?format=` parameter, or `Accept` header; default is an HTML page with embedded JSON readable by any AI that can fetch a URL
 - **System utility routes** — `/ping`, `/sysinfo`, `/env`, `/ls`, `/run` for AI agents that need OS-level context without a separate tool
 
 ---
@@ -223,33 +223,60 @@ Opening the root URL in any browser launches a dark-themed console with:
 
 - **Windows panel** — live list of all open windows; click to select and auto-load its element tree
 - **Elements panel** — nested element tree flattened with indentation; onscreen-only toggle; ControlType filter; click any element to select it
-- **Command builder** — grouped action buttons (Click, Text, Keys, State, Scroll, Toggle, Select, Window, Capture, AI Vision); Capture group includes a **UI map** button that renders the current window's element tree as a base64 PNG inline; Value input with context hints; ▶ Execute button
-- **AI Vision buttons** — `status` (check model), `describe` (capture element → vision model), `ask` (question about element); requires model loaded on the Model tab
-- **Response log** — newest result at top; captures rendered as inline images (click to zoom)
+- **Command builder** — grouped action buttons covering every action: Click, Text, Keys, State, Scroll, Toggle, Select, Window, Range/Slider, Grid/Table, Transform, Wait, Capture, AI Vision; Value input with context-sensitive hints; ▶ Execute button
+- **AI Vision buttons** — `status`, `describe`, `ask`, `file`; requires model loaded on the Model tab
+- **Format selector** — dropdown in the header (JSON / HTML / Text / PDF); all requests use the selected format; format demo links (help, status, windows) open directly in a new tab in the chosen format
+- **Response log** — newest result at top; captures rendered as inline images (click to zoom); PDF responses shown as an "Open PDF" link (browser-native rendering)
 
 ### Format negotiation
 
-Every endpoint supports three response formats, selected by priority:
+Every endpoint adapts its response to whatever format the caller can consume, selected by priority:
 
-1. `?format=` query parameter (`html`, `text`, or `json`)
-2. `Accept` request header (`text/html`, `text/plain`, or `application/json`)
-3. Default: `html`
+1. **URL file extension** — append `.json`, `.html`, `.txt`, or `.pdf` to any path
+2. **`?format=` query parameter** — `html`, `text`, `json`, or `pdf`
+3. **`Accept` request header** — `text/html`, `text/plain`, `application/json`, or `application/pdf`
+4. **Default:** `html`
 
 ```bash
-# HTML response (default — works in any browser or AI that can fetch a page)
-curl http://localhost:8080/ping
+# URL extension (highest priority — works even if the AI cannot set headers or query params)
+curl http://localhost:8080/status.json
+curl http://localhost:8080/help.txt
+curl http://localhost:8080/windows.html
+curl http://localhost:8080/status.pdf --output status.pdf
 
-# Plain text — compact key:value lines
+# ?format= query parameter
 curl "http://localhost:8080/ping?format=text"
-
-# JSON — structured data
 curl "http://localhost:8080/ping?format=json"
 
-# Via Accept header
-curl -H "Accept: application/json" http://localhost:8080/ping
+# Accept header
+curl -H "Accept: application/json"  http://localhost:8080/ping
+curl -H "Accept: application/pdf"   http://localhost:8080/help --output help.pdf
+
+# HTML response (default — works in any browser or AI that can fetch a page)
+curl http://localhost:8080/ping
 ```
 
-The HTML response includes a `<pre>` block for human readability and an embedded `<script type="application/json" id="apex-result">` block containing the full result as JSON — allowing any AI that can fetch a webpage to extract structured data without a vision model.
+**HTML** includes a `<pre>` block for human readability and an embedded `<script type="application/json" id="apex-result">` block containing the full result as JSON — allowing any AI that can fetch a webpage to extract structured data without a vision model.
+
+**PDF** is a valid A4 document using the built-in Courier font (no external dependencies). Useful for AI systems that can only accept PDF attachments.
+
+### GET access to command endpoints
+
+All command endpoints accept both `POST` (JSON body) and `GET` (query string parameters), so any command can be expressed as a plain URL — no request body required:
+
+```bash
+# Find a window via GET
+curl "http://localhost:8080/find?window=Notepad"
+
+# Execute an action via GET
+curl "http://localhost:8080/exec?action=gettext"
+
+# Combine with URL extension for full URL-only access
+curl "http://localhost:8080/find.json?window=Notepad&id=15"
+curl "http://localhost:8080/exec.pdf?action=describe" --output result.pdf
+```
+
+**GET parameter names** match the JSON body field names: `window`, `id` / `automationId`, `name` / `elementName`, `type` / `searchType`, `action`, `value`, `onscreen`, `prompt`, `model`, `proj`.
 
 ### Response format
 

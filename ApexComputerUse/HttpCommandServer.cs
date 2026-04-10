@@ -72,14 +72,18 @@ namespace ApexComputerUse
 
         private async Task HandleAsync(HttpListenerContext ctx)
         {
-            var req    = ctx.Request;
-            var res    = ctx.Response;
-            string path   = req.Url?.AbsolutePath.TrimEnd('/').ToLowerInvariant() ?? "/";
-            string method = req.HttpMethod.ToUpperInvariant();
+            var req     = ctx.Request;
+            var res     = ctx.Response;
+            string method  = req.HttpMethod.ToUpperInvariant();
+            string rawPath = req.Url?.AbsolutePath.TrimEnd('/') ?? "/";
+            string ext     = Path.GetExtension(rawPath).ToLowerInvariant();
+            bool   hasExt  = ext is ".json" or ".html" or ".htm" or ".txt" or ".text" or ".pdf";
+            // Strip format extension for routing; keep original for format detection
+            string path    = hasExt ? rawPath[..^ext.Length].ToLowerInvariant()
+                                    : rawPath.ToLowerInvariant();
+            string format  = FormatAdapter.Negotiate(req, hasExt ? ext[1..] : null);
 
-            OnLog?.Invoke($"HTTP {method} {path}");
-
-            string format = FormatAdapter.Negotiate(req);
+            OnLog?.Invoke($"HTTP {method} {rawPath}");
             ApexResult result;
 
             try
@@ -132,16 +136,21 @@ namespace ApexComputerUse
                             => ApexResult.From("uimap",      _processor.Process(new CommandRequest { Command = "uimap" })),
                         ("GET", "/ai/status")
                             => ApexResult.From("ai/status",  _processor.Process(new CommandRequest { Command = "ai", Action = "status" })),
-                        ("POST", "/find")
-                            => ApexResult.From("find",       _processor.Process(FromJson(body, "find"))),
-                        ("POST", "/execute")
-                            => ApexResult.From("execute",    _processor.Process(FromJson(body, "execute"))),
-                        ("POST", "/exec")
-                            => ApexResult.From("execute",    _processor.Process(FromJson(body, "execute"))),
-                        ("POST", "/ocr")
-                            => ApexResult.From("ocr",        _processor.Process(FromJson(body, "ocr"))),
-                        ("POST", "/capture")
-                            => ApexResult.From("capture",    _processor.Process(FromJson(body, "capture"))),
+                        ("POST", "/find") or ("GET", "/find")
+                            => ApexResult.From("find",    _processor.Process(
+                                method == "POST" ? FromJson(body, "find") : FromQueryString(req, "find"))),
+                        ("POST", "/execute") or ("GET", "/execute")
+                            => ApexResult.From("execute", _processor.Process(
+                                method == "POST" ? FromJson(body, "execute") : FromQueryString(req, "execute"))),
+                        ("POST", "/exec") or ("GET", "/exec")
+                            => ApexResult.From("execute", _processor.Process(
+                                method == "POST" ? FromJson(body, "execute") : FromQueryString(req, "execute"))),
+                        ("POST", "/ocr") or ("GET", "/ocr")
+                            => ApexResult.From("ocr",     _processor.Process(
+                                method == "POST" ? FromJson(body, "ocr") : FromQueryString(req, "ocr"))),
+                        ("POST", "/capture") or ("GET", "/capture")
+                            => ApexResult.From("capture", _processor.Process(
+                                method == "POST" ? FromJson(body, "capture") : FromQueryString(req, "capture"))),
                         ("POST", "/ai/init")
                             => ApexResult.From("ai/init",    _processor.Process(FromJson(body, "ai", "init"))),
                         ("POST", "/ai/describe")
@@ -169,8 +178,7 @@ namespace ApexComputerUse
 
         private static async Task WriteResponse(HttpListenerResponse res, ApexResult result, string format)
         {
-            var (body, contentType, statusCode) = FormatAdapter.Render(result, format);
-            byte[] buf = Encoding.UTF8.GetBytes(body);
+            var (buf, contentType, statusCode) = FormatAdapter.Render(result, format);
             res.ContentType     = contentType;
             res.ContentLength64 = buf.Length;
             res.StatusCode      = statusCode;
@@ -373,6 +381,15 @@ namespace ApexComputerUse
                   button.a.ai      { background: #2d2840; border-color: #5a4a8a; color: #b08ae0; }
                   button.a.ai:hover  { background: #3a3460; }
 
+                  /* ── Format bar ── */
+                  .fmt-bar { display: flex; gap: .5em; align-items: center; }
+                  .fmt-bar label { font-size: .75em; color: #888; }
+                  .fmt-bar select { background: #3c3c3c; color: #d4d4d4; border: 1px solid #555;
+                                    border-radius: 2px; padding: .15em .4em; font: inherit; font-size: .76em; }
+                  .fmt-bar a { font-size: .72em; color: #4ec9b0; text-decoration: none; padding: .1em .4em;
+                               border: 1px solid #3c3c3c; border-radius: 2px; }
+                  .fmt-bar a:hover { border-color: #4ec9b0; }
+
                   .vrow { display: flex; gap: .5em; align-items: center; }
                   .vrow label { font-size: .76em; color: #888; white-space: nowrap; }
                   .vrow input { flex: 1; background: #1e1e1e; color: #d4d4d4; border: 1px solid #3c3c3c;
@@ -403,6 +420,18 @@ namespace ApexComputerUse
                   <span id="dot"></span>
                   <span id="statusTxt">connecting…</span>
                   <span class="spacer"></span>
+                  <span class="fmt-bar">
+                    <label>Format</label>
+                    <select id="fmtSel" onchange="onFmtChange()">
+                      <option value="json" selected>JSON</option>
+                      <option value="html">HTML</option>
+                      <option value="text">Text</option>
+                      <option value="pdf">PDF</option>
+                    </select>
+                    <a id="lnkHelp"    href="/help.json"    target="_blank">help</a>
+                    <a id="lnkStatus"  href="/status.json"  target="_blank">status</a>
+                    <a id="lnkWindows" href="/windows.json" target="_blank">windows</a>
+                  </span>
                   <span class="brand">ApexComputerUse</span>
                 </header>
 
@@ -462,14 +491,20 @@ namespace ApexComputerUse
                           <button class="a" onclick="act('middle-click')">middle</button>
                           <button class="a" onclick="act('hover')">hover</button>
                           <button class="a" onclick="act('highlight')">highlight</button>
+                          <button class="a" onclick="act('invoke')">invoke</button>
+                          <button class="a" onclick="act('click-at')">click-at</button>
+                          <button class="a" onclick="act('drag')">drag</button>
                         </div>
 
                         <div class="grp">
                           <span class="glabel">Text</span>
                           <button class="a" onclick="act('type')">type</button>
                           <button class="a" onclick="act('gettext')">gettext</button>
+                          <button class="a" onclick="act('getvalue')">getvalue</button>
                           <button class="a" onclick="act('setvalue')">setvalue</button>
                           <button class="a" onclick="act('appendvalue')">append</button>
+                          <button class="a" onclick="act('insert')">insert</button>
+                          <button class="a" onclick="act('clearvalue')">clearval</button>
                           <button class="a" onclick="act('clear')">clear</button>
                           <button class="a" onclick="act('getselectedtext')">getsel</button>
                         </div>
@@ -479,6 +514,7 @@ namespace ApexComputerUse
                           <button class="a" onclick="act('keys')">keys</button>
                           <button class="a" onclick="act('selectall')">sel-all</button>
                           <button class="a" onclick="act('copy')">copy</button>
+                          <button class="a" onclick="act('cut')">cut</button>
                           <button class="a" onclick="act('paste')">paste</button>
                           <button class="a" onclick="act('undo')">undo</button>
                         </div>
@@ -500,6 +536,7 @@ namespace ApexComputerUse
                           <button class="a" onclick="act('scroll-left')">←</button>
                           <button class="a" onclick="act('scroll-right')">→</button>
                           <button class="a" onclick="act('scrollinto')">into view</button>
+                          <button class="a" onclick="act('scrollpercent')">percent</button>
                           <button class="a" onclick="act('getscrollinfo')">info</button>
                         </div>
 
@@ -511,6 +548,7 @@ namespace ApexComputerUse
                           <button class="a" onclick="act('gettoggle')">state</button>
                           <button class="a" onclick="act('expand')">expand</button>
                           <button class="a" onclick="act('collapse')">collapse</button>
+                          <button class="a" onclick="act('expandstate')">expstate</button>
                         </div>
 
                         <div class="grp">
@@ -520,6 +558,10 @@ namespace ApexComputerUse
                           <button class="a" onclick="act('getitems')">getitems</button>
                           <button class="a" onclick="act('getselecteditem')">selected</button>
                           <button class="a" onclick="act('getselection')">getsel</button>
+                          <button class="a" onclick="act('select-item')">sel-item</button>
+                          <button class="a" onclick="act('addselect')">addsel</button>
+                          <button class="a" onclick="act('removeselect')">rmsel</button>
+                          <button class="a" onclick="act('isselected')">isselected</button>
                         </div>
 
                         <div class="grp">
@@ -528,6 +570,31 @@ namespace ApexComputerUse
                           <button class="a" onclick="act('maximize')">maximize</button>
                           <button class="a" onclick="act('restore')">restore</button>
                           <button class="a" onclick="act('windowstate')">state</button>
+                        </div>
+
+                        <div class="grp">
+                          <span class="glabel">Range</span>
+                          <button class="a" onclick="act('setrange')">set</button>
+                          <button class="a" onclick="act('getrange')">get</button>
+                          <button class="a" onclick="act('rangeinfo')">info</button>
+                        </div>
+
+                        <div class="grp">
+                          <span class="glabel">Grid</span>
+                          <button class="a" onclick="act('griditem')">item</button>
+                          <button class="a" onclick="act('gridinfo')">info</button>
+                          <button class="a" onclick="act('griditeminfo')">iteminfo</button>
+                        </div>
+
+                        <div class="grp">
+                          <span class="glabel">Transform</span>
+                          <button class="a" onclick="act('move')">move</button>
+                          <button class="a" onclick="act('resize')">resize</button>
+                        </div>
+
+                        <div class="grp">
+                          <span class="glabel">Wait</span>
+                          <button class="a" onclick="act('wait')">wait</button>
                         </div>
 
                         <div class="grp">
@@ -544,6 +611,7 @@ namespace ApexComputerUse
                           <button class="a ai" onclick="doAiStatus()" title="Check if vision model is loaded">status</button>
                           <button class="a ai" onclick="doAiDescribe()" title="Capture element and describe it with the vision model (Value = optional prompt)">describe</button>
                           <button class="a ai" onclick="doAiAsk()" title="Ask the vision model a question about the current element (Value = prompt)">ask</button>
+                          <button class="a ai" onclick="doAiFile()" title="Send an image or audio file to the vision model (Value = file path)">file</button>
                         </div>
 
                       </div>
@@ -691,23 +759,24 @@ namespace ApexComputerUse
 
                 // ── Command builder ─────────────────────────────────────────
                 const VALUE_HINTS = {
-                  'type':        'text to type',
-                  'keys':        '{CTRL}c or Ctrl+A',
-                  'setvalue':    'new value',
-                  'appendvalue': 'text to append',
-                  'select':      'item text',
-                  'select-index':'zero-based index',
-                  'click-at':    'x,y offset from element',
-                  'drag':        'x,y screen coords',
-                  'move':        'x,y',
-                  'resize':      'w,h',
-                  'scrollpercent':'h,v (0-100)',
-                  'setrange':    'number',
-                  'wait':        'automationId to wait for',
-                  'insert':      'text at caret',
-                  'griditem':    'row,col',
-                  'ai/describe': 'optional prompt (e.g. "list all buttons")',
-                  'ai/ask':      'question for the vision model (required)',
+                  'type':          'text to type',
+                  'keys':          '{CTRL}c or Ctrl+A',
+                  'setvalue':      'new value',
+                  'appendvalue':   'text to append',
+                  'insert':        'text at caret',
+                  'select':        'item text',
+                  'select-index':  'zero-based index',
+                  'click-at':      'x,y offset from element',
+                  'drag':          'x,y screen coords',
+                  'move':          'x,y',
+                  'resize':        'w,h',
+                  'scrollpercent': 'h,v (0-100)',
+                  'setrange':      'number',
+                  'griditem':      'row,col',
+                  'wait':          'automationId to wait for',
+                  'ai/describe':   'optional prompt (e.g. "list all buttons")',
+                  'ai/ask':        'question for the vision model (required)',
+                  'ai/file':       'file path (e.g. C:\\path\\to\\image.png)',
                 };
 
                 function act(name) {
@@ -799,6 +868,18 @@ namespace ApexComputerUse
                   }
                 }
 
+                async function doAiFile() {
+                  const val = document.getElementById('val').value.trim();
+                  if (!val) { appendLog('ai/file', false, 'Enter a file path in the Value field first'); return; }
+                  appendLog('ai/file', true, 'Sending file to vision model\u2026');
+                  try {
+                    const r = await call('POST', '/ai/file', { value: val });
+                    log(r);
+                  } catch (e) {
+                    appendLog('ai/file', false, String(e));
+                  }
+                }
+
                 function logCapture(r, label) {
                   const b64 = r.data && r.data.result;
                   if (b64 && b64.length > 100) {
@@ -825,10 +906,22 @@ namespace ApexComputerUse
                   const ts  = document.createElement('div');
                   ts.className = 'ts';
                   ts.textContent = now() + ' ' + (r && r.action ? r.action : '');
-                  const pre = document.createElement('pre');
-                  pre.textContent = JSON.stringify(r, null, 2);
                   div.appendChild(ts);
-                  div.appendChild(pre);
+                  if (r._isPdf && r.data?.result) {
+                    // PDF — show open link (blob URL)
+                    const a = document.createElement('a');
+                    a.href = r.data.result;
+                    a.target = '_blank';
+                    a.textContent = '\u{1F4C4} Open PDF';
+                    a.style.cssText = 'color:#4ec94e;font-size:.85em;display:block;margin-top:.3em';
+                    div.appendChild(a);
+                  } else {
+                    const pre = document.createElement('pre');
+                    pre.textContent = r._isRaw && r.data?.result
+                      ? r.data.result
+                      : JSON.stringify(r, null, 2);
+                    div.appendChild(pre);
+                  }
                   prepend(div);
                 }
 
@@ -859,16 +952,34 @@ namespace ApexComputerUse
                   return new Date().toLocaleTimeString();
                 }
 
+                // ── Format bar ─────────────────────────────────────────────
+                function onFmtChange() {
+                  const fmt = document.getElementById('fmtSel').value;
+                  const ext = fmt === 'json' ? 'json' : fmt;
+                  document.getElementById('lnkHelp').href    = '/help.'    + ext;
+                  document.getElementById('lnkStatus').href  = '/status.'  + ext;
+                  document.getElementById('lnkWindows').href = '/windows.' + ext;
+                }
+
                 // ── API ─────────────────────────────────────────────────────
                 async function call(method, path, body) {
+                  const fmt  = document.getElementById('fmtSel')?.value ?? 'json';
                   const sep  = path.includes('?') ? '&' : '?';
-                  const url  = path + sep + 'format=json';
+                  const url  = path + sep + 'format=' + fmt;
                   const opts = { method };
                   if (body !== undefined && method !== 'GET') {
                     opts.headers = { 'Content-Type': 'application/json' };
                     opts.body    = JSON.stringify(body);
                   }
                   const res = await fetch(url, opts);
+                  if (fmt === 'pdf') {
+                    const blob = await res.blob();
+                    return { success: res.ok, action: path, data: { result: URL.createObjectURL(blob) }, _isPdf: true };
+                  }
+                  if (fmt === 'html' || fmt === 'text') {
+                    const text = await res.text();
+                    return { success: res.ok, action: path, data: { result: text }, _isRaw: true };
+                  }
                   return res.json();
                 }
                 </script>
@@ -885,6 +996,23 @@ namespace ApexComputerUse
         }
 
         // ── JSON parsing ──────────────────────────────────────────────────
+
+        private static CommandRequest FromQueryString(HttpListenerRequest req, string command, string? action = null)
+            => new()
+            {
+                Command      = command,
+                Action       = req.QueryString["action"]       ?? action,
+                Value        = req.QueryString["value"],
+                Window       = req.QueryString["window"],
+                AutomationId = req.QueryString["id"]           ?? req.QueryString["automationId"],
+                ElementName  = req.QueryString["name"]         ?? req.QueryString["elementName"],
+                SearchType   = req.QueryString["type"]         ?? req.QueryString["searchType"],
+                OnscreenOnly = string.Equals(req.QueryString["onscreen"], "true",
+                                   StringComparison.OrdinalIgnoreCase),
+                Prompt       = req.QueryString["prompt"],
+                ModelPath    = req.QueryString["model"]        ?? req.QueryString["modelPath"],
+                MmProjPath   = req.QueryString["proj"]         ?? req.QueryString["mmProjPath"],
+            };
 
         private static CommandRequest FromJson(string json, string command) =>
             FromJson(json, command, null);
@@ -948,25 +1076,38 @@ namespace ApexComputerUse
 
     internal static class FormatAdapter
     {
-        public static string Negotiate(HttpListenerRequest req)
+        public static string Negotiate(HttpListenerRequest req, string? extHint = null)
         {
-            string? qf = req.QueryString["format"]?.ToLowerInvariant();
-            if (qf is "json" or "html" or "text") return qf;
+            // 1. URL file extension takes highest priority
+            if (extHint is "pdf")           return "pdf";
+            if (extHint is "json")          return "json";
+            if (extHint is "html" or "htm") return "html";
+            if (extHint is "txt" or "text") return "text";
 
+            // 2. ?format= query parameter
+            string? qf = req.QueryString["format"]?.ToLowerInvariant();
+            if (qf is "json" or "html" or "text" or "pdf") return qf;
+
+            // 3. Accept header
             string accept = req.Headers["Accept"] ?? "";
+            if (accept.Contains("application/pdf",  StringComparison.OrdinalIgnoreCase)) return "pdf";
             if (accept.Contains("text/html",        StringComparison.OrdinalIgnoreCase)) return "html";
-            if (accept.Contains("text/plain",        StringComparison.OrdinalIgnoreCase)) return "text";
+            if (accept.Contains("text/plain",       StringComparison.OrdinalIgnoreCase)) return "text";
             if (accept.Contains("application/json", StringComparison.OrdinalIgnoreCase)) return "json";
-            return "html";
+            return "html"; // default
         }
 
-        public static (string body, string contentType, int statusCode) Render(ApexResult r, string format)
+        public static (byte[] body, string contentType, int statusCode) Render(ApexResult r, string format)
             => format switch
             {
-                "json" => RenderJson(r),
-                "text" => RenderText(r),
-                _      => RenderHtml(r),
+                "json" => AsUtf8(RenderJson(r), "application/json; charset=utf-8", r.Success),
+                "text" => AsUtf8(RenderText(r), "text/plain; charset=utf-8",       r.Success),
+                "pdf"  => RenderPdf(r),
+                _      => AsUtf8(RenderHtml(r), "text/html; charset=utf-8",        r.Success),
             };
+
+        private static (byte[], string, int) AsUtf8(string body, string ct, bool ok)
+            => (Encoding.UTF8.GetBytes(body), ct, ok ? 200 : 400);
 
         private static (string, string, int) RenderJson(ApexResult r)
         {
@@ -1024,6 +1165,127 @@ namespace ApexComputerUse
                 </body></html>
                 """;
             return (html, "text/html; charset=utf-8", r.Success ? 200 : 400);
+        }
+
+        private static (byte[], string, int) RenderPdf(ApexResult r)
+        {
+            var lines = new List<string>();
+            lines.Add($"Apex  {(r.Success ? "OK" : "ERR")}  {r.Action}");
+            lines.Add(new string('-', 64));
+            if (r.Error is not null) lines.Add($"error: {r.Error}");
+            if (r.Data  is not null)
+                foreach (var kv in r.Data)
+                {
+                    string line = $"{kv.Key}: {kv.Value}";
+                    while (line.Length > 90)
+                    {
+                        lines.Add(line[..90]);
+                        line = "  " + line[90..];
+                    }
+                    lines.Add(line);
+                }
+            byte[] pdf = PdfWriter.GenerateTextPdf(lines);
+            return (pdf, "application/pdf", r.Success ? 200 : 400);
+        }
+    }
+
+    // ── Minimal raw PDF generator (no external dependencies) ─────────────────
+
+    internal static class PdfWriter
+    {
+        public static byte[] GenerateTextPdf(List<string> lines)
+        {
+            const float W  = 595f, H = 842f, M = 50f; // A4, margins
+            const float Sz = 9f,   Lh = 12f;
+            int lpp = (int)((H - 2 * M) / Lh);        // lines per page
+
+            // Split into pages (at least one, even if empty)
+            var pages = new List<List<string>>();
+            if (lines.Count == 0)
+            {
+                pages.Add([]);
+            }
+            else
+            {
+                for (int i = 0; i < lines.Count; i += lpp)
+                    pages.Add(lines.Skip(i).Take(lpp).ToList());
+            }
+
+            // Object IDs: 1=Catalog 2=Pages 3=Font 4..=Page objs (4+n)..=Content streams
+            int nPages      = pages.Count;
+            int firstPage   = 4;
+            int firstStream = firstPage + nPages;
+
+            // Build in Latin-1: 1 char == 1 byte → sb.Length gives exact byte offsets
+            var sb      = new StringBuilder();
+            var offsets = new List<int>();
+
+            sb.Append("%PDF-1.4\n");
+
+            // obj 1 — Catalog
+            offsets.Add(sb.Length);
+            sb.Append("1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n");
+
+            // obj 2 — Pages
+            string kids = string.Join(" ", Enumerable.Range(firstPage, nPages).Select(i => $"{i} 0 R"));
+            offsets.Add(sb.Length);
+            sb.Append($"2 0 obj<</Type/Pages/Kids[{kids}]/Count {nPages}>>endobj\n");
+
+            // obj 3 — Font (Courier built-in — no embedding needed)
+            offsets.Add(sb.Length);
+            sb.Append("3 0 obj<</Type/Font/Subtype/Type1/BaseFont/Courier/Encoding/WinAnsiEncoding>>endobj\n");
+
+            // Page objects
+            for (int i = 0; i < nPages; i++)
+            {
+                offsets.Add(sb.Length);
+                sb.Append($"{firstPage + i} 0 obj<</Type/Page/Parent 2 0 R" +
+                          $"/MediaBox[0 0 {W} {H}]" +
+                          $"/Contents {firstStream + i} 0 R" +
+                          $"/Resources<</Font<</F1 3 0 R>>>>>>endobj\n");
+            }
+
+            // Content streams
+            for (int i = 0; i < nPages; i++)
+            {
+                var cs = new StringBuilder();
+                cs.Append($"BT /F1 {Sz} Tf {M} {H - M - Sz} Td {Lh} TL\n");
+                foreach (var line in pages[i])
+                    cs.Append($"({PdfEscapeString(line)}) Tj T*\n");
+                cs.Append("ET\n");
+                string stream = cs.ToString();
+                int    len    = stream.Length; // Latin-1: chars == bytes
+
+                offsets.Add(sb.Length);
+                sb.Append($"{firstStream + i} 0 obj<</Length {len}>>stream\n");
+                sb.Append(stream);
+                sb.Append("endstream endobj\n");
+            }
+
+            // xref table
+            int xrefPos   = sb.Length;
+            int totalObjs = 3 + nPages + nPages; // catalog + pages + font + page objs + streams
+            sb.Append($"xref\n0 {totalObjs + 1}\n");
+            sb.Append("0000000000 65535 f \n");
+            foreach (var off in offsets)
+                sb.Append($"{off:D10} 00000 n \n");
+
+            sb.Append($"trailer<</Size {totalObjs + 1}/Root 1 0 R>>\n");
+            sb.Append($"startxref\n{xrefPos}\n%%EOF");
+
+            return Encoding.Latin1.GetBytes(sb.ToString());
+        }
+
+        private static string PdfEscapeString(string s)
+        {
+            var sb = new StringBuilder(s.Length + 4);
+            foreach (char c in s)
+            {
+                if (c == '(' || c == ')' || c == '\\') sb.Append('\\');
+                // Replace non-ASCII / non-printable with a space
+                sb.Append(c is >= ' ' and < (char)127 ? c : ' ');
+            }
+            return sb.ToString();
         }
     }
 
