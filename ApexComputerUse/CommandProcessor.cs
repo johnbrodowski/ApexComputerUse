@@ -167,10 +167,21 @@ namespace ApexComputerUse
 
         private CommandResponse CmdExecute(CommandRequest req)
         {
-            if (CurrentElement == null) return Fail("No element selected. Use 'find' first.");
-            if (string.IsNullOrWhiteSpace(req.Action))  return Fail("'action' is required.");
+            if (string.IsNullOrWhiteSpace(req.Action)) return Fail("'action' is required.");
 
-            string result = RunAction(CurrentElement, CurrentWindow, req.Action!, req.Value ?? "");
+            // If a numeric element ID was provided directly (e.g. element=123 or id=123),
+            // look it up in the map so callers don't need a separate /find round-trip.
+            AutomationElement? target = CurrentElement;
+            if (!string.IsNullOrWhiteSpace(req.AutomationId) &&
+                int.TryParse(req.AutomationId, out int elemId) &&
+                _elementMap.TryGetValue(elemId, out var mappedEl))
+            {
+                target = mappedEl;
+            }
+
+            if (target == null) return Fail("No element selected. Use 'find' first or pass element=<id>.");
+
+            string result = RunAction(target, CurrentWindow, req.Action!, req.Value ?? "");
             return string.IsNullOrEmpty(result)
                 ? Ok($"'{req.Action}' executed.")
                 : Ok($"'{req.Action}' executed.", result);

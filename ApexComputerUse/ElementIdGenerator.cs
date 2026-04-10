@@ -147,11 +147,11 @@ namespace ApexComputerUse
                 //sb.Append(hwnd.ToString());
             }
 
-            // Sibling index: include when using incremental IDs for better element differentiation
-            // BUT only for elements within windows (parentHash != null), not for top-level windows
-            // Top-level window order can change (e.g., new window opens), breaking ID stability
-            // Elements within a window have stable order
-            if (UseIncrementalIds && !string.IsNullOrEmpty(parentHash))
+            // Sibling index: always include for non-root elements to avoid hash collisions
+            // between sibling elements that share identical ControlType/Class/AutomationId.
+            // Excluded for top-level windows (parentHash == null) since window z-order can
+            // change across sessions, making position-based IDs unstable.
+            if (!string.IsNullOrEmpty(parentHash))
             {
                 sb.Append("|idx:");
                 sb.Append(siblingIndex);

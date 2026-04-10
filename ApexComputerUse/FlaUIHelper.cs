@@ -429,23 +429,56 @@ namespace ApexComputerUse
 
         public void SetRangeValue(AutomationElement el, double value)
         {
-            if (el.Patterns.RangeValue.TryGetPattern(out var p)) p.SetValue(value);
-            else throw new InvalidOperationException("RangeValue pattern not supported");
+            if (el.Patterns.RangeValue.TryGetPattern(out var p)) { p.SetValue(value); return; }
+            // Fallback: write via Value pattern (e.g. WinForms TrackBar exposes Value not RangeValue)
+            if (el.Patterns.Value.TryGetPattern(out var vp) && !vp.IsReadOnly.ValueOrDefault)
+            {
+                vp.SetValue(value.ToString("G"));
+                return;
+            }
+            // Fallback: WinForms NumericUpDown — set value via child Edit element
+            var childEdit = el.FindAllChildren()
+                .FirstOrDefault(c => c.Properties.ControlType.ValueOrDefault == FlaUI.Core.Definitions.ControlType.Edit);
+            if (childEdit != null && childEdit.Patterns.Value.TryGetPattern(out var cvp) && !cvp.IsReadOnly.ValueOrDefault)
+            {
+                cvp.SetValue(value.ToString("G"));
+                return;
+            }
+            throw new InvalidOperationException("Neither RangeValue nor writable Value pattern is supported");
         }
 
         public string GetRangeValue(AutomationElement el)
         {
             if (el.Patterns.RangeValue.TryGetPattern(out var p)) return p.Value.ValueOrDefault.ToString("G");
             if (el.Patterns.Value.TryGetPattern(out var vp)) return vp.Value.ValueOrDefault ?? "";
+            // Fallback: WinForms NumericUpDown — read value from child Edit element
+            var childEdit = el.FindAllChildren()
+                .FirstOrDefault(c => c.Properties.ControlType.ValueOrDefault == FlaUI.Core.Definitions.ControlType.Edit);
+            if (childEdit != null && childEdit.Patterns.Value.TryGetPattern(out var cvp))
+                return cvp.Value.ValueOrDefault ?? "";
             return "RangeValue pattern not supported";
         }
 
         public string GetRangeInfo(AutomationElement el)
         {
-            if (!el.Patterns.RangeValue.TryGetPattern(out var p)) return "RangeValue pattern not supported";
-            return $"Value={p.Value.ValueOrDefault:G}  Min={p.Minimum.ValueOrDefault:G}  " +
-                   $"Max={p.Maximum.ValueOrDefault:G}  SmallChange={p.SmallChange.ValueOrDefault:G}  " +
-                   $"LargeChange={p.LargeChange.ValueOrDefault:G}";
+            if (el.Patterns.RangeValue.TryGetPattern(out var p))
+                return $"Value={p.Value.ValueOrDefault:G}  Min={p.Minimum.ValueOrDefault:G}  " +
+                       $"Max={p.Maximum.ValueOrDefault:G}  SmallChange={p.SmallChange.ValueOrDefault:G}  " +
+                       $"LargeChange={p.LargeChange.ValueOrDefault:G}";
+            // Fallback: Slider API (WinForms TrackBar uses Value pattern, not RangeValue).
+            // Read each property via the raw Value pattern to avoid FlaUI's Slider wrapper
+            // calling internal pattern accessors that throw NullReferenceException.
+            if (el.Patterns.Value.TryGetPattern(out var valuePat))
+            {
+                double val = 0;
+                if (double.TryParse(valuePat.Value.ValueOrDefault, out var parsed)) val = parsed;
+                var ct = el.Properties.ControlType.ValueOrDefault;
+                // For Slider/ScrollBar try to get min/max from FlaUI wrapper safely
+                double min = 0, max = 100, small = double.NaN, large = double.NaN;
+                try { var s = el.AsSlider(); min = s.Minimum; max = s.Maximum; small = s.SmallChange; large = s.LargeChange; } catch { }
+                return $"Value={val:G}  Min={min:G}  Max={max:G}  SmallChange={small:G}  LargeChange={large:G}";
+            }
+            return "RangeValue pattern not supported";
         }
 
         // ── Toggle pattern ────────────────────────────────────────────────
@@ -495,24 +528,28 @@ namespace ApexComputerUse
         public void SelectAllText(AutomationElement el)
         {
             el.Focus();
+            Thread.Sleep(FocusDelayMs);
             Keyboard.TypeSimultaneously(VirtualKeyShort.CONTROL, VirtualKeyShort.KEY_A);
         }
 
         public void CopyText(AutomationElement el)
         {
             el.Focus();
+            Thread.Sleep(FocusDelayMs);
             Keyboard.TypeSimultaneously(VirtualKeyShort.CONTROL, VirtualKeyShort.KEY_C);
         }
 
         public void CutText(AutomationElement el)
         {
             el.Focus();
+            Thread.Sleep(FocusDelayMs);
             Keyboard.TypeSimultaneously(VirtualKeyShort.CONTROL, VirtualKeyShort.KEY_X);
         }
 
         public void PasteText(AutomationElement el)
         {
             el.Focus();
+            Thread.Sleep(FocusDelayMs);
             Keyboard.TypeSimultaneously(VirtualKeyShort.CONTROL, VirtualKeyShort.KEY_V);
         }
 
@@ -770,7 +807,22 @@ namespace ApexComputerUse
         /// </summary>
         public void SelectComboBoxItem(AutomationElement el, string text)
         {
-            // 1. Try SelectionItem on matching list child (works in both ComboBox and ListBox)
+            // 1. If the element IS a List, select the named child item directly via SelectionItem
+            var ownType = el.Properties.ControlType.ValueOrDefault;
+            if (ownType == ControlType.List)
+            {
+                var items = el.FindAllChildren(cf => cf.ByControlType(ControlType.ListItem));
+                var match = items.FirstOrDefault(i => i.Properties.Name.ValueOrDefault == text);
+                if (match != null)
+                {
+                    if (match.Patterns.SelectionItem.TryGetPattern(out var sp)) { sp.Select(); return; }
+                    match.Click();
+                    return;
+                }
+                throw new InvalidOperationException($"Item '{text}' not found in List");
+            }
+
+            // 2. Try SelectionItem on matching list child (ComboBox with embedded List)
             var listChild = el.FindFirstDescendant(cf => cf.ByControlType(ControlType.List));
             if (listChild != null)
             {
@@ -812,11 +864,54 @@ namespace ApexComputerUse
         /// <summary>Selects a ComboBox or ListBox item by zero-based index.</summary>
         public void SelectByIndex(AutomationElement el, int index)
         {
+            // Handle plain List element (e.g. WinForms ListBox / multi-select ListBox)
+            if (el.Properties.ControlType.ValueOrDefault == ControlType.List)
+            {
+                var listItems = el.FindAllChildren(cf => cf.ByControlType(ControlType.ListItem));
+                if (index < listItems.Length)
+                {
+                    if (listItems[index].Patterns.SelectionItem.TryGetPattern(out var sp)) sp.Select();
+                    else listItems[index].Click();
+                    return;
+                }
+                throw new InvalidOperationException($"Index {index} out of range");
+            }
+
             var combo = el.AsComboBox();
             if (combo != null)
             {
-                if (index < combo.Items.Length) { combo.Items[index].Click(); return; }
-                throw new InvalidOperationException($"Index {index} out of range");
+                // Expand manually to populate children — avoids FlaUI's Items getter which
+                // calls Expand() internally and throws NullReferenceException on WinForms combos.
+                try
+                {
+                    if (el.Patterns.ExpandCollapse.TryGetPattern(out var ecp)) ecp.Expand();
+                }
+                catch { }
+                Thread.Sleep(300);
+
+                var children = el.FindAllChildren(cf => cf.ByControlType(ControlType.ListItem));
+                if (children.Length == 0)
+                {
+                    // WinForms DropDown: children appear under a List child
+                    foreach (var child in el.FindAllChildren())
+                    {
+                        if (child.Properties.ControlType.ValueOrDefault == ControlType.List)
+                        {
+                            children = child.FindAllChildren(cf => cf.ByControlType(ControlType.ListItem));
+                            break;
+                        }
+                    }
+                }
+
+                if (index < children.Length)
+                {
+                    if (children[index].Patterns.SelectionItem.TryGetPattern(out var sp)) sp.Select();
+                    else children[index].Click();
+                    try { if (el.Patterns.ExpandCollapse.TryGetPattern(out var ecp2)) ecp2.Collapse(); } catch { }
+                    return;
+                }
+                try { if (el.Patterns.ExpandCollapse.TryGetPattern(out var ecp3)) ecp3.Collapse(); } catch { }
+                throw new InvalidOperationException($"Index {index} out of range (found {children.Length} items)");
             }
             var listBox = el.AsListBox();
             if (listBox != null)
@@ -830,36 +925,144 @@ namespace ApexComputerUse
         public string GetComboBoxSelected(AutomationElement el)
         {
             var combo = el.AsComboBox();
-            if (combo != null) return combo.SelectedItem?.Text ?? "(none)";
+            if (combo != null)
+            {
+                try
+                {
+                    string? sel = combo.SelectedItem?.Text;
+                    if (sel != null) return sel;
+                }
+                catch { /* SelectionItem pattern not supported — fall through to Value */ }
+            }
             var listBox = el.AsListBox();
             if (listBox != null)
             {
-                var sel = listBox.SelectedItems;
-                return sel.Length > 0 ? sel[0].Text : "(none)";
+                try
+                {
+                    var sel = listBox.SelectedItems;
+                    if (sel.Length > 0) return sel[0].Text;
+                }
+                catch { /* fall through */ }
             }
-            // Fallback: get Value
+            // Fallback: get Value pattern (handles WinForms ComboBox / editable combos)
             if (el.Patterns.Value.TryGetPattern(out var vp)) return vp.Value.ValueOrDefault ?? "";
             return "(none)";
         }
 
         public string[] GetComboBoxItems(AutomationElement el)
         {
+            // Fast path for plain List elements (e.g. WinForms ListBox / multi-select ListBox)
+            // whose ControlType is List rather than ComboBox — scan children directly.
+            var ct = el.Properties.ControlType.ValueOrDefault;
+            if (ct == FlaUI.Core.Definitions.ControlType.List)
+            {
+                try
+                {
+                    return el.FindAllChildren()
+                        .Where(c => c.Properties.ControlType.ValueOrDefault == FlaUI.Core.Definitions.ControlType.ListItem)
+                        .Select(c => c.Properties.Name.ValueOrDefault ?? "")
+                        .Where(s => !string.IsNullOrEmpty(s))
+                        .ToArray();
+                }
+                catch { return Array.Empty<string>(); }
+            }
+
             var combo = el.AsComboBox();
             if (combo != null)
             {
-                var wasCollapsed = combo.ExpandCollapseState == ExpandCollapseState.Collapsed;
-                if (wasCollapsed) combo.Expand();
-                var items = combo.Items.Select(i => i.Text).ToArray();
-                if (wasCollapsed) try { combo.Collapse(); } catch { }
+                // Always expand to ensure children are visible in UIA tree;
+                // track state to know whether to collapse after.
+                bool wasCollapsed = true;
+                try { wasCollapsed = combo.ExpandCollapseState == ExpandCollapseState.Collapsed; }
+                catch { }
+                // Use the raw UIA pattern directly to avoid FlaUI wrapper quirks
+                try
+                {
+                    if (el.Patterns.ExpandCollapse.TryGetPattern(out var ecp))
+                        ecp.Expand();
+                }
+                catch { }
+                Thread.Sleep(500); // give UIA time to populate children after expand
+
+                // Strategy 1: SelectionItem children (direct child scan — avoids FlaUI's
+                // ComboBox.Items getter which calls Expand() internally and throws
+                // NullReferenceException on WinForms combos that lack the pattern).
+                string[] items = Array.Empty<string>();
+                try
+                {
+                    items = el.FindAllChildren()
+                        .Where(c => c.Properties.ControlType.ValueOrDefault == FlaUI.Core.Definitions.ControlType.ListItem)
+                        .Select(c => c.Properties.Name.ValueOrDefault ?? "")
+                        .Where(s => !string.IsNullOrEmpty(s))
+                        .ToArray();
+                }
+                catch { }
+
+                // Strategy 2: Scan direct children for a List container
+                // (WinForms ComboBox exposes a List child when expanded)
+                if (items.Length == 0)
+                {
+                    try
+                    {
+                        foreach (var child in el.FindAllChildren())
+                        {
+                            if (child.Properties.ControlType.ValueOrDefault == FlaUI.Core.Definitions.ControlType.List)
+                            {
+                                var listItems = child.FindAllChildren();
+                                items = listItems
+                                    .Select(i => i.Properties.Name.ValueOrDefault ?? "")
+                                    .Where(s => !string.IsNullOrEmpty(s))
+                                    .ToArray();
+                                break;
+                            }
+                        }
+                    }
+                    catch { }
+                }
+
+                if (wasCollapsed) try { if (el.Patterns.ExpandCollapse.TryGetPattern(out var ecpC)) ecpC.Collapse(); } catch { }
                 return items;
             }
+
             var listBox = el.AsListBox();
-            if (listBox != null) return listBox.Items.Select(i => i.Text).ToArray();
+            if (listBox != null)
+            {
+                string[] lbItems = Array.Empty<string>();
+                try { lbItems = listBox.Items.Select(i => i.Text).ToArray(); } catch { }
+                if (lbItems.Length == 0)
+                {
+                    // Fallback: scan children directly (handles WinForms ListBox)
+                    try
+                    {
+                        lbItems = el.FindAllChildren()
+                            .Where(c => c.Properties.ControlType.ValueOrDefault == FlaUI.Core.Definitions.ControlType.ListItem)
+                            .Select(c => c.Properties.Name.ValueOrDefault ?? "")
+                            .Where(s => !string.IsNullOrEmpty(s))
+                            .ToArray();
+                    }
+                    catch { }
+                }
+                return lbItems;
+            }
+
+            // Fallback: return current value as single-item list (e.g. WinForms ComboBox
+            // that exposes only Value+ExpandCollapse, not Selection/SelectionItem)
+            if (el.Patterns.Value.TryGetPattern(out var vp))
+            {
+                string v = vp.Value.ValueOrDefault ?? "";
+                return string.IsNullOrEmpty(v) ? Array.Empty<string>() : new[] { v };
+            }
             return Array.Empty<string>();
         }
 
-        public void ExpandComboBox(AutomationElement el) => el.AsComboBox().Expand();
-        public void CollapseComboBox(AutomationElement el) => el.AsComboBox().Collapse();
+        public void ExpandComboBox(AutomationElement el)
+        {
+            if (el.Patterns.ExpandCollapse.TryGetPattern(out var p)) p.Expand();
+        }
+        public void CollapseComboBox(AutomationElement el)
+        {
+            if (el.Patterns.ExpandCollapse.TryGetPattern(out var p)) p.Collapse();
+        }
 
         // ── CheckBox / RadioButton ────────────────────────────────────────
 

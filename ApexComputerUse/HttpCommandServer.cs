@@ -1004,7 +1004,8 @@ namespace ApexComputerUse
                 Action       = req.QueryString["action"]       ?? action,
                 Value        = req.QueryString["value"],
                 Window       = req.QueryString["window"],
-                AutomationId = req.QueryString["id"]           ?? req.QueryString["automationId"],
+                AutomationId = req.QueryString["id"]           ?? req.QueryString["automationId"]
+                             ?? req.QueryString["element"],
                 ElementName  = req.QueryString["name"]         ?? req.QueryString["elementName"],
                 SearchType   = req.QueryString["type"]         ?? req.QueryString["searchType"],
                 OnscreenOnly = string.Equals(req.QueryString["onscreen"], "true",
@@ -1026,7 +1027,7 @@ namespace ApexComputerUse
                 using var doc  = JsonDocument.Parse(json);
                 var root = doc.RootElement;
                 r.Window       = root.Str("window");
-                r.AutomationId = root.Str("automationId") ?? root.Str("id");
+                r.AutomationId = root.Str("automationId") ?? root.Str("id") ?? root.Str("element");
                 r.ElementName  = root.Str("elementName")  ?? root.Str("name");
                 r.SearchType   = root.Str("searchType")   ?? root.Str("type");
                 r.Action       = root.Str("action") ?? action;
@@ -1290,8 +1291,15 @@ namespace ApexComputerUse
 
     internal static class JsonElementExtensions
     {
-        public static string? Str(this JsonElement el, string name) =>
-            el.TryGetProperty(name, out var p) && p.ValueKind == JsonValueKind.String
-                ? p.GetString() : null;
+        public static string? Str(this JsonElement el, string name)
+        {
+            if (!el.TryGetProperty(name, out var p)) return null;
+            return p.ValueKind switch
+            {
+                JsonValueKind.String => p.GetString(),
+                JsonValueKind.Number => p.GetRawText(),
+                _                   => null
+            };
+        }
     }
 }

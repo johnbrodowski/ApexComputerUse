@@ -203,6 +203,9 @@ namespace ApexComputerUse
 
             // Restore saved model paths
             LoadSettings();
+
+            // Auto-start HTTP server once the form is fully loaded
+            this.Load += (_, _) => btnStartHttp_Click(this, EventArgs.Empty);
         }
 
         private void cmbControlType_SelectedIndexChanged(object sender, EventArgs e)
