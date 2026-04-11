@@ -10,7 +10,7 @@
 <!-- SCREENSHOT: animated GIF showing the web UI — select a window, browse elements, click a button, see the response log update. Suggested filename: docs/images/demo.gif -->
 ![ApexComputerUse demo](docs/images/demo.gif)
 
-ApexComputerUse reads the **Windows accessibility tree** (the same data the OS exposes to screen readers) and serves it over a plain **HTTP REST API**. Any AI agent — in any language, on any machine — can find, inspect, and control any desktop app or browser by making simple HTTP requests. No screenshots. No pixel coordinates. No cloud dependency. In the most of the recent tests, it's getting an average accuracy 99% on web and desktop tasks.
+ApexComputerUse reads the **Windows accessibility tree** (the same data the OS exposes to screen readers) and serves it over a plain **HTTP REST API**. Any AI agent — in any language, on any machine — can find, inspect, and control any desktop app or browser by making simple HTTP requests. No screenshots. No pixel coordinates. No cloud dependency. In the most of the recent tests; excluding 3D games, it's getting an average accuracy 99% on web and desktop tasks.
 
 **5–20 tokens per action** instead of 1,000–3,500 for a screenshot. A full browser page in onscreen-only mode is ~126 elements of compact JSON — less than the cost of a single screenshot of the same page.
 
