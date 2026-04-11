@@ -204,6 +204,9 @@ namespace ApexComputerUse
             // Restore saved model paths
             LoadSettings();
 
+            // First-launch hint: if the default model files are absent, go to the Model tab
+            this.Load += (_, _) => CheckFirstLaunch();
+
             // Auto-start HTTP server once the form is fully loaded
             this.Load += (_, _) => btnStartHttp_Click(this, EventArgs.Empty);
         }
@@ -768,6 +771,169 @@ namespace ApexComputerUse
                 txtProjPath.Text = dlg.FileName;
         }
 
+        // ── Default model / tessdata paths ───────────────────────────────
+        private static readonly string DefaultModelsDir =
+            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "models");
+        private static readonly string DefaultTessdataDir =
+            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "tessdata");
+
+        private static readonly (string Url, string RelPath, string Label)[] SetupFiles =
+        [
+            (
+                "https://huggingface.co/LiquidAI/LFM2.5-VL-450M-GGUF/resolve/main/LFM2.5-VL-450M-Q4_0.gguf",
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "models", "LFM2.5-VL-450M-Q4_0.gguf"),
+                "LFM2.5-VL model"
+            ),
+            (
+                "https://huggingface.co/LiquidAI/LFM2.5-VL-450M-GGUF/resolve/main/mmproj-LFM2.5-VL-450m-F16.gguf",
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "models", "mmproj-LFM2.5-VL-450m-F16.gguf"),
+                "projector"
+            ),
+            (
+                "https://github.com/tesseract-ocr/tessdata/raw/refs/heads/main/eng.traineddata",
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "tessdata", "eng.traineddata"),
+                "eng.traineddata"
+            ),
+        ];
+
+        private void CheckFirstLaunch()
+        {
+            bool anyMissing = SetupFiles.Any(f => !File.Exists(f.RelPath));
+            if (!anyMissing) return;
+
+            // Switch to Model tab so the user sees the Download All button
+            tabMain.SelectedTab = tabPageModel;
+            lblDownloadStatus.ForeColor = Color.DarkBlue;
+            lblDownloadStatus.Text = "First launch — click \"Download All\" to set up models and tessdata.";
+        }
+
+        // Shared streaming download helper; returns true on success.
+        private async Task<bool> DownloadFileAsync(
+            string url, string destPath,
+            Action<string, Color> setStatus,
+            Action<int> setProgress,
+            CancellationToken ct)
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(destPath)!);
+            using var client = new System.Net.Http.HttpClient();
+            using var resp = await client.GetAsync(url, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, ct);
+            resp.EnsureSuccessStatusCode();
+
+            long total = resp.Content.Headers.ContentLength ?? -1;
+            using var src = await resp.Content.ReadAsStreamAsync(ct);
+            using var dest = File.Create(destPath);
+
+            var buffer = new byte[81920];
+            long downloaded = 0;
+            int read;
+            while ((read = await src.ReadAsync(buffer, ct)) > 0)
+            {
+                await dest.WriteAsync(buffer.AsMemory(0, read), ct);
+                downloaded += read;
+                if (total > 0)
+                {
+                    int pct = (int)(downloaded * 100 / total);
+                    BeginInvoke(() =>
+                    {
+                        setProgress(pct);
+                        setStatus($"{downloaded / 1024 / 1024} MB / {total / 1024 / 1024} MB  ({pct}%)", Color.DarkBlue);
+                    });
+                }
+            }
+            return true;
+        }
+
+        private async void btnDownloadAll_Click(object sender, EventArgs e)
+        {
+            if (_downloadCts != null) { _downloadCts.Cancel(); return; }
+
+            _downloadCts = new CancellationTokenSource();
+            btnDownloadAll.Text = "Cancel";
+            btnDownload.Enabled = false;
+            pbarDownload.Value = 0;
+
+            try
+            {
+                for (int i = 0; i < SetupFiles.Length; i++)
+                {
+                    var (url, dest, label) = SetupFiles[i];
+                    if (File.Exists(dest))
+                    {
+                        BeginInvoke(() =>
+                        {
+                            lblDownloadStatus.ForeColor = Color.Gray;
+                            lblDownloadStatus.Text = $"[{i + 1}/{SetupFiles.Length}] {label} already exists — skipping.";
+                        });
+                        await Task.Delay(400, _downloadCts.Token); // brief pause so user can read it
+                        continue;
+                    }
+
+                    BeginInvoke(() =>
+                    {
+                        pbarDownload.Value = 0;
+                        lblDownloadStatus.ForeColor = Color.DarkBlue;
+                        lblDownloadStatus.Text = $"[{i + 1}/{SetupFiles.Length}] Downloading {label}…";
+                    });
+
+                    await DownloadFileAsync(
+                        url, dest,
+                        (msg, col) => { lblDownloadStatus.Text = $"[{i + 1}/{SetupFiles.Length}] {label}: {msg}"; lblDownloadStatus.ForeColor = col; },
+                        pct => pbarDownload.Value = pct,
+                        _downloadCts.Token);
+                }
+
+                BeginInvoke(() =>
+                {
+                    pbarDownload.Value = 100;
+                    lblDownloadStatus.ForeColor = Color.Green;
+                    lblDownloadStatus.Text = "All files downloaded.";
+                    // Auto-populate model path boxes
+                    txtModelPath.Text = SetupFiles[0].RelPath;
+                    txtProjPath.Text  = SetupFiles[1].RelPath;
+                    SaveSettings();
+                    Log($"Setup complete. Model: {SetupFiles[0].RelPath}");
+                    Log($"Projector: {SetupFiles[1].RelPath}");
+                    Log($"Tessdata:  {SetupFiles[2].RelPath}");
+                });
+            }
+            catch (OperationCanceledException)
+            {
+                BeginInvoke(() =>
+                {
+                    lblDownloadStatus.ForeColor = Color.Gray;
+                    lblDownloadStatus.Text = "Cancelled.";
+                    // Clean up any partial file that was being written
+                    foreach (var (_, dest, _) in SetupFiles)
+                        if (File.Exists(dest))
+                            try
+                            {
+                                // Only delete if it looks incomplete (very small)
+                                if (new FileInfo(dest).Length < 1024) File.Delete(dest);
+                            }
+                            catch { }
+                });
+            }
+            catch (Exception ex)
+            {
+                BeginInvoke(() =>
+                {
+                    lblDownloadStatus.ForeColor = Color.Red;
+                    lblDownloadStatus.Text = $"Error: {ex.Message}";
+                    Log($"Download All error: {ex.Message}");
+                });
+            }
+            finally
+            {
+                _downloadCts?.Dispose();
+                _downloadCts = null;
+                BeginInvoke(() =>
+                {
+                    btnDownloadAll.Text = "Download All  (LFM2.5-VL model + projector + tessdata)";
+                    btnDownload.Enabled = true;
+                });
+            }
+        }
+
         private async void btnLoadModel_Click(object sender, EventArgs e)
         {
             string model = txtModelPath.Text.Trim();
@@ -845,33 +1011,11 @@ namespace ApexComputerUse
 
             try
             {
-                using var client = new System.Net.Http.HttpClient();
-                using var resp = await client.GetAsync(url,
-                    System.Net.Http.HttpCompletionOption.ResponseHeadersRead, _downloadCts.Token);
-                resp.EnsureSuccessStatusCode();
-
-                long total = resp.Content.Headers.ContentLength ?? -1;
-                using var src = await resp.Content.ReadAsStreamAsync(_downloadCts.Token);
-                using var dest = File.Create(destPath);
-
-                var buffer = new byte[81920];
-                long downloaded = 0;
-                int read;
-                while ((read = await src.ReadAsync(buffer, _downloadCts.Token)) > 0)
-                {
-                    await dest.WriteAsync(buffer.AsMemory(0, read), _downloadCts.Token);
-                    downloaded += read;
-                    if (total > 0)
-                    {
-                        int pct = (int)(downloaded * 100 / total);
-                        BeginInvoke(() =>
-                        {
-                            pbarDownload.Value = pct;
-                            lblDownloadStatus.Text =
-                                $"{downloaded / 1024 / 1024} MB / {total / 1024 / 1024} MB  ({pct}%)";
-                        });
-                    }
-                }
+                await DownloadFileAsync(
+                    url, destPath,
+                    (msg, col) => { lblDownloadStatus.Text = msg; lblDownloadStatus.ForeColor = col; },
+                    pct => pbarDownload.Value = pct,
+                    _downloadCts.Token);
 
                 BeginInvoke(() =>
                 {

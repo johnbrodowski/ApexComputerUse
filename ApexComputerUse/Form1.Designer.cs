@@ -19,6 +19,7 @@ namespace ApexComputerUse
             toolsToolStripMenuItem = new ToolStripMenuItem();
             runAIComputerUseToolStripMenuItem = new ToolStripMenuItem();
             outputUiMapToolStripMenuItem = new ToolStripMenuItem();
+            renderTestToolStripMenuItem = new ToolStripMenuItem();
             tabMain = new TabControl();
             tabPageConsole = new TabPage();
             txtCommand = new TextBox();
@@ -73,12 +74,12 @@ namespace ApexComputerUse
             pbarDownload = new ProgressBar();
             lblDownloadStatus = new Label();
             btnDownload = new Button();
+            btnDownloadAll = new Button();
             statusStrip1 = new StatusStrip();
             lblStatCpu = new ToolStripStatusLabel();
             lblStatRam = new ToolStripStatusLabel();
             lblStatModel = new ToolStripStatusLabel();
             lblStatNet = new ToolStripStatusLabel();
-            renderTestToolStripMenuItem = new ToolStripMenuItem();
             menuStrip1.SuspendLayout();
             tabMain.SuspendLayout();
             tabPageConsole.SuspendLayout();
@@ -96,7 +97,7 @@ namespace ApexComputerUse
             menuStrip1.Items.AddRange(new ToolStripItem[] { toolsToolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
-            menuStrip1.Size = new Size(543, 24);
+            menuStrip1.Size = new Size(576, 24);
             menuStrip1.TabIndex = 0;
             menuStrip1.Text = "menuStrip1";
             // 
@@ -121,6 +122,13 @@ namespace ApexComputerUse
             outputUiMapToolStripMenuItem.Text = "Output UI Map";
             outputUiMapToolStripMenuItem.Click += outputUiMapToolStripMenuItem_Click;
             // 
+            // renderTestToolStripMenuItem
+            // 
+            renderTestToolStripMenuItem.Name = "renderTestToolStripMenuItem";
+            renderTestToolStripMenuItem.Size = new Size(222, 22);
+            renderTestToolStripMenuItem.Text = "RenderTest";
+            renderTestToolStripMenuItem.Click += renderTestToolStripMenuItem_Click;
+            // 
             // tabMain
             // 
             tabMain.Controls.Add(tabPageConsole);
@@ -130,7 +138,7 @@ namespace ApexComputerUse
             tabMain.Location = new Point(0, 24);
             tabMain.Name = "tabMain";
             tabMain.SelectedIndex = 0;
-            tabMain.Size = new Size(543, 305);
+            tabMain.Size = new Size(548, 328);
             tabMain.TabIndex = 1;
             // 
             // tabPageConsole
@@ -143,7 +151,7 @@ namespace ApexComputerUse
             tabPageConsole.Location = new Point(4, 24);
             tabPageConsole.Name = "tabPageConsole";
             tabPageConsole.Padding = new Padding(3);
-            tabPageConsole.Size = new Size(535, 277);
+            tabPageConsole.Size = new Size(540, 300);
             tabPageConsole.TabIndex = 0;
             tabPageConsole.Text = "Console";
             tabPageConsole.UseVisualStyleBackColor = true;
@@ -216,7 +224,7 @@ namespace ApexComputerUse
             tabPageFind.Location = new Point(4, 24);
             tabPageFind.Name = "tabPageFind";
             tabPageFind.Padding = new Padding(3);
-            tabPageFind.Size = new Size(535, 277);
+            tabPageFind.Size = new Size(540, 300);
             tabPageFind.TabIndex = 1;
             tabPageFind.Text = "Find & Execute";
             tabPageFind.UseVisualStyleBackColor = true;
@@ -361,7 +369,7 @@ namespace ApexComputerUse
             tabPageRemote.Location = new Point(4, 24);
             tabPageRemote.Name = "tabPageRemote";
             tabPageRemote.Padding = new Padding(3);
-            tabPageRemote.Size = new Size(535, 277);
+            tabPageRemote.Size = new Size(540, 300);
             tabPageRemote.TabIndex = 2;
             tabPageRemote.Text = "Remote Control";
             tabPageRemote.UseVisualStyleBackColor = true;
@@ -502,7 +510,7 @@ namespace ApexComputerUse
             tabPageModel.Location = new Point(4, 24);
             tabPageModel.Name = "tabPageModel";
             tabPageModel.Padding = new Padding(3);
-            tabPageModel.Size = new Size(535, 277);
+            tabPageModel.Size = new Size(540, 300);
             tabPageModel.TabIndex = 3;
             tabPageModel.Text = "Model";
             tabPageModel.UseVisualStyleBackColor = true;
@@ -602,9 +610,10 @@ namespace ApexComputerUse
             grpDownload.Controls.Add(pbarDownload);
             grpDownload.Controls.Add(lblDownloadStatus);
             grpDownload.Controls.Add(btnDownload);
+            grpDownload.Controls.Add(btnDownloadAll);
             grpDownload.Location = new Point(8, 142);
             grpDownload.Name = "grpDownload";
-            grpDownload.Size = new Size(519, 116);
+            grpDownload.Size = new Size(519, 150);
             grpDownload.TabIndex = 1;
             grpDownload.TabStop = false;
             grpDownload.Text = "Vision Model Download";
@@ -652,12 +661,21 @@ namespace ApexComputerUse
             btnDownload.Text = "Download";
             btnDownload.Click += btnDownload_Click;
             // 
+            // btnDownloadAll
+            // 
+            btnDownloadAll.Location = new Point(8, 116);
+            btnDownloadAll.Name = "btnDownloadAll";
+            btnDownloadAll.Size = new Size(503, 26);
+            btnDownloadAll.TabIndex = 5;
+            btnDownloadAll.Text = "Download All  (LFM2.5-VL model + projector + tessdata)";
+            btnDownloadAll.Click += btnDownloadAll_Click;
+            // 
             // statusStrip1
             // 
             statusStrip1.Items.AddRange(new ToolStripItem[] { lblStatCpu, lblStatRam, lblStatModel, lblStatNet });
-            statusStrip1.Location = new Point(0, 328);
+            statusStrip1.Location = new Point(0, 362);
             statusStrip1.Name = "statusStrip1";
-            statusStrip1.Size = new Size(543, 24);
+            statusStrip1.Size = new Size(576, 24);
             statusStrip1.TabIndex = 2;
             statusStrip1.Text = "statusStrip1";
             // 
@@ -685,23 +703,16 @@ namespace ApexComputerUse
             // lblStatNet
             // 
             lblStatNet.Name = "lblStatNet";
-            lblStatNet.Size = new Size(333, 19);
+            lblStatNet.Size = new Size(366, 19);
             lblStatNet.Spring = true;
             lblStatNet.Text = "Net: --";
             lblStatNet.TextAlign = ContentAlignment.MiddleRight;
-            // 
-            // renderTestToolStripMenuItem
-            // 
-            renderTestToolStripMenuItem.Name = "renderTestToolStripMenuItem";
-            renderTestToolStripMenuItem.Size = new Size(222, 22);
-            renderTestToolStripMenuItem.Text = "RenderTest";
-            renderTestToolStripMenuItem.Click += renderTestToolStripMenuItem_Click;
             // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(543, 352);
+            ClientSize = new Size(576, 386);
             Controls.Add(tabMain);
             Controls.Add(statusStrip1);
             Controls.Add(menuStrip1);
@@ -786,6 +797,7 @@ namespace ApexComputerUse
         private System.Windows.Forms.ProgressBar pbarDownload;
         private System.Windows.Forms.Label     lblDownloadStatus;
         private System.Windows.Forms.Button    btnDownload;
+        private System.Windows.Forms.Button    btnDownloadAll;
 
         // ── Status strip ──────────────────────────────────────────────────
         private System.Windows.Forms.StatusStrip statusStrip1;
