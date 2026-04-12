@@ -419,6 +419,7 @@ namespace ApexComputerUse
             //
             this.splitInner.Panel1.Controls.Add(this.toolboxPanel);
             this.splitInner.Panel1.Controls.Add(this.canvasPanel);
+            this.splitInner.Panel1.Controls.Add(this.toolboxPanel);
             //
             // splitInner.Panel2
             //
