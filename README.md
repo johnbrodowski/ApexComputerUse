@@ -1,4 +1,4 @@
-<img width="1536" height="875" alt="7e2a4e1e-91b3-4aef-a9b3-59c76cc3e665" src="https://github.com/user-attachments/assets/75363e02-0179-421a-a4ac-9eacf3588224" />
+<img width="1536" height="875" alt="ApexComputerUse header" src="https://github.com/user-attachments/assets/75363e02-0179-421a-a4ac-9eacf3588224" />
 
 
 # ApexComputerUse
@@ -7,14 +7,51 @@
 
 ![.NET](https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet) ![Platform](https://img.shields.io/badge/platform-Windows-0078D4?logo=windows) ![License](https://img.shields.io/badge/license-MIT-green)
 
-<!-- SCREENSHOT: animated GIF showing the web UI — select a window, browse elements, click a button, see the response log update. Suggested filename: docs/images/demo.gif -->
-![ApexComputerUse demo](docs/images/demo.gif)
-
-ApexComputerUse reads the **Windows accessibility tree** (the same data the OS exposes to screen readers) and serves it over a plain **HTTP REST API**. Any AI agent — in any language, on any machine — can find, inspect, and control any desktop app or browser by making simple HTTP requests. No screenshots. No pixel coordinates. No cloud dependency. In the most of the recent tests; excluding 3D games, it's getting an average accuracy 99% on web and desktop tasks.
+ApexComputerUse reads the **Windows accessibility tree** (the same data the OS exposes to screen readers) and serves it over a plain **HTTP REST API**. Any AI agent — in any language, on any machine — can find, inspect, and control any desktop app or browser by making simple HTTP requests. No screenshots. No pixel coordinates. No cloud dependency. In recent tests, excluding 3D games, accuracy averages **99%** on web and desktop tasks.
 
 **5–20 tokens per action** instead of 1,000–3,500 for a screenshot. A full browser page in onscreen-only mode is ~126 elements of compact JSON — less than the cost of a single screenshot of the same page.
 
 Works on Win32, WPF, UWP, WinForms, and browsers. Controlled via **HTTP REST**, **named pipes**, **cmd.exe**, and **Telegram**.
+
+---
+
+## Screenshots
+
+### Main Desktop UI
+
+<!-- TODO: Replace with actual screenshot. Suggested filename: docs/images/ui-main.png
+     Show the main WinForms window with Find & Execute tab active, a window selected, element found, action result in log. -->
+![Desktop UI](docs/images/ui-main.png)
+
+### Interactive Web Console (`GET /`)
+
+<!-- TODO: Replace with actual screenshot. Suggested filename: docs/images/web-console.png
+     Show the dark-themed browser console at localhost:8080 with windows panel, element tree, command builder, and a response in the log. -->
+![Web Console](docs/images/web-console.png)
+
+### Scene Editor — WinForms
+
+<!-- TODO: Replace with actual screenshot. Suggested filename: docs/images/scene-editor-form.png
+     Show the WinForms scene editor with the canvas displaying shapes, the layers panel on the right, and a shape selected with its resize handles visible. -->
+![Scene Editor (WinForms)](docs/images/scene-editor-form.png)
+
+### Scene Editor — Browser (`GET /editor`)
+
+<!-- TODO: Replace with actual screenshot. Suggested filename: docs/images/scene-editor-web.png
+     Show the browser-based canvas editor at localhost:8080/editor with a scene loaded, shapes on the canvas, and the layers panel. -->
+![Scene Editor (Web)](docs/images/scene-editor-web.png)
+
+### AI-Generated Drawing
+
+<!-- TODO: Replace with actual rendered PNG. Suggested filename: docs/images/ai-drawing-demo.png
+     This is the built-in space scene produced by GET /draw/demo — stars, moon, planet with rings, mountains, rocket ship. Run the app and hit GET /draw/demo?overlay=true to see it live, or decode data.result from the JSON response. -->
+![AI-generated space scene](docs/images/ai-drawing-demo.png)
+
+### UI Map Overlay
+
+<!-- TODO: Replace with actual screenshot. Suggested filename: docs/images/uimap-overlay.png
+     Show the live colour-coded bounding-box overlay drawn on top of a real app window, with labelled boxes for buttons, text fields, menus, etc. Tools → Render UI Map to generate it. -->
+![UI Map overlay](docs/images/uimap-overlay.png)
 
 ---
 
@@ -113,9 +150,12 @@ The filter composes with the existing type filter: `?onscreen=true&type=Button`.
 - Remote control via Telegram bot
 - Screenshot capture of elements, windows, and full screen (returned as base64 PNG)
 - **Interactive HTTP test console** — served at `GET /`, includes live windows list, element tree browser, grouped command builder covering every action, inline capture/OCR/AI vision/UI map buttons, format selector (JSON/HTML/Text/PDF), format demo links, and a response log
-- **UI Map Renderer** — renders the element tree as a colour-coded overlay drawn directly on screen, and optionally exports a PNG image; accessible via Tools → Render UI Map or `GET /uimap` (returns base64 PNG)
+- **AI Drawing** — `POST /draw` renders any combination of shapes (rect, ellipse, circle, line, arrow, polygon, text) to a base64 PNG; `GET /draw/demo` renders a built-in multi-colour space scene; `?overlay=true` shows the result as a click-through screen overlay
+- **Layered Scene Editor** — persistent, structured drawing canvas with stable shape IDs so AI can generate a composition and the user can refine it; full REST API at `/scenes/*`; interactive WinForms editor (Tools → Scene Editor) and browser editor (`GET /editor`)
+- **UI Map Renderer** — renders the element tree as a colour-coded overlay drawn directly on screen, and optionally exports a PNG image; accessible via Tools → Render UI Map or `GET /uimap`
 - **Format-adaptive responses** — every endpoint serves HTML, plain text, JSON, or **PDF** via URL extension (`.json`, `.html`, `.txt`, `.pdf`), `?format=` parameter, or `Accept` header; default is an HTML page with embedded JSON readable by any AI that can fetch a URL
 - **System utility routes** — `/ping`, `/sysinfo`, `/env`, `/ls`, `/run` for AI agents that need OS-level context without a separate tool
+- **Auto-download setup** — Model tab "Download All" button fetches the LFM2.5-VL model, projector, and Tesseract data to fixed local paths on first launch
 
 ---
 
@@ -129,15 +169,17 @@ cd ApexComputerUse
 dotnet run --project ApexComputerUse
 ```
 
-### 2. OCR (optional)
+### 2. Models and OCR data (optional — auto-download available)
 
-Download `eng.traineddata` (and any other language files) from [github.com/tesseract-ocr/tessdata](https://github.com/tesseract-ocr/tessdata) and place them in a `tessdata\` folder next to the executable:
+Open the **Model** tab and click **Download All** to automatically fetch:
 
-```
-tessdata\
-  eng.traineddata
-  (other languages...)
-```
+- `LFM2.5-VL-450M-Q4_0.gguf` — vision LLM (450 M parameters, quantized)
+- `mmproj-LFM2.5-VL-450m-F16.gguf` — multimodal projector
+- `eng.traineddata` — Tesseract English OCR data
+
+Files are saved to `models\` and `tessdata\` next to the executable. On first launch the app detects missing files and switches to the Model tab automatically.
+
+To download manually: copy `eng.traineddata` from [github.com/tesseract-ocr/tessdata](https://github.com/tesseract-ocr/tessdata) into `tessdata\`, and place both `.gguf` files in `models\`.
 
 ### 3. Telegram Bot (optional)
 
@@ -148,9 +190,6 @@ tessdata\
 ---
 
 ## Usage — UI
-
-<!-- SCREENSHOT: the main WinForms window showing the Find & Execute tab with a window selected, element found, and an action result in the log. Suggested filename: docs/images/ui-main.png -->
-![Desktop UI](docs/images/ui-main.png)
 
 | Field | Description |
 |---|---|
@@ -172,6 +211,7 @@ tessdata\
 | **Run AI Computer Use Mode** | Launches the interactive multimodal AI agent loop (requires model loaded on the Model tab). |
 | **Output UI Map** | Scans the current window's element tree and logs it as nested JSON to the console tab. |
 | **Render UI Map** | Scans the current window's element tree, draws a colour-coded bounding-box overlay on screen for 5 seconds, and offers to save the overlay as a PNG image. |
+| **Scene Editor** | Opens the layered scene editor — create scenes, add shapes to layers, drag to reposition, use AI to generate and refine compositions. |
 
 ---
 
@@ -235,14 +275,6 @@ The `?onscreen=true` filter further reduces the element map to only what is visi
 
 > **Provider breakdown:** at 1024×768, Anthropic ≈ 1,050 tokens / OpenAI ≈ 765 tokens. At 1920×1080, Anthropic ≈ 1,840 / OpenAI ≈ 2,125. At 2048×2048, OpenAI ≈ 2,765 / Anthropic ≈ 2,500–3,500. Gemini is notably more efficient — typically under 1,000 tokens even for ~4K images. All providers compound costs across steps: every screenshot remains in context for the life of the conversation.
 
-### Assumptions Used Below
-
-| | Screen Capture | Map Approach |
-|---|---|---|
-| Per-interaction cost | 2,500–10,000 tokens (image) | 5–20 tokens (text reference) |
-| Session setup cost | none — image sent every time | 400–1,800 tokens (one-time map render) |
-| Interactions per person/day | 100 | 100 |
-
 ---
 
 ### Example 1 — Small App *(Calculator, tray utility, simple tool)*
@@ -273,16 +305,14 @@ Start the HTTP server from the **Remote Control** group box, then use curl or op
 
 ### Interactive Test Console (`GET /`)
 
-<!-- SCREENSHOT: the web console at localhost:8080 — left sidebar showing windows and elements, right panel showing command builder buttons and a response in the log. Suggested filename: docs/images/web-console.png -->
-![Web Console](docs/images/web-console.png)
-
 Opening the root URL in any browser launches a dark-themed console with:
 
 - **Windows panel** — live list of all open windows; click to select and auto-load its element tree
 - **Elements panel** — nested element tree flattened with indentation; onscreen-only toggle; ControlType filter; click any element to select it
-- **Command builder** — grouped action buttons covering every action: Click, Text, Keys, State, Scroll, Toggle, Select, Window, Range/Slider, Grid/Table, Transform, Wait, Capture, AI Vision; Value input with context-sensitive hints; ▶ Execute button
+- **Command builder** — grouped action buttons covering every action: Click, Text, Keys, State, Scroll, Toggle, Select, Window, Range/Slider, Grid/Table, Transform, Wait, Capture, AI Vision; Value input (multiline, Ctrl+Enter to execute) with context-sensitive hints; ▶ Execute button
 - **AI Vision buttons** — `status`, `describe`, `ask`, `file`; requires model loaded on the Model tab
 - **Format selector** — dropdown in the header (JSON / HTML / Text / PDF); all requests use the selected format; format demo links (help, status, windows) open directly in a new tab in the chosen format
+- **Scene Editor link** — opens the browser-based canvas editor in a new tab
 - **Response log** — newest result at top; captures rendered as inline images (click to zoom); PDF responses shown as an "Open PDF" link (browser-native rendering)
 
 ### Format negotiation
@@ -501,6 +531,138 @@ curl -X POST http://localhost:8080/ai/file \
 
 ---
 
+## Usage — AI Drawing
+
+The drawing engine renders GDI+ shapes to a base64 PNG on demand. Every shape type supports colour, opacity, fill/stroke, and dashed lines.
+
+### Quick draw
+
+```bash
+# Draw a filled blue circle with white text
+curl -X POST http://localhost:8080/draw \
+     -H "Content-Type: application/json" \
+     -d '{
+       "value": "{\"canvas\":\"blank\",\"width\":400,\"height\":300,\"shapes\":[
+         {\"type\":\"circle\",\"x\":200,\"y\":150,\"r\":80,\"color\":\"royalblue\",\"fill\":true},
+         {\"type\":\"text\",\"x\":200,\"y\":140,\"text\":\"Hello!\",\"color\":\"white\",\"font_size\":20,\"font_bold\":true,\"align\":\"center\"}
+       ]}"
+     }'
+
+# Render the built-in space scene
+curl http://localhost:8080/draw/demo
+
+# Show it as a full-screen overlay for 6 seconds
+curl "http://localhost:8080/draw/demo?overlay=true&ms=6000"
+```
+
+The `data.result` field contains the base64 PNG. The web console renders it inline.
+
+### Shape types
+
+| Type | Key fields | Description |
+|---|---|---|
+| `rect` | `x y w h corner_radius` | Rectangle (rounded if `corner_radius > 0`) |
+| `ellipse` | `x y w h` | Ellipse inside bounding box |
+| `circle` | `x y r` | Circle — x,y is the centre |
+| `line` | `x y x2 y2` | Straight line |
+| `arrow` | `x y x2 y2` | Line with arrowhead at (x2,y2) |
+| `polygon` | `points[]` | Closed polygon — flat array of x,y pairs |
+| `text` | `x y text font_size font_bold align background` | Rendered text |
+
+**Common fields on all shapes:** `color`, `fill` (bool), `stroke_width`, `opacity` (0–1), `dashed` (bool).
+
+**Canvas values:** `blank` (transparent), `white`, `black`, `screen` (live screenshot), `window` (current window), `element` (current element).
+
+---
+
+## Usage — Layered Scene Editor
+
+The scene system lets AI agents and users collaborate on persistent, structured drawings. Every shape has a stable ID; coordinates are always accurate; the AI can read them back and refine the composition at any time.
+
+### REST API (`/scenes/*`)
+
+```bash
+# Create a scene
+curl -X POST http://localhost:8080/scenes \
+     -H "Content-Type: application/json" \
+     -d '{"name":"My Scene","width":800,"height":600,"background":"#1a1a2e"}'
+# → data.scene contains the full scene with id
+
+# List scenes
+curl http://localhost:8080/scenes
+
+# Get a scene
+curl http://localhost:8080/scenes/{id}
+
+# Add a layer
+curl -X POST http://localhost:8080/scenes/{id}/layers \
+     -H "Content-Type: application/json" \
+     -d '{"name":"Background"}'
+
+# Add a shape to a layer
+curl -X POST http://localhost:8080/scenes/{id}/layers/{lid}/shapes \
+     -H "Content-Type: application/json" \
+     -d '{"shape":{"type":"circle","x":400,"y":300,"r":80,"color":"royalblue","fill":true},"name":"Planet"}'
+
+# Render the scene to a PNG
+curl http://localhost:8080/scenes/{id}/render
+# → data.result is base64 PNG
+
+# Patch shape geometry (after user drags it — never clobbers color/style)
+curl -X PATCH http://localhost:8080/scenes/{id}/layers/{lid}/shapes/{sid} \
+     -H "Content-Type: application/json" \
+     -d '{"x":420,"y":310}'
+
+# Move a shape to a different layer
+curl -X POST http://localhost:8080/scenes/{id}/shapes/{sid}/move \
+     -H "Content-Type: application/json" \
+     -d '{"target_layer_id":"{newLayerId}"}'
+
+# Delete a shape / layer / scene
+curl -X DELETE http://localhost:8080/scenes/{id}/layers/{lid}/shapes/{sid}
+curl -X DELETE http://localhost:8080/scenes/{id}/layers/{lid}
+curl -X DELETE http://localhost:8080/scenes/{id}
+```
+
+### Full route reference
+
+| Method | Route | Description |
+|---|---|---|
+| `GET` / `POST` | `/scenes` | List all scenes / create scene |
+| `GET` / `PUT` / `DELETE` | `/scenes/{id}` | Get / update meta / delete scene |
+| `GET` | `/scenes/{id}/render` | Render scene → base64 PNG |
+| `GET` / `POST` | `/scenes/{id}/layers` | List layers / add layer |
+| `GET` / `PUT` / `DELETE` | `/scenes/{id}/layers/{lid}` | Get / update / delete layer |
+| `GET` / `POST` | `/scenes/{id}/layers/{lid}/shapes` | List shapes / add shape |
+| `GET` / `PUT` / `PATCH` / `DELETE` | `/scenes/{id}/layers/{lid}/shapes/{sid}` | Get / replace / patch geometry / delete shape |
+| `POST` | `/scenes/{id}/shapes/{sid}/move` | Move shape to a different layer |
+
+### Scene Editor — WinForms (Tools → Scene Editor)
+
+The desktop editor opens a standalone window with:
+
+- **Scene list** — create, select, or delete scenes
+- **Toolbar** — arrow (select/move), rect, ellipse, circle, line, text, delete
+- **Canvas** — double-buffered; drag shapes to reposition; draw new shapes by clicking and dragging; mouse wheel to zoom
+- **Layers panel** — add/delete layers; click to select the active layer; eye icon to toggle visibility
+- **Properties panel** — x, y, w, h, r fields for the selected shape; edits commit to the store immediately
+- **Keyboard shortcuts** — V/R/E/C/L/T for tools, Delete to remove selected shape, Escape to deselect
+
+All changes are persisted to disk (`<exe>/scenes/{id}.json`) and immediately available via the REST API.
+
+### Scene Editor — Browser (`GET /editor`)
+
+Open `http://localhost:8080/editor` for the same editing experience in a browser:
+
+- HTML5 Canvas renderer for all 7 shape types
+- Click-and-drag to place shapes; click to select and drag to move
+- Layer panel with add/delete/visibility toggle
+- Properties panel showing live coordinates
+- Keyboard shortcuts (V/R/E/C/L/T, Delete, Escape)
+- All changes sync to the same `/scenes/*` REST API
+
+---
+
 ## Usage — Telegram Bot
 
 After starting the bot, send commands to it in any Telegram chat:
@@ -662,7 +824,7 @@ The AI command set is backed by `MtmdHelper`, which uses [LLamaSharp](https://gi
 
 ### Setup
 
-Download a vision-capable GGUF model and its multimodal projector (e.g. LFM2-VL from LM Studio) and note the paths to both `.gguf` files. Then call `ai init` before any inference commands.
+Download a vision-capable GGUF model and its multimodal projector (e.g. LFM2.5-VL from LM Studio) and note the paths to both `.gguf` files, or use **Download All** on the Model tab. Then call `ai init` before any inference commands.
 
 ### AI sub-commands
 
@@ -691,9 +853,6 @@ Select an element in the Elements panel first, then click **describe** or **ask*
 ---
 
 ## UI Map Renderer
-
-<!-- SCREENSHOT: the live colour-coded overlay drawn on top of a real app window, showing labelled bounding boxes for buttons, text fields, menus, etc. Suggested filename: docs/images/uimap-overlay.png -->
-![UI Map overlay](docs/images/uimap-overlay.png)
 
 The UI Map Renderer scans the current window's accessibility tree and renders every element's bounding rectangle as a colour-coded overlay. Each control type gets a deterministic, visually distinct colour. Element names are drawn inside the bounding box.
 
@@ -917,7 +1076,7 @@ Captures saved by **OCR Element + Save** go to `Desktop\Apex_Captures\`.
 
 The AI command set is backed by `MtmdHelper` using LLamaSharp's multimodal (MTMD) API. Supports vision and audio modalities depending on the model. Every inference call is fully stateless — no chat history is retained between calls.
 
-Download a vision-capable GGUF model and its multimodal projector (e.g. LFM2-VL from LM Studio) and note the paths to both `.gguf` files. Then call `ai init` before any inference commands.
+Download a vision-capable GGUF model and its multimodal projector (e.g. LFM2.5-VL from LM Studio) and note the paths to both `.gguf` files, or click **Download All** on the Model tab. Then call `ai init` before any inference commands.
 
 ---
 
@@ -925,23 +1084,27 @@ Download a vision-capable GGUF model and its multimodal projector (e.g. LFM2-VL 
 
 ```
 ApexComputerUse/
-├── Form1.cs / Form1.Designer.cs   — Main UI (tabs: Console, Find & Execute, Remote Control, Model)
-├── FlaUIHelper.cs                 — All FlaUI automation wrappers
-├── ElementIdGenerator.cs          — Stable SHA-256 hash-based element ID mapping
-├── CommandProcessor.cs            — Shared remote command logic (used by all server types)
-├── HttpCommandServer.cs           — HTTP REST server (System.Net.HttpListener)
-│     ├── ApexResult               — Canonical {success, action, data, error} result type
-│     ├── FormatAdapter            — Format negotiation (HTML / JSON / text / PDF)
-│     └── PdfWriter                — Minimal PDF generator (no external dependencies)
-├── PipeCommandServer.cs           — Named-pipe server
-├── TelegramController.cs          — Telegram bot (Telegram.Bot)
-├── OcrHelper.cs                   — Tesseract OCR wrapper
-├── MtmdHelper.cs                  — Stateless multimodal LLM wrapper (LLamaSharp MTMD)
-├── MtmdInteractiveModeExecute.cs  — Interactive AI computer use mode (Tools menu)
-├── UiMapRenderer.cs               — Renders element trees as colour-coded screen overlays and PNG images
+├── Form1.cs / Form1.Designer.cs         — Main UI (tabs: Console, Find & Execute, Remote Control, Model)
+├── FlaUIHelper.cs                       — All FlaUI automation wrappers
+├── ElementIdGenerator.cs                — Stable SHA-256 hash-based element ID mapping
+├── CommandProcessor.cs                  — Shared remote command logic (used by all server types)
+├── HttpCommandServer.cs                 — HTTP REST server (System.Net.HttpListener)
+│     ├── ApexResult                     — Canonical {success, action, data, error} result type
+│     ├── FormatAdapter                  — Format negotiation (HTML / JSON / text / PDF)
+│     └── PdfWriter                      — Minimal PDF generator (no external dependencies)
+├── PipeCommandServer.cs                 — Named-pipe server
+├── TelegramController.cs                — Telegram bot (Telegram.Bot)
+├── OcrHelper.cs                         — Tesseract OCR wrapper
+├── MtmdHelper.cs                        — Stateless multimodal LLM wrapper (LLamaSharp MTMD)
+├── MtmdInteractiveModeExecute.cs        — Interactive AI computer use mode (Tools menu)
+├── UiMapRenderer.cs                     — Renders element trees as colour-coded screen overlays and PNG images
+├── AIDrawingCommand.cs                  — GDI+ drawing engine; 7 shape types; screen overlay; built-in space scene
+├── Scene.cs                             — SceneShape / Layer / Scene data models with stable IDs
+├── SceneStore.cs                        — Thread-safe in-memory + disk-persisted scene store
+├── SceneEditorForm.cs / .Designer.cs    — WinForms layered scene editor (Tools → Scene Editor)
 └── Scripts/
-    ├── ApexComputerUse.psm1       — PowerShell module (pipe-based)
-    └── apex.cmd                   — cmd.exe helper (HTTP-based)
+    ├── ApexComputerUse.psm1             — PowerShell module (pipe-based)
+    └── apex.cmd                         — cmd.exe helper (HTTP-based)
 ```
 
 > **OCR:** place Tesseract language files in a `tessdata\` folder next to the executable. Not included in the repo — download from [github.com/tesseract-ocr/tessdata](https://github.com/tesseract-ocr/tessdata).

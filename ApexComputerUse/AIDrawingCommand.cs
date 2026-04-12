@@ -31,11 +31,11 @@ namespace ApexComputerUse
     ///   text     – label    (x, y, text)
     ///   polygon  – closed shape (points = [x1,y1, x2,y2, …])
     /// </summary>
-    internal static class AIDrawingCommand
+    public static class AIDrawingCommand
     {
         // ── Public request / shape models ─────────────────────────────────
 
-        public sealed class DrawRequest
+        public class DrawRequest
         {
             /// Canvas source: "blank", "white", "black", "screen", or a base-64 PNG.
             [JsonPropertyName("canvas")]      public string Canvas      { get; set; } = "blank";
@@ -50,7 +50,7 @@ namespace ApexComputerUse
             [JsonPropertyName("overlay_ms")]  public int    OverlayMs   { get; set; } = 5000;
         }
 
-        public sealed class ShapeCommand
+        public class ShapeCommand
         {
             /// rect | ellipse | circle | line | arrow | text | polygon
             [JsonPropertyName("type")]          public string   Type         { get; set; } = "rect";
@@ -106,6 +106,13 @@ namespace ApexComputerUse
 
             return BitmapToBase64(bmp);
         }
+
+        /// <summary>
+        /// Render a single shape onto an existing Graphics context.
+        /// Used by the WinForms SceneCanvas to paint shapes directly in OnPaint
+        /// without going through the full bitmap pipeline.
+        /// </summary>
+        internal static void RenderShapeTo(Graphics g, ShapeCommand s) => DrawShape(g, s);
 
         /// <summary>Parse a JSON string into a <see cref="DrawRequest"/>.</summary>
         public static DrawRequest ParseRequest(string json) =>

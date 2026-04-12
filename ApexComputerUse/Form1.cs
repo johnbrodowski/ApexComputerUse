@@ -11,6 +11,7 @@ namespace ApexComputerUse
     {
         private readonly ApexHelper _helper = new();
         private readonly CommandProcessor _processor = new();
+        private readonly SceneStore _sceneStore = new();
         private OcrHelper? _ocr;
         private HttpCommandServer? _http;
         private TelegramController? _telegram;
@@ -200,6 +201,9 @@ namespace ApexComputerUse
                 try { _cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total"); }
                 catch { /* not available in all environments */ }
             });
+
+            // Inject SceneStore into CommandProcessor
+            _processor.SceneStore = _sceneStore;
 
             // Restore saved model paths
             LoadSettings();
@@ -628,7 +632,7 @@ namespace ApexComputerUse
 
             try
             {
-                _http = new HttpCommandServer(port, _processor);
+                _http = new HttpCommandServer(port, _processor, _sceneStore);
                 _http.OnLog += msg => BeginInvoke(() => Log(msg));
                 _http.Start();
                 btnStartHttp.Text = "Stop HTTP";
@@ -1147,6 +1151,12 @@ namespace ApexComputerUse
             }
 
             renderer.ShowOverlay(json, 5000);
+        }
+
+        private void sceneEditorToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var editor = new SceneEditorForm(_sceneStore);
+            editor.Show(this);
         }
     }
 }

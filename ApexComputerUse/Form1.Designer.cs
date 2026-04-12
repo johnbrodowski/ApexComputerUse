@@ -20,6 +20,7 @@ namespace ApexComputerUse
             runAIComputerUseToolStripMenuItem = new ToolStripMenuItem();
             outputUiMapToolStripMenuItem = new ToolStripMenuItem();
             renderTestToolStripMenuItem = new ToolStripMenuItem();
+            sceneEditorToolStripMenuItem = new ToolStripMenuItem();
             tabMain = new TabControl();
             tabPageConsole = new TabPage();
             txtCommand = new TextBox();
@@ -103,7 +104,7 @@ namespace ApexComputerUse
             // 
             // toolsToolStripMenuItem
             // 
-            toolsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { runAIComputerUseToolStripMenuItem, outputUiMapToolStripMenuItem, renderTestToolStripMenuItem });
+            toolsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { runAIComputerUseToolStripMenuItem, outputUiMapToolStripMenuItem, renderTestToolStripMenuItem, sceneEditorToolStripMenuItem });
             toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             toolsToolStripMenuItem.Size = new Size(47, 20);
             toolsToolStripMenuItem.Text = "Tools";
@@ -128,7 +129,14 @@ namespace ApexComputerUse
             renderTestToolStripMenuItem.Size = new Size(222, 22);
             renderTestToolStripMenuItem.Text = "RenderTest";
             renderTestToolStripMenuItem.Click += renderTestToolStripMenuItem_Click;
-            // 
+            //
+            // sceneEditorToolStripMenuItem
+            //
+            sceneEditorToolStripMenuItem.Name = "sceneEditorToolStripMenuItem";
+            sceneEditorToolStripMenuItem.Size = new Size(222, 22);
+            sceneEditorToolStripMenuItem.Text = "Scene Editor";
+            sceneEditorToolStripMenuItem.Click += sceneEditorToolStripMenuItem_Click;
+            //
             // tabMain
             // 
             tabMain.Controls.Add(tabPageConsole);
@@ -821,5 +829,6 @@ namespace ApexComputerUse
         private System.Windows.Forms.Button    btnStartPipe;
         private System.Windows.Forms.Label     lblPipeStatus;
         private ToolStripMenuItem renderTestToolStripMenuItem;
+        private ToolStripMenuItem sceneEditorToolStripMenuItem;
     }
 }
