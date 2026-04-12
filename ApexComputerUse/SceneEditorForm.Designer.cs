@@ -10,7 +10,7 @@ namespace ApexComputerUse
         private System.Windows.Forms.Button btnFillColor;
 
         // ── Toolbox ───────────────────────────────────────────────────────
-        private System.Windows.Forms.FlowLayoutPanel toolboxPanel;
+        private System.Windows.Forms.Panel toolboxPanel;
         private System.Windows.Forms.Button btnToolArrow;
         private System.Windows.Forms.Button btnToolRect;
         private System.Windows.Forms.Button btnToolEllipse;
@@ -77,7 +77,7 @@ namespace ApexComputerUse
             this.toolFlow = new System.Windows.Forms.FlowLayoutPanel();
             this.lblFillLabel = new System.Windows.Forms.Label();
             this.btnFillColor = new System.Windows.Forms.Button();
-            this.toolboxPanel = new System.Windows.Forms.FlowLayoutPanel();
+            this.toolboxPanel = new System.Windows.Forms.Panel();
             this.btnToolArrow = new System.Windows.Forms.Button();
             this.btnToolRect = new System.Windows.Forms.Button();
             this.btnToolEllipse = new System.Windows.Forms.Button();
@@ -186,13 +186,11 @@ namespace ApexComputerUse
             this.toolboxPanel.Controls.Add(this.btnToolText);
             this.toolboxPanel.Controls.Add(this.btnDeleteShape);
             this.toolboxPanel.Dock = System.Windows.Forms.DockStyle.Left;
-            this.toolboxPanel.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
             this.toolboxPanel.Location = new System.Drawing.Point(0, 0);
             this.toolboxPanel.Name = "toolboxPanel";
             this.toolboxPanel.Padding = new System.Windows.Forms.Padding(5, 8, 5, 8);
             this.toolboxPanel.Size = new System.Drawing.Size(70, 694);
             this.toolboxPanel.TabIndex = 1;
-            this.toolboxPanel.WrapContents = false;
             //
             // btnToolArrow
             //
@@ -204,6 +202,7 @@ namespace ApexComputerUse
             this.btnToolArrow.Font = new System.Drawing.Font("Segoe UI", 14F);
             this.btnToolArrow.ForeColor = System.Drawing.Color.FromArgb(212, 212, 212);
             this.btnToolArrow.Margin = new System.Windows.Forms.Padding(0, 0, 0, 4);
+            this.btnToolArrow.Location = new System.Drawing.Point(5, 8);
             this.btnToolArrow.Name = "btnToolArrow";
             this.btnToolArrow.Size = new System.Drawing.Size(60, 50);
             this.btnToolArrow.TabIndex = 0;
@@ -221,6 +220,7 @@ namespace ApexComputerUse
             this.btnToolRect.Font = new System.Drawing.Font("Segoe UI", 14F);
             this.btnToolRect.ForeColor = System.Drawing.Color.FromArgb(212, 212, 212);
             this.btnToolRect.Margin = new System.Windows.Forms.Padding(0, 0, 0, 4);
+            this.btnToolRect.Location = new System.Drawing.Point(5, 62);
             this.btnToolRect.Name = "btnToolRect";
             this.btnToolRect.Size = new System.Drawing.Size(60, 50);
             this.btnToolRect.TabIndex = 1;
@@ -238,6 +238,7 @@ namespace ApexComputerUse
             this.btnToolEllipse.Font = new System.Drawing.Font("Segoe UI", 14F);
             this.btnToolEllipse.ForeColor = System.Drawing.Color.FromArgb(212, 212, 212);
             this.btnToolEllipse.Margin = new System.Windows.Forms.Padding(0, 0, 0, 4);
+            this.btnToolEllipse.Location = new System.Drawing.Point(5, 116);
             this.btnToolEllipse.Name = "btnToolEllipse";
             this.btnToolEllipse.Size = new System.Drawing.Size(60, 50);
             this.btnToolEllipse.TabIndex = 2;
@@ -255,6 +256,7 @@ namespace ApexComputerUse
             this.btnToolCircle.Font = new System.Drawing.Font("Segoe UI", 14F);
             this.btnToolCircle.ForeColor = System.Drawing.Color.FromArgb(212, 212, 212);
             this.btnToolCircle.Margin = new System.Windows.Forms.Padding(0, 0, 0, 4);
+            this.btnToolCircle.Location = new System.Drawing.Point(5, 170);
             this.btnToolCircle.Name = "btnToolCircle";
             this.btnToolCircle.Size = new System.Drawing.Size(60, 50);
             this.btnToolCircle.TabIndex = 3;
@@ -272,6 +274,7 @@ namespace ApexComputerUse
             this.btnToolLine.Font = new System.Drawing.Font("Segoe UI", 14F);
             this.btnToolLine.ForeColor = System.Drawing.Color.FromArgb(212, 212, 212);
             this.btnToolLine.Margin = new System.Windows.Forms.Padding(0, 0, 0, 4);
+            this.btnToolLine.Location = new System.Drawing.Point(5, 224);
             this.btnToolLine.Name = "btnToolLine";
             this.btnToolLine.Size = new System.Drawing.Size(60, 50);
             this.btnToolLine.TabIndex = 4;
@@ -289,6 +292,7 @@ namespace ApexComputerUse
             this.btnToolText.Font = new System.Drawing.Font("Segoe UI", 14F);
             this.btnToolText.ForeColor = System.Drawing.Color.FromArgb(212, 212, 212);
             this.btnToolText.Margin = new System.Windows.Forms.Padding(0, 0, 0, 4);
+            this.btnToolText.Location = new System.Drawing.Point(5, 278);
             this.btnToolText.Name = "btnToolText";
             this.btnToolText.Size = new System.Drawing.Size(60, 50);
             this.btnToolText.TabIndex = 5;
@@ -306,6 +310,7 @@ namespace ApexComputerUse
             this.btnDeleteShape.Font = new System.Drawing.Font("Segoe UI", 14F);
             this.btnDeleteShape.ForeColor = System.Drawing.Color.FromArgb(212, 212, 212);
             this.btnDeleteShape.Margin = new System.Windows.Forms.Padding(0, 12, 0, 4);
+            this.btnDeleteShape.Location = new System.Drawing.Point(5, 340);
             this.btnDeleteShape.Name = "btnDeleteShape";
             this.btnDeleteShape.Size = new System.Drawing.Size(60, 50);
             this.btnDeleteShape.TabIndex = 6;
@@ -417,6 +422,7 @@ namespace ApexComputerUse
             //
             // splitInner.Panel1
             //
+            this.splitInner.Panel1.Controls.Add(this.toolboxPanel);
             this.splitInner.Panel1.Controls.Add(this.canvasPanel);
             //
             // splitInner.Panel2
