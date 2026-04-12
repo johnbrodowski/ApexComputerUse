@@ -54,6 +54,8 @@ namespace ApexComputerUse
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
                 ?.SetValue(canvasPanel, true);
 
+            SetTool("arrow");
+            btnFillColor.BackColor = _activeColor;
             RefreshSceneList();
             refreshTimer.Start();
         }
@@ -727,6 +729,16 @@ namespace ApexComputerUse
         // ── Keyboard ──────────────────────────────────────────────────────
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
+            switch (keyData)
+            {
+                case Keys.V: SetTool("arrow");   return true;
+                case Keys.R: SetTool("rect");    return true;
+                case Keys.E: SetTool("ellipse"); return true;
+                case Keys.C: SetTool("circle");  return true;
+                case Keys.L: SetTool("line");    return true;
+                case Keys.T: SetTool("text");    return true;
+            }
+
             if (keyData == Keys.Delete || keyData == Keys.Back)
             {
                 DeleteSelectedShape();
