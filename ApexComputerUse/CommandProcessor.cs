@@ -86,6 +86,7 @@ namespace ApexComputerUse
                         "windows"           => CmdListWindows(),
                         "elements"          => CmdListElements(req),
                         "uimap"             => CmdRenderMap(),
+                        "draw"              => CmdDraw(req),
                         "help"              => CmdHelp(),
                         "capture"           => CmdCapture(req),
                         _ => Fail($"Unknown command '{req.Command}'. Try 'help'.")
@@ -236,6 +237,55 @@ namespace ApexComputerUse
                 default: // "element"
                     if (CurrentElement == null) return Fail("No element selected. Use 'find' first.");
                     return Ok("Captured element", _helper.CaptureElementToBase64(CurrentElement));
+            }
+        }
+
+        private CommandResponse CmdDraw(CommandRequest req)
+        {
+            string json = !string.IsNullOrWhiteSpace(req.Value)  ? req.Value!
+                        : !string.IsNullOrWhiteSpace(req.Prompt) ? req.Prompt!
+                        : "";
+
+            if (string.IsNullOrWhiteSpace(json))
+                return Fail("'draw' requires a JSON DrawRequest in the value field. " +
+                            "Example: {\"canvas\":\"blank\",\"width\":800,\"height\":600," +
+                            "\"shapes\":[{\"type\":\"circle\",\"x\":400,\"y\":300,\"r\":80,\"color\":\"royalblue\",\"fill\":true}]}");
+
+            try
+            {
+                var drawReq = AIDrawingCommand.ParseRequest(json);
+
+                // Resolve canvas sources that need the UI automation helper
+                if (string.Equals(drawReq.Canvas, "window", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (CurrentWindow == null) return Fail("No window selected. Use 'find' first.");
+                    drawReq.Canvas = _helper.CaptureElementToBase64(CurrentWindow);
+                }
+                else if (string.Equals(drawReq.Canvas, "element", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (CurrentElement == null) return Fail("No element selected. Use 'find' first.");
+                    drawReq.Canvas = _helper.CaptureElementToBase64(CurrentElement);
+                }
+
+                string base64 = AIDrawingCommand.Render(drawReq);
+
+                if (drawReq.Overlay)
+                {
+                    // ShowOverlay must run on the UI thread
+                    System.Windows.Forms.Application.OpenForms[0]?.BeginInvoke(
+                        () => AIDrawingCommand.ShowOverlay(drawReq));
+                }
+
+                int ms = drawReq.OverlayMs;
+                string overlayNote = drawReq.Overlay
+                    ? (ms > 0 ? $" Overlay showing for {ms / 1000.0:0.#}s (Esc to dismiss)."
+                               : " Overlay showing — press Esc to dismiss.")
+                    : "";
+                return Ok($"Drawing rendered ({drawReq.Shapes.Count} shape(s)).{overlayNote}", base64);
+            }
+            catch (Exception ex)
+            {
+                return Fail($"Draw error: {ex.Message}");
             }
         }
 
@@ -446,6 +496,30 @@ namespace ApexComputerUse
             exec     action=<action> [value=<input>]
             ocr      [value=x,y,w,h]
             capture  [action=screen|window|element|elements] [value=id1,id2,...]
+            draw     value=<JSON DrawRequest>
+              canvas      blank|white|black|screen|window|element|<base64-png>
+              overlay     true = also show on screen as a transparent overlay
+              overlay_ms  ms before overlay auto-closes (default 5000; 0 = Esc to dismiss)
+              width    canvas width  (default 800, ignored when canvas is an image)
+              height   canvas height (default 600, ignored when canvas is an image)
+              shapes   array of shape objects:
+                type         rect|ellipse|circle|line|arrow|text|polygon
+                x,y          position (circle: centre)
+                w,h          size (rect/ellipse)
+                r            radius (circle)
+                x2,y2        end point (line/arrow)
+                points       [x1,y1,x2,y2,…] (polygon)
+                color        name or #RRGGBB  (default "red")
+                fill         true/false (default false)
+                stroke_width pen width (default 2)
+                opacity      0.0–1.0  (default 1)
+                corner_radius rounded corners for rect (default 0)
+                dashed       true/false dashed stroke (default false)
+                text         label string (type=text)
+                font_size    pixels (default 14)
+                font_bold    true/false
+                background   label background colour (type=text)
+                align        left|center|right (type=text)
             ai       action=<sub> ...
               init     model=<path> proj=<path>
               status

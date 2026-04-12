@@ -151,6 +151,10 @@ namespace ApexComputerUse
                         ("POST", "/capture") or ("GET", "/capture")
                             => ApexResult.From("capture", _processor.Process(
                                 method == "POST" ? FromJson(body, "capture") : FromQueryString(req, "capture"))),
+                        ("POST", "/draw") or ("GET", "/draw")
+                            => ApexResult.From("draw",    _processor.Process(
+                                method == "POST" ? FromJson(body, "draw")    : FromQueryString(req, "draw"))),
+                        ("GET", "/draw/demo") => HandleDrawDemo(req),
                         ("POST", "/ai/init")
                             => ApexResult.From("ai/init",    _processor.Process(FromJson(body, "ai", "init"))),
                         ("POST", "/ai/describe")
@@ -187,6 +191,31 @@ namespace ApexComputerUse
         }
 
         // ── New route handlers ────────────────────────────────────────────
+
+        private ApexResult HandleDrawDemo(HttpListenerRequest req)
+        {
+            bool overlay = string.Equals(req.QueryString["overlay"], "true",
+                               StringComparison.OrdinalIgnoreCase);
+            int overlayMs = int.TryParse(req.QueryString["ms"], out int ms) ? ms : 6000;
+
+            var scene = AIDrawingCommand.BuildSpaceScene();
+            scene.Overlay   = overlay;
+            scene.OverlayMs = overlayMs;
+
+            string base64 = AIDrawingCommand.Render(scene);
+
+            if (overlay)
+                Application.OpenForms[0]?.BeginInvoke(() => AIDrawingCommand.ShowOverlay(scene));
+
+            string msg = $"Space scene rendered ({scene.Shapes.Count} shapes)." +
+                         (overlay ? $" Overlay showing for {overlayMs / 1000.0:0.#}s (Esc to dismiss)." : "");
+            return new ApexResult
+            {
+                Success = true,
+                Action  = "draw/demo",
+                Data    = new Dictionary<string, string> { ["result"] = base64, ["message"] = msg }
+            };
+        }
 
         private static ApexResult HandlePing() => new()
         {
@@ -390,11 +419,13 @@ namespace ApexComputerUse
                                border: 1px solid #3c3c3c; border-radius: 2px; }
                   .fmt-bar a:hover { border-color: #4ec9b0; }
 
-                  .vrow { display: flex; gap: .5em; align-items: center; }
-                  .vrow label { font-size: .76em; color: #888; white-space: nowrap; }
-                  .vrow input { flex: 1; background: #1e1e1e; color: #d4d4d4; border: 1px solid #3c3c3c;
-                                border-radius: 3px; padding: .28em .5em; font: inherit; font-size: .85em; }
-                  .vrow input:focus { outline: 1px solid #0e639c; }
+                  .vrow { display: flex; gap: .5em; align-items: flex-start; }
+                  .vrow label { font-size: .76em; color: #888; white-space: nowrap; padding-top: .35em; }
+                  .vrow textarea { flex: 1; background: #1e1e1e; color: #d4d4d4; border: 1px solid #3c3c3c;
+                                   border-radius: 3px; padding: .28em .5em; font: inherit; font-size: .85em;
+                                   resize: vertical; min-height: 2.2em; max-height: 14em;
+                                   overflow-y: auto; white-space: pre; font-family: 'Consolas', monospace; }
+                  .vrow textarea:focus { outline: 1px solid #0e639c; }
                   button#go { background: #0e639c; color: #fff; border: 1px solid #1177bb;
                               border-radius: 3px; padding: .28em .85em; cursor: pointer;
                               font: inherit; font-size: .85em; white-space: nowrap; }
@@ -604,6 +635,8 @@ namespace ApexComputerUse
                           <button class="a cap" onclick="doCapture('screen')">screen</button>
                           <button class="a cap" onclick="doOcr()">OCR</button>
                           <button class="a cap" onclick="doUiMap()">UI map</button>
+                          <button class="a cap" onclick="doDraw()" title="POST /draw — Value field must be a JSON DrawRequest (shapes array). Canvas: blank|white|black|screen|window|element">draw</button>
+                          <button class="a cap" onclick="doDrawDemo()" title="GET /draw/demo — renders the built-in space scene. Add ?overlay=true to also show on screen.">demo</button>
                         </div>
 
                         <div class="grp">
@@ -618,8 +651,9 @@ namespace ApexComputerUse
 
                       <div class="vrow">
                         <label>Value</label>
-                        <input id="val" placeholder="(optional — text, x,y, row,col, …)"
-                               onkeydown="if(event.key==='Enter')doExec()">
+                        <textarea id="val" rows="1" placeholder="(optional — text, x,y, JSON, …)  Ctrl+Enter to execute"
+                                  onkeydown="if(event.key==='Enter'&&(event.ctrlKey||event.metaKey)){event.preventDefault();doExec();}"
+                                  oninput="this.rows=Math.min(12,Math.max(1,this.value.split('\n').length))"></textarea>
                         <button id="go" onclick="doExec()">▶ Execute</button>
                       </div>
                     </div>
@@ -831,6 +865,39 @@ namespace ApexComputerUse
                     logCapture(r, 'uimap');
                   } catch (e) {
                     appendLog('uimap', false, String(e));
+                  }
+                }
+
+                // ── Draw demo ────────────────────────────────────────────────
+                async function doDrawDemo() {
+                  appendLog('draw/demo', true, 'Rendering space scene\u2026');
+                  try {
+                    const overlay = document.getElementById('val').value.trim() === 'overlay';
+                    const url     = overlay ? '/draw/demo?overlay=true' : '/draw/demo';
+                    const r       = await call('GET', url);
+                    logCapture(r, 'draw/demo');
+                  } catch (e) {
+                    appendLog('draw/demo', false, String(e));
+                  }
+                }
+
+                // ── Draw ────────────────────────────────────────────────────
+                async function doDraw() {
+                  const val = document.getElementById('val').value.trim();
+                  if (!val) {
+                    appendLog('draw', false, 'Enter a JSON DrawRequest in the Value field. Example: {"canvas":"blank","width":400,"height":300,"shapes":[{"type":"circle","x":200,"y":150,"r":80,"color":"royalblue","fill":true},{"type":"text","x":200,"y":140,"text":"Hello!","color":"white","font_size":20,"font_bold":true,"align":"center"}]}');
+                    return;
+                  }
+                  appendLog('draw', true, 'Rendering\u2026');
+                  try {
+                    // Allow the value to be either a raw JSON object or wrapped in {"value":...}
+                    let body;
+                    try { const parsed = JSON.parse(val); body = parsed.shapes ? { value: val } : { value: val }; }
+                    catch { body = { value: val }; }
+                    const r = await call('POST', '/draw', body);
+                    logCapture(r, 'draw');
+                  } catch (e) {
+                    appendLog('draw', false, String(e));
                   }
                 }
 

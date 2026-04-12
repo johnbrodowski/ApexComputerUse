@@ -410,7 +410,7 @@ namespace ApexComputerUse
             txtHttpPort.Name = "txtHttpPort";
             txtHttpPort.Size = new Size(55, 23);
             txtHttpPort.TabIndex = 1;
-            txtHttpPort.Text = "8080";
+            txtHttpPort.Text = "8081";
             // 
             // btnStartHttp
             // 
