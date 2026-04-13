@@ -1,0 +1,9 @@
+{
+  "success": true,
+  "action": "find",
+  "data": {
+    "result": "Name=AGPA E-Commerce Test App - Personal - Microsoft\u200B Edge  ControlType=Window  AutomationId=  Enabled=True  Offscreen=False  Class=Chrome_WidgetWin_1  Framework=Win32",
+    "message": "Window: AGPA E-Commerce Test App - Personal - Microsoft\u200B Edge (fuzzy for \u0027AGPA E-Commerce\u0027)"
+  },
+  "error": null
+}

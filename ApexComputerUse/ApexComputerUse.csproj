@@ -1,0 +1,47 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Version>0.9.0</Version>
+    <AssemblyVersion>0.9.0.0</AssemblyVersion>
+    <FileVersion>0.9.0.0</FileVersion>
+    <Product>ApexComputerUse</Product>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="tessdata\**" />
+    <EmbeddedResource Remove="tessdata\**" />
+    <None Remove="tessdata\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FlaUI.Core" Version="5.0.0" />
+    <PackageReference Include="FlaUI.UIA3" Version="5.0.0" />
+    <PackageReference Include="LLamaSharp" Version="0.26.0" />
+    <PackageReference Include="LLamaSharp.Backend.Cpu" Version="0.26.0" GeneratePathProperty="true" />
+    <PackageReference Include="Telegram.Bot" Version="22.9.6" />
+    <PackageReference Include="Tesseract" Version="5.2.0" />
+  </ItemGroup>
+
+  <!--
+    LLamaSharp.Backend.Cpu 0.26.0 changed the native DLL layout to
+    LLamaSharpRuntimes\win-x64\native\{avx|avx2|avx512|noavx}\llama.dll
+    LLamaSharp probes for llama.dll next to the exe (AppContext.BaseDirectory),
+    so we copy the avx2 variants directly to the output root.
+    avx2 covers virtually all modern x64 CPUs (Haswell+, 2013+).
+  -->
+  <Target Name="CopyLlamaSharpCpuNative" AfterTargets="Build">
+    <ItemGroup>
+      <_LlamaAvx2Dlls Include="$(PkgLLamaSharp_Backend_Cpu)\LLamaSharpRuntimes\win-x64\native\avx2\*.dll" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_LlamaAvx2Dlls)" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" Condition="'@(_LlamaAvx2Dlls)' != ''" />
+    <Message Text="Copied LLamaSharp CPU native (avx2) DLLs to $(TargetDir)" Importance="high" Condition="'@(_LlamaAvx2Dlls)' != ''" />
+    <Warning Text="LLamaSharp.Backend.Cpu avx2 DLLs not found at $(PkgLLamaSharp_Backend_Cpu)\LLamaSharpRuntimes\win-x64\native\avx2\ — native load will fail at runtime." Condition="'@(_LlamaAvx2Dlls)' == ''" />
+  </Target>
+
+</Project>
