@@ -67,6 +67,7 @@ namespace ApexComputerUse
             // Default to loopback-only; set bindAll=true (or APEX_HTTP_BIND_ALL=true) for network-wide binding.
             string prefix = _bindAll ? $"http://+:{Port}/" : $"http://localhost:{Port}/";
             _listener.Prefixes.Add(prefix);
+            _listener.Start();
             IsRunning  = true;
             _cts       = new CancellationTokenSource();
             _listenTask = Task.Run(() => ListenLoop(_cts.Token));
