@@ -175,9 +175,29 @@ namespace ApexComputerUse
             try { window.Focus(); } catch { /* window may not support focus */ }
             string wNote  = wExact ? "" : $" (fuzzy for '{req.Window}')";
 
-            // No element search — target the window itself
+            // No element search — target the window itself, unless a type filter was
+            // given, in which case find the first descendant of that ControlType.
             if (string.IsNullOrWhiteSpace(req.AutomationId) && string.IsNullOrWhiteSpace(req.ElementName))
             {
+                ControlType? typeOnly = ResolveControlType(req.SearchType);
+                if (typeOnly.HasValue)
+                {
+                    AutomationElement? byType = null;
+                    try
+                    {
+                        var t = Task.Run(() => window.FindFirstDescendant(cf => cf.ByControlType(typeOnly.Value)));
+                        byType = t.Wait(5000) ? t.Result : null;
+                    }
+                    catch { /* stale window — fall through to null check */ }
+
+                    if (byType == null)
+                        return Fail($"No element of type '{req.SearchType}' found in '{wTitle}'.");
+
+                    CurrentElement = byType;
+                    _elementDesc   = _helper.Describe(byType);
+                    return Ok($"Window: {wTitle}{wNote} | Element (first {req.SearchType})", _elementDesc);
+                }
+
                 CurrentElement = window;
                 _elementDesc   = _helper.Describe(window);
                 return Ok($"Window: {wTitle}{wNote}", _elementDesc);
@@ -418,6 +438,13 @@ namespace ApexComputerUse
 
             var root = ScanElementsIntoMap(CurrentWindow, null, null, onscreenOnly: req.OnscreenOnly);
 
+            // Apply ControlType filter: prune tree to matching nodes (plus structural ancestors).
+            ControlType? typeFilter = ResolveControlType(req.SearchType);
+            if (typeFilter.HasValue && root != null)
+                root = FilterTreeByType(root, typeFilter.Value, isRoot: true);
+
+            int count = CountNodes(root);
+
             string json = System.Text.Json.JsonSerializer.Serialize(root,
                 new System.Text.Json.JsonSerializerOptions
                 {
@@ -426,7 +453,7 @@ namespace ApexComputerUse
                     DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
                 });
 
-            return Ok($"{_elementMap.Count} element(s)", json);
+            return Ok($"{count} element(s)", json);
         }
 
         // ── AI (Multimodal) commands ──────────────────────────────────────
@@ -1023,6 +1050,54 @@ namespace ApexComputerUse
         }
 
         // ── Helpers ───────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Recursively prunes an element tree to nodes whose ControlType matches
+        /// <paramref name="typeFilter"/>, retaining structural ancestors (Window/Pane/Group)
+        /// that lead to matching descendants so that spatial context is preserved.
+        /// </summary>
+        private static ElementNode? FilterTreeByType(ElementNode node, ControlType typeFilter, bool isRoot)
+        {
+            List<ElementNode>? filteredChildren = null;
+            if (node.Children != null)
+            {
+                foreach (var child in node.Children)
+                {
+                    var filtered = FilterTreeByType(child, typeFilter, isRoot: false);
+                    if (filtered != null)
+                    {
+                        filteredChildren ??= new List<ElementNode>();
+                        filteredChildren.Add(filtered);
+                    }
+                }
+            }
+
+            bool keep = isRoot
+                || node.ControlType.Equals(typeFilter.ToString(), StringComparison.OrdinalIgnoreCase)
+                || filteredChildren != null;
+
+            if (!keep) return null;
+
+            return new ElementNode
+            {
+                Id                = node.Id,
+                ControlType       = node.ControlType,
+                Name              = node.Name,
+                AutomationId      = node.AutomationId,
+                BoundingRectangle = node.BoundingRectangle,
+                Children          = filteredChildren
+            };
+        }
+
+        private static int CountNodes(ElementNode? node)
+        {
+            if (node == null) return 0;
+            int count = 1;
+            if (node.Children != null)
+                foreach (var child in node.Children)
+                    count += CountNodes(child);
+            return count;
+        }
 
         private static ControlType? ResolveControlType(string? name)
         {
