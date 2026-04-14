@@ -16,8 +16,6 @@ namespace ApexComputerUse
     {
         public static async Task RunComputerUseMode(string modelPath , string multiModalProj)
         {
-         //   string modelPath = @"C:\Users\Administrator\.cache\lm-studio\models\LiquidAI\LFM2-VL-450M-GGUF\LFM2-VL-450M-Q4_0.gguf";
-           // string multiModalProj = @"C:\Users\Administrator\.cache\lm-studio\models\LiquidAI\LFM2-VL-450M-GGUF\mmproj-LFM2-VL-450M-F16.gguf";
             const int maxTokens = 4096;
 
             string? prompt = @"{{C:\Users\Administrator\Pictures\aug1.jpg}}";

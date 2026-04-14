@@ -964,7 +964,7 @@ namespace ApexComputerUse
                     var fetchTask = Task.Run(() => el.FindAllChildren());
                     children = fetchTask.Wait(ScanChildTimeout) ? fetchTask.Result : null;
                 }
-                catch { children = null; }
+                catch (Exception ex) { AppLog.Debug($"[Scan] FindAllChildren failed — {ex.Message}"); children = null; }
 
                 List<ElementNode>? childNodes = null;
                 if (children != null)

@@ -117,14 +117,8 @@ namespace ApexComputerUse
                     var process = Process.GetProcessById(processId);
                     sb.Append(process.ProcessName);
                 }
-                catch { }
+                catch (Exception ex) { AppLog.Debug($"[ElementIdGenerator] Could not resolve process name for pid={processId}: {ex.Message}"); }
             }
-            else
-            {
-                /* no-op else branch — see P4-23 dead-code cleanup */
-            }
-            //     System: [Registry Updated][23:11:13] WindowChanged, 
-
             // Name: Exclude when:
             // 1. excludeName is explicitly true (Window/Pane elements)
             // 2. Using incremental IDs (for stability during content rescans)
@@ -134,17 +128,6 @@ namespace ApexComputerUse
             {
                 sb.Append("|");
                 sb.Append(SafeGetProperty<string>(() => props.Name.ValueOrDefault, "") ?? "");
-            }
-            else
-            {
-                /* no-op else branch — see P4-23 dead-code cleanup */
-            }
-
-            // hwnd: include for Window/Pane types when available
-            if (!excludeName && hwnd != IntPtr.Zero)
-            {
-                //sb.Append("|");
-                //sb.Append(hwnd.ToString());
             }
 
             // Sibling index: always include for non-root elements to avoid hash collisions

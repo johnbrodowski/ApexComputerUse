@@ -113,7 +113,7 @@ namespace ApexComputerUse
                         cancellationToken: ct);
                     return;
                 }
-                catch { /* fall through to text on error */ }
+                catch (Exception ex) { OnLog?.Invoke($"[Telegram] Failed to send photo, falling back to text: {ex.Message}"); }
             }
 
             string reply = response.ToText();
@@ -146,7 +146,7 @@ namespace ApexComputerUse
 
         // ── Command parser ────────────────────────────────────────────────
 
-        private static CommandRequest? ParseCommand(string text)
+        internal static CommandRequest? ParseCommand(string text)
         {
             if (!text.StartsWith('/')) return null;
 
@@ -206,7 +206,7 @@ namespace ApexComputerUse
         }
 
         /// Parses "key=value key2="multi word value" ..." into a dictionary.
-        private static Dictionary<string, string> ParseKeyValues(string input)
+        internal static Dictionary<string, string> ParseKeyValues(string input)
         {
             var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             int i = 0;

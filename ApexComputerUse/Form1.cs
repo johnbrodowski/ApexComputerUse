@@ -74,7 +74,7 @@ namespace ApexComputerUse
                 else EnsureApiKey();   // old settings file missing key
                 if (!string.IsNullOrWhiteSpace(s.AllowedChatIds)) txtAllowedChatIds.Text = s.AllowedChatIds;
             }
-            catch { /* ignore corrupt settings — will regenerate on next save */ }
+            catch (Exception ex) { AppLog.Warning($"LoadSettings: settings file appears corrupt and was ignored — {ex.Message}"); }
         }
 
         private void SaveSettings()
@@ -92,7 +92,7 @@ namespace ApexComputerUse
                 File.WriteAllText(SettingsFile,
                     JsonSerializer.Serialize(s, new JsonSerializerOptions { WriteIndented = true }));
             }
-            catch { /* ignore write errors */ }
+            catch (Exception ex) { AppLog.Warning($"SaveSettings: failed to write settings — {ex.Message}"); }
         }
 
         /// <summary>Generates a new random API key and writes it to the API key field.</summary>

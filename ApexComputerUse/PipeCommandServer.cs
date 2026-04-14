@@ -188,7 +188,7 @@ namespace ApexComputerUse
 
         // ── JSON parser ───────────────────────────────────────────────────
 
-        private static CommandRequest ParseJson(string json)
+        internal static CommandRequest ParseJson(string json)
         {
             var r = new CommandRequest();
             try
@@ -206,7 +206,7 @@ namespace ApexComputerUse
                 r.MmProjPath   = root.Str("proj")         ?? root.Str("mmProjPath");
                 r.Prompt       = root.Str("prompt");
             }
-            catch { r.Command = "help"; }
+            catch (Exception ex) { AppLog.Debug($"[Pipe] Malformed JSON from client — {ex.Message}"); r.Command = "help"; }
             return r;
         }
 

@@ -2292,7 +2292,7 @@ namespace ApexComputerUse
                 r.MmProjPath   = root.Str("proj")    ?? root.Str("mmProjPath");
                 r.Prompt       = root.Str("prompt");
             }
-            catch { /* malformed JSON — return partial */ }
+            catch (Exception ex) { AppLog.Debug($"[HTTP] Malformed JSON in request body — {ex.Message}"); }
             return r;
         }
 
