@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Net;
 using System.Text;
@@ -14,18 +15,47 @@ namespace ApexComputerUse
         private readonly HttpListener        _listener  = new();
         private readonly CommandProcessor    _processor;
         private readonly SceneStore          _store;
+        private readonly string?             _apiKey;
+        private readonly bool                _enableShellRun;
+        private readonly bool                _bindAll;
+        private readonly DateTime            _startTime = DateTime.UtcNow;
         private          CancellationTokenSource? _cts;
         private          Task?              _listenTask;
+        private          int                _activeRequests;   // Interlocked counter for graceful drain
+
+        // ── Metrics ───────────────────────────────────────────────────────
+        private long _totalRequests;
+        private long _errorRequests;
+        private readonly ConcurrentDictionary<string, long>   _routeCounts       = new();
+        private readonly ConcurrentDictionary<string, double> _routeLastLatencyMs = new();
 
         public int    Port      { get; }
         public bool   IsRunning { get; private set; }
         public event  Action<string>? OnLog;
 
-        public HttpCommandServer(int port, CommandProcessor processor, SceneStore store)
+        /// <summary>
+        /// Creates the HTTP server.
+        /// When <paramref name="apiKey"/> is non-empty every request must supply it via
+        /// "Authorization: Bearer &lt;key&gt;", "X-Api-Key: &lt;key&gt;", or "?apiKey=&lt;key&gt;".
+        /// Unauthenticated requests receive HTTP 401.
+        /// Pass null or empty to disable authentication (dev/local use only).
+        /// <paramref name="enableShellRun"/> must be explicitly set to true to enable the
+        /// POST /run shell-execution endpoint. It is disabled by default because it allows
+        /// authenticated callers to execute arbitrary OS commands.
+        /// </summary>
+        /// <paramref name="bindAll"/> controls the listener prefix:
+        /// false (default) → <c>http://localhost:{port}/</c> (loopback only, safer default).
+        /// true → <c>http://+:{port}/</c> (all interfaces; set APEX_HTTP_BIND_ALL=true or HttpBindAll in appsettings.json).
+        public HttpCommandServer(int port, CommandProcessor processor, SceneStore store,
+                                 string? apiKey = null, bool enableShellRun = false,
+                                 bool bindAll = false)
         {
-            Port       = port;
-            _processor = processor;
-            _store     = store;
+            Port            = port;
+            _processor      = processor;
+            _store          = store;
+            _apiKey         = string.IsNullOrWhiteSpace(apiKey) ? null : apiKey.Trim();
+            _enableShellRun = enableShellRun;
+            _bindAll        = bindAll;
         }
 
         // ── Lifecycle ─────────────────────────────────────────────────────
@@ -34,21 +64,33 @@ namespace ApexComputerUse
         {
             if (IsRunning) return;
             _listener.Prefixes.Clear();
-            _listener.Prefixes.Add($"http://+:{Port}/");
+            // Default to loopback-only; set bindAll=true (or APEX_HTTP_BIND_ALL=true) for network-wide binding.
+            string prefix = _bindAll ? $"http://+:{Port}/" : $"http://localhost:{Port}/";
+            _listener.Prefixes.Add(prefix);
             _listener.Start();
             IsRunning  = true;
             _cts       = new CancellationTokenSource();
             _listenTask = Task.Run(() => ListenLoop(_cts.Token));
-            OnLog?.Invoke($"HTTP server listening on http://localhost:{Port}/");
+            string bindDesc = _bindAll ? $"http://+:{Port}/ (all interfaces)" : $"http://localhost:{Port}/";
+            OnLog?.Invoke($"HTTP server listening on {bindDesc}");
         }
 
-        public void Stop()
+        public void Stop(TimeSpan? drainTimeout = null)
         {
             if (!IsRunning) return;
             _cts?.Cancel();
             try { _listener.Stop(); } catch { /* already stopped */ }
             IsRunning = false;
-            OnLog?.Invoke("HTTP server stopped.");
+
+            // Wait for in-flight request handlers to complete (default 5 s).
+            var deadline = DateTime.UtcNow + (drainTimeout ?? TimeSpan.FromSeconds(5));
+            while (Volatile.Read(ref _activeRequests) > 0 && DateTime.UtcNow < deadline)
+                Thread.Sleep(50);
+
+            int abandoned = Volatile.Read(ref _activeRequests);
+            OnLog?.Invoke(abandoned > 0
+                ? $"HTTP server stopped ({abandoned} request(s) abandoned after drain timeout)."
+                : "HTTP server stopped.");
         }
 
         // ── Accept loop ───────────────────────────────────────────────────
@@ -60,7 +102,12 @@ namespace ApexComputerUse
                 try
                 {
                     var ctx = await _listener.GetContextAsync().WaitAsync(ct);
-                    _ = Task.Run(() => HandleAsync(ctx), ct);
+                    Interlocked.Increment(ref _activeRequests);
+                    _ = Task.Run(async () =>
+                    {
+                        try   { await HandleAsync(ctx); }
+                        finally { Interlocked.Decrement(ref _activeRequests); }
+                    }, ct);
                 }
                 catch (OperationCanceledException) { break; }
                 catch (Exception ex) when (!ct.IsCancellationRequested)
@@ -72,12 +119,66 @@ namespace ApexComputerUse
 
         // ── Request handler ───────────────────────────────────────────────
 
+        // ── Authentication ────────────────────────────────────────────────
+
+        /// <summary>
+        /// Returns true if the request carries the correct API key, or if auth is disabled.
+        /// Checks (in order): Authorization: Bearer, X-Api-Key header, ?apiKey= query param.
+        /// </summary>
+        private bool IsAuthenticated(HttpListenerRequest req)
+        {
+            if (_apiKey == null) return true;   // auth disabled
+
+            // Authorization: Bearer <key>
+            string? authHeader = req.Headers["Authorization"];
+            if (authHeader != null && authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                return authHeader[7..].Trim() == _apiKey;
+
+            // X-Api-Key: <key>
+            string? apiKeyHeader = req.Headers["X-Api-Key"];
+            if (apiKeyHeader != null)
+                return apiKeyHeader.Trim() == _apiKey;
+
+            // ?apiKey=<key>  (convenient for browser / curl testing)
+            string? queryKey = req.QueryString["apiKey"];
+            if (queryKey != null)
+                return queryKey.Trim() == _apiKey;
+
+            return false;
+        }
+
+        private static readonly byte[] UnauthorizedBody =
+            System.Text.Encoding.UTF8.GetBytes(
+                """{"success":false,"error":"Unauthorized. Supply the API key via 'Authorization: Bearer <key>', 'X-Api-Key: <key>' header, or '?apiKey=<key>' query parameter."}""");
+
         private async Task HandleAsync(HttpListenerContext ctx)
         {
-            var req     = ctx.Request;
-            var res     = ctx.Response;
-            string method  = req.HttpMethod.ToUpperInvariant();
-            string rawPath = req.Url?.AbsolutePath.TrimEnd('/') ?? "/";
+            var req      = ctx.Request;
+            var res      = ctx.Response;
+            string method   = req.HttpMethod.ToUpperInvariant();
+            string rawPath  = req.Url?.AbsolutePath.TrimEnd('/') ?? "/";
+            string clientIp = req.RemoteEndPoint?.Address?.ToString() ?? "?";
+            var    sw       = Stopwatch.StartNew();
+            int    statusCode = 200;
+
+            Interlocked.Increment(ref _totalRequests);
+
+            try
+            {
+
+            // ── Auth gate ─────────────────────────────────────────────────
+            if (!IsAuthenticated(req))
+            {
+                statusCode = 401;
+                Interlocked.Increment(ref _errorRequests);
+                res.StatusCode      = 401;
+                res.ContentType     = "application/json; charset=utf-8";
+                res.Headers["WWW-Authenticate"] = "Bearer realm=\"ApexComputerUse\"";
+                res.ContentLength64 = UnauthorizedBody.Length;
+                try   { await res.OutputStream.WriteAsync(UnauthorizedBody); }
+                finally { res.Close(); }
+                return;
+            }
             string ext     = Path.GetExtension(rawPath).ToLowerInvariant();
             bool   hasExt  = ext is ".json" or ".html" or ".htm" or ".txt" or ".text" or ".pdf";
             // Strip format extension for routing; keep original for format detection
@@ -85,7 +186,6 @@ namespace ApexComputerUse
                                     : rawPath.ToLowerInvariant();
             string format  = FormatAdapter.Negotiate(req, hasExt ? ext[1..] : null);
 
-            OnLog?.Invoke($"HTTP {method} {rawPath}");
             ApexResult result;
 
             try
@@ -112,23 +212,40 @@ namespace ApexComputerUse
                 var sceneResult = TryHandleSceneRoute(method, path, body, req);
                 if (sceneResult != null)
                 {
-                    await WriteResponse(res, sceneResult, format);
+                    statusCode = await WriteResponse(res, sceneResult, format);
+                    if (statusCode >= 400) Interlocked.Increment(ref _errorRequests);
                     return;
                 }
 
                 // /run is async — handled before the sync switch
                 if (path == "/run")
                 {
-                    string? cmd = method == "GET"
-                        ? req.QueryString["cmd"]
-                        : FromJson(body, "run").Value;
-                    result = await HandleRunAsync(cmd);
+                    if (!_enableShellRun)
+                    {
+                        result = new ApexResult
+                        {
+                            Success = false,
+                            Action  = "run",
+                            Error   = "The /run endpoint is disabled. " +
+                                      "Set enableShellRun=true when constructing HttpCommandServer to opt in."
+                        };
+                    }
+                    else
+                    {
+                        string? cmd = method == "GET"
+                            ? req.QueryString["cmd"]
+                            : FromJson(body, "run").Value;
+                        result = await HandleRunAsync(cmd);
+                    }
                 }
                 else
                 {
                     result = (method, path) switch
                     {
-                        // ── New routes ─────────────────────────────────────────────
+                        // ── Observability routes ───────────────────────────────────
+                        ("GET", "/health")  => HandleHealth(),
+                        ("GET", "/metrics") => HandleMetrics(),
+                        // ── Diagnostic routes (auth-gated) ─────────────────────────
                         ("GET", "/ping")    => HandlePing(),
                         ("GET", "/sysinfo") => HandleSysinfo(),
                         ("GET", "/env")     => HandleEnv(),
@@ -194,10 +311,22 @@ namespace ApexComputerUse
                 result = new ApexResult { Success = false, Action = $"{method} {path}", Error = ex.Message };
             }
 
-            await WriteResponse(res, result, format);
+            statusCode = await WriteResponse(res, result, format);
+            if (statusCode >= 400) Interlocked.Increment(ref _errorRequests);
+
+            } // end try
+            finally
+            {
+                sw.Stop();
+                string routeKey = $"{method} {rawPath}";
+                _routeCounts.AddOrUpdate(routeKey, 1, (_, n) => n + 1);
+                _routeLastLatencyMs[routeKey] = sw.Elapsed.TotalMilliseconds;
+                OnLog?.Invoke($"HTTP {statusCode} {method} {rawPath} ({sw.ElapsedMilliseconds}ms) [{clientIp}]");
+            }
         }
 
-        private static async Task WriteResponse(HttpListenerResponse res, ApexResult result, string format)
+        /// <summary>Returns the HTTP status code that was written.</summary>
+        private static async Task<int> WriteResponse(HttpListenerResponse res, ApexResult result, string format)
         {
             var (buf, contentType, statusCode) = FormatAdapter.Render(result, format);
             res.ContentType     = contentType;
@@ -205,6 +334,7 @@ namespace ApexComputerUse
             res.StatusCode      = statusCode;
             try   { await res.OutputStream.WriteAsync(buf); }
             finally { res.Close(); }
+            return statusCode;
         }
 
         // ── Scene REST routes ─────────────────────────────────────────────
@@ -1201,6 +1331,55 @@ namespace ApexComputerUse
             };
         }
 
+        // ── /health ───────────────────────────────────────────────────────
+
+        private ApexResult HandleHealth()
+        {
+            var up = DateTime.UtcNow - _startTime;
+            return new ApexResult
+            {
+                Success = true,
+                Action  = "health",
+                Data    = new Dictionary<string, string>
+                {
+                    ["status"]           = "ok",
+                    ["uptime"]           = $"{(int)up.TotalHours:D2}:{up.Minutes:D2}:{up.Seconds:D2}",
+                    ["model_loaded"]     = _processor.IsModelLoaded.ToString(),
+                    ["model_processing"] = _processor.IsProcessing.ToString(),
+                    ["active_requests"]  = Volatile.Read(ref _activeRequests).ToString(),
+                    ["total_requests"]   = Volatile.Read(ref _totalRequests).ToString(),
+                    ["error_requests"]   = Volatile.Read(ref _errorRequests).ToString(),
+                }
+            };
+        }
+
+        // ── /metrics ──────────────────────────────────────────────────────
+
+        private ApexResult HandleMetrics()
+        {
+            var routes = _routeCounts.Keys.OrderByDescending(k => _routeCounts[k])
+                .ToDictionary(
+                    k => k,
+                    k => new
+                    {
+                        count      = _routeCounts[k],
+                        last_ms    = _routeLastLatencyMs.TryGetValue(k, out double ms) ? Math.Round(ms, 1) : 0.0
+                    });
+
+            return new ApexResult
+            {
+                Success = true,
+                Action  = "metrics",
+                Data    = new Dictionary<string, string>
+                {
+                    ["total_requests"]   = Volatile.Read(ref _totalRequests).ToString(),
+                    ["error_requests"]   = Volatile.Read(ref _errorRequests).ToString(),
+                    ["active_requests"]  = Volatile.Read(ref _activeRequests).ToString(),
+                    ["routes"]           = JsonSerializer.Serialize(routes)
+                }
+            };
+        }
+
         private static ApexResult HandlePing() => new()
         {
             Success = true,
@@ -1239,8 +1418,17 @@ namespace ApexComputerUse
 
         private static ApexResult HandleLs(string? requestedPath)
         {
-            string dir = string.IsNullOrWhiteSpace(requestedPath)
-                ? Environment.CurrentDirectory : requestedPath;
+            string dir;
+            try
+            {
+                dir = string.IsNullOrWhiteSpace(requestedPath)
+                    ? Environment.CurrentDirectory
+                    : Path.GetFullPath(requestedPath);   // canonicalize to prevent traversal
+            }
+            catch
+            {
+                return new ApexResult { Success = false, Action = "ls", Error = "Invalid path." };
+            }
 
             if (!Directory.Exists(dir))
                 return new ApexResult { Success = false, Action = "ls",
@@ -2104,7 +2292,7 @@ namespace ApexComputerUse
                 r.MmProjPath   = root.Str("proj")    ?? root.Str("mmProjPath");
                 r.Prompt       = root.Str("prompt");
             }
-            catch { /* malformed JSON — return partial */ }
+            catch (Exception ex) { AppLog.Debug($"[HTTP] Malformed JSON in request body — {ex.Message}"); }
             return r;
         }
 

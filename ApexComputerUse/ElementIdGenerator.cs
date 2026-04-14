@@ -65,14 +65,14 @@ namespace ApexComputerUse
                     }
                 }
                 if (showDefaultDebugOutput)
-                    System.Diagnostics.Debug.WriteLine($"[ElementIdGenerator] GenerateIdFromHash (Incremental): Hash: {hash.Substring(0, 8)}... -> ID: {id}");
+                    AppLog.Debug($"[ElementIdGenerator] GenerateIdFromHash (Incremental): Hash: {hash.Substring(0, 8)}... -> ID: {id}");
             }
             else
             {
                 // Hash-based mode
                 id = ConvertHashToId(hash);
                 if (showDefaultDebugOutput)
-                    System.Diagnostics.Debug.WriteLine($"[ElementIdGenerator] GenerateIdFromHash (Hash): Hash: {hash.Substring(0, 8)}... -> ID: {id}");
+                    AppLog.Debug($"[ElementIdGenerator] GenerateIdFromHash (Hash): Hash: {hash.Substring(0, 8)}... -> ID: {id}");
             }
 
             return id;
@@ -117,14 +117,8 @@ namespace ApexComputerUse
                     var process = Process.GetProcessById(processId);
                     sb.Append(process.ProcessName);
                 }
-                catch { }
+                catch (Exception ex) { AppLog.Debug($"[ElementIdGenerator] Could not resolve process name for pid={processId}: {ex.Message}"); }
             }
-            else
-            {
-                Debug.Write("");
-            }
-            //     System: [Registry Updated][23:11:13] WindowChanged, 
-
             // Name: Exclude when:
             // 1. excludeName is explicitly true (Window/Pane elements)
             // 2. Using incremental IDs (for stability during content rescans)
@@ -134,17 +128,6 @@ namespace ApexComputerUse
             {
                 sb.Append("|");
                 sb.Append(SafeGetProperty<string>(() => props.Name.ValueOrDefault, "") ?? "");
-            }
-            else
-            {
-                Debug.Write("");
-            }
-
-            // hwnd: include for Window/Pane types when available
-            if (!excludeName && hwnd != IntPtr.Zero)
-            {
-                //sb.Append("|");
-                //sb.Append(hwnd.ToString());
             }
 
             // Sibling index: always include for non-root elements to avoid hash collisions
@@ -221,7 +204,7 @@ namespace ApexComputerUse
             // Keep within reasonable int range (avoid overflow issues)
             var result = Math.Abs(hashValue);
 
-            if (showDefaultDebugOutput) System.Diagnostics.Debug.WriteLine($"[ElementIdGenerator] ConvertHashToId: '{hashSubstring}' (hex) = {hashValue} (int) = {result} (abs)");
+            if (showDefaultDebugOutput) AppLog.Debug($"[ElementIdGenerator] ConvertHashToId: '{hashSubstring}' (hex) = {hashValue} (int) = {result} (abs)");
 
             return result;
         }

@@ -298,7 +298,7 @@ namespace ApexComputerUse
                 File.WriteAllText(SceneFilePath(scene.Id),
                     JsonSerializer.Serialize(scene, JsonOpts));
             }
-            catch { /* non-fatal — in-memory state is still correct */ }
+            catch (Exception ex) { AppLog.Warning($"SceneStore: failed to persist scene '{scene.Id}' to disk — {ex.Message}"); }
         }
 
         private void LoadAllFromDisk()
@@ -312,7 +312,7 @@ namespace ApexComputerUse
                     if (scene != null)
                         _scenes[scene.Id] = scene;
                 }
-                catch { /* skip corrupt files */ }
+                catch (Exception ex) { AppLog.Warning($"SceneStore: skipping corrupt scene file '{Path.GetFileName(file)}' — {ex.Message}"); }
             }
         }
 

@@ -63,7 +63,12 @@ namespace ApexComputerUse
 
         private string _windowDesc  = "(none)";
         private string _elementDesc = "(none)";
-        private readonly object _lock = new();
+        /// <summary>
+        /// Guards all state mutations (CurrentElement, CurrentWindow, element/window maps).
+        /// AI inference commands capture a state snapshot and then run <em>outside</em> this
+        /// lock so that 30-second inference runs do not block find/execute/status/etc.
+        /// </summary>
+        private readonly object _stateLock = new();
 
         /// Fired on every command for display in the form's log.
         public event Action<string>? OnLog;
@@ -75,16 +80,52 @@ namespace ApexComputerUse
 
         public CommandResponse Process(CommandRequest req)
         {
-            lock (_lock)
+            string cmd = req.Command.ToLowerInvariant();
+
+            // AI inference (describe, ask, file, init) runs OUTSIDE _stateLock.
+            // Inference can take 30+ seconds; holding the lock that long would block
+            // every other command (find, execute, status, …).
+            // Serialisation of the model itself is handled by MtmdHelper's SemaphoreSlim.
+            if (cmd == "ai")
+            {
+                string action = (req.Action ?? "").ToLowerInvariant();
+                if (action is "describe" or "ask" or "file" or "init")
+                {
+                    // Snapshot mutable state under a brief lock acquisition.
+                    AutomationElement? elementSnapshot;
+                    lock (_stateLock) { elementSnapshot = CurrentElement; }
+
+                    try
+                    {
+                        CommandResponse r = action switch
+                        {
+                            "describe" => CmdAiDescribe(req, elementSnapshot),
+                            "ask"      => CmdAiAsk(req, elementSnapshot),
+                            "file"     => CmdAiFile(req),
+                            "init"     => CmdAiInit(req),
+                            _          => Fail("unreachable")
+                        };
+                        OnLog?.Invoke($"[Remote] ai/{action}: {r.Message}");
+                        return r;
+                    }
+                    catch (Exception ex)
+                    {
+                        OnLog?.Invoke($"[Remote Error] {ex.Message}");
+                        return Fail(ex.Message);
+                    }
+                }
+            }
+
+            lock (_stateLock)
             {
                 try
                 {
-                    var response = req.Command.ToLowerInvariant() switch
+                    var response = cmd switch
                     {
                         "find"              => CmdFind(req),
                         "execute" or "exec" => CmdExecute(req),
                         "ocr"               => CmdOcr(req),
-                        "ai"                => CmdAi(req),
+                        "ai"                => CmdAi(req),       // only reaches here for "status"
                         "status"            => CmdStatus(),
                         "windows"           => CmdListWindows(),
                         "elements"          => CmdListElements(req),
@@ -149,13 +190,15 @@ namespace ApexComputerUse
             // Map lookup: if the search value is a numeric mapped ID, resolve directly
             if (byId && int.TryParse(searchVal, out int mappedId) && _elementMap.TryGetValue(mappedId, out var mappedEl))
             {
+                if (!IsElementValid(mappedEl))
+                    return Fail($"Element [map:{mappedId}] is stale — the target app has changed state. Run 'find' again.");
                 try
                 {
                     CurrentElement = mappedEl;
                     _elementDesc   = _helper.Describe(mappedEl);
                     return Ok($"Window: {wTitle}{wNote} | Element [map:{mappedId}]", _elementDesc);
                 }
-                catch { } // stale — fall through to fuzzy find
+                catch { return Fail($"Element [map:{mappedId}] became stale during access. Run 'find' again."); }
             }
 
             var el = _helper.FindElementFuzzy(window, searchVal, filter, byId,
@@ -185,6 +228,7 @@ namespace ApexComputerUse
             }
 
             if (target == null) return Fail("No element selected. Use 'find' first or pass element=<id>.");
+            if (!IsElementValid(target)) return Fail("The selected element is stale — the target app has changed state. Run 'find' again.");
 
             string result = RunAction(target, CurrentWindow, req.Action!, req.Value ?? "");
             return string.IsNullOrEmpty(result)
@@ -202,9 +246,13 @@ namespace ApexComputerUse
                 var parts = req.Value!.Split(',');
                 if (parts.Length == 4)
                 {
-                    var region = new System.Drawing.Rectangle(
-                        int.Parse(parts[0].Trim()), int.Parse(parts[1].Trim()),
-                        int.Parse(parts[2].Trim()), int.Parse(parts[3].Trim()));
+                    if (!int.TryParse(parts[0].Trim(), out int rx) ||
+                        !int.TryParse(parts[1].Trim(), out int ry) ||
+                        !int.TryParse(parts[2].Trim(), out int rw) ||
+                        !int.TryParse(parts[3].Trim(), out int rh) ||
+                        rw <= 0 || rh <= 0)
+                        return Fail("OCR region must be four integers: x,y,width,height with width and height > 0.");
+                    var region = new System.Drawing.Rectangle(rx, ry, rw, rh);
                     var r = _ocr.OcrElementRegion(CurrentElement, region);
                     return Ok($"OCR region (confidence {r.Confidence:P1})", r.Text);
                 }
@@ -383,15 +431,13 @@ namespace ApexComputerUse
 
         // ── AI (Multimodal) commands ──────────────────────────────────────
 
+        // NOTE: describe/ask/file/init are intercepted in Process() and dispatched outside
+        // _stateLock. Only "status" reaches this method through the locked code path.
         private CommandResponse CmdAi(CommandRequest req)
         {
             return (req.Action?.ToLowerInvariant() ?? "status") switch
             {
-                "init"     => CmdAiInit(req),
-                "status"   => CmdAiStatus(),
-                "describe" => CmdAiDescribe(req),
-                "file"     => CmdAiFile(req),
-                "ask"      => CmdAiAsk(req),
+                "status" => CmdAiStatus(),
                 _ => Fail($"Unknown ai action '{req.Action}'. Try: init, status, describe, file, ask")
             };
         }
@@ -434,7 +480,9 @@ namespace ApexComputerUse
         {
             if (string.IsNullOrWhiteSpace(req.ModelPath))  return Fail("model= path required.");
             if (string.IsNullOrWhiteSpace(req.MmProjPath)) return Fail("proj= path required.");
-            return InitModelAsync(req.ModelPath!, req.MmProjPath!).GetAwaiter().GetResult();
+            // Task.Run avoids a SynchronizationContext deadlock when called from the WinForms thread.
+            return Task.Run(async () => await InitModelAsync(req.ModelPath!, req.MmProjPath!))
+                        .GetAwaiter().GetResult();
         }
 
         /// Builds a readable exception message including all inner exceptions.
@@ -460,14 +508,18 @@ namespace ApexComputerUse
             return Ok($"AI ready. Vision={_mtmd.SupportsVision} Audio={_mtmd.SupportsAudio}");
         }
 
-        private CommandResponse CmdAiDescribe(CommandRequest req)
+        private CommandResponse CmdAiDescribe(CommandRequest req, AutomationElement? element)
         {
             if (_mtmd == null || !_mtmd.IsInitialized) return Fail("AI not initialized. Use ai action=init first.");
-            if (CurrentElement == null)                 return Fail("No element selected. Use 'find' first.");
+            if (element == null)                        return Fail("No element selected. Use 'find' first.");
             string prompt = req.Prompt ?? req.Value ?? "Describe what you see in this UI element.";
             IsProcessing = true;
-            try   { string result = _mtmd.DescribeElementAsync(CurrentElement, prompt).GetAwaiter().GetResult();
-                    return Ok("AI description", result); }
+            try
+            {
+                string result = Task.Run(async () => await _mtmd.DescribeElementAsync(element, prompt))
+                                    .GetAwaiter().GetResult();
+                return Ok("AI description", result);
+            }
             finally { IsProcessing = false; }
         }
 
@@ -476,22 +528,38 @@ namespace ApexComputerUse
             if (_mtmd == null || !_mtmd.IsInitialized) return Fail("AI not initialized. Use ai action=init first.");
             string? path = req.Value;
             if (string.IsNullOrWhiteSpace(path)) return Fail("value=<file path> required.");
+
+            // Resolve to a canonical absolute path to prevent directory traversal attacks.
+            try   { path = Path.GetFullPath(path!); }
+            catch { return Fail("Invalid file path."); }
+
+            if (!File.Exists(path))
+                return Fail($"File not found: {Path.GetFileName(path)}");
+
             string prompt = req.Prompt ?? "Describe this media.";
             IsProcessing = true;
-            try   { string result = _mtmd.DescribeImageAsync(path!, prompt).GetAwaiter().GetResult();
-                    return Ok($"AI file description ({Path.GetFileName(path)})", result); }
+            try
+            {
+                string result = Task.Run(async () => await _mtmd.DescribeImageAsync(path, prompt))
+                                    .GetAwaiter().GetResult();
+                return Ok($"AI file description ({Path.GetFileName(path)})", result);
+            }
             finally { IsProcessing = false; }
         }
 
-        private CommandResponse CmdAiAsk(CommandRequest req)
+        private CommandResponse CmdAiAsk(CommandRequest req, AutomationElement? element)
         {
             if (_mtmd == null || !_mtmd.IsInitialized) return Fail("AI not initialized. Use ai action=init first.");
-            if (CurrentElement == null)                 return Fail("No element selected. Use 'find' first.");
+            if (element == null)                        return Fail("No element selected. Use 'find' first.");
             string prompt = req.Prompt ?? req.Value ?? "";
             if (string.IsNullOrWhiteSpace(prompt)) return Fail("prompt= required.");
             IsProcessing = true;
-            try   { string result = _mtmd.DescribeElementAsync(CurrentElement, prompt).GetAwaiter().GetResult();
-                    return Ok("AI answer", result); }
+            try
+            {
+                string result = Task.Run(async () => await _mtmd.DescribeElementAsync(element, prompt))
+                                    .GetAwaiter().GetResult();
+                return Ok("AI answer", result);
+            }
             finally { IsProcessing = false; }
         }
 
@@ -896,7 +964,7 @@ namespace ApexComputerUse
                     var fetchTask = Task.Run(() => el.FindAllChildren());
                     children = fetchTask.Wait(ScanChildTimeout) ? fetchTask.Result : null;
                 }
-                catch { children = null; }
+                catch (Exception ex) { AppLog.Debug($"[Scan] FindAllChildren failed — {ex.Message}"); children = null; }
 
                 List<ElementNode>? childNodes = null;
                 if (children != null)
@@ -964,6 +1032,17 @@ namespace ApexComputerUse
 
         private static CommandResponse Ok(string msg, string? data = null) =>
             new() { Success = true,  Message = msg, Data = data };
+
+        /// <summary>
+        /// Returns false if the cached AutomationElement is no longer valid (e.g. the
+        /// target app closed or navigated away).  Uses a lightweight property read so the
+        /// COM call fails fast on stale references rather than hanging.
+        /// </summary>
+        private static bool IsElementValid(AutomationElement el)
+        {
+            try { return el.Properties.ProcessId.ValueOrDefault > 0; }
+            catch { return false; }
+        }
 
         private static CommandResponse Fail(string msg) =>
             new() { Success = false, Message = msg };

@@ -65,19 +65,21 @@ dotnet run --project ApexComputerUse
 ```
 
 1. The app opens. In the **Remote Control** tab, click **Start HTTP**.
-2. Open `http://localhost:8080/` in a browser — the interactive console appears.
-3. Pick any open window from the **Windows** panel on the left.
-4. Browse its element tree, click an action button, see the result.
+2. An API key is generated automatically and shown in the **API Key** field — copy it.
+3. Open `http://localhost:8081/` in a browser — the interactive console appears (the browser console pre-fills the key).
+4. Pick any open window from the **Windows** panel on the left.
+5. Browse its element tree, click an action button, see the result.
 
-Or go straight to curl:
+Or go straight to curl (replace `<key>` with the API key from the Remote Control tab):
 
 ```bash
 # Confirm the server is up
-curl http://localhost:8080/ping
+curl -H "X-Api-Key: <key>" http://localhost:8081/ping
 
 # Find Notepad and read its text editor content
-curl -X POST http://localhost:8080/find -H "Content-Type: application/json" -d '{"window":"Notepad"}'
-curl http://localhost:8080/exec?action=gettext
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/find \
+     -H "Content-Type: application/json" -d '{"window":"Notepad"}'
+curl -H "X-Api-Key: <key>" http://localhost:8081/exec?action=gettext
 ```
 
 > **OCR:** requires `eng.traineddata` — download from [github.com/tesseract-ocr/tessdata](https://github.com/tesseract-ocr/tessdata) and place it in `tessdata\` next to the executable.
@@ -126,10 +128,6 @@ This is the same direction taken by the most efficient browser-only tools: [brow
 
 
 
-Here's a draft section you can drop into the README, right after "Why ApexComputerUse" or before the Quickstart. I've written it to match the existing tone and table style:
-
----
-
 ## Compatible AI Agents
 
 ApexComputerUse exposes a plain HTTP REST API, which means any AI agent that can execute shell commands or fetch a URL can use it. No SDK, no plugin, no special integration required — if the agent can run `curl`, it can drive any Windows app or browser through this server.
@@ -173,10 +171,10 @@ Several agents support the Model Context Protocol. If you prefer a tighter integ
 Start the HTTP server, then drop this into your Claude Code session:
 
 ```
-The ApexComputerUse REST API is running at http://localhost:8080.
+The ApexComputerUse REST API is running at http://localhost:8081.
 Use curl (or Python requests if curl is blocked) to control Windows apps.
-Start with: curl http://localhost:8080/ping
-Then: curl http://localhost:8080/windows  (to see what's open)
+Start with: curl http://localhost:8081/ping
+Then: curl http://localhost:8081/windows  (to see what's open)
 Then find and interact with any element using /find and /exec.
 ```
 
@@ -249,6 +247,101 @@ To download manually: copy `eng.traineddata` from [github.com/tesseract-ocr/tess
 1. Message [@BotFather](https://t.me/BotFather) on Telegram and create a bot with `/newbot`.
 2. Copy the token (format: `123456789:ABC-DEF...`).
 3. Paste it into the **Bot Token** field in the app and click **Start Telegram**.
+4. Add your Telegram chat ID to the **Allowed Chat IDs** field to restrict who can send commands.
+
+---
+
+## Security & Configuration
+
+### HTTP API Authentication
+
+Every HTTP request must include the API key. Three equivalent methods:
+
+```bash
+# Authorization header (recommended)
+curl -H "Authorization: Bearer <key>" http://localhost:8081/ping
+
+# X-Api-Key header
+curl -H "X-Api-Key: <key>" http://localhost:8081/ping
+
+# Query parameter (use only for browser links / quick tests)
+curl "http://localhost:8081/ping?apiKey=<key>"
+```
+
+Requests without a valid key receive **HTTP 401**. The interactive web console (`GET /`) pre-fills the key automatically — paste it from the Remote Control tab on first launch.
+
+To disable authentication (local development only), clear the API Key field in the app.
+
+### Named Pipe Security
+
+The named pipe is ACL-restricted to the current Windows user. Other local users and unprivileged processes cannot connect.
+
+### Telegram Bot Authorization
+
+Enter one or more Telegram chat IDs in the **Allowed Chat IDs** field (comma-separated). Any message from an unlisted chat ID receives "Unauthorized." and is logged. Leave the field empty only for local testing.
+
+### Shell Execution (`/run`)
+
+The `POST /run` and `GET /run` endpoints execute arbitrary `cmd.exe` commands. They are **disabled by default**. Enable them explicitly:
+
+- In `appsettings.json`: `"EnableShellRun": true`
+- Or via environment variable: `APEX_ENABLE_SHELL_RUN=true`
+
+### Configuration
+
+All settings can be layered via three sources (highest priority last wins for env vars):
+
+**`appsettings.json`** (next to the executable):
+
+```json
+{
+  "HttpPort":       8081,
+  "HttpBindAll":    false,
+  "PipeName":       "ApexComputerUse",
+  "LogLevel":       "Information",
+  "EnableShellRun": false,
+  "ApiKey":         "",
+  "AllowedChatIds": "",
+  "TelegramToken":  "",
+  "ModelPath":      "",
+  "MmProjPath":     ""
+}
+```
+
+**Environment variables** (prefix `APEX_`, override `appsettings.json`):
+
+| Variable | Description |
+|---|---|
+| `APEX_HTTP_PORT` | HTTP listen port (default `8081`) |
+| `APEX_HTTP_BIND_ALL` | `true` to bind all interfaces instead of localhost only |
+| `APEX_PIPE_NAME` | Named pipe name |
+| `APEX_LOG_LEVEL` | Serilog minimum level: `Debug` / `Information` / `Warning` / `Error` |
+| `APEX_ENABLE_SHELL_RUN` | `true` to enable the `/run` shell-execution endpoint |
+| `APEX_API_KEY` | Override the auto-generated API key |
+| `APEX_ALLOWED_CHAT_IDS` | Comma-separated Telegram chat ID whitelist |
+| `APEX_TELEGRAM_TOKEN` | Telegram bot token |
+| `APEX_MODEL_PATH` | Default LLM `.gguf` path |
+| `APEX_MMPROJ_PATH` | Default multimodal projector `.gguf` path |
+
+**Network binding:** `HttpBindAll = false` (the default) binds to `http://localhost:{port}/` — loopback only, safe for single-machine use. Set `APEX_HTTP_BIND_ALL=true` to bind all interfaces for network-wide access (ensure firewall rules are in place).
+
+**Logs** are written to `<exe>/logs/apex-YYYYMMDD.log` (daily rotation, 7-day retention).
+
+### Run as a Windows Service
+
+ApexComputerUse can run headlessly as a Windows service (no GUI):
+
+```powershell
+# Install
+sc.exe create ApexComputerUse binPath="C:\ApexComputerUse\ApexComputerUse.exe --service" start=auto
+sc.exe start ApexComputerUse
+
+# Uninstall
+sc.exe stop ApexComputerUse
+sc.exe delete ApexComputerUse
+```
+
+Configure via `appsettings.json` or `APEX_*` environment variables before starting the service. The `APEX_TELEGRAM_TOKEN` and `APEX_API_KEY` variables are the recommended way to inject secrets in a service context.
 
 ---
 
@@ -284,17 +377,17 @@ Every window and element is assigned a **stable numeric ID** (SHA-256 hash-based
 
 ```bash
 # 1. Get windows with their IDs
-curl http://localhost:8080/windows
+curl http://localhost:8081/windows
 # Returns: [{"id":42,"title":"Notepad"},{"id":107,"title":"Calculator"},...]
 
 # 2. Get elements with their IDs for the current window
-curl http://localhost:8080/elements
+curl http://localhost:8081/elements
 
 # Onscreen elements only (prunes offscreen subtrees — 80% fewer elements on browser pages)
-curl "http://localhost:8080/elements?onscreen=true"
+curl "http://localhost:8081/elements?onscreen=true"
 
 # Combine with type filter
-curl "http://localhost:8080/elements?onscreen=true&type=Button"
+curl "http://localhost:8081/elements?onscreen=true&type=Button"
 
 # Returns nested JSON including bounding rectangles:
 # {
@@ -307,7 +400,7 @@ curl "http://localhost:8080/elements?onscreen=true&type=Button"
 # }
 
 # 3. Find using numeric IDs (no fuzzy matching, direct map lookup)
-curl -X POST http://localhost:8080/find \
+curl -X POST http://localhost:8081/find \
      -H "Content-Type: application/json" \
      -d '{"window":42,"id":105}'
 ```
@@ -364,7 +457,7 @@ The `?onscreen=true` filter further reduces the element map to only what is visi
 
 ## Usage — HTTP API
 
-Start the HTTP server from the **Remote Control** group box, then use curl or open `http://localhost:8080/` in a browser to access the interactive test console.
+Start the HTTP server from the **Remote Control** group box, then use curl or open `http://localhost:8081/` in a browser to access the interactive test console.
 
 ### Interactive Test Console (`GET /`)
 
@@ -389,21 +482,21 @@ Every endpoint adapts its response to whatever format the caller can consume, se
 
 ```bash
 # URL extension (highest priority — works even if the AI cannot set headers or query params)
-curl http://localhost:8080/status.json
-curl http://localhost:8080/help.txt
-curl http://localhost:8080/windows.html
-curl http://localhost:8080/status.pdf --output status.pdf
+curl http://localhost:8081/status.json
+curl http://localhost:8081/help.txt
+curl http://localhost:8081/windows.html
+curl http://localhost:8081/status.pdf --output status.pdf
 
 # ?format= query parameter
-curl "http://localhost:8080/ping?format=text"
-curl "http://localhost:8080/ping?format=json"
+curl "http://localhost:8081/ping?format=text"
+curl "http://localhost:8081/ping?format=json"
 
 # Accept header
-curl -H "Accept: application/json"  http://localhost:8080/ping
-curl -H "Accept: application/pdf"   http://localhost:8080/help --output help.pdf
+curl -H "Accept: application/json"  http://localhost:8081/ping
+curl -H "Accept: application/pdf"   http://localhost:8081/help --output help.pdf
 
 # HTML response (default — works in any browser or AI that can fetch a page)
-curl http://localhost:8080/ping
+curl http://localhost:8081/ping
 ```
 
 **HTML** includes a `<pre>` block for human readability and an embedded `<script type="application/json" id="apex-result">` block containing the full result as JSON — allowing any AI that can fetch a webpage to extract structured data without a vision model.
@@ -416,14 +509,14 @@ All command endpoints accept both `POST` (JSON body) and `GET` (query string par
 
 ```bash
 # Find a window via GET
-curl "http://localhost:8080/find?window=Notepad"
+curl "http://localhost:8081/find?window=Notepad"
 
 # Execute an action via GET
-curl "http://localhost:8080/exec?action=gettext"
+curl "http://localhost:8081/exec?action=gettext"
 
 # Combine with URL extension for full URL-only access
-curl "http://localhost:8080/find.json?window=Notepad&id=15"
-curl "http://localhost:8080/exec.pdf?action=describe" --output result.pdf
+curl "http://localhost:8081/find.json?window=Notepad&id=15"
+curl "http://localhost:8081/exec.pdf?action=describe" --output result.pdf
 ```
 
 **GET parameter names** match the JSON body field names: `window`, `id` / `automationId`, `name` / `elementName`, `type` / `searchType`, `action`, `value`, `onscreen`, `prompt`, `model`, `proj`.
@@ -449,26 +542,29 @@ HTTP status: **200** on success, **400** on error.
 
 ```bash
 # Health check
-curl http://localhost:8080/ping
+curl http://localhost:8081/ping
 
 # System information (OS, machine, user, CPU, CLR)
-curl http://localhost:8080/sysinfo
+curl http://localhost:8081/sysinfo
 
 # All environment variables
-curl http://localhost:8080/env
+curl http://localhost:8081/env
 
 # Directory listing (defaults to current working directory)
-curl http://localhost:8080/ls
-curl "http://localhost:8080/ls?path=C:\Users"
+curl http://localhost:8081/ls
+curl "http://localhost:8081/ls?path=C:\Users"
 
 # Run a shell command (cmd.exe /c); 30-second timeout
-curl "http://localhost:8080/run?cmd=whoami"
-curl -X POST http://localhost:8080/run \
+# Requires EnableShellRun = true in appsettings.json or APEX_ENABLE_SHELL_RUN=true
+curl -H "X-Api-Key: <key>" "http://localhost:8081/run?cmd=whoami"
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/run \
      -H "Content-Type: application/json" \
      -d '{"value":"dir C:\\"}'
 ```
 
 `/run` response data fields: `cmd`, `stdout`, `stderr`, `exit_code`.
+
+> **Security note:** `/run` executes arbitrary commands as the process user. It is disabled by default and should only be enabled in trusted, authenticated environments.
 
 ---
 
@@ -476,104 +572,104 @@ curl -X POST http://localhost:8080/run \
 
 ```bash
 # List all open windows (with stable IDs)
-curl http://localhost:8080/windows
+curl http://localhost:8081/windows
 
 # Get current state
-curl http://localhost:8080/status
+curl http://localhost:8081/status
 
 # List all elements in the current window (nested JSON with IDs and bounding rectangles)
-curl http://localhost:8080/elements
+curl http://localhost:8081/elements
 
 # Onscreen elements only — prunes offscreen subtrees for maximum token efficiency
-curl "http://localhost:8080/elements?onscreen=true"
+curl "http://localhost:8081/elements?onscreen=true"
 
 # Filter by ControlType
-curl "http://localhost:8080/elements?type=Button"
+curl "http://localhost:8081/elements?type=Button"
 
 # Both filters combined
-curl "http://localhost:8080/elements?onscreen=true&type=Button"
+curl "http://localhost:8081/elements?onscreen=true&type=Button"
 
 # Render the current window's UI element tree as a colour-coded PNG (returns base64)
-curl http://localhost:8080/uimap
+curl http://localhost:8081/uimap
 
 # Help
-curl http://localhost:8080/help
+curl http://localhost:8081/help
 
 # Find a window and element by title/name
-curl -X POST http://localhost:8080/find \
+curl -X POST http://localhost:8081/find \
      -H "Content-Type: application/json" \
      -d '{"window":"Notepad","id":"15"}'
 
 # Find by element name with ControlType filter
-curl -X POST http://localhost:8080/find \
+curl -X POST http://localhost:8081/find \
      -H "Content-Type: application/json" \
      -d '{"window":"Notepad","name":"Text Editor","type":"Edit"}'
 
 # Find by numeric window/element IDs (fast, no fuzzy search)
-curl -X POST http://localhost:8080/find \
+curl -X POST http://localhost:8081/find \
      -H "Content-Type: application/json" \
      -d '{"window":42,"id":105}'
 
 # Type text into the found element
-curl -X POST http://localhost:8080/execute \
+curl -X POST http://localhost:8081/execute \
      -H "Content-Type: application/json" \
      -d '{"action":"type","value":"Hello World"}'
 
 # Click a button
-curl -X POST http://localhost:8080/execute \
+curl -X POST http://localhost:8081/execute \
      -H "Content-Type: application/json" \
      -d '{"action":"click"}'
 
 # Read text from element
-curl -X POST http://localhost:8080/execute \
+curl -X POST http://localhost:8081/execute \
      -H "Content-Type: application/json" \
      -d '{"action":"gettext"}'
 
 # Capture current element (returns base64 PNG in data field)
-curl -X POST http://localhost:8080/capture
+curl -X POST http://localhost:8081/capture
 
 # Capture full screen
-curl -X POST http://localhost:8080/capture \
+curl -X POST http://localhost:8081/capture \
      -H "Content-Type: application/json" \
      -d '{"action":"screen"}'
 
 # Capture multiple elements stitched into one image
-curl -X POST http://localhost:8080/capture \
+curl -X POST http://localhost:8081/capture \
      -H "Content-Type: application/json" \
      -d '{"action":"elements","value":"42,105,106"}'
 
 # OCR the found element
-curl -X POST http://localhost:8080/ocr
+curl -X POST http://localhost:8081/ocr
 
 # OCR a region (x,y,width,height) within the element
-curl -X POST http://localhost:8080/ocr \
+curl -X POST http://localhost:8081/ocr \
      -H "Content-Type: application/json" \
      -d '{"value":"0,0,300,50"}'
 
 # Check AI model status
-curl http://localhost:8080/ai/status
+curl http://localhost:8081/ai/status
 
 # Load a vision/audio LLM (run once; model stays loaded until the server restarts)
-curl -X POST http://localhost:8080/ai/init \
+curl -X POST http://localhost:8081/ai/init \
      -H "Content-Type: application/json" \
      -d '{"model":"C:\\models\\vision.gguf","proj":"C:\\models\\mmproj.gguf"}'
 
 # Describe the currently selected UI element using the vision model
 # Captures the element as an image and sends it to the LLM
-curl -X POST http://localhost:8080/ai/describe
+curl -X POST http://localhost:8081/ai/describe
 
 # Describe with a custom prompt
-curl -X POST http://localhost:8080/ai/describe \
+curl -X POST http://localhost:8081/ai/describe \
      -H "Content-Type: application/json" \
      -d '{"prompt":"List every button you can see."}'
 
 # Ask a specific question about the current element
-curl -X POST http://localhost:8080/ai/ask \
+curl -X POST http://localhost:8081/ai/ask \
      -H "Content-Type: application/json" \
      -d '{"prompt":"Is there an error message visible?"}'
 
 # Describe an image file on disk
-curl -X POST http://localhost:8080/ai/file \
+curl -X POST http://localhost:8081/ai/file \
      -H "Content-Type: application/json" \
      -d '{"value":"C:\\screenshots\\app.png","prompt":"What dialog is shown?"}'
 ```
@@ -602,7 +698,7 @@ The drawing engine renders GDI+ shapes to a base64 PNG on demand. Every shape ty
 
 ```bash
 # Draw a filled blue circle with white text
-curl -X POST http://localhost:8080/draw \
+curl -X POST http://localhost:8081/draw \
      -H "Content-Type: application/json" \
      -d '{
        "value": "{\"canvas\":\"blank\",\"width\":400,\"height\":300,\"shapes\":[
@@ -612,10 +708,10 @@ curl -X POST http://localhost:8080/draw \
      }'
 
 # Render the built-in space scene
-curl http://localhost:8080/draw/demo
+curl http://localhost:8081/draw/demo
 
 # Show it as a full-screen overlay for 6 seconds
-curl "http://localhost:8080/draw/demo?overlay=true&ms=6000"
+curl "http://localhost:8081/draw/demo?overlay=true&ms=6000"
 ```
 
 The `data.result` field contains the base64 PNG. The web console renders it inline.
@@ -630,9 +726,11 @@ The `data.result` field contains the base64 PNG. The web console renders it inli
 | `line` | `x y x2 y2` | Straight line |
 | `arrow` | `x y x2 y2` | Line with arrowhead at (x2,y2) |
 | `polygon` | `points[]` | Closed polygon — flat array of x,y pairs |
+| `triangle` | `x y w h` | Triangle — bounding-box anchored, top-centre apex |
+| `arc` | `x y w h start_angle sweep_angle` | Open arc — angles in degrees, clockwise from 3 o'clock |
 | `text` | `x y text font_size font_bold align background` | Rendered text |
 
-**Common fields on all shapes:** `color`, `fill` (bool), `stroke_width`, `opacity` (0–1), `dashed` (bool).
+**Common fields on all shapes:** `color`, `fill` (bool), `stroke_width`, `opacity` (0–1), `dashed` (bool), `rotation` (degrees, centre-origin).
 
 **Canvas values:** `blank` (transparent), `white`, `black`, `screen` (live screenshot), `window` (current window), `element` (current element).
 
@@ -646,45 +744,45 @@ The scene system lets AI agents and users collaborate on persistent, structured 
 
 ```bash
 # Create a scene
-curl -X POST http://localhost:8080/scenes \
+curl -X POST http://localhost:8081/scenes \
      -H "Content-Type: application/json" \
      -d '{"name":"My Scene","width":800,"height":600,"background":"#1a1a2e"}'
 # → data.scene contains the full scene with id
 
 # List scenes
-curl http://localhost:8080/scenes
+curl http://localhost:8081/scenes
 
 # Get a scene
-curl http://localhost:8080/scenes/{id}
+curl http://localhost:8081/scenes/{id}
 
 # Add a layer
-curl -X POST http://localhost:8080/scenes/{id}/layers \
+curl -X POST http://localhost:8081/scenes/{id}/layers \
      -H "Content-Type: application/json" \
      -d '{"name":"Background"}'
 
 # Add a shape to a layer
-curl -X POST http://localhost:8080/scenes/{id}/layers/{lid}/shapes \
+curl -X POST http://localhost:8081/scenes/{id}/layers/{lid}/shapes \
      -H "Content-Type: application/json" \
      -d '{"shape":{"type":"circle","x":400,"y":300,"r":80,"color":"royalblue","fill":true},"name":"Planet"}'
 
 # Render the scene to a PNG
-curl http://localhost:8080/scenes/{id}/render
+curl http://localhost:8081/scenes/{id}/render
 # → data.result is base64 PNG
 
 # Patch shape geometry (after user drags it — never clobbers color/style)
-curl -X PATCH http://localhost:8080/scenes/{id}/layers/{lid}/shapes/{sid} \
+curl -X PATCH http://localhost:8081/scenes/{id}/layers/{lid}/shapes/{sid} \
      -H "Content-Type: application/json" \
      -d '{"x":420,"y":310}'
 
 # Move a shape to a different layer
-curl -X POST http://localhost:8080/scenes/{id}/shapes/{sid}/move \
+curl -X POST http://localhost:8081/scenes/{id}/shapes/{sid}/move \
      -H "Content-Type: application/json" \
      -d '{"target_layer_id":"{newLayerId}"}'
 
 # Delete a shape / layer / scene
-curl -X DELETE http://localhost:8080/scenes/{id}/layers/{lid}/shapes/{sid}
-curl -X DELETE http://localhost:8080/scenes/{id}/layers/{lid}
-curl -X DELETE http://localhost:8080/scenes/{id}
+curl -X DELETE http://localhost:8081/scenes/{id}/layers/{lid}/shapes/{sid}
+curl -X DELETE http://localhost:8081/scenes/{id}/layers/{lid}
+curl -X DELETE http://localhost:8081/scenes/{id}
 ```
 
 ### Full route reference
@@ -715,7 +813,7 @@ All changes are persisted to disk (`<exe>/scenes/{id}.json`) and immediately ava
 
 ### Scene Editor — Browser (`GET /editor`)
 
-Open `http://localhost:8080/editor` for the same editing experience in a browser:
+Open `http://localhost:8081/editor` for the same editing experience in a browser:
 
 - HTML5 Canvas renderer for all 7 shape types
 - Click-and-drag to place shapes; click to select and drag to move
@@ -837,8 +935,8 @@ Disconnect-FlaUI
 Use `Scripts\apex.cmd` — a batch helper that wraps the HTTP server with simpler positional syntax. Requires the HTTP server to be started first and `curl` (built-in on Windows 10+).
 
 ```batch
-:: Optional: override port
-set APEX_PORT=8080
+:: Optional: override port (default is 8081)
+set APEX_HTTP_PORT=8081
 
 :: Discovery
 apex windows
@@ -923,7 +1021,7 @@ The UI Map Renderer scans the current window's accessibility tree and renders ev
 
 ```bash
 # Returns base64-encoded PNG of the current window's element tree
-curl http://localhost:8080/uimap
+curl http://localhost:8081/uimap
 ```
 
 Requires a prior `find` call to select a window. The response `data.result` field contains the base64 PNG — identical format to the `/capture` endpoints. In the interactive test console, the **UI map** button (in the Capture group) renders the result inline in the response log.
@@ -1085,27 +1183,27 @@ For `elements`, provide comma-separated numeric IDs from a prior `elements` scan
 
 ```bash
 # Current element
-curl -X POST http://localhost:8080/capture
+curl -X POST http://localhost:8081/capture
 
 # Full screen
-curl -X POST http://localhost:8080/capture \
+curl -X POST http://localhost:8081/capture \
      -H "Content-Type: application/json" \
      -d '{"action":"screen"}'
 
 # Current window
-curl -X POST http://localhost:8080/capture \
+curl -X POST http://localhost:8081/capture \
      -H "Content-Type: application/json" \
      -d '{"action":"window"}'
 
 # Multiple elements stitched into one image
-curl -X POST http://localhost:8080/capture \
+curl -X POST http://localhost:8081/capture \
      -H "Content-Type: application/json" \
      -d '{"action":"elements","value":"42,105,106"}'
 ```
 
 Response `data` field contains the base64 PNG. Decode it to get the image:
 ```bash
-curl -s -X POST http://localhost:8080/capture -d '{"action":"screen"}' \
+curl -s -X POST http://localhost:8081/capture -d '{"action":"screen"}' \
   | python -c "import sys,json,base64; d=json.load(sys.stdin)['data']; open('screen.png','wb').write(base64.b64decode(d))"
 ```
 
@@ -1161,7 +1259,7 @@ ApexComputerUse/
 ├── MtmdHelper.cs                        — Stateless multimodal LLM wrapper (LLamaSharp MTMD)
 ├── MtmdInteractiveModeExecute.cs        — Interactive AI computer use mode (Tools menu)
 ├── UiMapRenderer.cs                     — Renders element trees as colour-coded screen overlays and PNG images
-├── AIDrawingCommand.cs                  — GDI+ drawing engine; 7 shape types; screen overlay; built-in space scene
+├── AIDrawingCommand.cs                  — GDI+ drawing engine; 9 shape types; screen overlay; built-in space scene
 ├── Scene.cs                             — SceneShape / Layer / Scene data models with stable IDs
 ├── SceneStore.cs                        — Thread-safe in-memory + disk-persisted scene store
 ├── SceneEditorForm.cs / .Designer.cs    — WinForms layered scene editor (Tools → Scene Editor)
@@ -1171,3 +1269,41 @@ ApexComputerUse/
 ```
 
 > **OCR:** place Tesseract language files in a `tessdata\` folder next to the executable. Not included in the repo — download from [github.com/tesseract-ocr/tessdata](https://github.com/tesseract-ocr/tessdata).
+
+---
+
+## Development
+
+### Build
+
+```powershell
+# Restore and build (Release)
+dotnet build -c Release ApexComputerUse/ApexComputerUse.csproj
+
+# Run from source
+dotnet run --project ApexComputerUse/ApexComputerUse.csproj
+```
+
+Requires the **.NET 10 SDK** and the **Windows Desktop workload** (`dotnet workload install windows`).
+
+### Unit Tests
+
+```powershell
+dotnet test ApexComputerUse.Tests/ApexComputerUse.Tests.csproj
+```
+
+The test suite covers the pure-logic and data-model layers — everything that can be tested without a live desktop session:
+
+| Test file | Coverage area |
+|---|---|
+| `ElementIdGeneratorTests.cs` | Hash mode, incremental mode, reset, thread safety |
+| `SceneStoreTests.cs` | CRUD, disk persistence, concurrent creates |
+| `SceneModelTests.cs` | `FlattenForRender`, ZIndex ordering, opacity, `SceneIds` |
+| `AIDrawingCommandTests.cs` | JSON parsing, canvas backgrounds, all 8 shape types |
+| `TelegramParseCommandTests.cs` | Command + key-value parser, `DictExtensions.Get` |
+| `PipeCommandServerTests.cs` | Named-pipe JSON protocol parser |
+| `LevenshteinTests.cs` | Edit-distance boundary and domain cases |
+| `CommandResponseTests.cs` | `ToText` / `ToJson` serialisation |
+| `OcrHelperTests.cs` | `CropBitmap` region logic, `OcrResult.ToString` |
+
+Components that require an active Windows session (FlaUI UIA, Tesseract, LLamaSharp, WinForms UI) are covered by the existing integration script `Scripts/test_controls.py` and manual testing.

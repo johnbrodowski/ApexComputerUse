@@ -104,7 +104,7 @@ namespace ApexComputerUse
             return new Bitmap(capture.Bitmap);
         }
 
-        private static Bitmap CropBitmap(Bitmap source, Rectangle region)
+        internal static Bitmap CropBitmap(Bitmap source, Rectangle region)
         {
             var safe = Rectangle.Intersect(new Rectangle(0, 0, source.Width, source.Height), region);
             return source.Clone(safe, source.PixelFormat);

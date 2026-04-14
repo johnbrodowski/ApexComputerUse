@@ -23,15 +23,26 @@ namespace ApexComputerUse
     {
         private readonly TelegramBotClient _bot;
         private readonly CommandProcessor  _processor;
+        private readonly HashSet<long>?    _allowedChatIds;
         private CancellationTokenSource?   _cts;
 
         public bool IsRunning { get; private set; }
         public event Action<string>? OnLog;
 
-        public TelegramController(string token, CommandProcessor processor)
+        /// <summary>
+        /// Creates the Telegram bot controller.
+        /// When <paramref name="allowedChatIds"/> is non-empty, only messages from those
+        /// chat IDs are processed; all others receive an "Unauthorized." reply and are logged.
+        /// Pass null or an empty collection to disable the whitelist (dev/local use only).
+        /// </summary>
+        public TelegramController(string token, CommandProcessor processor,
+                                  IReadOnlyCollection<long>? allowedChatIds = null)
         {
-            _bot       = new TelegramBotClient(token);
-            _processor = processor;
+            _bot            = new TelegramBotClient(token);
+            _processor      = processor;
+            _allowedChatIds = allowedChatIds?.Count > 0
+                                ? new HashSet<long>(allowedChatIds)
+                                : null;
         }
 
         // ── Lifecycle ─────────────────────────────────────────────────────
@@ -69,7 +80,15 @@ namespace ApexComputerUse
 
             long   chatId   = update.Message.Chat.Id;
             string username = update.Message.From?.Username ?? "unknown";
-            OnLog?.Invoke($"[Telegram] @{username}: {text}");
+            OnLog?.Invoke($"[Telegram] @{username} (chat {chatId}): {text}");
+
+            // Authorization: reject messages from unlisted chat IDs when a whitelist is set.
+            if (_allowedChatIds != null && !_allowedChatIds.Contains(chatId))
+            {
+                OnLog?.Invoke($"[Telegram] Rejected unauthorized chat {chatId} (@{username})");
+                await bot.SendMessage(chatId, "Unauthorized.", cancellationToken: ct);
+                return;
+            }
 
             var req = ParseCommand(text);
             if (req == null)
@@ -94,16 +113,28 @@ namespace ApexComputerUse
                         cancellationToken: ct);
                     return;
                 }
-                catch { /* fall through to text on error */ }
+                catch (Exception ex) { OnLog?.Invoke($"[Telegram] Failed to send photo, falling back to text: {ex.Message}"); }
             }
 
             string reply = response.ToText();
 
-            // Telegram caps messages at 4096 characters
-            if (reply.Length > 4000)
-                reply = reply[..4000] + "\n...(truncated)";
-
-            await bot.SendMessage(chatId, reply, cancellationToken: ct);
+            // Telegram caps messages at 4096 characters — split into numbered pages if needed.
+            const int MaxLen = 4000;
+            if (reply.Length <= MaxLen)
+            {
+                await bot.SendMessage(chatId, reply, cancellationToken: ct);
+            }
+            else
+            {
+                int pageCount = (reply.Length + MaxLen - 1) / MaxLen;
+                for (int page = 0; page < pageCount; page++)
+                {
+                    int  start  = page * MaxLen;
+                    int  length = Math.Min(MaxLen, reply.Length - start);
+                    string part = $"[{page + 1}/{pageCount}]\n" + reply.Substring(start, length);
+                    await bot.SendMessage(chatId, part, cancellationToken: ct);
+                }
+            }
         }
 
         private Task HandleErrorAsync(ITelegramBotClient bot, Exception ex,
@@ -115,7 +146,7 @@ namespace ApexComputerUse
 
         // ── Command parser ────────────────────────────────────────────────
 
-        private static CommandRequest? ParseCommand(string text)
+        internal static CommandRequest? ParseCommand(string text)
         {
             if (!text.StartsWith('/')) return null;
 
@@ -175,7 +206,7 @@ namespace ApexComputerUse
         }
 
         /// Parses "key=value key2="multi word value" ..." into a dictionary.
-        private static Dictionary<string, string> ParseKeyValues(string input)
+        internal static Dictionary<string, string> ParseKeyValues(string input)
         {
             var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             int i = 0;

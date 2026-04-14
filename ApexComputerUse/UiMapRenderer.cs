@@ -59,8 +59,6 @@ public class UiMapRenderer
             _includedControlTypes.Count == 0 ||
             _includedControlTypes.Contains(element.ControlType);
 
-          shouldDraw = true;  // 
-
 
         if (shouldDraw)
         {
