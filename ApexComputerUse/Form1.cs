@@ -32,19 +32,49 @@ namespace ApexComputerUse
         {
             public string ModelPath { get; set; } = "";
             public string ProjPath { get; set; } = "";
+            /// <summary>
+            /// API key for the HTTP server. Auto-generated on first launch.
+            /// Clear this field (or delete settings.json) to disable auth.
+            /// </summary>
+            public string ApiKey { get; set; } = "";
+            /// <summary>
+            /// Comma-separated list of Telegram chat IDs allowed to control this machine.
+            /// Leave empty to disable the whitelist (any user who discovers the bot token can connect).
+            /// </summary>
+            public string AllowedChatIds { get; set; } = "";
         }
 
         private void LoadSettings()
         {
+            // Layer 1: Apply appsettings.json / env-var defaults (AppConfig) as baseline.
+            var cfg = AppConfig.Current;
+            if (cfg.HttpPort != 8081) txtHttpPort.Text = cfg.HttpPort.ToString();
+            if (!string.IsNullOrWhiteSpace(cfg.PipeName) &&
+                cfg.PipeName != "ApexComputerUse") txtPipeName.Text = cfg.PipeName;
+            if (!string.IsNullOrWhiteSpace(cfg.ModelPath)) txtModelPath.Text = cfg.ModelPath;
+            if (!string.IsNullOrWhiteSpace(cfg.MmProjPath)) txtProjPath.Text = cfg.MmProjPath;
+            if (!string.IsNullOrWhiteSpace(cfg.ApiKey)) txtApiKey.Text = cfg.ApiKey;
+            if (!string.IsNullOrWhiteSpace(cfg.AllowedChatIds)) txtAllowedChatIds.Text = cfg.AllowedChatIds;
+            if (!string.IsNullOrWhiteSpace(cfg.TelegramToken)) txtBotToken.Text = cfg.TelegramToken;
+
+            // Layer 2: User's saved preferences in AppData override the above.
             try
             {
-                if (!File.Exists(SettingsFile)) return;
+                if (!File.Exists(SettingsFile))
+                {
+                    // First launch — generate a key and persist it immediately.
+                    EnsureApiKey();
+                    return;
+                }
                 var s = JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(SettingsFile));
                 if (s == null) return;
                 if (!string.IsNullOrWhiteSpace(s.ModelPath)) txtModelPath.Text = s.ModelPath;
                 if (!string.IsNullOrWhiteSpace(s.ProjPath)) txtProjPath.Text = s.ProjPath;
+                if (!string.IsNullOrWhiteSpace(s.ApiKey)) txtApiKey.Text = s.ApiKey;
+                else EnsureApiKey();   // old settings file missing key
+                if (!string.IsNullOrWhiteSpace(s.AllowedChatIds)) txtAllowedChatIds.Text = s.AllowedChatIds;
             }
-            catch { /* ignore corrupt settings */ }
+            catch { /* ignore corrupt settings — will regenerate on next save */ }
         }
 
         private void SaveSettings()
@@ -52,11 +82,32 @@ namespace ApexComputerUse
             try
             {
                 Directory.CreateDirectory(SettingsDir);
-                var s = new AppSettings { ModelPath = txtModelPath.Text, ProjPath = txtProjPath.Text };
+                var s = new AppSettings
+                {
+                    ModelPath = txtModelPath.Text,
+                    ProjPath = txtProjPath.Text,
+                    ApiKey = txtApiKey.Text,
+                    AllowedChatIds = txtAllowedChatIds.Text
+                };
                 File.WriteAllText(SettingsFile,
                     JsonSerializer.Serialize(s, new JsonSerializerOptions { WriteIndented = true }));
             }
             catch { /* ignore write errors */ }
+        }
+
+        /// <summary>Generates a new random API key and writes it to the API key field.</summary>
+        private void EnsureApiKey()
+        {
+            if (!string.IsNullOrWhiteSpace(txtApiKey.Text)) return;
+            txtApiKey.Text = GenerateApiKey();
+            SaveSettings();
+        }
+
+        private static string GenerateApiKey()
+        {
+            var bytes = new byte[24];
+            System.Security.Cryptography.RandomNumberGenerator.Fill(bytes);
+            return Convert.ToBase64String(bytes).Replace('+', '-').Replace('/', '_').TrimEnd('=');
         }
 
         private AutomationElement? _foundElement;
@@ -180,7 +231,7 @@ namespace ApexComputerUse
             InitializeComponent();
 
             // Route CommandProcessor logs to the status box
-            _processor.OnLog += msg => BeginInvoke(() => Log(msg));
+            _processor.OnLog += msg => { BeginInvoke(() => Log(msg)); AppLog.FromOnLog(msg); };
 
             // Action control-type picker
             cmbControlType.Items.AddRange(ControlActions.Keys.ToArray<object>());
@@ -632,12 +683,17 @@ namespace ApexComputerUse
 
             try
             {
-                _http = new HttpCommandServer(port, _processor, _sceneStore);
-                _http.OnLog += msg => BeginInvoke(() => Log(msg));
+                string apiKey = txtApiKey.Text.Trim();
+                var appCfg = AppConfig.Current;
+                _http = new HttpCommandServer(port, _processor, _sceneStore, apiKey,
+                            enableShellRun: appCfg.EnableShellRun,
+                            bindAll: appCfg.HttpBindAll);
+                _http.OnLog += msg => { BeginInvoke(() => Log(msg)); AppLog.FromOnLog(msg); };
                 _http.Start();
                 btnStartHttp.Text = "Stop HTTP";
-                lblHttpStatus.Text = $"Listening :{port}";
-                lblHttpStatus.ForeColor = Color.Green;
+                string authNote = string.IsNullOrWhiteSpace(apiKey) ? " (no auth)" : " (auth enabled)";
+                lblHttpStatus.Text = $"Listening :{port}{authNote}";
+                lblHttpStatus.ForeColor = string.IsNullOrWhiteSpace(apiKey) ? Color.DarkOrange : Color.Green;
             }
             catch (Exception ex) { Log($"HTTP start error: {ex.Message}"); }
         }
@@ -663,7 +719,7 @@ namespace ApexComputerUse
             try
             {
                 _pipe = new PipeCommandServer(name, _processor);
-                _pipe.OnLog += msg => BeginInvoke(() => Log(msg));
+                _pipe.OnLog += msg => { BeginInvoke(() => Log(msg)); AppLog.FromOnLog(msg); };
                 _pipe.Start();
                 btnStartPipe.Text = "Stop Pipe";
                 lblPipeStatus.Text = $"Running: {name}";
@@ -692,14 +748,33 @@ namespace ApexComputerUse
 
             try
             {
-                _telegram = new TelegramController(token, _processor);
-                _telegram.OnLog += msg => BeginInvoke(() => Log(msg));
+                // Parse comma-separated allowed chat IDs from the UI field.
+                var allowedIds = txtAllowedChatIds.Text
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                    .Select(s => long.TryParse(s, out long id) ? (long?)id : null)
+                    .Where(id => id.HasValue)
+                    .Select(id => id!.Value)
+                    .ToList();
+
+                _telegram = new TelegramController(token, _processor, allowedIds.Count > 0 ? allowedIds : null);
+                _telegram.OnLog += msg => { BeginInvoke(() => Log(msg)); AppLog.FromOnLog(msg); };
                 _telegram.Start();
                 btnStartTelegram.Text = "Stop Telegram";
-                lblTelegramStatus.Text = "Telegram: Running";
-                lblTelegramStatus.ForeColor = Color.Green;
+                string authNote = allowedIds.Count > 0
+                    ? $" ({allowedIds.Count} allowed chat(s))"
+                    : " (no chat ID filter)";
+                lblTelegramStatus.Text = $"Telegram: Running{authNote}";
+                lblTelegramStatus.ForeColor = allowedIds.Count > 0 ? Color.Green : Color.DarkOrange;
             }
             catch (Exception ex) { Log($"Telegram start error: {ex.Message}"); }
+        }
+
+        private void btnCopyApiKey_Click(object sender, EventArgs e)
+        {
+            string key = txtApiKey.Text.Trim();
+            if (string.IsNullOrWhiteSpace(key)) { Log("API key is empty."); return; }
+            Clipboard.SetText(key);
+            Log("API key copied to clipboard.");
         }
 
         private void Log(string msg) =>
@@ -893,7 +968,7 @@ namespace ApexComputerUse
                     lblDownloadStatus.Text = "All files downloaded.";
                     // Auto-populate model path boxes
                     txtModelPath.Text = SetupFiles[0].RelPath;
-                    txtProjPath.Text  = SetupFiles[1].RelPath;
+                    txtProjPath.Text = SetupFiles[1].RelPath;
                     SaveSettings();
                     Log($"Setup complete. Model: {SetupFiles[0].RelPath}");
                     Log($"Projector: {SetupFiles[1].RelPath}");
@@ -1118,7 +1193,7 @@ namespace ApexComputerUse
             // Sync the GUI tab's selected window to the processor if they differ
             if (_targetWindow != null)
             {
-                var targetHwnd    = _targetWindow.Properties.NativeWindowHandle.ValueOrDefault;
+                var targetHwnd = _targetWindow.Properties.NativeWindowHandle.ValueOrDefault;
                 var processorHwnd = _processor.CurrentWindow?.Properties.NativeWindowHandle.ValueOrDefault ?? IntPtr.Zero;
                 if (targetHwnd != processorHwnd)
                     _processor.Process(new CommandRequest { Command = "find", Window = _targetWindow.Name });
@@ -1131,15 +1206,15 @@ namespace ApexComputerUse
                 return;
             }
 
-            string json     = response.Data;
-            var    renderer = CreateUiMapRenderer();
-            string winName  = _processor.CurrentWindow?.Properties.Name.ValueOrDefault ?? "window";
+            string json = response.Data;
+            var renderer = CreateUiMapRenderer();
+            string winName = _processor.CurrentWindow?.Properties.Name.ValueOrDefault ?? "window";
             string safeName = string.Concat(winName.Split(Path.GetInvalidFileNameChars()));
 
             using var dlg = new SaveFileDialog
             {
-                Title    = "Save UI Map Image",
-                Filter   = "PNG Image (*.png)|*.png",
+                Title = "Save UI Map Image",
+                Filter = "PNG Image (*.png)|*.png",
                 FileName = $"ui_map_{safeName}"
             };
 
@@ -1157,6 +1232,11 @@ namespace ApexComputerUse
         {
             var editor = new SceneEditorForm(_sceneStore);
             editor.Show(this);
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }

@@ -65,14 +65,14 @@ namespace ApexComputerUse
                     }
                 }
                 if (showDefaultDebugOutput)
-                    System.Diagnostics.Debug.WriteLine($"[ElementIdGenerator] GenerateIdFromHash (Incremental): Hash: {hash.Substring(0, 8)}... -> ID: {id}");
+                    AppLog.Debug($"[ElementIdGenerator] GenerateIdFromHash (Incremental): Hash: {hash.Substring(0, 8)}... -> ID: {id}");
             }
             else
             {
                 // Hash-based mode
                 id = ConvertHashToId(hash);
                 if (showDefaultDebugOutput)
-                    System.Diagnostics.Debug.WriteLine($"[ElementIdGenerator] GenerateIdFromHash (Hash): Hash: {hash.Substring(0, 8)}... -> ID: {id}");
+                    AppLog.Debug($"[ElementIdGenerator] GenerateIdFromHash (Hash): Hash: {hash.Substring(0, 8)}... -> ID: {id}");
             }
 
             return id;
@@ -121,7 +121,7 @@ namespace ApexComputerUse
             }
             else
             {
-                Debug.Write("");
+                /* no-op else branch — see P4-23 dead-code cleanup */
             }
             //     System: [Registry Updated][23:11:13] WindowChanged, 
 
@@ -137,7 +137,7 @@ namespace ApexComputerUse
             }
             else
             {
-                Debug.Write("");
+                /* no-op else branch — see P4-23 dead-code cleanup */
             }
 
             // hwnd: include for Window/Pane types when available
@@ -221,7 +221,7 @@ namespace ApexComputerUse
             // Keep within reasonable int range (avoid overflow issues)
             var result = Math.Abs(hashValue);
 
-            if (showDefaultDebugOutput) System.Diagnostics.Debug.WriteLine($"[ElementIdGenerator] ConvertHashToId: '{hashSubstring}' (hex) = {hashValue} (int) = {result} (abs)");
+            if (showDefaultDebugOutput) AppLog.Debug($"[ElementIdGenerator] ConvertHashToId: '{hashSubstring}' (hex) = {hashValue} (int) = {result} (abs)");
 
             return result;
         }

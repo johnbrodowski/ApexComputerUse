@@ -51,10 +51,15 @@ namespace ApexComputerUse
             txtHttpPort = new TextBox();
             btnStartHttp = new Button();
             lblHttpStatus = new Label();
+            lblApiKey = new Label();
+            txtApiKey = new TextBox();
+            btnCopyApiKey = new Button();
             lblBotToken = new Label();
             txtBotToken = new TextBox();
             btnStartTelegram = new Button();
             lblTelegramStatus = new Label();
+            lblAllowedChatIds = new Label();
+            txtAllowedChatIds = new TextBox();
             lblPipeName = new Label();
             txtPipeName = new TextBox();
             btnStartPipe = new Button();
@@ -129,14 +134,14 @@ namespace ApexComputerUse
             renderTestToolStripMenuItem.Size = new Size(222, 22);
             renderTestToolStripMenuItem.Text = "RenderTest";
             renderTestToolStripMenuItem.Click += renderTestToolStripMenuItem_Click;
-            //
+            // 
             // sceneEditorToolStripMenuItem
-            //
+            // 
             sceneEditorToolStripMenuItem.Name = "sceneEditorToolStripMenuItem";
             sceneEditorToolStripMenuItem.Size = new Size(222, 22);
             sceneEditorToolStripMenuItem.Text = "Scene Editor";
             sceneEditorToolStripMenuItem.Click += sceneEditorToolStripMenuItem_Click;
-            //
+            // 
             // tabMain
             // 
             tabMain.Controls.Add(tabPageConsole);
@@ -388,17 +393,22 @@ namespace ApexComputerUse
             grpRemote.Controls.Add(txtHttpPort);
             grpRemote.Controls.Add(btnStartHttp);
             grpRemote.Controls.Add(lblHttpStatus);
+            grpRemote.Controls.Add(lblApiKey);
+            grpRemote.Controls.Add(txtApiKey);
+            grpRemote.Controls.Add(btnCopyApiKey);
             grpRemote.Controls.Add(lblBotToken);
             grpRemote.Controls.Add(txtBotToken);
             grpRemote.Controls.Add(btnStartTelegram);
             grpRemote.Controls.Add(lblTelegramStatus);
+            grpRemote.Controls.Add(lblAllowedChatIds);
+            grpRemote.Controls.Add(txtAllowedChatIds);
             grpRemote.Controls.Add(lblPipeName);
             grpRemote.Controls.Add(txtPipeName);
             grpRemote.Controls.Add(btnStartPipe);
             grpRemote.Controls.Add(lblPipeStatus);
             grpRemote.Location = new Point(8, 8);
             grpRemote.Name = "grpRemote";
-            grpRemote.Size = new Size(519, 152);
+            grpRemote.Size = new Size(519, 228);
             grpRemote.TabIndex = 0;
             grpRemote.TabStop = false;
             grpRemote.Text = "Remote Control";
@@ -439,10 +449,36 @@ namespace ApexComputerUse
             lblHttpStatus.TabIndex = 3;
             lblHttpStatus.Text = "Stopped";
             // 
+            // lblApiKey
+            // 
+            lblApiKey.AutoSize = true;
+            lblApiKey.Location = new Point(8, 58);
+            lblApiKey.Name = "lblApiKey";
+            lblApiKey.Size = new Size(50, 15);
+            lblApiKey.TabIndex = 12;
+            lblApiKey.Text = "API Key:";
+            // 
+            // txtApiKey
+            // 
+            txtApiKey.Location = new Point(82, 55);
+            txtApiKey.Name = "txtApiKey";
+            txtApiKey.PlaceholderText = "(leave blank to disable auth)";
+            txtApiKey.Size = new Size(349, 23);
+            txtApiKey.TabIndex = 13;
+            // 
+            // btnCopyApiKey
+            // 
+            btnCopyApiKey.Location = new Point(439, 54);
+            btnCopyApiKey.Name = "btnCopyApiKey";
+            btnCopyApiKey.Size = new Size(52, 26);
+            btnCopyApiKey.TabIndex = 14;
+            btnCopyApiKey.Text = "Copy";
+            btnCopyApiKey.Click += btnCopyApiKey_Click;
+            // 
             // lblBotToken
             // 
             lblBotToken.AutoSize = true;
-            lblBotToken.Location = new Point(8, 62);
+            lblBotToken.Location = new Point(8, 98);
             lblBotToken.Name = "lblBotToken";
             lblBotToken.Size = new Size(63, 15);
             lblBotToken.TabIndex = 4;
@@ -450,7 +486,7 @@ namespace ApexComputerUse
             // 
             // txtBotToken
             // 
-            txtBotToken.Location = new Point(82, 59);
+            txtBotToken.Location = new Point(82, 95);
             txtBotToken.Name = "txtBotToken";
             txtBotToken.PlaceholderText = "123456:ABC-DEF...";
             txtBotToken.Size = new Size(265, 23);
@@ -458,7 +494,7 @@ namespace ApexComputerUse
             // 
             // btnStartTelegram
             // 
-            btnStartTelegram.Location = new Point(357, 58);
+            btnStartTelegram.Location = new Point(357, 94);
             btnStartTelegram.Name = "btnStartTelegram";
             btnStartTelegram.Size = new Size(120, 26);
             btnStartTelegram.TabIndex = 6;
@@ -469,16 +505,33 @@ namespace ApexComputerUse
             // 
             lblTelegramStatus.AutoSize = true;
             lblTelegramStatus.ForeColor = Color.Gray;
-            lblTelegramStatus.Location = new Point(8, 89);
+            lblTelegramStatus.Location = new Point(8, 155);
             lblTelegramStatus.Name = "lblTelegramStatus";
             lblTelegramStatus.Size = new Size(106, 15);
             lblTelegramStatus.TabIndex = 7;
             lblTelegramStatus.Text = "Telegram: Stopped";
             // 
+            // lblAllowedChatIds
+            // 
+            lblAllowedChatIds.AutoSize = true;
+            lblAllowedChatIds.Location = new Point(8, 128);
+            lblAllowedChatIds.Name = "lblAllowedChatIds";
+            lblAllowedChatIds.Size = new Size(54, 15);
+            lblAllowedChatIds.TabIndex = 15;
+            lblAllowedChatIds.Text = "Chat IDs:";
+            // 
+            // txtAllowedChatIds
+            // 
+            txtAllowedChatIds.Location = new Point(82, 125);
+            txtAllowedChatIds.Name = "txtAllowedChatIds";
+            txtAllowedChatIds.PlaceholderText = "123456789,987654321 (leave blank to allow all)";
+            txtAllowedChatIds.Size = new Size(395, 23);
+            txtAllowedChatIds.TabIndex = 16;
+            // 
             // lblPipeName
             // 
             lblPipeName.AutoSize = true;
-            lblPipeName.Location = new Point(8, 120);
+            lblPipeName.Location = new Point(8, 195);
             lblPipeName.Name = "lblPipeName";
             lblPipeName.Size = new Size(68, 15);
             lblPipeName.TabIndex = 8;
@@ -486,7 +539,7 @@ namespace ApexComputerUse
             // 
             // txtPipeName
             // 
-            txtPipeName.Location = new Point(82, 117);
+            txtPipeName.Location = new Point(82, 192);
             txtPipeName.Name = "txtPipeName";
             txtPipeName.Size = new Size(120, 23);
             txtPipeName.TabIndex = 9;
@@ -494,7 +547,7 @@ namespace ApexComputerUse
             // 
             // btnStartPipe
             // 
-            btnStartPipe.Location = new Point(211, 116);
+            btnStartPipe.Location = new Point(211, 191);
             btnStartPipe.Name = "btnStartPipe";
             btnStartPipe.Size = new Size(90, 26);
             btnStartPipe.TabIndex = 10;
@@ -505,7 +558,7 @@ namespace ApexComputerUse
             // 
             lblPipeStatus.AutoSize = true;
             lblPipeStatus.ForeColor = Color.Gray;
-            lblPipeStatus.Location = new Point(311, 120);
+            lblPipeStatus.Location = new Point(311, 195);
             lblPipeStatus.Name = "lblPipeStatus";
             lblPipeStatus.Size = new Size(51, 15);
             lblPipeStatus.TabIndex = 11;
@@ -730,6 +783,7 @@ namespace ApexComputerUse
             Name = "Form1";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "ApexComputerUse";
+            Load += Form1_Load;
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
             tabMain.ResumeLayout(false);
@@ -820,10 +874,15 @@ namespace ApexComputerUse
         private System.Windows.Forms.TextBox   txtHttpPort;
         private System.Windows.Forms.Button    btnStartHttp;
         private System.Windows.Forms.Label     lblHttpStatus;
+        private System.Windows.Forms.Label     lblApiKey;
+        private System.Windows.Forms.TextBox   txtApiKey;
+        private System.Windows.Forms.Button    btnCopyApiKey;
         private System.Windows.Forms.Label     lblBotToken;
         private System.Windows.Forms.TextBox   txtBotToken;
         private System.Windows.Forms.Button    btnStartTelegram;
         private System.Windows.Forms.Label     lblTelegramStatus;
+        private System.Windows.Forms.Label     lblAllowedChatIds;
+        private System.Windows.Forms.TextBox   txtAllowedChatIds;
         private System.Windows.Forms.Label     lblPipeName;
         private System.Windows.Forms.TextBox   txtPipeName;
         private System.Windows.Forms.Button    btnStartPipe;
