@@ -1,0 +1,2047 @@
+success: True
+action:  elements
+result: {
+  "id": 1306926730,
+  "controlType": "Window",
+  "name": "Top Stock Gains: US stocks posting the highest gains today - Yahoo Finance - Personal - Microsoft\u200B Edge",
+  "automationId": "",
+  "boundingRectangle": {
+    "x": 580,
+    "y": 86,
+    "width": 798,
+    "height": 536
+  },
+  "children": [
+    {
+      "id": 1528669459,
+      "controlType": "Pane",
+      "name": "",
+      "automationId": "",
+      "boundingRectangle": {
+        "x": 588,
+        "y": 86,
+        "width": 782,
+        "height": 528
+      }
+    },
+    {
+      "id": 2007336033,
+      "controlType": "Pane",
+      "name": "Top Stock Gains: US stocks posting the highest gains today - Yahoo Finance - Microsoft Edge",
+      "automationId": "",
+      "boundingRectangle": {
+        "x": 588,
+        "y": 86,
+        "width": 783,
+        "height": 529
+      },
+      "children": [
+        {
+          "id": 708379645,
+          "controlType": "Pane",
+          "name": "",
+          "automationId": "",
+          "boundingRectangle": {
+            "x": 588,
+            "y": 86,
+            "width": 783,
+            "height": 529
+          },
+          "children": [
+            {
+              "id": 673323110,
+              "controlType": "Pane",
+              "name": "",
+              "automationId": "",
+              "boundingRectangle": {
+                "x": 588,
+                "y": 86,
+                "width": 783,
+                "height": 529
+              },
+              "children": [
+                {
+                  "id": 73677510,
+                  "controlType": "Pane",
+                  "name": "",
+                  "automationId": "",
+                  "boundingRectangle": {
+                    "x": 1216,
+                    "y": 87,
+                    "width": 155,
+                    "height": 44
+                  },
+                  "children": [
+                    {
+                      "id": 1950740863,
+                      "controlType": "Button",
+                      "name": "Minimize",
+                      "automationId": "view_2",
+                      "boundingRectangle": {
+                        "x": 1216,
+                        "y": 87,
+                        "width": 52,
+                        "height": 44
+                      }
+                    },
+                    {
+                      "id": 427403193,
+                      "controlType": "Button",
+                      "name": "Maximize",
+                      "automationId": "view_3",
+                      "boundingRectangle": {
+                        "x": 1268,
+                        "y": 87,
+                        "width": 52,
+                        "height": 44
+                      }
+                    },
+                    {
+                      "id": 877398314,
+                      "controlType": "Button",
+                      "name": "Close",
+                      "automationId": "view_7",
+                      "boundingRectangle": {
+                        "x": 1319,
+                        "y": 87,
+                        "width": 52,
+                        "height": 44
+                      }
+                    }
+                  ]
+                },
+                {
+                  "id": 2003783617,
+                  "controlType": "Pane",
+                  "name": "",
+                  "automationId": "",
+                  "boundingRectangle": {
+                    "x": 588,
+                    "y": 86,
+                    "width": 783,
+                    "height": 529
+                  },
+                  "children": [
+                    {
+                      "id": 242854735,
+                      "controlType": "Pane",
+                      "name": "",
+                      "automationId": "",
+                      "boundingRectangle": {
+                        "x": 588,
+                        "y": 86,
+                        "width": 783,
+                        "height": 90
+                      },
+                      "children": [
+                        {
+                          "id": 596304309,
+                          "controlType": "ToolBar",
+                          "name": "App bar",
+                          "automationId": "view_1000",
+                          "boundingRectangle": {
+                            "x": 588,
+                            "y": 131,
+                            "width": 783,
+                            "height": 45
+                          },
+                          "children": [
+                            {
+                              "id": 1104182130,
+                              "controlType": "Button",
+                              "name": "Back",
+                              "automationId": "view_1001",
+                              "boundingRectangle": {
+                                "x": 592,
+                                "y": 136,
+                                "width": 36,
+                                "height": 36
+                              }
+                            },
+                            {
+                              "id": 1872692243,
+                              "controlType": "Button",
+                              "name": "Refresh",
+                              "automationId": "view_1003",
+                              "boundingRectangle": {
+                                "x": 633,
+                                "y": 136,
+                                "width": 36,
+                                "height": 36
+                              }
+                            },
+                            {
+                              "id": 776768923,
+                              "controlType": "Group",
+                              "name": "",
+                              "automationId": "",
+                              "boundingRectangle": {
+                                "x": 673,
+                                "y": 136,
+                                "width": 325,
+                                "height": 36
+                              },
+                              "children": [
+                                {
+                                  "id": 1308959538,
+                                  "controlType": "Button",
+                                  "name": "View site information",
+                                  "automationId": "view_1019",
+                                  "boundingRectangle": {
+                                    "x": 678,
+                                    "y": 140,
+                                    "width": 27,
+                                    "height": 27
+                                  }
+                                },
+                                {
+                                  "id": 1090767810,
+                                  "controlType": "Edit",
+                                  "name": "Address and search bar",
+                                  "automationId": "view_1021",
+                                  "boundingRectangle": {
+                                    "x": 704,
+                                    "y": 140,
+                                    "width": 195,
+                                    "height": 27
+                                  }
+                                },
+                                {
+                                  "id": 1386046443,
+                                  "controlType": "Pane",
+                                  "name": "",
+                                  "automationId": "",
+                                  "boundingRectangle": {
+                                    "x": 904,
+                                    "y": 140,
+                                    "width": 90,
+                                    "height": 27
+                                  },
+                                  "children": [
+                                    {
+                                      "id": 544990609,
+                                      "controlType": "Button",
+                                      "name": "App available. Install Yahoo Finance",
+                                      "automationId": "",
+                                      "boundingRectangle": {
+                                        "x": 904,
+                                        "y": 140,
+                                        "width": 27,
+                                        "height": 27
+                                      },
+                                      "children": [
+                                        {
+                                          "id": 277727660,
+                                          "controlType": "Text",
+                                          "name": "App available",
+                                          "automationId": ""
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "id": 631596291,
+                                      "controlType": "Button",
+                                      "name": "Read aloud this page (Ctrl\u002BShift\u002BU)",
+                                      "automationId": "",
+                                      "boundingRectangle": {
+                                        "x": 935,
+                                        "y": 140,
+                                        "width": 27,
+                                        "height": 27
+                                      }
+                                    },
+                                    {
+                                      "id": 1470145758,
+                                      "controlType": "Button",
+                                      "name": "Add this page to favorites (Ctrl\u002BD)",
+                                      "automationId": "view_1006",
+                                      "boundingRectangle": {
+                                        "x": 967,
+                                        "y": 140,
+                                        "width": 27,
+                                        "height": 27
+                                      }
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "id": 1947955129,
+                              "controlType": "Pane",
+                              "name": "",
+                              "automationId": "",
+                              "boundingRectangle": {
+                                "x": 1002,
+                                "y": 131,
+                                "width": 123,
+                                "height": 45
+                              },
+                              "children": [
+                                {
+                                  "id": 908971870,
+                                  "controlType": "Button",
+                                  "name": "uBlock Origin (21), 21\nHas access to this site",
+                                  "automationId": "view_1017",
+                                  "boundingRectangle": {
+                                    "x": 1002,
+                                    "y": 136,
+                                    "width": 36,
+                                    "height": 36
+                                  }
+                                },
+                                {
+                                  "id": 1606811996,
+                                  "controlType": "Button",
+                                  "name": "Current State: LIGHT\nHas access to this site",
+                                  "automationId": "view_1017",
+                                  "boundingRectangle": {
+                                    "x": 1043,
+                                    "y": 136,
+                                    "width": 36,
+                                    "height": 36
+                                  }
+                                },
+                                {
+                                  "id": 1387326594,
+                                  "controlType": "Button",
+                                  "name": "Extensions",
+                                  "automationId": "view_1014",
+                                  "boundingRectangle": {
+                                    "x": 1083,
+                                    "y": 136,
+                                    "width": 36,
+                                    "height": 36
+                                  }
+                                },
+                                {
+                                  "id": 1543229770,
+                                  "controlType": "Pane",
+                                  "name": "",
+                                  "automationId": "",
+                                  "boundingRectangle": {
+                                    "x": 1123,
+                                    "y": 144,
+                                    "width": 2,
+                                    "height": 18
+                                  }
+                                }
+                              ]
+                            },
+                            {
+                              "id": 1566564974,
+                              "controlType": "Pane",
+                              "name": "",
+                              "automationId": "",
+                              "boundingRectangle": {
+                                "x": 1129,
+                                "y": 131,
+                                "width": 77,
+                                "height": 45
+                              },
+                              "children": [
+                                {
+                                  "id": 103940988,
+                                  "controlType": "Button",
+                                  "name": "Favorites",
+                                  "automationId": "view_1011",
+                                  "boundingRectangle": {
+                                    "x": 1129,
+                                    "y": 136,
+                                    "width": 36,
+                                    "height": 36
+                                  }
+                                },
+                                {
+                                  "id": 1262124031,
+                                  "controlType": "Button",
+                                  "name": "History",
+                                  "automationId": "",
+                                  "boundingRectangle": {
+                                    "x": 1169,
+                                    "y": 136,
+                                    "width": 36,
+                                    "height": 36
+                                  }
+                                }
+                              ]
+                            },
+                            {
+                              "id": 48592428,
+                              "controlType": "Button",
+                              "name": "Screenshot",
+                              "automationId": "view_1032",
+                              "boundingRectangle": {
+                                "x": 1210,
+                                "y": 136,
+                                "width": 36,
+                                "height": 36
+                              }
+                            },
+                            {
+                              "id": 911108891,
+                              "controlType": "Button",
+                              "name": "Share",
+                              "automationId": "view_1030",
+                              "boundingRectangle": {
+                                "x": 1250,
+                                "y": 136,
+                                "width": 36,
+                                "height": 36
+                              }
+                            },
+                            {
+                              "id": 2085154363,
+                              "controlType": "Button",
+                              "name": "Personal Profile",
+                              "automationId": "view_1013",
+                              "boundingRectangle": {
+                                "x": 1290,
+                                "y": 136,
+                                "width": 36,
+                                "height": 36
+                              }
+                            },
+                            {
+                              "id": 996135046,
+                              "controlType": "Button",
+                              "name": "Settings and more (Alt\u002BF)",
+                              "automationId": "view_1015",
+                              "boundingRectangle": {
+                                "x": 1330,
+                                "y": 136,
+                                "width": 36,
+                                "height": 36
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": 204921819,
+                      "controlType": "Pane",
+                      "name": "",
+                      "automationId": "",
+                      "boundingRectangle": {
+                        "x": 588,
+                        "y": 176,
+                        "width": 783,
+                        "height": 440
+                      },
+                      "children": [
+                        {
+                          "id": 2131588984,
+                          "controlType": "Pane",
+                          "name": "",
+                          "automationId": "",
+                          "boundingRectangle": {
+                            "x": 588,
+                            "y": 176,
+                            "width": 783,
+                            "height": 440
+                          },
+                          "children": [
+                            {
+                              "id": 653880987,
+                              "controlType": "Pane",
+                              "name": "",
+                              "automationId": "",
+                              "boundingRectangle": {
+                                "x": 588,
+                                "y": 176,
+                                "width": 783,
+                                "height": 440
+                              },
+                              "children": [
+                                {
+                                  "id": 632607503,
+                                  "controlType": "Pane",
+                                  "name": "",
+                                  "automationId": "",
+                                  "boundingRectangle": {
+                                    "x": 588,
+                                    "y": 176,
+                                    "width": 783,
+                                    "height": 440
+                                  },
+                                  "children": [
+                                    {
+                                      "id": 402782855,
+                                      "controlType": "Pane",
+                                      "name": "",
+                                      "automationId": "",
+                                      "boundingRectangle": {
+                                        "x": 588,
+                                        "y": 176,
+                                        "width": 783,
+                                        "height": 440
+                                      },
+                                      "children": [
+                                        {
+                                          "id": 825125243,
+                                          "controlType": "Pane",
+                                          "name": "",
+                                          "automationId": "",
+                                          "boundingRectangle": {
+                                            "x": 588,
+                                            "y": 176,
+                                            "width": 783,
+                                            "height": 440
+                                          },
+                                          "children": [
+                                            {
+                                              "id": 1025786701,
+                                              "controlType": "Document",
+                                              "name": "Top Stock Gains: US stocks posting the highest gains today - Yahoo Finance",
+                                              "automationId": "RootWebArea",
+                                              "boundingRectangle": {
+                                                "x": 592,
+                                                "y": 176,
+                                                "width": 774,
+                                                "height": 435
+                                              },
+                                              "children": [
+                                                {
+                                                  "id": 870162122,
+                                                  "controlType": "Group",
+                                                  "name": "",
+                                                  "automationId": "atomic",
+                                                  "boundingRectangle": {
+                                                    "x": 592,
+                                                    "y": 176,
+                                                    "width": 757,
+                                                    "height": 4282
+                                                  },
+                                                  "children": [
+                                                    {
+                                                      "id": 334860196,
+                                                      "controlType": "Group",
+                                                      "name": "",
+                                                      "automationId": "",
+                                                      "boundingRectangle": {
+                                                        "x": 592,
+                                                        "y": 176,
+                                                        "width": 757,
+                                                        "height": 72
+                                                      },
+                                                      "children": [
+                                                        {
+                                                          "id": 2067014063,
+                                                          "controlType": "Group",
+                                                          "name": "",
+                                                          "automationId": "ybar",
+                                                          "boundingRectangle": {
+                                                            "x": 592,
+                                                            "y": 176,
+                                                            "width": 757,
+                                                            "height": 72
+                                                          },
+                                                          "children": [
+                                                            {
+                                                              "id": 1283187971,
+                                                              "controlType": "Button",
+                                                              "name": "Y! Sites",
+                                                              "automationId": "_yb_sidenav-btn",
+                                                              "boundingRectangle": {
+                                                                "x": 611,
+                                                                "y": 199,
+                                                                "width": 23,
+                                                                "height": 23
+                                                              },
+                                                              "children": [
+                                                                {
+                                                                  "id": 2127641704,
+                                                                  "controlType": "Image",
+                                                                  "name": "",
+                                                                  "automationId": "",
+                                                                  "boundingRectangle": {
+                                                                    "x": 611,
+                                                                    "y": 199,
+                                                                    "width": 23,
+                                                                    "height": 23
+                                                                  }
+                                                                }
+                                                              ]
+                                                            },
+                                                            {
+                                                              "id": 611569794,
+                                                              "controlType": "Group",
+                                                              "name": "",
+                                                              "automationId": "",
+                                                              "boundingRectangle": {
+                                                                "x": 654,
+                                                                "y": 200,
+                                                                "width": 160,
+                                                                "height": 24
+                                                              },
+                                                              "children": [
+                                                                {
+                                                                  "id": 1065081452,
+                                                                  "controlType": "Hyperlink",
+                                                                  "name": "Yahoo Finance",
+                                                                  "automationId": "ybar-logo",
+                                                                  "boundingRectangle": {
+                                                                    "x": 654,
+                                                                    "y": 200,
+                                                                    "width": 160,
+                                                                    "height": 24
+                                                                  },
+                                                                  "children": [
+                                                                    {
+                                                                      "id": 181737330,
+                                                                      "controlType": "Image",
+                                                                      "name": "",
+                                                                      "automationId": "",
+                                                                      "boundingRectangle": {
+                                                                        "x": 654,
+                                                                        "y": 200,
+                                                                        "width": 160,
+                                                                        "height": 24
+                                                                      }
+                                                                    }
+                                                                  ]
+                                                                }
+                                                              ]
+                                                            },
+                                                            {
+                                                              "id": 2020901388,
+                                                              "controlType": "Group",
+                                                              "name": "",
+                                                              "automationId": "ybar-sf",
+                                                              "boundingRectangle": {
+                                                                "x": 840,
+                                                                "y": 189,
+                                                                "width": 220,
+                                                                "height": 46
+                                                              },
+                                                              "children": [
+                                                                {
+                                                                  "id": 1953297462,
+                                                                  "controlType": "Edit",
+                                                                  "name": "Search query",
+                                                                  "automationId": "ybar-sbq",
+                                                                  "boundingRectangle": {
+                                                                    "x": 840,
+                                                                    "y": 189,
+                                                                    "width": 220,
+                                                                    "height": 46
+                                                                  }
+                                                                },
+                                                                {
+                                                                  "id": 1365134816,
+                                                                  "controlType": "Image",
+                                                                  "name": "",
+                                                                  "automationId": "",
+                                                                  "boundingRectangle": {
+                                                                    "x": 862,
+                                                                    "y": 202,
+                                                                    "width": 19,
+                                                                    "height": 19
+                                                                  }
+                                                                },
+                                                                {
+                                                                  "id": 1876916793,
+                                                                  "controlType": "Button",
+                                                                  "name": "Search",
+                                                                  "automationId": "ybar-search",
+                                                                  "boundingRectangle": {
+                                                                    "x": 978,
+                                                                    "y": 189,
+                                                                    "width": 82,
+                                                                    "height": 46
+                                                                  }
+                                                                }
+                                                              ]
+                                                            },
+                                                            {
+                                                              "id": 534808985,
+                                                              "controlType": "ToolBar",
+                                                              "name": "",
+                                                              "automationId": "",
+                                                              "boundingRectangle": {
+                                                                "x": 1080,
+                                                                "y": 189,
+                                                                "width": 256,
+                                                                "height": 46
+                                                              },
+                                                              "children": [
+                                                                {
+                                                                  "id": 332799571,
+                                                                  "controlType": "Group",
+                                                                  "name": "",
+                                                                  "automationId": "notification-container",
+                                                                  "boundingRectangle": {
+                                                                    "x": 1080,
+                                                                    "y": 191,
+                                                                    "width": 41,
+                                                                    "height": 41
+                                                                  },
+                                                                  "children": [
+                                                                    {
+                                                                      "id": 776771946,
+                                                                      "controlType": "CheckBox",
+                                                                      "name": "Notifications",
+                                                                      "automationId": "ybarNotificationMenu",
+                                                                      "boundingRectangle": {
+                                                                        "x": 1089,
+                                                                        "y": 200,
+                                                                        "width": 41,
+                                                                        "height": 41
+                                                                      }
+                                                                    },
+                                                                    {
+                                                                      "id": 377995463,
+                                                                      "controlType": "Image",
+                                                                      "name": "",
+                                                                      "automationId": "",
+                                                                      "boundingRectangle": {
+                                                                        "x": 1090,
+                                                                        "y": 201,
+                                                                        "width": 19,
+                                                                        "height": 19
+                                                                      }
+                                                                    }
+                                                                  ]
+                                                                },
+                                                                {
+                                                                  "id": 429867328,
+                                                                  "controlType": "Group",
+                                                                  "name": "",
+                                                                  "automationId": "",
+                                                                  "boundingRectangle": {
+                                                                    "x": 1134,
+                                                                    "y": 189,
+                                                                    "width": 97,
+                                                                    "height": 46
+                                                                  },
+                                                                  "children": [
+                                                                    {
+                                                                      "id": 412865979,
+                                                                      "controlType": "Hyperlink",
+                                                                      "name": "Check your mail",
+                                                                      "automationId": "ybarMailLink",
+                                                                      "boundingRectangle": {
+                                                                        "x": 1153,
+                                                                        "y": 191,
+                                                                        "width": 59,
+                                                                        "height": 41
+                                                                      },
+                                                                      "children": [
+                                                                        {
+                                                                          "id": 1285706098,
+                                                                          "controlType": "Image",
+                                                                          "name": "",
+                                                                          "automationId": "",
+                                                                          "boundingRectangle": {
+                                                                            "x": 1153,
+                                                                            "y": 203,
+                                                                            "width": 23,
+                                                                            "height": 17
+                                                                          }
+                                                                        }
+                                                                      ]
+                                                                    }
+                                                                  ]
+                                                                },
+                                                                {
+                                                                  "id": 1634059955,
+                                                                  "controlType": "Hyperlink",
+                                                                  "name": "Sign in",
+                                                                  "automationId": "",
+                                                                  "boundingRectangle": {
+                                                                    "x": 1248,
+                                                                    "y": 189,
+                                                                    "width": 88,
+                                                                    "height": 46
+                                                                  }
+                                                                }
+                                                              ]
+                                                            }
+                                                          ]
+                                                        }
+                                                      ]
+                                                    },
+                                                    {
+                                                      "id": 1364729403,
+                                                      "controlType": "Group",
+                                                      "name": "",
+                                                      "automationId": "nimbus-app",
+                                                      "boundingRectangle": {
+                                                        "x": 592,
+                                                        "y": 247,
+                                                        "width": 757,
+                                                        "height": 4211
+                                                      },
+                                                      "children": [
+                                                        {
+                                                          "id": 898125669,
+                                                          "controlType": "Group",
+                                                          "name": "",
+                                                          "automationId": "",
+                                                          "boundingRectangle": {
+                                                            "x": 592,
+                                                            "y": 247,
+                                                            "width": 757,
+                                                            "height": 4211
+                                                          },
+                                                          "children": [
+                                                            {
+                                                              "id": 1619483391,
+                                                              "controlType": "Group",
+                                                              "name": "Left navigation",
+                                                              "automationId": "",
+                                                              "boundingRectangle": {
+                                                                "x": 592,
+                                                                "y": 247,
+                                                                "width": 757,
+                                                                "height": 50
+                                                              },
+                                                              "children": [
+                                                                {
+                                                                  "id": 95453467,
+                                                                  "controlType": "Group",
+                                                                  "name": "Markets Navigation",
+                                                                  "automationId": "",
+                                                                  "boundingRectangle": {
+                                                                    "x": 609,
+                                                                    "y": 261,
+                                                                    "width": 740,
+                                                                    "height": 36
+                                                                  },
+                                                                  "children": [
+                                                                    {
+                                                                      "id": 1721805069,
+                                                                      "controlType": "MenuBar",
+                                                                      "name": "Markets Navigation menubar",
+                                                                      "automationId": "",
+                                                                      "boundingRectangle": {
+                                                                        "x": 609,
+                                                                        "y": 261,
+                                                                        "width": 740,
+                                                                        "height": 36
+                                                                      },
+                                                                      "children": [
+                                                                        {
+                                                                          "id": 1549320530,
+                                                                          "controlType": "MenuItem",
+                                                                          "name": "Overview",
+                                                                          "automationId": "",
+                                                                          "boundingRectangle": {
+                                                                            "x": 609,
+                                                                            "y": 261,
+                                                                            "width": 78,
+                                                                            "height": 36
+                                                                          }
+                                                                        },
+                                                                        {
+                                                                          "id": 1901290556,
+                                                                          "controlType": "MenuItem",
+                                                                          "name": "World Indices",
+                                                                          "automationId": "",
+                                                                          "boundingRectangle": {
+                                                                            "x": 704,
+                                                                            "y": 261,
+                                                                            "width": 115,
+                                                                            "height": 36
+                                                                          }
+                                                                        },
+                                                                        {
+                                                                          "id": 1867465688,
+                                                                          "controlType": "MenuItem",
+                                                                          "name": "Futures",
+                                                                          "automationId": "",
+                                                                          "boundingRectangle": {
+                                                                            "x": 836,
+                                                                            "y": 261,
+                                                                            "width": 64,
+                                                                            "height": 36
+                                                                          }
+                                                                        },
+                                                                        {
+                                                                          "id": 210929853,
+                                                                          "controlType": "MenuItem",
+                                                                          "name": "Bonds",
+                                                                          "automationId": "",
+                                                                          "boundingRectangle": {
+                                                                            "x": 917,
+                                                                            "y": 261,
+                                                                            "width": 54,
+                                                                            "height": 36
+                                                                          }
+                                                                        },
+                                                                        {
+                                                                          "id": 1774444692,
+                                                                          "controlType": "MenuItem",
+                                                                          "name": "Currencies",
+                                                                          "automationId": "",
+                                                                          "boundingRectangle": {
+                                                                            "x": 988,
+                                                                            "y": 261,
+                                                                            "width": 91,
+                                                                            "height": 36
+                                                                          }
+                                                                        },
+                                                                        {
+                                                                          "id": 463474585,
+                                                                          "controlType": "MenuItem",
+                                                                          "name": "Options",
+                                                                          "automationId": "",
+                                                                          "boundingRectangle": {
+                                                                            "x": 1096,
+                                                                            "y": 261,
+                                                                            "width": 67,
+                                                                            "height": 36
+                                                                          }
+                                                                        },
+                                                                        {
+                                                                          "id": 987846808,
+                                                                          "controlType": "MenuItem",
+                                                                          "name": "Sectors",
+                                                                          "automationId": "",
+                                                                          "boundingRectangle": {
+                                                                            "x": 1180,
+                                                                            "y": 261,
+                                                                            "width": 64,
+                                                                            "height": 36
+                                                                          }
+                                                                        },
+                                                                        {
+                                                                          "id": 495201926,
+                                                                          "controlType": "MenuItem",
+                                                                          "name": "Prediction Markets NEW",
+                                                                          "automationId": "",
+                                                                          "boundingRectangle": {
+                                                                            "x": 1261,
+                                                                            "y": 261,
+                                                                            "width": 206,
+                                                                            "height": 36
+                                                                          }
+                                                                        }
+                                                                      ]
+                                                                    }
+                                                                  ]
+                                                                }
+                                                              ]
+                                                            },
+                                                            {
+                                                              "id": 1766694080,
+                                                              "controlType": "Group",
+                                                              "name": "",
+                                                              "automationId": "",
+                                                              "boundingRectangle": {
+                                                                "x": 609,
+                                                                "y": 314,
+                                                                "width": 723,
+                                                                "height": 35
+                                                              },
+                                                              "children": [
+                                                                {
+                                                                  "id": 303476807,
+                                                                  "controlType": "Text",
+                                                                  "name": "Stocks",
+                                                                  "automationId": "",
+                                                                  "boundingRectangle": {
+                                                                    "x": 609,
+                                                                    "y": 314,
+                                                                    "width": 76,
+                                                                    "height": 35
+                                                                  }
+                                                                }
+                                                              ]
+                                                            },
+                                                            {
+                                                              "id": 444769498,
+                                                              "controlType": "Tab",
+                                                              "name": "",
+                                                              "automationId": "",
+                                                              "boundingRectangle": {
+                                                                "x": 609,
+                                                                "y": 365,
+                                                                "width": 723,
+                                                                "height": 37
+                                                              },
+                                                              "children": [
+                                                                {
+                                                                  "id": 2053202866,
+                                                                  "controlType": "TabItem",
+                                                                  "name": "Most Active",
+                                                                  "automationId": "tab-most-active",
+                                                                  "boundingRectangle": {
+                                                                    "x": 609,
+                                                                    "y": 365,
+                                                                    "width": 113,
+                                                                    "height": 37
+                                                                  }
+                                                                },
+                                                                {
+                                                                  "id": 1928824845,
+                                                                  "controlType": "TabItem",
+                                                                  "name": "Trending Now",
+                                                                  "automationId": "tab-trending",
+                                                                  "boundingRectangle": {
+                                                                    "x": 721,
+                                                                    "y": 365,
+                                                                    "width": 125,
+                                                                    "height": 37
+                                                                  }
+                                                                },
+                                                                {
+                                                                  "id": 955037315,
+                                                                  "controlType": "TabItem",
+                                                                  "name": "Top Gainers",
+                                                                  "automationId": "tab-gainers",
+                                                                  "boundingRectangle": {
+                                                                    "x": 845,
+                                                                    "y": 365,
+                                                                    "width": 113,
+                                                                    "height": 37
+                                                                  }
+                                                                },
+                                                                {
+                                                                  "id": 950363130,
+                                                                  "controlType": "TabItem",
+                                                                  "name": "Top Losers",
+                                                                  "automationId": "tab-losers",
+                                                                  "boundingRectangle": {
+                                                                    "x": 957,
+                                                                    "y": 365,
+                                                                    "width": 104,
+                                                                    "height": 37
+                                                                  }
+                                                                },
+                                                                {
+                                                                  "id": 1861587585,
+                                                                  "controlType": "TabItem",
+                                                                  "name": "52 Week Gainers",
+                                                                  "automationId": "tab-52-week-gainers",
+                                                                  "boundingRectangle": {
+                                                                    "x": 1060,
+                                                                    "y": 365,
+                                                                    "width": 147,
+                                                                    "height": 37
+                                                                  }
+                                                                },
+                                                                {
+                                                                  "id": 1816030787,
+                                                                  "controlType": "TabItem",
+                                                                  "name": "52 Week Losers",
+                                                                  "automationId": "tab-52-week-losers",
+                                                                  "boundingRectangle": {
+                                                                    "x": 1206,
+                                                                    "y": 365,
+                                                                    "width": 140,
+                                                                    "height": 37
+                                                                  }
+                                                                }
+                                                              ]
+                                                            },
+                                                            {
+                                                              "id": 891205117,
+                                                              "controlType": "CheckBox",
+                                                              "name": "table",
+                                                              "automationId": "swc-obd59d7k",
+                                                              "boundingRectangle": {
+                                                                "x": 610,
+                                                                "y": 420,
+                                                                "width": 95,
+                                                                "height": 28
+                                                              }
+                                                            },
+                                                            {
+                                                              "id": 1060297669,
+                                                              "controlType": "Text",
+                                                              "name": "Table View",
+                                                              "automationId": "",
+                                                              "boundingRectangle": {
+                                                                "x": 624,
+                                                                "y": 425,
+                                                                "width": 68,
+                                                                "height": 17
+                                                              }
+                                                            },
+                                                            {
+                                                              "id": 1045300810,
+                                                              "controlType": "CheckBox",
+                                                              "name": "heatmap",
+                                                              "automationId": "swc-xd1okteq",
+                                                              "boundingRectangle": {
+                                                                "x": 704,
+                                                                "y": 420,
+                                                                "width": 118,
+                                                                "height": 28
+                                                              }
+                                                            },
+                                                            {
+                                                              "id": 456827864,
+                                                              "controlType": "Text",
+                                                              "name": "Heatmap View",
+                                                              "automationId": "",
+                                                              "boundingRectangle": {
+                                                                "x": 718,
+                                                                "y": 425,
+                                                                "width": 91,
+                                                                "height": 17
+                                                              }
+                                                            },
+                                                            {
+                                                              "id": 647452925,
+                                                              "controlType": "Hyperlink",
+                                                              "name": "Edit in screener",
+                                                              "automationId": "",
+                                                              "boundingRectangle": {
+                                                                "x": 609,
+                                                                "y": 460,
+                                                                "width": 144,
+                                                                "height": 27
+                                                              }
+                                                            },
+                                                            {
+                                                              "id": 345571549,
+                                                              "controlType": "Hyperlink",
+                                                              "name": "View all screeners",
+                                                              "automationId": "",
+                                                              "boundingRectangle": {
+                                                                "x": 761,
+                                                                "y": 460,
+                                                                "width": 158,
+                                                                "height": 27
+                                                              }
+                                                            },
+                                                            {
+                                                              "id": 312512123,
+                                                              "controlType": "Table",
+                                                              "name": "",
+                                                              "automationId": "",
+                                                              "boundingRectangle": {
+                                                                "x": 610,
+                                                                "y": 505,
+                                                                "width": 1172,
+                                                                "height": 488
+                                                              },
+                                                              "children": [
+                                                                {
+                                                                  "id": 629100735,
+                                                                  "controlType": "DataItem",
+                                                                  "name": "",
+                                                                  "automationId": "",
+                                                                  "boundingRectangle": {
+                                                                    "x": 610,
+                                                                    "y": 505,
+                                                                    "width": 1172,
+                                                                    "height": 40
+                                                                  },
+                                                                  "children": [
+                                                                    {
+                                                                      "id": 359735147,
+                                                                      "controlType": "DataItem",
+                                                                      "name": "Symbol",
+                                                                      "automationId": "",
+                                                                      "boundingRectangle": {
+                                                                        "x": 610,
+                                                                        "y": 505,
+                                                                        "width": 66,
+                                                                        "height": 40
+                                                                      }
+                                                                    },
+                                                                    {
+                                                                      "id": 10360741,
+                                                                      "controlType": "DataItem",
+                                                                      "name": "Name",
+                                                                      "automationId": "",
+                                                                      "boundingRectangle": {
+                                                                        "x": 675,
+                                                                        "y": 505,
+                                                                        "width": 198,
+                                                                        "height": 40
+                                                                      }
+                                                                    },
+                                                                    {
+                                                                      "id": 109251880,
+                                                                      "controlType": "DataItem",
+                                                                      "name": "\u00A0",
+                                                                      "automationId": "",
+                                                                      "boundingRectangle": {
+                                                                        "x": 872,
+                                                                        "y": 505,
+                                                                        "width": 75,
+                                                                        "height": 40
+                                                                      }
+                                                                    },
+                                                                    {
+                                                                      "id": 893994139,
+                                                                      "controlType": "DataItem",
+                                                                      "name": "Price",
+                                                                      "automationId": "",
+                                                                      "boundingRectangle": {
+                                                                        "x": 946,
+                                                                        "y": 505,
+                                                                        "width": 62,
+                                                                        "height": 40
+                                                                      }
+                                                                    },
+                                                                    {
+                                                                      "id": 116871526,
+                                                                      "controlType": "DataItem",
+                                                                      "name": "Change",
+                                                                      "automationId": "",
+                                                                      "boundingRectangle": {
+                                                                        "x": 1007,
+                                                                        "y": 505,
+                                                                        "width": 72,
+                                                                        "height": 40
+                                                                      }
+                                                                    },
+                                                                    {
+                                                                      "id": 1995019345,
+                                                                      "controlType": "DataItem",
+                                                                      "name": "Change %",
+                                                                      "automationId": "",
+                                                                      "boundingRectangle": {
+                                                                        "x": 1078,
+                                                                        "y": 505,
+                                                                        "width": 97,
+                                                                        "height": 40
+                                                                      }
+                                                                    },
+                                                                    {
+                                                                      "id": 460370035,
+                                                                      "controlType": "DataItem",
+                                                                      "name": "Volume",
+                                                                      "automationId": "",
+                                                                      "boundingRectangle": {
+                                                                        "x": 1174,
+                                                                        "y": 505,
+                                                                        "width": 85,
+                                                                        "height": 40
+                                                                      }
+                                                                    },
+                                                                    {
+                                                                      "id": 1185456112,
+                                                                      "controlType": "DataItem",
+                                                                      "name": "Avg Vol (3M)",
+                                                                      "automationId": "",
+                                                                      "boundingRectangle": {
+                                                                        "x": 1258,
+                                                                        "y": 505,
+                                                                        "width": 96,
+                                                                        "height": 40
+                                                                      }
+                                                                    }
+                                                                  ]
+                                                                },
+                                                                {
+                                                                  "id": 169757731,
+                                                                  "controlType": "DataItem",
+                                                                  "name": "",
+                                                                  "automationId": "",
+                                                                  "boundingRectangle": {
+                                                                    "x": 610,
+                                                                    "y": 544,
+                                                                    "width": 1172,
+                                                                    "height": 46
+                                                                  },
+                                                                  "children": [
+                                                                    {
+                                                                      "id": 819752362,
+                                                                      "controlType": "DataItem",
+                                                                      "name": "Xanadu Quantum Technologies Limited",
+                                                                      "automationId": "",
+                                                                      "boundingRectangle": {
+                                                                        "x": 610,
+                                                                        "y": 544,
+                                                                        "width": 66,
+                                                                        "height": 46
+                                                                      },
+                                                                      "children": [
+                                                                        {
+                                                                          "id": 32499469,
+                                                                          "controlType": "Hyperlink",
+                                                                          "name": "Xanadu Quantum Technologies Limited",
+                                                                          "automationId": "",
+                                                                          "boundingRectangle": {
+                                                                            "x": 619,
+                                                                            "y": 553,
+                                                                            "width": 46,
+                                                                            "height": 28
+                                                                          }
+                                                                        }
+                                                                      ]
+                                                                    },
+                                                                    {
+                                                                      "id": 1622125135,
+                                                                      "controlType": "DataItem",
+                                                                      "name": "Xanadu Quantum Technologies Limited",
+                                                                      "automationId": "",
+                                                                      "boundingRectangle": {
+                                                                        "x": 675,
+                                                                        "y": 544,
+                                                                        "width": 198,
+                                                                        "height": 46
+                                                                      }
+                                                                    },
+                                                                    {
+                                                                      "id": 2004093098,
+                                                                      "controlType": "DataItem",
+                                                                      "name": "Advanced Chart",
+                                                                      "automationId": "",
+                                                                      "boundingRectangle": {
+                                                                        "x": 872,
+                                                                        "y": 544,
+                                                                        "width": 75,
+                                                                        "height": 46
+                                                                      },
+                                                                      "children": [
+                                                                        {
+                                                                          "id": 977450136,
+                                                                          "controlType": "Hyperlink",
+                                                                          "name": "Advanced Chart",
+                                                                          "automationId": "",
+                                                                          "boundingRectangle": {
+                                                                            "x": 881,
+                                                                            "y": 555,
+                                                                            "width": 57,
+                                                                            "height": 23
+                                                                          },
+                                                                          "children": [
+                                                                            {
+                                                                              "id": 1773856063,
+                                                                              "controlType": "Group",
+                                                                              "name": "",
+                                                                              "automationId": "",
+                                                                              "boundingRectangle": {
+                                                                                "x": 881,
+                                                                                "y": 555,
+                                                                                "width": 57,
+                                                                                "height": 23
+                                                                              },
+                                                                              "children": [
+                                                                                {
+                                                                                  "id": 503181771,
+                                                                                  "controlType": "Image",
+                                                                                  "name": "XNDU chart",
+                                                                                  "automationId": "",
+                                                                                  "boundingRectangle": {
+                                                                                    "x": 881,
+                                                                                    "y": 555,
+                                                                                    "width": 57,
+                                                                                    "height": 23
+                                                                                  }
+                                                                                }
+                                                                              ]
+                                                                            }
+                                                                          ]
+                                                                        }
+                                                                      ]
+                                                                    },
+                                                                    {
+                                                                      "id": 3155211,
+                                                                      "controlType": "DataItem",
+                                                                      "name": "24.88",
+                                                                      "automationId": "",
+                                                                      "boundingRectangle": {
+                                                                        "x": 946,
+                                                                        "y": 544,
+                                                                        "width": 62,
+                                                                        "height": 46
+                                                                      }
+                                                                    },
+                                                                    {
+                                                                      "id": 1490309969,
+                                                                      "controlType": "DataItem",
+                                                                      "name": "\u002B10.05",
+                                                                      "automationId": "",
+                                                                      "boundingRectangle": {
+                                                                        "x": 1007,
+                                                                        "y": 544,
+                                                                        "width": 72,
+                                                                        "height": 46
+                                                                      }
+                                                                    },
+                                                                    {
+                                                                      "id": 2073403309,
+                                                                      "controlType": "DataItem",
+                                                                      "name": "\u002B67.72%",
+                                                                      "automationId": "",
+                                                                      "boundingRectangle": {
+                                                                        "x": 1078,
+                                                                        "y": 544,
+                                                                        "width": 97,
+                                                                        "height": 46
+                                                                      }
+                                                                    },
+                                                                    {
+                                                                      "id": 1157292269,
+                                                                      "controlType": "DataItem",
+                                                                      "name": "6.012M",
+                                                                      "automationId": "",
+                                                                      "boundingRectangle": {
+                                                                        "x": 1174,
+                                                                        "y": 544,
+                                                                        "width": 85,
+                                                                        "height": 46
+                                                                      }
+                                                                    },
+                                                                    {
+                                                                      "id": 332730420,
+                                                                      "controlType": "DataItem",
+                                                                      "name": "971,137",
+                                                                      "automationId": "",
+                                                                      "boundingRectangle": {
+                                                                        "x": 1258,
+                                                                        "y": 544,
+                                                                        "width": 96,
+                                                                        "height": 46
+                                                                      }
+                                                                    }
+                                                                  ]
+                                                                },
+                                                                {
+                                                                  "id": 436426162,
+                                                                  "controlType": "DataItem",
+                                                                  "name": "",
+                                                                  "automationId": "",
+                                                                  "boundingRectangle": {
+                                                                    "x": 610,
+                                                                    "y": 589,
+                                                                    "width": 1172,
+                                                                    "height": 45
+                                                                  },
+                                                                  "children": [
+                                                                    {
+                                                                      "id": 2070975104,
+                                                                      "controlType": "DataItem",
+                                                                      "name": "D-Wave Quantum Inc.",
+                                                                      "automationId": "",
+                                                                      "boundingRectangle": {
+                                                                        "x": 610,
+                                                                        "y": 589,
+                                                                        "width": 66,
+                                                                        "height": 45
+                                                                      },
+                                                                      "children": [
+                                                                        {
+                                                                          "id": 474831918,
+                                                                          "controlType": "Hyperlink",
+                                                                          "name": "D-Wave Quantum Inc.",
+                                                                          "automationId": "",
+                                                                          "boundingRectangle": {
+                                                                            "x": 619,
+                                                                            "y": 598,
+                                                                            "width": 42,
+                                                                            "height": 27
+                                                                          }
+                                                                        }
+                                                                      ]
+                                                                    },
+                                                                    {
+                                                                      "id": 1516341657,
+                                                                      "controlType": "DataItem",
+                                                                      "name": "D-Wave Quantum Inc.",
+                                                                      "automationId": "",
+                                                                      "boundingRectangle": {
+                                                                        "x": 675,
+                                                                        "y": 589,
+                                                                        "width": 198,
+                                                                        "height": 45
+                                                                      }
+                                                                    },
+                                                                    {
+                                                                      "id": 1797740349,
+                                                                      "controlType": "DataItem",
+                                                                      "name": "Advanced Chart",
+                                                                      "automationId": "",
+                                                                      "boundingRectangle": {
+                                                                        "x": 872,
+                                                                        "y": 589,
+                                                                        "width": 75,
+                                                                        "height": 45
+                                                                      },
+                                                                      "children": [
+                                                                        {
+                                                                          "id": 2122629537,
+                                                                          "controlType": "Hyperlink",
+                                                                          "name": "Advanced Chart",
+                                                                          "automationId": "",
+                                                                          "boundingRectangle": {
+                                                                            "x": 881,
+                                                                            "y": 600,
+                                                                            "width": 57,
+                                                                            "height": 23
+                                                                          },
+                                                                          "children": [
+                                                                            {
+                                                                              "id": 2130019081,
+                                                                              "controlType": "Group",
+                                                                              "name": "",
+                                                                              "automationId": "",
+                                                                              "boundingRectangle": {
+                                                                                "x": 881,
+                                                                                "y": 600,
+                                                                                "width": 57,
+                                                                                "height": 23
+                                                                              },
+                                                                              "children": [
+                                                                                {
+                                                                                  "id": 659588925,
+                                                                                  "controlType": "Image",
+                                                                                  "name": "QBTS chart",
+                                                                                  "automationId": "",
+                                                                                  "boundingRectangle": {
+                                                                                    "x": 881,
+                                                                                    "y": 600,
+                                                                                    "width": 57,
+                                                                                    "height": 23
+                                                                                  }
+                                                                                }
+                                                                              ]
+                                                                            }
+                                                                          ]
+                                                                        }
+                                                                      ]
+                                                                    },
+                                                                    {
+                                                                      "id": 1802425749,
+                                                                      "controlType": "DataItem",
+                                                                      "name": "20.27",
+                                                                      "automationId": "",
+                                                                      "boundingRectangle": {
+                                                                        "x": 946,
+                                                                        "y": 589,
+                                                                        "width": 62,
+                                                                        "height": 45
+                                                                      }
+                                                                    },
+                                                                    {
+                                                                      "id": 2106475263,
+                                                                      "controlType": "DataItem",
+                                                                      "name": "\u002B3.30",
+                                                                      "automationId": "",
+                                                                      "boundingRectangle": {
+                                                                        "x": 1007,
+                                                                        "y": 589,
+                                                                        "width": 72,
+                                                                        "height": 45
+                                                                      }
+                                                                    },
+                                                                    {
+                                                                      "id": 401903679,
+                                                                      "controlType": "DataItem",
+                                                                      "name": "\u002B19.45%",
+                                                                      "automationId": "",
+                                                                      "boundingRectangle": {
+                                                                        "x": 1078,
+                                                                        "y": 589,
+                                                                        "width": 97,
+                                                                        "height": 45
+                                                                      }
+                                                                    },
+                                                                    {
+                                                                      "id": 2007921717,
+                                                                      "controlType": "DataItem",
+                                                                      "name": "72.803M",
+                                                                      "automationId": "",
+                                                                      "boundingRectangle": {
+                                                                        "x": 1174,
+                                                                        "y": 589,
+                                                                        "width": 85,
+                                                                        "height": 45
+                                                                      }
+                                                                    },
+                                                                    {
+                                                                      "id": 1053167404,
+                                                                      "controlType": "DataItem",
+                                                                      "name": "26.013M",
+                                                                      "automationId": "",
+                                                                      "boundingRectangle": {
+                                                                        "x": 1258,
+                                                                        "y": 589,
+                                                                        "width": 96,
+                                                                        "height": 45
+                                                                      }
+                                                                    }
+                                                                  ]
+                                                                }
+                                                              ]
+                                                            },
+                                                            {
+                                                              "id": 1165301679,
+                                                              "controlType": "Group",
+                                                              "name": "Dock",
+                                                              "automationId": "right-rail",
+                                                              "children": [
+                                                                {
+                                                                  "id": 1886130599,
+                                                                  "controlType": "Window",
+                                                                  "name": "Dock",
+                                                                  "automationId": "",
+                                                                  "boundingRectangle": {
+                                                                    "x": 1275,
+                                                                    "y": 510,
+                                                                    "width": 57,
+                                                                    "height": 57
+                                                                  },
+                                                                  "children": [
+                                                                    {
+                                                                      "id": 574205019,
+                                                                      "controlType": "Group",
+                                                                      "name": "",
+                                                                      "automationId": "header-quote-lookup",
+                                                                      "children": [
+                                                                        {
+                                                                          "id": 72861385,
+                                                                          "controlType": "Group",
+                                                                          "name": "",
+                                                                          "automationId": "",
+                                                                          "children": [
+                                                                            {
+                                                                              "id": 402034069,
+                                                                              "controlType": "Edit",
+                                                                              "name": "Quote Lookup",
+                                                                              "automationId": ""
+                                                                            }
+                                                                          ]
+                                                                        }
+                                                                      ]
+                                                                    },
+                                                                    {
+                                                                      "id": 574396574,
+                                                                      "controlType": "List",
+                                                                      "name": "",
+                                                                      "automationId": "",
+                                                                      "children": [
+                                                                        {
+                                                                          "id": 2052244636,
+                                                                          "controlType": "ListItem",
+                                                                          "name": "Trending tickersBIRDAllbirds, Inc.18.56\u002B16.07(\u002B645.38%)TSLATesla, Inc.387.29\u002B23.13(\u002B6.35%)SOUNSoundHound AI, Inc.7.68\u002B0.71(\u002B10.11%)UBERUber Technologies, Inc.77.63\u002B4.72(\u002B6.47%)SHOPShopify Inc.126.92\u002B9.28(\u002B7.88%)",
+                                                                          "automationId": "",
+                                                                          "children": [
+                                                                            {
+                                                                              "id": 930998539,
+                                                                              "controlType": "Group",
+                                                                              "name": "",
+                                                                              "automationId": "",
+                                                                              "children": [
+                                                                                {
+                                                                                  "id": 6687676,
+                                                                                  "controlType": "Hyperlink",
+                                                                                  "name": "Trending tickers",
+                                                                                  "automationId": ""
+                                                                                }
+                                                                              ]
+                                                                            },
+                                                                            {
+                                                                              "id": 63131104,
+                                                                              "controlType": "List",
+                                                                              "name": "",
+                                                                              "automationId": "",
+                                                                              "children": [
+                                                                                {
+                                                                                  "id": 2138720767,
+                                                                                  "controlType": "ListItem",
+                                                                                  "name": "BIRDAllbirds, Inc.18.56\u002B16.07(\u002B645.38%)",
+                                                                                  "automationId": "",
+                                                                                  "children": [
+                                                                                    {
+                                                                                      "id": 2097395591,
+                                                                                      "controlType": "Hyperlink",
+                                                                                      "name": "BIRD Allbirds, Inc. 18.56 \u002B16.07 (\u002B645.38%)",
+                                                                                      "automationId": "",
+                                                                                      "children": [
+                                                                                        {
+                                                                                          "id": 962691718,
+                                                                                          "controlType": "Group",
+                                                                                          "name": "",
+                                                                                          "automationId": "",
+                                                                                          "children": [
+                                                                                            {
+                                                                                              "id": 1128317931,
+                                                                                              "controlType": "Image",
+                                                                                              "name": "BIRD chart",
+                                                                                              "automationId": ""
+                                                                                            }
+                                                                                          ]
+                                                                                        }
+                                                                                      ]
+                                                                                    },
+                                                                                    {
+                                                                                      "id": 983738722,
+                                                                                      "controlType": "Button",
+                                                                                      "name": "Follow",
+                                                                                      "automationId": ""
+                                                                                    }
+                                                                                  ]
+                                                                                },
+                                                                                {
+                                                                                  "id": 1314922175,
+                                                                                  "controlType": "ListItem",
+                                                                                  "name": "TSLATesla, Inc.387.29\u002B23.13(\u002B6.35%)",
+                                                                                  "automationId": "",
+                                                                                  "children": [
+                                                                                    {
+                                                                                      "id": 1475615439,
+                                                                                      "controlType": "Hyperlink",
+                                                                                      "name": "TSLA Tesla, Inc. 387.29 \u002B23.13 (\u002B6.35%)",
+                                                                                      "automationId": "",
+                                                                                      "children": [
+                                                                                        {
+                                                                                          "id": 1174350916,
+                                                                                          "controlType": "Group",
+                                                                                          "name": "",
+                                                                                          "automationId": "",
+                                                                                          "children": [
+                                                                                            {
+                                                                                              "id": 1695463852,
+                                                                                              "controlType": "Image",
+                                                                                              "name": "TSLA chart",
+                                                                                              "automationId": ""
+                                                                                            }
+                                                                                          ]
+                                                                                        }
+                                                                                      ]
+                                                                                    },
+                                                                                    {
+                                                                                      "id": 1582995225,
+                                                                                      "controlType": "Button",
+                                                                                      "name": "Follow",
+                                                                                      "automationId": ""
+                                                                                    }
+                                                                                  ]
+                                                                                },
+                                                                                {
+                                                                                  "id": 696047450,
+                                                                                  "controlType": "ListItem",
+                                                                                  "name": "SOUNSoundHound AI, Inc.7.68\u002B0.71(\u002B10.11%)",
+                                                                                  "automationId": "",
+                                                                                  "children": [
+                                                                                    {
+                                                                                      "id": 1727312590,
+                                                                                      "controlType": "Hyperlink",
+                                                                                      "name": "SOUN SoundHound AI, Inc. 7.68 \u002B0.71 (\u002B10.11%)",
+                                                                                      "automationId": "",
+                                                                                      "children": [
+                                                                                        {
+                                                                                          "id": 494025106,
+                                                                                          "controlType": "Group",
+                                                                                          "name": "",
+                                                                                          "automationId": "",
+                                                                                          "children": [
+                                                                                            {
+                                                                                              "id": 1542889792,
+                                                                                              "controlType": "Image",
+                                                                                              "name": "SOUN chart",
+                                                                                              "automationId": ""
+                                                                                            }
+                                                                                          ]
+                                                                                        }
+                                                                                      ]
+                                                                                    },
+                                                                                    {
+                                                                                      "id": 160345488,
+                                                                                      "controlType": "Button",
+                                                                                      "name": "Follow",
+                                                                                      "automationId": ""
+                                                                                    }
+                                                                                  ]
+                                                                                },
+                                                                                {
+                                                                                  "id": 1465727100,
+                                                                                  "controlType": "ListItem",
+                                                                                  "name": "UBERUber Technologies, Inc.77.63\u002B4.72(\u002B6.47%)",
+                                                                                  "automationId": "",
+                                                                                  "children": [
+                                                                                    {
+                                                                                      "id": 1261171084,
+                                                                                      "controlType": "Hyperlink",
+                                                                                      "name": "UBER Uber Technologies, Inc. 77.63 \u002B4.72 (\u002B6.47%)",
+                                                                                      "automationId": "",
+                                                                                      "children": [
+                                                                                        {
+                                                                                          "id": 1880814158,
+                                                                                          "controlType": "Group",
+                                                                                          "name": "",
+                                                                                          "automationId": "",
+                                                                                          "children": [
+                                                                                            {
+                                                                                              "id": 121847204,
+                                                                                              "controlType": "Image",
+                                                                                              "name": "UBER chart",
+                                                                                              "automationId": ""
+                                                                                            }
+                                                                                          ]
+                                                                                        }
+                                                                                      ]
+                                                                                    },
+                                                                                    {
+                                                                                      "id": 1199262936,
+                                                                                      "controlType": "Button",
+                                                                                      "name": "Follow",
+                                                                                      "automationId": ""
+                                                                                    }
+                                                                                  ]
+                                                                                },
+                                                                                {
+                                                                                  "id": 587547264,
+                                                                                  "controlType": "ListItem",
+                                                                                  "name": "SHOPShopify Inc.126.92\u002B9.28(\u002B7.88%)",
+                                                                                  "automationId": "",
+                                                                                  "children": [
+                                                                                    {
+                                                                                      "id": 374929971,
+                                                                                      "controlType": "Hyperlink",
+                                                                                      "name": "SHOP Shopify Inc. 126.92 \u002B9.28 (\u002B7.88%)",
+                                                                                      "automationId": "",
+                                                                                      "children": [
+                                                                                        {
+                                                                                          "id": 127520203,
+                                                                                          "controlType": "Group",
+                                                                                          "name": "",
+                                                                                          "automationId": "",
+                                                                                          "children": [
+                                                                                            {
+                                                                                              "id": 1722489204,
+                                                                                              "controlType": "Image",
+                                                                                              "name": "SHOP chart",
+                                                                                              "automationId": ""
+                                                                                            }
+                                                                                          ]
+                                                                                        }
+                                                                                      ]
+                                                                                    },
+                                                                                    {
+                                                                                      "id": 2108789217,
+                                                                                      "controlType": "Button",
+                                                                                      "name": "Follow",
+                                                                                      "automationId": ""
+                                                                                    }
+                                                                                  ]
+                                                                                }
+                                                                              ]
+                                                                            }
+                                                                          ]
+                                                                        },
+                                                                        {
+                                                                          "id": 1113177976,
+                                                                          "controlType": "ListItem",
+                                                                          "name": "PortfolioSign in to access your portfolioSign in",
+                                                                          "automationId": "",
+                                                                          "children": [
+                                                                            {
+                                                                              "id": 1363582502,
+                                                                              "controlType": "Hyperlink",
+                                                                              "name": "Portfolio",
+                                                                              "automationId": ""
+                                                                            }
+                                                                          ]
+                                                                        }
+                                                                      ]
+                                                                    },
+                                                                    {
+                                                                      "id": 354564970,
+                                                                      "controlType": "Button",
+                                                                      "name": "Dock",
+                                                                      "automationId": "",
+                                                                      "boundingRectangle": {
+                                                                        "x": 1275,
+                                                                        "y": 510,
+                                                                        "width": 57,
+                                                                        "height": 57
+                                                                      }
+                                                                    }
+                                                                  ]
+                                                                }
+                                                              ]
+                                                            }
+                                                          ]
+                                                        }
+                                                      ]
+                                                    },
+                                                    {
+                                                      "id": 1038127263,
+                                                      "controlType": "Group",
+                                                      "name": "",
+                                                      "automationId": "svelte-announcer",
+                                                      "boundingRectangle": {
+                                                        "x": 592,
+                                                        "y": 176,
+                                                        "width": 2,
+                                                        "height": 2
+                                                      }
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "id": 1759838039,
+                                  "controlType": "Edit",
+                                  "name": "",
+                                  "automationId": ""
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": 1152825766,
+                      "controlType": "Tab",
+                      "name": "Tab bar",
+                      "automationId": "",
+                      "boundingRectangle": {
+                        "x": 590,
+                        "y": 86,
+                        "width": 627,
+                        "height": 46
+                      },
+                      "children": [
+                        {
+                          "id": 1551912977,
+                          "controlType": "Pane",
+                          "name": "",
+                          "automationId": "view_25",
+                          "boundingRectangle": {
+                            "x": 590,
+                            "y": 86,
+                            "width": 287,
+                            "height": 46
+                          },
+                          "children": [
+                            {
+                              "id": 1944631556,
+                              "controlType": "Pane",
+                              "name": "",
+                              "automationId": "",
+                              "boundingRectangle": {
+                                "x": 590,
+                                "y": 86,
+                                "width": 287,
+                                "height": 46
+                              },
+                              "children": [
+                                {
+                                  "id": 999782711,
+                                  "controlType": "TabItem",
+                                  "name": "Top Stock Gains: US stocks posting the highest gains today - Yahoo Finance",
+                                  "automationId": "view_24",
+                                  "boundingRectangle": {
+                                    "x": 590,
+                                    "y": 86,
+                                    "width": 287,
+                                    "height": 46
+                                  },
+                                  "children": [
+                                    {
+                                      "id": 705130623,
+                                      "controlType": "Button",
+                                      "name": "Close tab",
+                                      "automationId": "view_27",
+                                      "boundingRectangle": {
+                                        "x": 841,
+                                        "y": 100,
+                                        "width": 18,
+                                        "height": 18
+                                      }
+                                    }
+                                  ]
+                                },
+                                {
+                                  "id": 533979846,
+                                  "controlType": "Pane",
+                                  "name": "",
+                                  "automationId": "",
+                                  "children": [
+                                    {
+                                      "id": 615458329,
+                                      "controlType": "Pane",
+                                      "name": "",
+                                      "automationId": "",
+                                      "children": [
+                                        {
+                                          "id": 736689887,
+                                          "controlType": "Pane",
+                                          "name": "",
+                                          "automationId": ""
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "id": 961960451,
+                                      "controlType": "Pane",
+                                      "name": "",
+                                      "automationId": ""
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "id": 313832625,
+                              "controlType": "Pane",
+                              "name": "",
+                              "automationId": "",
+                              "boundingRectangle": {
+                                "x": 590,
+                                "y": 86,
+                                "width": 287,
+                                "height": 46
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "id": 1408644703,
+                          "controlType": "Button",
+                          "name": "New Tab",
+                          "automationId": "view_28",
+                          "boundingRectangle": {
+                            "x": 872,
+                            "y": 86,
+                            "width": 36,
+                            "height": 46
+                          }
+                        },
+                        {
+                          "id": 1271524263,
+                          "controlType": "Pane",
+                          "name": "",
+                          "automationId": "",
+                          "boundingRectangle": {
+                            "x": 908,
+                            "y": 86,
+                            "width": 308,
+                            "height": 46
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": 259187635,
+              "controlType": "Pane",
+              "name": "",
+              "automationId": "",
+              "boundingRectangle": {
+                "x": 588,
+                "y": 86,
+                "width": 783,
+                "height": 529
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+message: 178 element(s)

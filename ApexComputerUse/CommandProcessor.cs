@@ -16,6 +16,7 @@ namespace ApexComputerUse
         public string? ModelPath    { get; set; }   // ai init — LLM model .gguf path
         public string? MmProjPath   { get; set; }   // ai init — mmproj .gguf path
         public string? Prompt       { get; set; }   // ai describe/ask — question text
+        public int?    Depth        { get; set; }   // elements — max tree depth (null = unlimited)
     }
 
     public class CommandResponse
@@ -48,8 +49,9 @@ namespace ApexComputerUse
         private MtmdHelper?  _mtmd;
 
         private readonly ElementIdGenerator _idGen = new() { UseIncrementalIds = false };
-        private readonly Dictionary<int, AutomationElement> _elementMap = new();
-        private readonly Dictionary<int, Window>            _windowMap  = new();
+        private readonly Dictionary<int, AutomationElement> _elementMap    = new();
+        private readonly Dictionary<int, string>            _elementHashes = new();   // parallel to _elementMap — stores each element's hash so a subtree can be re-scanned without re-walking from the window root
+        private readonly Dictionary<int, Window>            _windowMap     = new();
         private IntPtr _mappedWindowHandle = IntPtr.Zero;
 
         public AutomationElement? CurrentElement { get; private set; }
@@ -425,18 +427,61 @@ namespace ApexComputerUse
             if (CurrentWindow == null) return Fail("No window selected. Use 'find window=X' first.");
 
             var hwnd = CurrentWindow.Properties.NativeWindowHandle.ValueOrDefault;
-            if (hwnd != _mappedWindowHandle)
+
+            // Optional: start the scan at a previously-mapped element instead of the window root.
+            // Lets callers progressively drill into a subtree without re-scanning the whole window.
+            // When provided, the map is preserved (IDs remain stable across calls).
+            int? startId = null;
+            if (!string.IsNullOrWhiteSpace(req.AutomationId)
+                && int.TryParse(req.AutomationId, out int parsedId))
             {
-                _elementMap.Clear();
-                _idGen.Reset();
-                _mappedWindowHandle = hwnd;
+                startId = parsedId;
+            }
+
+            AutomationElement scanRoot;
+            string? rootHashOverride = null;
+            int?    rootIdOverride   = null;
+
+            if (startId.HasValue)
+            {
+                if (hwnd != _mappedWindowHandle)
+                    return Fail($"Element ID {startId} is stale (current window differs from the one that was scanned). Run /elements first.");
+                if (!_elementMap.TryGetValue(startId.Value, out var startEl))
+                    return Fail($"Element ID {startId} not in map. Run /elements first.");
+                if (!_elementHashes.TryGetValue(startId.Value, out var startHash))
+                    return Fail($"Element hash for ID {startId} missing. Run /elements first.");
+
+                scanRoot         = startEl;
+                rootHashOverride = startHash;
+                rootIdOverride   = startId.Value;
+                // Do NOT clear the map — we want to preserve existing IDs so callers can keep referencing them.
             }
             else
             {
-                _elementMap.Clear();
+                // Full-tree scan from the window root — clear the map and start fresh.
+                if (hwnd != _mappedWindowHandle)
+                {
+                    _elementMap.Clear();
+                    _elementHashes.Clear();
+                    _idGen.Reset();
+                    _mappedWindowHandle = hwnd;
+                }
+                else
+                {
+                    _elementMap.Clear();
+                    _elementHashes.Clear();
+                }
+                scanRoot = CurrentWindow;
             }
 
-            var root = ScanElementsIntoMap(CurrentWindow, null, null, onscreenOnly: req.OnscreenOnly);
+            int? maxDepth = (req.Depth.HasValue && req.Depth.Value >= 0) ? req.Depth : null;
+
+            var root = ScanElementsIntoMap(
+                scanRoot, null, null,
+                onscreenOnly: req.OnscreenOnly,
+                maxDepth:     maxDepth,
+                overrideHash: rootHashOverride,
+                overrideId:   rootIdOverride);
 
             // Apply ControlType filter: prune tree to matching nodes (plus structural ancestors).
             ControlType? typeFilter = ResolveControlType(req.SearchType);
@@ -965,12 +1010,16 @@ namespace ApexComputerUse
         private const int ScanMaxDepth    = 25;
         private const int ScanChildTimeout = 2000; // ms per FindAllChildren call
 
-        private ElementNode? ScanElementsIntoMap(AutomationElement el, string? parentHash, int? parentId, int siblingIndex = 0, int depth = 0, bool onscreenOnly = false)
+        private ElementNode? ScanElementsIntoMap(
+            AutomationElement el, string? parentHash, int? parentId,
+            int siblingIndex = 0, int depth = 0, bool onscreenOnly = false,
+            int? maxDepth = null,
+            string? overrideHash = null, int? overrideId = null)
         {
             if (depth > ScanMaxDepth) return null;
 
             // Onscreen filter — skip element and its entire subtree if off-viewport.
-            // depth == 0 is always the Window root; never filter it out.
+            // depth == 0 is always the scan root (window or expansion target); never filter it out.
             if (onscreenOnly && depth > 0 && el.Properties.IsOffscreen.ValueOrDefault)
                 return null;
 
@@ -978,13 +1027,30 @@ namespace ApexComputerUse
             {
                 var ct = el.Properties.ControlType.ValueOrDefault;
                 bool isWindowOrPane = ct == ControlType.Window || ct == ControlType.Pane;
-                string hash = _idGen.GenerateElementHash(el, parentId, parentHash,
-                                  excludeName: isWindowOrPane, siblingIndex: siblingIndex);
-                int id = _idGen.GenerateIdFromHash(hash);
-                _elementMap[id] = el;
+
+                // If the caller supplied an override (lazy-expansion of a previously-mapped node),
+                // reuse its stored hash/id so descendants hash identically to the original scan.
+                string hash;
+                int    id;
+                if (overrideHash != null && overrideId.HasValue)
+                {
+                    hash = overrideHash;
+                    id   = overrideId.Value;
+                }
+                else
+                {
+                    hash = _idGen.GenerateElementHash(el, parentId, parentHash,
+                              excludeName: isWindowOrPane, siblingIndex: siblingIndex);
+                    id = _idGen.GenerateIdFromHash(hash);
+                }
+                _elementMap[id]    = el;
+                _elementHashes[id] = hash;
+
+                bool truncate = maxDepth.HasValue && depth >= maxDepth.Value;
 
                 // Fetch children on a background thread with a timeout to avoid
                 // hanging on UWP-hosted elements that block UIA traversal indefinitely.
+                // We fetch even at the truncation boundary so we can report childCount.
                 AutomationElement[]? children = null;
                 try
                 {
@@ -993,12 +1059,22 @@ namespace ApexComputerUse
                 }
                 catch (Exception ex) { AppLog.Debug($"[Scan] FindAllChildren failed — {ex.Message}"); children = null; }
 
-                List<ElementNode>? childNodes = null;
-                if (children != null)
+                List<ElementNode>? childNodes    = null;
+                int?               childCountOut = null;
+
+                if (truncate)
+                {
+                    // Depth limit hit — omit children, report their count so callers know to drill in.
+                    if (children != null && children.Length > 0)
+                        childCountOut = children.Length;
+                }
+                else if (children != null)
                 {
                     for (int i = 0; i < children.Length; i++)
                     {
-                        var child = ScanElementsIntoMap(children[i], hash, id, i, depth + 1, onscreenOnly);
+                        var child = ScanElementsIntoMap(
+                            children[i], hash, id, i, depth + 1,
+                            onscreenOnly, maxDepth);
                         if (child != null)
                         {
                             childNodes ??= new List<ElementNode>();
@@ -1025,7 +1101,8 @@ namespace ApexComputerUse
                     Name              = el.Properties.Name.ValueOrDefault ?? "",
                     AutomationId      = el.Properties.AutomationId.ValueOrDefault ?? "",
                     BoundingRectangle = boundingRect,
-                    Children          = childNodes
+                    Children          = childNodes,
+                    ChildCount        = childCountOut
                 };
             }
             catch { return null; } // element became stale mid-scan — skip silently
@@ -1039,6 +1116,7 @@ namespace ApexComputerUse
             public string              AutomationId      { get; init; } = "";
             public BoundingRect?       BoundingRectangle { get; init; }
             public List<ElementNode>?  Children          { get; init; }
+            public int?                ChildCount        { get; init; }  // set only when children are omitted due to a depth limit — tells the caller it can expand this node via /elements?id=<Id>
         }
 
         private sealed class BoundingRect
@@ -1085,7 +1163,8 @@ namespace ApexComputerUse
                 Name              = node.Name,
                 AutomationId      = node.AutomationId,
                 BoundingRectangle = node.BoundingRectangle,
-                Children          = filteredChildren
+                Children          = filteredChildren,
+                ChildCount        = node.ChildCount
             };
         }
 

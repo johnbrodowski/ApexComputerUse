@@ -541,8 +541,30 @@ namespace ApexComputerUse
 
         // ── TextBox / PasswordBox ─────────────────────────────────────────
 
-        public void EnterText(AutomationElement el, string text) =>
-            el.AsTextBox().Enter(text);
+        public void EnterText(AutomationElement el, string text)
+        {
+            // Keyboard.Type can leave Shift latched after shifted characters (e.g. &, $).
+            // Clipboard paste avoids keyboard simulation entirely and handles all characters correctly.
+            Exception? clipEx = null;
+            var sta = new Thread(() =>
+            {
+                try { System.Windows.Forms.Clipboard.SetText(text, System.Windows.Forms.TextDataFormat.UnicodeText); }
+                catch (Exception e) { clipEx = e; }
+            });
+            sta.SetApartmentState(ApartmentState.STA);
+            sta.Start();
+            sta.Join();
+            if (clipEx != null)
+            {
+                // Fallback: original keyboard typing
+                el.AsTextBox().Enter(text);
+                return;
+            }
+            el.Focus();
+            Thread.Sleep(FocusDelayMs);
+            Keyboard.TypeSimultaneously(VirtualKeyShort.CONTROL, VirtualKeyShort.KEY_V);
+            Thread.Sleep(50);
+        }
 
         public void SelectAllText(AutomationElement el)
         {

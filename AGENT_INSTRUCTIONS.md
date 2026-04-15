@@ -2,6 +2,8 @@
 
 ## Authentication
 
+API key: d4x7kiS8XeeWxJ0XFNdrs7k_upavnAOS
+
 Every request requires the API key from the **Remote Control** tab. Three equivalent methods:
 
 ```bash

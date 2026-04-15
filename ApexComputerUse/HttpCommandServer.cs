@@ -263,6 +263,8 @@ namespace ApexComputerUse
                             {
                                 Command      = "elements",
                                 SearchType   = req.QueryString["type"],
+                                AutomationId = req.QueryString["id"],       // numeric — expands a subtree from a previously-mapped element
+                                Depth        = int.TryParse(req.QueryString["depth"], out int _elemDepth) ? _elemDepth : null,
                                 OnscreenOnly = string.Equals(req.QueryString["onscreen"], "true",
                                                    StringComparison.OrdinalIgnoreCase)
                             })),

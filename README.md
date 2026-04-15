@@ -191,7 +191,23 @@ Every element is assigned a **SHA-256 hash-based numeric ID** derived from its c
 
 `GET /elements?onscreen=true` prunes any element where `IsOffscreen = true` during the tree scan, skipping entire offscreen subtrees. On a live Chewy.com product page this reduces **634 elements to 126** — an 80% reduction — putting token cost per step in the same range as the best browser-only tools while covering all desktop apps too.
 
-The filter composes with the existing type filter: `?onscreen=true&type=Button`.
+The filter composes with the type filter and the new depth/expansion params: `?onscreen=true&type=Button`.
+
+### Progressive tree expansion
+
+For deep pages, fetch a shallow overview first, then drill into only the branches you care about:
+
+```bash
+# Step 1 — shallow overview (fast, small response)
+curl "http://localhost:8081/elements?depth=2&onscreen=true"
+# Nodes that have children beyond the depth limit show "childCount": N instead of "children"
+
+# Step 2 — expand a specific node by its ID (IDs are stable between calls)
+curl "http://localhost:8081/elements?id=708379645&depth=2&onscreen=true"
+# Returns only that subtree, 2 levels deep — existing map entries are preserved
+```
+
+This lets an AI agent navigate to the relevant section of a large page without fetching the whole tree on every step.
 
 ---
 
@@ -201,6 +217,7 @@ The filter composes with the existing type filter: `?onscreen=true&type=Button`.
 - Filter element search by ControlType
 - Persistent, hash-based stable element and window IDs (survive app restarts)
 - Onscreen-only element map (`?onscreen=true`) — prunes offscreen subtrees at scan time
+- Progressive tree expansion (`?depth=N` + `?id=<elementId>`) — fetch a shallow overview then drill into only the branches you need, without re-scanning the whole window
 - Element nodes include `boundingRectangle` (x, y, width, height) for spatial context and visual rendering
 - Execute all common UI actions: click, type, select, toggle, scroll, drag & drop, etc.
 - OCR any UI element using Tesseract
@@ -386,6 +403,12 @@ curl http://localhost:8081/elements
 # Onscreen elements only (prunes offscreen subtrees — 80% fewer elements on browser pages)
 curl "http://localhost:8081/elements?onscreen=true"
 
+# Limit tree depth — nodes at the cutoff show "childCount" instead of "children"
+curl "http://localhost:8081/elements?depth=2&onscreen=true"
+
+# Expand a specific subtree by numeric ID (IDs are stable; map is preserved between expansion calls)
+curl "http://localhost:8081/elements?id=708379645&depth=2&onscreen=true"
+
 # Combine with type filter
 curl "http://localhost:8081/elements?onscreen=true&type=Button"
 
@@ -397,6 +420,15 @@ curl "http://localhost:8081/elements?onscreen=true&type=Button"
 #   "automationId": "15",
 #   "boundingRectangle": { "x": 0, "y": 30, "width": 800, "height": 600 },
 #   "children": [...]
+# }
+#
+# When a depth limit truncates a node's children, "childCount" appears instead:
+# {
+#   "id": 708379645,
+#   "controlType": "Pane",
+#   "name": "",
+#   "boundingRectangle": { ... },
+#   "childCount": 7    <-- call /elements?id=708379645 to expand
 # }
 
 # 3. Find using numeric IDs (no fuzzy matching, direct map lookup)
@@ -519,7 +551,9 @@ curl "http://localhost:8081/find.json?window=Notepad&id=15"
 curl "http://localhost:8081/exec.pdf?action=describe" --output result.pdf
 ```
 
-**GET parameter names** match the JSON body field names: `window`, `id` / `automationId`, `name` / `elementName`, `type` / `searchType`, `action`, `value`, `onscreen`, `prompt`, `model`, `proj`.
+**GET parameter names** match the JSON body field names: `window`, `id` / `automationId`, `name` / `elementName`, `type` / `searchType`, `action`, `value`, `onscreen`, `depth`, `prompt`, `model`, `proj`.
+
+> **`/elements`-specific:** `depth=N` limits tree depth (truncated nodes show `childCount`); `id=<numericId>` expands from a previously-mapped element without clearing the rest of the map.
 
 ### Response format
 
@@ -583,11 +617,17 @@ curl http://localhost:8081/elements
 # Onscreen elements only — prunes offscreen subtrees for maximum token efficiency
 curl "http://localhost:8081/elements?onscreen=true"
 
+# Limit depth — truncated nodes show "childCount" so you know where to drill in
+curl "http://localhost:8081/elements?depth=2&onscreen=true"
+
+# Expand a specific node by numeric ID (preserves the rest of the map — IDs stay stable)
+curl "http://localhost:8081/elements?id=<elementId>&depth=2&onscreen=true"
+
 # Filter by ControlType
 curl "http://localhost:8081/elements?type=Button"
 
-# Both filters combined
-curl "http://localhost:8081/elements?onscreen=true&type=Button"
+# All filters combined
+curl "http://localhost:8081/elements?depth=3&onscreen=true&type=Button"
 
 # Render the current window's UI element tree as a colour-coded PNG (returns base64)
 curl http://localhost:8081/uimap

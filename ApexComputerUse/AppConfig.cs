@@ -53,7 +53,8 @@ namespace ApexComputerUse
             {
                 try
                 {
-                    using var doc = JsonDocument.Parse(File.ReadAllText(jsonPath));
+                    var opts = new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip };
+                    using var doc = JsonDocument.Parse(File.ReadAllText(jsonPath), opts);
                     cfg = ApplyJson(cfg, doc.RootElement);
                 }
                 catch (Exception ex)
