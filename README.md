@@ -385,6 +385,7 @@ Configure via `appsettings.json` or `APEX_*` environment variables before starti
 | **Output UI Map** | Scans the current window's element tree and logs it as nested JSON to the console tab. |
 | **Render UI Map** | Scans the current window's element tree, draws a colour-coded bounding-box overlay on screen for 5 seconds, and offers to save the overlay as a PNG image. |
 | **Scene Editor** | Opens the layered scene editor — create scenes, add shapes to layers, drag to reposition, use AI to generate and refine compositions. |
+| **AI Chat** | Opens a streaming chat window with support for 8 AI providers (OpenAI, Anthropic, DeepSeek, Grok, Groq, Duck, LM Studio, LlamaSharp). Configure API keys in `ai-settings.json` next to the executable. |
 
 ---
 
@@ -1286,6 +1287,8 @@ Download a vision-capable GGUF model and its multimodal projector (e.g. LFM2.5-V
 ```
 ApexComputerUse/
 ├── Form1.cs / Form1.Designer.cs         — Main UI (tabs: Console, Find & Execute, Remote Control, Model)
+├── AiChatForm.cs / AiChatForm.Designer.cs — AI Chat window (Tools → AI Chat); 8-provider streaming chat
+├── AiChatService.cs                     — Thread-safe service layer wrapping AiMessagingCore; manages provider config, session lifecycle, and streaming
 ├── FlaUIHelper.cs                       — All FlaUI automation wrappers
 ├── ElementIdGenerator.cs                — Stable SHA-256 hash-based element ID mapping
 ├── CommandProcessor.cs                  — Shared remote command logic (used by all server types)
@@ -1303,9 +1306,14 @@ ApexComputerUse/
 ├── Scene.cs                             — SceneShape / Layer / Scene data models with stable IDs
 ├── SceneStore.cs                        — Thread-safe in-memory + disk-persisted scene store
 ├── SceneEditorForm.cs / .Designer.cs    — WinForms layered scene editor (Tools → Scene Editor)
+├── ai-settings.json                     — Starter config for AI Chat providers (placeholder keys)
 └── Scripts/
     ├── ApexComputerUse.psm1             — PowerShell module (pipe-based)
     └── apex.cmd                         — cmd.exe helper (HTTP-based)
+
+AIClients/                               — AI messaging projects (also in ApexComputerUse.sln)
+├── AiMessagingCore/                     — Provider-neutral .NET 10 library; 8 providers; streaming via events
+└── AIClients/                           — Standalone WinForms chat harness (builds independently via AIClients.sln)
 ```
 
 > **OCR:** place Tesseract language files in a `tessdata\` folder next to the executable. Not included in the repo — download from [github.com/tesseract-ocr/tessdata](https://github.com/tesseract-ocr/tessdata).

@@ -5,6 +5,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.10.0] — 2026-04-16
+
+### Added
+- **AI Chat window** — Tools → AI Chat opens a standalone chat interface powered by the `AiMessagingCore` library. Supports 8 providers: OpenAI, Anthropic, DeepSeek, Grok, Groq, Duck, LM Studio, and LlamaSharp (local GGUF). Streams tokens in real-time; shows timing metrics (total tokens, tokens/second, time-to-first-token). Provider, model, system prompt, and sample query are persisted to `ai-settings.json` next to the executable.
+- **`AIClients` solution integrated** — both `AiMessagingCore` (class library) and `AIClients` (standalone WinForms harness) are now included in `ApexComputerUse.sln` for single-solution editing. `AIClients.sln` and `AIClients.exe` remain fully independent and buildable on their own.
+- **`ai-settings.json`** — starter settings file (copied to output on build) with placeholder API keys for all 8 providers. Replace placeholders with real keys to activate each provider.
+
+### Fixed
+- `ProviderSettings.ApiKey` and `AiLibrarySettings.DefaultProvider` changed from `init`-only to `set` so runtime configuration updates (provider switch, API key override) can be applied without reconstructing the settings objects.
+- `HandleChatStatus` in `HttpCommandServer` now returns `Dictionary<string, string>` matching the `ApexResult.Data` contract; `sessionActive` is serialized as `"True"` / `"False"`.
+
+---
+
 ## [0.9.0] — 2026-04-07
 
 ### Added

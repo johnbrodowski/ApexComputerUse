@@ -12,6 +12,7 @@ namespace ApexComputerUse
         private readonly ApexHelper _helper = new();
         private readonly CommandProcessor _processor = new();
         private readonly SceneStore _sceneStore = new();
+        private readonly AiChatService _chatService = new();
         private OcrHelper? _ocr;
         private HttpCommandServer? _http;
         private TelegramController? _telegram;
@@ -258,6 +259,9 @@ namespace ApexComputerUse
 
             // Restore saved model paths
             LoadSettings();
+
+            // Populate the Chat tab provider list and defaults
+            InitChatTab();
 
             // First-launch hint: if the default model files are absent, go to the Model tab
             this.Load += (_, _) => CheckFirstLaunch();
@@ -685,7 +689,7 @@ namespace ApexComputerUse
             {
                 string apiKey = txtApiKey.Text.Trim();
                 var appCfg = AppConfig.Current;
-                _http = new HttpCommandServer(port, _processor, _sceneStore, apiKey,
+                _http = new HttpCommandServer(port, _processor, _sceneStore, _chatService, apiKey,
                             enableShellRun: appCfg.EnableShellRun,
                             bindAll: appCfg.HttpBindAll);
                 _http.OnLog += msg => { BeginInvoke(() => Log(msg)); AppLog.FromOnLog(msg); };
@@ -830,6 +834,68 @@ namespace ApexComputerUse
                 _netBytesPrev = totalBytes;
             }
             catch { lblStatNet.Text = "Net: --"; }
+        }
+
+        // ── Chat tab ─────────────────────────────────────────────────────
+
+        private void InitChatTab()
+        {
+            cboAiProvider.Items.AddRange(_chatService.RegisteredProviders.Cast<object>().ToArray());
+
+            // Select the default provider without triggering SelectedIndexChanged yet
+            var idx = cboAiProvider.Items.IndexOf(_chatService.CurrentProvider);
+            cboAiProvider.SelectedIndex = idx >= 0 ? idx : 0;
+
+            LoadChatProviderFields(_chatService.CurrentProvider);
+            lblAiSettingsPath.Text = $"Settings: {AiMessagingCore.Configuration.AiSettings.DefaultFilePath}";
+        }
+
+        private void LoadChatProviderFields(string provider)
+        {
+            var defaults = _chatService.GetProviderDefaults(provider);
+            txtAiModel.Text         = defaults?.Model ?? "";
+            txtAiSystemPrompt.Text  = defaults?.SystemPrompt ?? "";
+            txtAiApiKey.Text        = _chatService.GetApiKey(provider);
+        }
+
+        private void cboAiProvider_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (cboAiProvider.SelectedItem?.ToString() is string p)
+                LoadChatProviderFields(p);
+        }
+
+        private void btnAiSaveSettings_Click(object sender, EventArgs e)
+        {
+            if (cboAiProvider.SelectedItem?.ToString() is not string provider) return;
+            _chatService.ApplySettings(
+                provider,
+                txtAiModel.Text.Trim(),
+                txtAiSystemPrompt.Text.Trim(),
+                txtAiApiKey.Text.Trim());
+            lblAiSessionStatus.Text      = "Settings saved — next message starts a new session.";
+            lblAiSessionStatus.ForeColor = Color.Green;
+        }
+
+        private void btnAiOpenChat_Click(object sender, EventArgs e)
+        {
+            if (_http?.IsRunning != true)
+            {
+                Log("Start the HTTP server first (Remote Control tab).");
+                return;
+            }
+            var port = _http.Port;
+            var key  = txtApiKey.Text.Trim();
+            // Pass the key via the URL fragment so the page can auto-authenticate.
+            var url  = $"http://localhost:{port}/chat#{Uri.EscapeDataString(key)}";
+            try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(url) { UseShellExecute = true }); }
+            catch (Exception ex) { Log($"Could not open browser: {ex.Message}"); }
+        }
+
+        private void btnAiResetChat_Click(object sender, EventArgs e)
+        {
+            _chatService.ResetSession();
+            lblAiSessionStatus.Text      = "Conversation reset.";
+            lblAiSessionStatus.ForeColor = Color.Gray;
         }
 
         // ── Model tab ────────────────────────────────────────────────────

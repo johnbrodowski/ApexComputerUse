@@ -21,6 +21,22 @@ namespace ApexComputerUse
             outputUiMapToolStripMenuItem = new ToolStripMenuItem();
             renderTestToolStripMenuItem = new ToolStripMenuItem();
             sceneEditorToolStripMenuItem = new ToolStripMenuItem();
+            tabPageChat = new TabPage();
+            grpAiSettings = new GroupBox();
+            lblAiProvider = new Label();
+            cboAiProvider = new ComboBox();
+            lblAiModel = new Label();
+            txtAiModel = new TextBox();
+            lblAiApiKey = new Label();
+            txtAiApiKey = new TextBox();
+            lblAiSysPrompt = new Label();
+            txtAiSystemPrompt = new TextBox();
+            btnAiSaveSettings = new Button();
+            lblAiSettingsPath = new Label();
+            grpAiSession = new GroupBox();
+            lblAiSessionStatus = new Label();
+            btnAiOpenChat = new Button();
+            btnAiResetChat = new Button();
             tabMain = new TabControl();
             tabPageConsole = new TabPage();
             txtCommand = new TextBox();
@@ -95,6 +111,9 @@ namespace ApexComputerUse
             tabPageModel.SuspendLayout();
             grpModelPaths.SuspendLayout();
             grpDownload.SuspendLayout();
+            tabPageChat.SuspendLayout();
+            grpAiSettings.SuspendLayout();
+            grpAiSession.SuspendLayout();
             statusStrip1.SuspendLayout();
             SuspendLayout();
             // 
@@ -141,13 +160,14 @@ namespace ApexComputerUse
             sceneEditorToolStripMenuItem.Size = new Size(222, 22);
             sceneEditorToolStripMenuItem.Text = "Scene Editor";
             sceneEditorToolStripMenuItem.Click += sceneEditorToolStripMenuItem_Click;
-            // 
+            //
             // tabMain
             // 
             tabMain.Controls.Add(tabPageConsole);
             tabMain.Controls.Add(tabPageFind);
             tabMain.Controls.Add(tabPageRemote);
             tabMain.Controls.Add(tabPageModel);
+            tabMain.Controls.Add(tabPageChat);
             tabMain.Location = new Point(0, 24);
             tabMain.Name = "tabMain";
             tabMain.SelectedIndex = 0;
@@ -575,7 +595,163 @@ namespace ApexComputerUse
             tabPageModel.TabIndex = 3;
             tabPageModel.Text = "Model";
             tabPageModel.UseVisualStyleBackColor = true;
-            // 
+            //
+            // tabPageChat
+            //
+            tabPageChat.Controls.Add(grpAiSettings);
+            tabPageChat.Controls.Add(grpAiSession);
+            tabPageChat.Location = new Point(4, 24);
+            tabPageChat.Name = "tabPageChat";
+            tabPageChat.Padding = new Padding(3);
+            tabPageChat.Size = new Size(540, 300);
+            tabPageChat.TabIndex = 4;
+            tabPageChat.Text = "Chat";
+            tabPageChat.UseVisualStyleBackColor = true;
+            //
+            // grpAiSettings
+            //
+            grpAiSettings.Controls.Add(lblAiProvider);
+            grpAiSettings.Controls.Add(cboAiProvider);
+            grpAiSettings.Controls.Add(lblAiModel);
+            grpAiSettings.Controls.Add(txtAiModel);
+            grpAiSettings.Controls.Add(lblAiApiKey);
+            grpAiSettings.Controls.Add(txtAiApiKey);
+            grpAiSettings.Controls.Add(lblAiSysPrompt);
+            grpAiSettings.Controls.Add(txtAiSystemPrompt);
+            grpAiSettings.Controls.Add(btnAiSaveSettings);
+            grpAiSettings.Controls.Add(lblAiSettingsPath);
+            grpAiSettings.Location = new Point(8, 6);
+            grpAiSettings.Name = "grpAiSettings";
+            grpAiSettings.Size = new Size(520, 208);
+            grpAiSettings.TabIndex = 0;
+            grpAiSettings.TabStop = false;
+            grpAiSettings.Text = "Provider Settings";
+            //
+            // lblAiProvider
+            //
+            lblAiProvider.AutoSize = true;
+            lblAiProvider.Location = new Point(8, 26);
+            lblAiProvider.Name = "lblAiProvider";
+            lblAiProvider.TabIndex = 0;
+            lblAiProvider.Text = "Provider:";
+            //
+            // cboAiProvider
+            //
+            cboAiProvider.DropDownStyle = ComboBoxStyle.DropDownList;
+            cboAiProvider.FormattingEnabled = true;
+            cboAiProvider.Location = new Point(90, 22);
+            cboAiProvider.Name = "cboAiProvider";
+            cboAiProvider.Size = new Size(160, 24);
+            cboAiProvider.TabIndex = 1;
+            cboAiProvider.SelectedIndexChanged += cboAiProvider_SelectedIndexChanged;
+            //
+            // lblAiModel
+            //
+            lblAiModel.AutoSize = true;
+            lblAiModel.Location = new Point(8, 58);
+            lblAiModel.Name = "lblAiModel";
+            lblAiModel.TabIndex = 2;
+            lblAiModel.Text = "Model:";
+            //
+            // txtAiModel
+            //
+            txtAiModel.Location = new Point(90, 54);
+            txtAiModel.Name = "txtAiModel";
+            txtAiModel.Size = new Size(360, 24);
+            txtAiModel.TabIndex = 3;
+            //
+            // lblAiApiKey
+            //
+            lblAiApiKey.AutoSize = true;
+            lblAiApiKey.Location = new Point(8, 92);
+            lblAiApiKey.Name = "lblAiApiKey";
+            lblAiApiKey.TabIndex = 4;
+            lblAiApiKey.Text = "API Key:";
+            //
+            // txtAiApiKey
+            //
+            txtAiApiKey.Location = new Point(90, 88);
+            txtAiApiKey.Name = "txtAiApiKey";
+            txtAiApiKey.PasswordChar = '●';
+            txtAiApiKey.Size = new Size(360, 24);
+            txtAiApiKey.TabIndex = 5;
+            //
+            // lblAiSysPrompt
+            //
+            lblAiSysPrompt.AutoSize = true;
+            lblAiSysPrompt.Location = new Point(8, 126);
+            lblAiSysPrompt.Name = "lblAiSysPrompt";
+            lblAiSysPrompt.TabIndex = 6;
+            lblAiSysPrompt.Text = "System:";
+            //
+            // txtAiSystemPrompt
+            //
+            txtAiSystemPrompt.Location = new Point(90, 122);
+            txtAiSystemPrompt.Multiline = true;
+            txtAiSystemPrompt.Name = "txtAiSystemPrompt";
+            txtAiSystemPrompt.Size = new Size(360, 46);
+            txtAiSystemPrompt.TabIndex = 7;
+            //
+            // btnAiSaveSettings
+            //
+            btnAiSaveSettings.Location = new Point(456, 22);
+            btnAiSaveSettings.Name = "btnAiSaveSettings";
+            btnAiSaveSettings.Size = new Size(56, 26);
+            btnAiSaveSettings.TabIndex = 8;
+            btnAiSaveSettings.Text = "Save";
+            btnAiSaveSettings.UseVisualStyleBackColor = true;
+            btnAiSaveSettings.Click += btnAiSaveSettings_Click;
+            //
+            // lblAiSettingsPath
+            //
+            lblAiSettingsPath.AutoSize = true;
+            lblAiSettingsPath.ForeColor = System.Drawing.Color.Gray;
+            lblAiSettingsPath.Location = new Point(8, 184);
+            lblAiSettingsPath.Name = "lblAiSettingsPath";
+            lblAiSettingsPath.TabIndex = 9;
+            lblAiSettingsPath.Text = "ai-settings.json";
+            //
+            // grpAiSession
+            //
+            grpAiSession.Controls.Add(lblAiSessionStatus);
+            grpAiSession.Controls.Add(btnAiOpenChat);
+            grpAiSession.Controls.Add(btnAiResetChat);
+            grpAiSession.Location = new Point(8, 222);
+            grpAiSession.Name = "grpAiSession";
+            grpAiSession.Size = new Size(520, 66);
+            grpAiSession.TabIndex = 1;
+            grpAiSession.TabStop = false;
+            grpAiSession.Text = "Chat";
+            //
+            // lblAiSessionStatus
+            //
+            lblAiSessionStatus.AutoSize = true;
+            lblAiSessionStatus.ForeColor = System.Drawing.Color.Gray;
+            lblAiSessionStatus.Location = new Point(8, 24);
+            lblAiSessionStatus.Name = "lblAiSessionStatus";
+            lblAiSessionStatus.TabIndex = 0;
+            lblAiSessionStatus.Text = "No active session";
+            //
+            // btnAiOpenChat
+            //
+            btnAiOpenChat.Location = new Point(276, 20);
+            btnAiOpenChat.Name = "btnAiOpenChat";
+            btnAiOpenChat.Size = new Size(120, 26);
+            btnAiOpenChat.TabIndex = 1;
+            btnAiOpenChat.Text = "Open in Browser";
+            btnAiOpenChat.UseVisualStyleBackColor = true;
+            btnAiOpenChat.Click += btnAiOpenChat_Click;
+            //
+            // btnAiResetChat
+            //
+            btnAiResetChat.Location = new Point(402, 20);
+            btnAiResetChat.Name = "btnAiResetChat";
+            btnAiResetChat.Size = new Size(110, 26);
+            btnAiResetChat.TabIndex = 2;
+            btnAiResetChat.Text = "Reset Conversation";
+            btnAiResetChat.UseVisualStyleBackColor = true;
+            btnAiResetChat.Click += btnAiResetChat_Click;
+            //
             // grpModelPaths
             // 
             grpModelPaths.Controls.Add(lblModelPath);
@@ -799,6 +975,11 @@ namespace ApexComputerUse
             grpModelPaths.PerformLayout();
             grpDownload.ResumeLayout(false);
             grpDownload.PerformLayout();
+            tabPageChat.ResumeLayout(false);
+            grpAiSettings.ResumeLayout(false);
+            grpAiSettings.PerformLayout();
+            grpAiSession.ResumeLayout(false);
+            grpAiSession.PerformLayout();
             statusStrip1.ResumeLayout(false);
             statusStrip1.PerformLayout();
             ResumeLayout(false);
@@ -889,5 +1070,21 @@ namespace ApexComputerUse
         private System.Windows.Forms.Label     lblPipeStatus;
         private ToolStripMenuItem renderTestToolStripMenuItem;
         private ToolStripMenuItem sceneEditorToolStripMenuItem;
+        private TabPage tabPageChat;
+        private GroupBox grpAiSettings;
+        private Label lblAiProvider;
+        private ComboBox cboAiProvider;
+        private Label lblAiModel;
+        private TextBox txtAiModel;
+        private Label lblAiApiKey;
+        private TextBox txtAiApiKey;
+        private Label lblAiSysPrompt;
+        private TextBox txtAiSystemPrompt;
+        private Button btnAiSaveSettings;
+        private Label lblAiSettingsPath;
+        private GroupBox grpAiSession;
+        private Label lblAiSessionStatus;
+        private Button btnAiOpenChat;
+        private Button btnAiResetChat;
     }
 }
