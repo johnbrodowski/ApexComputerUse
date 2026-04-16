@@ -5,6 +5,23 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.11.0] — 2026-04-16
+
+### Added
+- **`/elements?match=<text>`** — case-insensitive substring search across `Name`, `AutomationId`, and `Value` pattern. Returns only branches containing matches, each wrapped in its ancestor path (non-matching siblings pruned). `depth` now controls how deep to render under each match, so one call replaces the repeated drill-down pattern of "fetch tree → spot candidate → fetch subtree". Composes with `type=` and `onscreen=true`.
+- **`/elements?collapseChains=true`** — folds "1-in-1-in-1" wrapper chains that dominate web accessibility trees. A node is skipped only when it has exactly one child, no `Name`, no `AutomationId`, and its control type is `Pane`, `Group`, or `Custom`. Named containers and anything with an AutomationId are preserved. IDs of hoisted descendants are unchanged — follow-up `/elements?id=<id>` and `/execute id=<id>` calls continue to work against the real (unflattened) tree.
+- **`/elements?includePath=true`** — every emitted node gains a `path` breadcrumb string (e.g. `"Chrome > Document > Main > Form"`) so an agent can orient itself without climbing back up the tree.
+- **`/elements?properties=extra`** — opt-in per-node `value` (via Value pattern, when the element supports it) and `helpText` properties. Off by default so token budgets don't change silently; needed for web inputs whose `Name` is empty and whose visible content lives in the Value pattern.
+- **`descendantCount` on truncated nodes** — nodes cut off by `depth` now emit `descendantCount: N` alongside the existing `childCount`, so an agent can decide whether a subtree is worth expanding without another round trip.
+- **Structured `/find` response** — `/find` now populates a JSON `element` object on the response (id, controlType, name, automationId, className, frameworkId, isEnabled, isOffscreen, boundingRectangle, plus `value`/`helpText` when `properties=extra`) alongside the existing human-readable string in `message`. The element's numeric ID is recovered from the most recent `/elements` scan when available.
+- **Tree-shape unit tests** (`ApexComputerUse.Tests/CommandProcessorTreeTests.cs`) — covers `FilterTreeByMatch` (case-insensitive, AutomationId + Value lookup, sibling pruning), `CollapseSingleChildChains` (identity-less-only collapse, multi-child preservation, ID stability), and `ElementNode` JSON round-trip for the new opt-in fields.
+
+### Changed
+- `CommandProcessor.ElementNode` / `BoundingRect` promoted from `private` to `internal sealed class` so the new in-process post-processors (`FilterTreeByMatch`, `CollapseSingleChildChains`) and the test project (`InternalsVisibleTo`) can exercise them directly.
+- `ScanElementsIntoMap` now accepts a `ScanOptions` struct (IncludePath + IncludeExtra + depth) and threads the parent breadcrumb through recursion without changing call-site signatures for existing endpoints.
+
+---
+
 ## [0.10.0] — 2026-04-16
 
 ### Added

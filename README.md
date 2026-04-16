@@ -209,6 +209,35 @@ curl "http://localhost:8081/elements?id=708379645&depth=2&onscreen=true"
 
 This lets an AI agent navigate to the relevant section of a large page without fetching the whole tree on every step.
 
+### Browser-friendly tree filters
+
+Modern web pages often wrap every visible element in several identity-less `Pane`/`Group`/`Custom` nodes and produce deep trees with many one-child chains. Two opt-in `/elements` parameters strip that noise:
+
+```bash
+# Text search across Name, AutomationId, and Value — one call returns every
+# match with its ancestor path plus `depth` levels of descendants under each.
+curl "http://localhost:8081/elements?match=add+to+cart&onscreen=true&depth=1"
+
+# Collapse "1-in-1-in-1" wrapper chains. A wrapper is skipped only when it has
+# exactly one child, no name, no AutomationId, and its control type is Pane,
+# Group, or Custom. Named containers and anything with an AutomationId survive.
+curl "http://localhost:8081/elements?onscreen=true&collapseChains=true"
+
+# Ancestor breadcrumb on every emitted node: "Chrome > Document > Main > Form".
+curl "http://localhost:8081/elements?onscreen=true&includePath=true"
+
+# Opt into Value pattern + HelpText on every node — useful for web inputs
+# whose Name is empty and whose visible content lives in the Value pattern.
+curl "http://localhost:8081/elements?onscreen=true&properties=extra"
+
+# All new filters combine cleanly with existing ones.
+curl "http://localhost:8081/elements?onscreen=true&collapseChains=true&match=submit&type=Button&depth=1&properties=extra"
+```
+
+Truncated nodes (ones whose children were cut off by `depth`) now also emit `descendantCount` alongside `childCount`, so an agent can decide whether a subtree is worth expanding without another round trip. Element IDs are computed against the real, unflattened tree — hoisting a descendant through `collapseChains` does not change its ID, and follow-up `/elements?id=<id>` and `/execute id=<id>` calls still resolve.
+
+`/find` now populates the response's structured `element` object (id, controlType, name, automationId, className, frameworkId, isEnabled, isOffscreen, boundingRectangle, plus `value`/`helpText` when `properties=extra`), in addition to the existing human-readable string in `message`.
+
 ---
 
 ## Features
@@ -627,8 +656,22 @@ curl "http://localhost:8081/elements?id=<elementId>&depth=2&onscreen=true"
 # Filter by ControlType
 curl "http://localhost:8081/elements?type=Button"
 
+# Text search across Name, AutomationId, and Value — returns only matching
+# branches, each wrapped in its ancestor path, with `depth` levels below.
+curl "http://localhost:8081/elements?match=add+to+cart&onscreen=true&depth=1"
+
+# Collapse identity-less single-child Pane/Group/Custom wrapper chains
+# (named containers and anything with an AutomationId are preserved).
+curl "http://localhost:8081/elements?onscreen=true&collapseChains=true"
+
+# Add an ancestor breadcrumb ("path") to every emitted node.
+curl "http://localhost:8081/elements?onscreen=true&includePath=true"
+
+# Opt into Value pattern + HelpText (omitted by default to keep payloads small).
+curl "http://localhost:8081/elements?onscreen=true&properties=extra"
+
 # All filters combined
-curl "http://localhost:8081/elements?depth=3&onscreen=true&type=Button"
+curl "http://localhost:8081/elements?depth=3&onscreen=true&type=Button&collapseChains=true&match=submit&properties=extra"
 
 # Render the current window's UI element tree as a colour-coded PNG (returns base64)
 curl http://localhost:8081/uimap

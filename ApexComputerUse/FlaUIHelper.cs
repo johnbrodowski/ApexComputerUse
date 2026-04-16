@@ -190,6 +190,34 @@ namespace ApexComputerUse
             $"Enabled={el.Properties.IsEnabled.ValueOrDefault}  Offscreen={el.Properties.IsOffscreen.ValueOrDefault}  " +
             $"Class={el.Properties.ClassName.ValueOrDefault}  Framework={el.Properties.FrameworkId.ValueOrDefault}";
 
+        /// <summary>
+        /// Reads the Value pattern content if the element supports it; returns null otherwise.
+        /// Safe for tree scans where many elements don't have the pattern — pattern probes
+        /// and property reads both throw on unsupported / stale elements, so everything is
+        /// wrapped in try/catch.
+        /// </summary>
+        public string? ReadValuePattern(AutomationElement el)
+        {
+            try
+            {
+                if (el.Patterns.Value.TryGetPattern(out var vp))
+                    return vp.Value.ValueOrDefault;
+            }
+            catch { /* pattern unsupported or element went stale — treat as "no value" */ }
+            return null;
+        }
+
+        /// <summary>Reads the HelpText property safely — returns null if unsupported or empty.</summary>
+        public string? ReadHelpText(AutomationElement el)
+        {
+            try
+            {
+                var h = el.Properties.HelpText.ValueOrDefault;
+                return string.IsNullOrEmpty(h) ? null : h;
+            }
+            catch { return null; }
+        }
+
         public string GetBoundingRect(AutomationElement el)
         {
             var r = el.BoundingRectangle;

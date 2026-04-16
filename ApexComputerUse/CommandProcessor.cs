@@ -17,6 +17,16 @@ namespace ApexComputerUse
         public string? MmProjPath   { get; set; }   // ai init — mmproj .gguf path
         public string? Prompt       { get; set; }   // ai describe/ask — question text
         public int?    Depth        { get; set; }   // elements — max tree depth (null = unlimited)
+
+        // ── Browser-friendly tree shaping (opt-in; all default to inert) ──
+        /// <summary>elements — case-insensitive substring search applied to Name/AutomationId/Value.</summary>
+        public string? Match          { get; set; }
+        /// <summary>elements — collapse chains of identity-less single-child wrapper nodes.</summary>
+        public bool    CollapseChains { get; set; }
+        /// <summary>elements/find — include an ancestor breadcrumb `path` on every emitted node.</summary>
+        public bool    IncludePath    { get; set; }
+        /// <summary>elements/find — extra per-element properties. "extra" adds `value` (Value pattern) and `helpText`.</summary>
+        public string? Properties     { get; set; }
     }
 
     public class CommandResponse
@@ -177,6 +187,8 @@ namespace ApexComputerUse
             try { window.Focus(); } catch { /* window may not support focus */ }
             string wNote  = wExact ? "" : $" (fuzzy for '{req.Window}')";
 
+            bool includeExtra = string.Equals(req.Properties, "extra", StringComparison.OrdinalIgnoreCase);
+
             // No element search — target the window itself, unless a type filter was
             // given, in which case find the first descendant of that ControlType.
             if (string.IsNullOrWhiteSpace(req.AutomationId) && string.IsNullOrWhiteSpace(req.ElementName))
@@ -197,12 +209,14 @@ namespace ApexComputerUse
 
                     CurrentElement = byType;
                     _elementDesc   = _helper.Describe(byType);
-                    return Ok($"Window: {wTitle}{wNote} | Element (first {req.SearchType})", _elementDesc);
+                    return Ok($"Window: {wTitle}{wNote} | Element (first {req.SearchType})",
+                              BuildFindElementJson(byType, includeExtra));
                 }
 
                 CurrentElement = window;
                 _elementDesc   = _helper.Describe(window);
-                return Ok($"Window: {wTitle}{wNote}", _elementDesc);
+                return Ok($"Window: {wTitle}{wNote}",
+                          BuildFindElementJson(window, includeExtra));
             }
 
             ControlType? filter = ResolveControlType(req.SearchType);
@@ -218,7 +232,8 @@ namespace ApexComputerUse
                 {
                     CurrentElement = mappedEl;
                     _elementDesc   = _helper.Describe(mappedEl);
-                    return Ok($"Window: {wTitle}{wNote} | Element [map:{mappedId}]", _elementDesc);
+                    return Ok($"Window: {wTitle}{wNote} | Element [map:{mappedId}]",
+                              BuildFindElementJson(mappedEl, includeExtra, mappedId));
                 }
                 catch { return Fail($"Element [map:{mappedId}] became stale during access. Run 'find' again."); }
             }
@@ -232,7 +247,82 @@ namespace ApexComputerUse
             _elementDesc   = _helper.Describe(el);
             string eNote   = eExact ? "" : $" (fuzzy '{searchVal}' → '{eValue}')";
 
-            return Ok($"Window: {wTitle}{wNote} | Element{eNote}", _elementDesc);
+            return Ok($"Window: {wTitle}{wNote} | Element{eNote}",
+                      BuildFindElementJson(el, includeExtra));
+        }
+
+        /// <summary>
+        /// Builds the structured JSON document returned in <c>data.result</c> for <c>/find</c>.
+        /// Replaces the legacy unstructured <see cref="ApexHelper.Describe"/> string so callers
+        /// can programmatically consume <c>id</c>, <c>controlType</c>, <c>name</c>, etc. without
+        /// regex-parsing a description. The Describe text remains available in <c>message</c>.
+        /// </summary>
+        /// <param name="preferredId">
+        /// When the element was resolved via a numeric map-ID lookup, pass that ID so the
+        /// response mirrors the caller's own reference. Otherwise we try to recover the ID
+        /// from <c>_elementMap</c> via reference equality (present only when /elements was
+        /// called previously on the same window); we omit <c>id</c> if we have no match.
+        /// </param>
+        private string BuildFindElementJson(AutomationElement el, bool includeExtra, int? preferredId = null)
+        {
+            // Recover the stable numeric ID if the caller previously ran /elements — reference
+            // equality against the live AutomationElement handles the common "scan then find"
+            // workflow. First-time /find without a prior scan simply omits `id`.
+            int? id = preferredId;
+            if (id == null)
+            {
+                foreach (var kv in _elementMap)
+                {
+                    if (ReferenceEquals(kv.Value, el)) { id = kv.Key; break; }
+                }
+            }
+
+            BoundingRect? rect = null;
+            try
+            {
+                var b = el.BoundingRectangle;
+                if (b.Width > 0 || b.Height > 0)
+                    rect = new BoundingRect { X = (int)b.X, Y = (int)b.Y, Width = (int)b.Width, Height = (int)b.Height };
+            }
+            catch { /* stale — leave rect null */ }
+
+            string ct       = "Unknown";
+            string name     = "";
+            string autoId   = "";
+            string className = "";
+            string frameworkId = "";
+            bool   isEnabled   = false;
+            bool   isOffscreen = false;
+            try { ct          = el.Properties.ControlType.ValueOrDefault.ToString(); } catch { }
+            try { name        = el.Properties.Name.ValueOrDefault         ?? ""; }     catch { }
+            try { autoId      = el.Properties.AutomationId.ValueOrDefault ?? ""; }     catch { }
+            try { className   = el.Properties.ClassName.ValueOrDefault    ?? ""; }     catch { }
+            try { frameworkId = el.Properties.FrameworkId.ValueOrDefault  ?? ""; }     catch { }
+            try { isEnabled   = el.Properties.IsEnabled.ValueOrDefault;          }     catch { }
+            try { isOffscreen = el.Properties.IsOffscreen.ValueOrDefault;        }     catch { }
+
+            var payload = new
+            {
+                id,
+                controlType       = ct,
+                name,
+                automationId      = autoId,
+                className,
+                frameworkId,
+                isEnabled,
+                isOffscreen,
+                boundingRectangle = rect,
+                value             = includeExtra ? _helper.ReadValuePattern(el) : null,
+                helpText          = includeExtra ? _helper.ReadHelpText(el)     : null
+            };
+
+            return System.Text.Json.JsonSerializer.Serialize(payload,
+                new System.Text.Json.JsonSerializerOptions
+                {
+                    WriteIndented          = true,
+                    PropertyNamingPolicy   = System.Text.Json.JsonNamingPolicy.CamelCase,
+                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+                });
         }
 
         private CommandResponse CmdExecute(CommandRequest req)
@@ -476,10 +566,17 @@ namespace ApexComputerUse
 
             int? maxDepth = (req.Depth.HasValue && req.Depth.Value >= 0) ? req.Depth : null;
 
+            var options = new ScanOptions
+            {
+                OnscreenOnly = req.OnscreenOnly,
+                MaxDepth     = maxDepth,
+                IncludePath  = req.IncludePath,
+                IncludeExtra = string.Equals(req.Properties, "extra", StringComparison.OrdinalIgnoreCase)
+            };
+
             var root = ScanElementsIntoMap(
                 scanRoot, null, null,
-                onscreenOnly: req.OnscreenOnly,
-                maxDepth:     maxDepth,
+                options,
                 overrideHash: rootHashOverride,
                 overrideId:   rootIdOverride);
 
@@ -487,6 +584,15 @@ namespace ApexComputerUse
             ControlType? typeFilter = ResolveControlType(req.SearchType);
             if (typeFilter.HasValue && root != null)
                 root = FilterTreeByType(root, typeFilter.Value, isRoot: true);
+
+            // Text-search filter: prune to branches containing matches on Name/AutomationId/Value.
+            if (!string.IsNullOrWhiteSpace(req.Match) && root != null)
+                root = FilterTreeByMatch(root, req.Match!.Trim(), isRoot: true);
+
+            // Single-child wrapper collapse — run last so IDs, paths, and descendant counts are
+            // already set before we start hoisting children up through the tree.
+            if (req.CollapseChains && root != null)
+                root = CollapseSingleChildChains(root);
 
             int count = CountNodes(root);
 
@@ -1010,17 +1116,30 @@ namespace ApexComputerUse
         private const int ScanMaxDepth    = 25;
         private const int ScanChildTimeout = 2000; // ms per FindAllChildren call
 
+        /// <summary>
+        /// Bundle of options threaded through <see cref="ScanElementsIntoMap"/>. Kept as a
+        /// struct so the recursion signature stays readable as more opt-in features land.
+        /// </summary>
+        private readonly struct ScanOptions
+        {
+            public bool    OnscreenOnly    { get; init; }
+            public int?    MaxDepth        { get; init; }
+            public bool    IncludePath     { get; init; }
+            public bool    IncludeExtra    { get; init; }  // properties=extra → value + helpText
+        }
+
         private ElementNode? ScanElementsIntoMap(
             AutomationElement el, string? parentHash, int? parentId,
-            int siblingIndex = 0, int depth = 0, bool onscreenOnly = false,
-            int? maxDepth = null,
+            ScanOptions options,
+            int siblingIndex = 0, int depth = 0,
+            string? parentPath = null,
             string? overrideHash = null, int? overrideId = null)
         {
             if (depth > ScanMaxDepth) return null;
 
             // Onscreen filter — skip element and its entire subtree if off-viewport.
             // depth == 0 is always the scan root (window or expansion target); never filter it out.
-            if (onscreenOnly && depth > 0 && el.Properties.IsOffscreen.ValueOrDefault)
+            if (options.OnscreenOnly && depth > 0 && el.Properties.IsOffscreen.ValueOrDefault)
                 return null;
 
             try
@@ -1046,7 +1165,19 @@ namespace ApexComputerUse
                 _elementMap[id]    = el;
                 _elementHashes[id] = hash;
 
-                bool truncate = maxDepth.HasValue && depth >= maxDepth.Value;
+                bool truncate = options.MaxDepth.HasValue && depth >= options.MaxDepth.Value;
+
+                string nameProp = el.Properties.Name.ValueOrDefault ?? "";
+
+                // Build the ancestor breadcrumb — each level is "ControlType" if Name is empty,
+                // otherwise "Name". Root is just the root's label. Only materialised when the
+                // caller asked for IncludePath, so we don't burn string allocations otherwise.
+                string? path = null;
+                if (options.IncludePath)
+                {
+                    string segment = string.IsNullOrEmpty(nameProp) ? ct.ToString() : nameProp;
+                    path = string.IsNullOrEmpty(parentPath) ? segment : $"{parentPath} > {segment}";
+                }
 
                 // Fetch children on a background thread with a timeout to avoid
                 // hanging on UWP-hosted elements that block UIA traversal indefinitely.
@@ -1059,22 +1190,30 @@ namespace ApexComputerUse
                 }
                 catch (Exception ex) { AppLog.Debug($"[Scan] FindAllChildren failed — {ex.Message}"); children = null; }
 
-                List<ElementNode>? childNodes    = null;
-                int?               childCountOut = null;
+                List<ElementNode>? childNodes        = null;
+                int?               childCountOut     = null;
+                int?               descendantCountOut = null;
 
                 if (truncate)
                 {
-                    // Depth limit hit — omit children, report their count so callers know to drill in.
+                    // Depth limit hit — omit children, report their counts so callers know to drill in.
                     if (children != null && children.Length > 0)
-                        childCountOut = children.Length;
+                    {
+                        childCountOut      = children.Length;
+                        // Count all descendants below the cutoff so the caller can decide whether
+                        // drilling in is cheap or expensive. Respects the onscreen filter so the
+                        // count matches what a follow-up /elements?id=<id>&onscreen=true would emit.
+                        descendantCountOut = CountDescendantsBelow(el, options.OnscreenOnly);
+                    }
                 }
                 else if (children != null)
                 {
                     for (int i = 0; i < children.Length; i++)
                     {
                         var child = ScanElementsIntoMap(
-                            children[i], hash, id, i, depth + 1,
-                            onscreenOnly, maxDepth);
+                            children[i], hash, id, options,
+                            siblingIndex: i, depth: depth + 1,
+                            parentPath: path);
                         if (child != null)
                         {
                             childNodes ??= new List<ElementNode>();
@@ -1094,21 +1233,64 @@ namespace ApexComputerUse
                     }
                     : null;
 
+                // Opt-in properties — read only when the caller asked for them so default scans
+                // keep their existing 4-property budget.
+                string? valueOut    = options.IncludeExtra ? _helper.ReadValuePattern(el) : null;
+                string? helpTextOut = options.IncludeExtra ? _helper.ReadHelpText(el)     : null;
+                if (string.IsNullOrEmpty(valueOut))    valueOut    = null;
+                if (string.IsNullOrEmpty(helpTextOut)) helpTextOut = null;
+
                 return new ElementNode
                 {
                     Id                = id,
                     ControlType       = ct.ToString(),
-                    Name              = el.Properties.Name.ValueOrDefault ?? "",
+                    Name              = nameProp,
                     AutomationId      = el.Properties.AutomationId.ValueOrDefault ?? "",
                     BoundingRectangle = boundingRect,
                     Children          = childNodes,
-                    ChildCount        = childCountOut
+                    ChildCount        = childCountOut,
+                    DescendantCount   = descendantCountOut,
+                    Path              = path,
+                    Value             = valueOut,
+                    HelpText          = helpTextOut
                 };
             }
             catch { return null; } // element became stale mid-scan — skip silently
         }
 
-        private sealed class ElementNode
+        /// <summary>
+        /// Cheap count of all live descendants under <paramref name="el"/>, respecting the
+        /// onscreen filter so the number matches what the caller would see if they drilled in
+        /// via <c>/elements?id=&lt;id&gt;</c>. No ID hashing, no node construction, no mapping —
+        /// just walks children to produce an integer so the caller can estimate cost.
+        /// </summary>
+        private static int CountDescendantsBelow(AutomationElement el, bool onscreenOnly)
+        {
+            AutomationElement[]? children;
+            try
+            {
+                var fetchTask = Task.Run(() => el.FindAllChildren());
+                children = fetchTask.Wait(ScanChildTimeout) ? fetchTask.Result : null;
+            }
+            catch { return 0; }
+            if (children == null || children.Length == 0) return 0;
+
+            int total = 0;
+            foreach (var c in children)
+            {
+                try
+                {
+                    if (onscreenOnly && c.Properties.IsOffscreen.ValueOrDefault) continue;
+                    total += 1 + CountDescendantsBelow(c, onscreenOnly);
+                }
+                catch { /* stale child — skip */ }
+            }
+            return total;
+        }
+
+        // Internal (not private) so the test project (InternalsVisibleTo) can construct
+        // synthetic trees to verify FilterTreeByMatch / CollapseSingleChildChains / descendant counts.
+        internal sealed class ElementNode
         {
             public int                 Id                { get; init; }
             public string              ControlType       { get; init; } = "";
@@ -1117,9 +1299,15 @@ namespace ApexComputerUse
             public BoundingRect?       BoundingRectangle { get; init; }
             public List<ElementNode>?  Children          { get; init; }
             public int?                ChildCount        { get; init; }  // set only when children are omitted due to a depth limit — tells the caller it can expand this node via /elements?id=<Id>
+
+            // ── Opt-in fields (emitted only when populated; JsonIgnoreCondition.WhenWritingNull keeps payloads small) ──
+            public int?                DescendantCount   { get; init; }  // set alongside ChildCount on truncated nodes — total transitive descendants the caller could still drill into
+            public string?             Path              { get; init; }  // ancestor breadcrumb, e.g. "Chrome > Document > Form" — set only when the caller requested IncludePath
+            public string?             Value             { get; init; }  // Value pattern content — set only when the caller requested properties=extra
+            public string?             HelpText          { get; init; }  // HelpText property — set only when the caller requested properties=extra
         }
 
-        private sealed class BoundingRect
+        internal sealed class BoundingRect
         {
             public int X      { get; init; }
             public int Y      { get; init; }
@@ -1156,17 +1344,114 @@ namespace ApexComputerUse
 
             if (!keep) return null;
 
-            return new ElementNode
+            return CloneWithChildren(node, filteredChildren);
+        }
+
+        /// <summary>
+        /// Prunes the tree to branches whose Name, AutomationId, or Value (when populated)
+        /// contains <paramref name="needle"/> (case-insensitive). Matching nodes keep their
+        /// full subtree; non-matching ancestors are preserved only when they lie on the path
+        /// to a match, giving the caller a breadcrumb without siblings.
+        /// </summary>
+        internal static ElementNode? FilterTreeByMatch(ElementNode node, string needle, bool isRoot)
+        {
+            if (string.IsNullOrEmpty(needle)) return node;
+
+            bool selfMatches = MatchesNode(node, needle);
+
+            // If this node matches, keep its entire subtree — the agent probably wants
+            // context below the match. Non-matching siblings beneath a match are fine;
+            // they're the siblings of a match, not unrelated noise.
+            if (selfMatches) return node;
+
+            List<ElementNode>? keptChildren = null;
+            if (node.Children != null)
+            {
+                foreach (var child in node.Children)
+                {
+                    var kept = FilterTreeByMatch(child, needle, isRoot: false);
+                    if (kept != null)
+                    {
+                        keptChildren ??= new List<ElementNode>();
+                        keptChildren.Add(kept);
+                    }
+                }
+            }
+
+            // Keep the root so callers always get a valid tree skeleton, even if zero matches.
+            // Keep intermediate nodes only when a descendant matched (they serve as breadcrumbs).
+            if (!isRoot && keptChildren == null) return null;
+
+            return CloneWithChildren(node, keptChildren);
+        }
+
+        private static bool MatchesNode(ElementNode node, string needle)
+        {
+            if (!string.IsNullOrEmpty(node.Name)         && node.Name.Contains(needle,         StringComparison.OrdinalIgnoreCase)) return true;
+            if (!string.IsNullOrEmpty(node.AutomationId) && node.AutomationId.Contains(needle, StringComparison.OrdinalIgnoreCase)) return true;
+            if (!string.IsNullOrEmpty(node.Value)        && node.Value.Contains(needle,        StringComparison.OrdinalIgnoreCase)) return true;
+            return false;
+        }
+
+        /// <summary>
+        /// Folds chains of identity-less single-child wrappers — e.g. the "1-in-1-in-1" Pane/Group
+        /// chains browsers emit around every piece of web content. A node is collapsed when it has
+        /// exactly one child AND has no Name AND has no AutomationId AND its ControlType is one of
+        /// the generic containers (Pane/Group/Custom). IDs are never rewritten — the hoisted child
+        /// keeps its original ID so follow-up /elements?id=&lt;id&gt; calls still resolve.
+        /// </summary>
+        internal static ElementNode? CollapseSingleChildChains(ElementNode? node)
+        {
+            if (node == null) return null;
+
+            // Recurse first so we collapse bottom-up.
+            List<ElementNode>? newChildren = null;
+            if (node.Children != null)
+            {
+                foreach (var child in node.Children)
+                {
+                    var reduced = CollapseSingleChildChains(child);
+                    if (reduced != null)
+                    {
+                        newChildren ??= new List<ElementNode>();
+                        newChildren.Add(reduced);
+                    }
+                }
+            }
+
+            // A node qualifies for collapse if it's an identity-less wrapper with exactly one
+            // surviving child. The child (possibly already collapsed) is hoisted into our place.
+            if (IsCollapsibleWrapper(node) && newChildren != null && newChildren.Count == 1)
+                return newChildren[0];
+
+            return CloneWithChildren(node, newChildren);
+        }
+
+        private static bool IsCollapsibleWrapper(ElementNode node)
+        {
+            if (!string.IsNullOrEmpty(node.Name))         return false;
+            if (!string.IsNullOrEmpty(node.AutomationId)) return false;
+            return node.ControlType.Equals("Pane",   StringComparison.OrdinalIgnoreCase)
+                || node.ControlType.Equals("Group",  StringComparison.OrdinalIgnoreCase)
+                || node.ControlType.Equals("Custom", StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>Clones a node, substituting a new children list but preserving every other field.</summary>
+        private static ElementNode CloneWithChildren(ElementNode node, List<ElementNode>? newChildren) =>
+            new()
             {
                 Id                = node.Id,
                 ControlType       = node.ControlType,
                 Name              = node.Name,
                 AutomationId      = node.AutomationId,
                 BoundingRectangle = node.BoundingRectangle,
-                Children          = filteredChildren,
-                ChildCount        = node.ChildCount
+                Children          = newChildren,
+                ChildCount        = node.ChildCount,
+                DescendantCount   = node.DescendantCount,
+                Path              = node.Path,
+                Value             = node.Value,
+                HelpText          = node.HelpText
             };
-        }
 
         private static int CountNodes(ElementNode? node)
         {

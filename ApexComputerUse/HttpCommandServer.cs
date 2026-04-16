@@ -278,12 +278,16 @@ namespace ApexComputerUse
                         ("GET", "/elements")
                             => ApexResult.From("elements",   _processor.Process(new CommandRequest
                             {
-                                Command      = "elements",
-                                SearchType   = req.QueryString["type"],
-                                AutomationId = req.QueryString["id"],       // numeric — expands a subtree from a previously-mapped element
-                                Depth        = int.TryParse(req.QueryString["depth"], out int _elemDepth) ? _elemDepth : null,
-                                OnscreenOnly = string.Equals(req.QueryString["onscreen"], "true",
-                                                   StringComparison.OrdinalIgnoreCase)
+                                Command        = "elements",
+                                SearchType     = req.QueryString["type"],
+                                AutomationId   = req.QueryString["id"],       // numeric — expands a subtree from a previously-mapped element
+                                Depth          = int.TryParse(req.QueryString["depth"], out int _elemDepth) ? _elemDepth : null,
+                                OnscreenOnly   = string.Equals(req.QueryString["onscreen"],       "true", StringComparison.OrdinalIgnoreCase),
+                                // ── Browser-friendly tree shaping (opt-in; see README) ──
+                                Match          = req.QueryString["match"],                        // text-search Name/AutomationId/Value
+                                CollapseChains = string.Equals(req.QueryString["collapseChains"], "true", StringComparison.OrdinalIgnoreCase),
+                                IncludePath    = string.Equals(req.QueryString["includePath"],    "true", StringComparison.OrdinalIgnoreCase),
+                                Properties     = req.QueryString["properties"]                    // "extra" → value + helpText
                             })),
                         ("GET", "/uimap")
                             => ApexResult.From("uimap",      _processor.Process(new CommandRequest { Command = "uimap" })),
@@ -2571,6 +2575,11 @@ namespace ApexComputerUse
                 Prompt       = req.QueryString["prompt"],
                 ModelPath    = req.QueryString["model"]        ?? req.QueryString["modelPath"],
                 MmProjPath   = req.QueryString["proj"]         ?? req.QueryString["mmProjPath"],
+                Depth          = int.TryParse(req.QueryString["depth"], out int _d) ? _d : null,
+                Match          = req.QueryString["match"],
+                CollapseChains = string.Equals(req.QueryString["collapseChains"], "true", StringComparison.OrdinalIgnoreCase),
+                IncludePath    = string.Equals(req.QueryString["includePath"],    "true", StringComparison.OrdinalIgnoreCase),
+                Properties     = req.QueryString["properties"],
             };
 
         private static CommandRequest FromJson(string json, string command) =>
@@ -2593,6 +2602,13 @@ namespace ApexComputerUse
                 r.ModelPath    = root.Str("model")   ?? root.Str("modelPath");
                 r.MmProjPath   = root.Str("proj")    ?? root.Str("mmProjPath");
                 r.Prompt       = root.Str("prompt");
+                // Browser-friendly tree shaping (opt-in). All safe to miss — defaults are inert.
+                if (root.TryGetProperty("depth", out var dEl) && dEl.ValueKind == JsonValueKind.Number && dEl.TryGetInt32(out int dVal))
+                    r.Depth = dVal;
+                r.Match          = root.Str("match");
+                r.CollapseChains = root.Bool("collapseChains") ?? false;
+                r.IncludePath    = root.Bool("includePath")    ?? false;
+                r.Properties     = root.Str("properties");
             }
             catch (Exception ex) { AppLog.Debug($"[HTTP] Malformed JSON in request body — {ex.Message}"); }
             return r;
