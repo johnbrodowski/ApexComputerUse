@@ -2,7 +2,6 @@ using System.IO.Pipes;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Text;
-using System.Text.Json;
 
 namespace ApexComputerUse
 {
@@ -32,7 +31,7 @@ namespace ApexComputerUse
     public class PipeCommandServer : IDisposable
     {
         private readonly string            _pipeName;
-        private readonly CommandProcessor  _processor;
+        private readonly CommandDispatcher _dispatcher;
         private CancellationTokenSource?   _cts;
         private Task?                      _listenTask;
 
@@ -45,8 +44,8 @@ namespace ApexComputerUse
 
         public PipeCommandServer(string pipeName, CommandProcessor processor)
         {
-            _pipeName  = pipeName;
-            _processor = processor;
+            _pipeName   = pipeName;
+            _dispatcher = new CommandDispatcher(processor);
         }
 
         // ── Lifecycle ─────────────────────────────────────────────────────
@@ -133,19 +132,10 @@ namespace ApexComputerUse
                         line = line.Trim();
                         if (line.Length == 0) continue;
 
-                        CommandResponse response;
-                        try
-                        {
-                            var req = ParseJson(line);
-                            if (req.Command.Equals("exit", StringComparison.OrdinalIgnoreCase))
-                                break;
-                            response = _processor.Process(req);
-                        }
-                        catch (Exception ex)
-                        {
-                            response = new CommandResponse { Success = false, Message = ex.Message };
-                        }
-
+                        var req = CommandRequestJsonMapper.FromJsonSelfDescribing(line);
+                        if (req.Command.Equals("exit", StringComparison.OrdinalIgnoreCase))
+                            break;
+                        var response = _dispatcher.Dispatch(req);
                         await writer.WriteLineAsync(response.ToJson());
                     }
                 }
@@ -184,30 +174,6 @@ namespace ApexComputerUse
                 AccessControlType.Deny));
 
             return security;
-        }
-
-        // ── JSON parser ───────────────────────────────────────────────────
-
-        internal static CommandRequest ParseJson(string json)
-        {
-            var r = new CommandRequest();
-            try
-            {
-                using var doc  = JsonDocument.Parse(json);
-                var root = doc.RootElement;
-                r.Command      = root.Str("command")      ?? "";
-                r.Window       = root.Str("window");
-                r.AutomationId = root.Str("automationId") ?? root.Str("id");
-                r.ElementName  = root.Str("elementName")  ?? root.Str("name");
-                r.SearchType   = root.Str("searchType")   ?? root.Str("type");
-                r.Action       = root.Str("action");
-                r.Value        = root.Str("value");
-                r.ModelPath    = root.Str("model")        ?? root.Str("modelPath");
-                r.MmProjPath   = root.Str("proj")         ?? root.Str("mmProjPath");
-                r.Prompt       = root.Str("prompt");
-            }
-            catch (Exception ex) { AppLog.Debug($"[Pipe] Malformed JSON from client — {ex.Message}"); r.Command = "help"; }
-            return r;
         }
 
         public void Dispose() => Stop();

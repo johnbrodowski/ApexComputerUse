@@ -4,7 +4,7 @@ using Xunit;
 namespace ApexComputerUse.Tests;
 
 /// <summary>
-/// Unit tests for <see cref="PipeCommandServer.ParseJson"/>.
+/// Unit tests for <see cref="CommandRequestJsonMapper.FromJsonSelfDescribing"/>.
 /// The method is tested in isolation — no named-pipe connection required.
 /// </summary>
 public class PipeCommandServerTests
@@ -14,7 +14,7 @@ public class PipeCommandServerTests
     [Fact]
     public void ParseJson_MinimalCommand_SetsCommand()
     {
-        var req = PipeCommandServer.ParseJson("""{"command":"windows"}""");
+        var req = CommandRequestJsonMapper.FromJsonSelfDescribing("""{"command":"windows"}""");
         Assert.Equal("windows", req.Command);
     }
 
@@ -36,7 +36,7 @@ public class PipeCommandServerTests
             }
             """;
 
-        var req = PipeCommandServer.ParseJson(json);
+        var req = CommandRequestJsonMapper.FromJsonSelfDescribing(json);
 
         Assert.Equal("find",            req.Command);
         Assert.Equal("Notepad",         req.Window);
@@ -55,7 +55,7 @@ public class PipeCommandServerTests
     {
         // "id" maps to AutomationId; "name" maps to ElementName; "type" to SearchType.
         const string json = """{"command":"find","id":"btn1","name":"OK","type":"Button"}""";
-        var req = PipeCommandServer.ParseJson(json);
+        var req = CommandRequestJsonMapper.FromJsonSelfDescribing(json);
         Assert.Equal("btn1",   req.AutomationId);
         Assert.Equal("OK",     req.ElementName);
         Assert.Equal("Button", req.SearchType);
@@ -65,7 +65,7 @@ public class PipeCommandServerTests
     public void ParseJson_ModelPathAlias_Resolved()
     {
         const string json = """{"command":"ai","modelPath":"path/to/model.gguf"}""";
-        var req = PipeCommandServer.ParseJson(json);
+        var req = CommandRequestJsonMapper.FromJsonSelfDescribing(json);
         Assert.Equal("path/to/model.gguf", req.ModelPath);
     }
 
@@ -73,7 +73,7 @@ public class PipeCommandServerTests
     public void ParseJson_MmProjPathAlias_Resolved()
     {
         const string json = """{"command":"ai","mmProjPath":"clip.gguf"}""";
-        var req = PipeCommandServer.ParseJson(json);
+        var req = CommandRequestJsonMapper.FromJsonSelfDescribing(json);
         Assert.Equal("clip.gguf", req.MmProjPath);
     }
 
@@ -82,21 +82,21 @@ public class PipeCommandServerTests
     [Fact]
     public void ParseJson_InvalidJson_FallsBackToHelp()
     {
-        var req = PipeCommandServer.ParseJson("not valid json {{{");
+        var req = CommandRequestJsonMapper.FromJsonSelfDescribing("not valid json {{{");
         Assert.Equal("help", req.Command);
     }
 
     [Fact]
     public void ParseJson_EmptyObject_CommandIsEmpty()
     {
-        var req = PipeCommandServer.ParseJson("{}");
+        var req = CommandRequestJsonMapper.FromJsonSelfDescribing("{}");
         Assert.Equal("", req.Command);
     }
 
     [Fact]
     public void ParseJson_MissingCommand_CommandIsEmpty()
     {
-        var req = PipeCommandServer.ParseJson("""{"window":"Notepad"}""");
+        var req = CommandRequestJsonMapper.FromJsonSelfDescribing("""{"window":"Notepad"}""");
         Assert.Equal("",        req.Command);
         Assert.Equal("Notepad", req.Window);
     }
@@ -105,7 +105,7 @@ public class PipeCommandServerTests
     public void ParseJson_NullFieldValues_TreatedAsNull()
     {
         const string json = """{"command":"find","window":null,"action":null}""";
-        var req = PipeCommandServer.ParseJson(json);
+        var req = CommandRequestJsonMapper.FromJsonSelfDescribing(json);
         Assert.Equal("find", req.Command);
         Assert.Null(req.Window);
         Assert.Null(req.Action);
@@ -117,14 +117,14 @@ public class PipeCommandServerTests
     public void ParseJson_ExtraUnknownFields_Ignored()
     {
         const string json = """{"command":"status","unknownField":"value","another":42}""";
-        var req = PipeCommandServer.ParseJson(json);
+        var req = CommandRequestJsonMapper.FromJsonSelfDescribing(json);
         Assert.Equal("status", req.Command);
     }
 
     [Fact]
     public void ParseJson_EmptyString_FallsBackToHelp()
     {
-        var req = PipeCommandServer.ParseJson("");
+        var req = CommandRequestJsonMapper.FromJsonSelfDescribing("");
         Assert.Equal("help", req.Command);
     }
 }

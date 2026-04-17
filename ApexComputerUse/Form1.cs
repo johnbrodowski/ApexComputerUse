@@ -10,7 +10,8 @@ namespace ApexComputerUse
     public partial class Form1 : Form
     {
         private readonly ApexHelper _helper = new();
-        private readonly CommandProcessor _processor = new();
+        private readonly CommandProcessor  _processor  = new();
+        private readonly CommandDispatcher _dispatcher;
         private readonly SceneStore _sceneStore = new();
         private readonly AiChatService _chatService = new();
         private OcrHelper? _ocr;
@@ -18,11 +19,27 @@ namespace ApexComputerUse
         private TelegramController? _telegram;
         private PipeCommandServer? _pipe;
 
+        /// <summary>
+        /// Shared log-forwarding delegate for processor + all I/O servers.
+        /// Captured as a field so it can be unsubscribed symmetrically on Stop / FormClosed —
+        /// if a server outlives the form and fires OnLog, BeginInvoke on a disposed form would throw.
+        /// Self-guards against a disposed form as a belt-and-suspenders against race windows.
+        /// </summary>
+        private readonly Action<string> _logHandler;
+
         // ── Status bar ────────────────────────────────────────────────────
         private readonly System.Windows.Forms.Timer _statusTimer = new() { Interval = 2000 };
         private System.Diagnostics.PerformanceCounter? _cpuCounter;
         private long _netBytesPrev = -1;
-        private CancellationTokenSource? _downloadCts;
+
+        // Cached set of up-adapters for the status-bar Net counter. Enumerating
+        // NetworkInterface.GetAllNetworkInterfaces() costs ~10ms on machines with many NICs,
+        // and the status timer ticks every 2s on the UI thread; refresh only when the OS
+        // reports an address change rather than re-enumerating every tick.
+        private NetworkInterface[] _cachedNics = Array.Empty<NetworkInterface>();
+        private readonly NetworkAddressChangedEventHandler _nicChangedHandler;
+
+        private readonly DownloadManager _downloader = new();
 
         // ── Persistent settings ───────────────────────────────────────────
         private static readonly string SettingsDir =
@@ -110,9 +127,6 @@ namespace ApexComputerUse
             System.Security.Cryptography.RandomNumberGenerator.Fill(bytes);
             return Convert.ToBase64String(bytes).Replace('+', '-').Replace('/', '_').TrimEnd('=');
         }
-
-        private AutomationElement? _foundElement;
-        private Window? _targetWindow;
 
         private static readonly Dictionary<string, string[]> ControlActions = new()
         {
@@ -229,10 +243,23 @@ namespace ApexComputerUse
 
         public Form1()
         {
+            _dispatcher        = new CommandDispatcher(_processor);
+            _nicChangedHandler = (_, _) => RefreshNicCache();
+
             InitializeComponent();
 
+            _logHandler = msg =>
+            {
+                // Always forward to the persistent app log; it has no UI coupling.
+                AppLog.FromOnLog(msg);
+                if (IsDisposed || Disposing || !IsHandleCreated) return;
+                try { BeginInvoke(() => Log(msg)); }
+                catch (ObjectDisposedException) { /* form closed between check and call */ }
+                catch (InvalidOperationException) { /* handle destroyed between check and call */ }
+            };
+
             // Route CommandProcessor logs to the status box
-            _processor.OnLog += msg => { BeginInvoke(() => Log(msg)); AppLog.FromOnLog(msg); };
+            _processor.OnLog += _logHandler;
 
             // Action control-type picker
             cmbControlType.Items.AddRange(ControlActions.Keys.ToArray<object>());
@@ -244,6 +271,10 @@ namespace ApexComputerUse
                 if (ct != ControlType.Unknown)
                     cmbSearchType.Items.Add(ct.ToString());
             cmbSearchType.SelectedIndex = 0;
+
+            // Seed NIC cache and refresh only when the OS reports address changes.
+            RefreshNicCache();
+            NetworkChange.NetworkAddressChanged += _nicChangedHandler;
 
             // Status bar timer — CPU counter init happens on background thread to avoid startup lag
             _statusTimer.Tick += StatusTimer_Tick;
@@ -264,7 +295,7 @@ namespace ApexComputerUse
             InitChatTab();
 
             // First-launch hint: if the default model files are absent, go to the Model tab
-            this.Load += (_, _) => CheckFirstLaunch();
+            this.Load += (_, _) => { WireDownloader(); CheckFirstLaunch(); };
 
             // Auto-start HTTP server once the form is fully loaded
             this.Load += (_, _) => btnStartHttp_Click(this, EventArgs.Empty);
@@ -297,125 +328,39 @@ namespace ApexComputerUse
             string input = txtCommand.Text.Trim();
             if (string.IsNullOrEmpty(input)) return;
 
-            var req = ParseCommandLine(input);
+            var req = CommandLineParser.Parse(input);
             if (req == null) { Log($"Unknown command. Type 'help' for a list."); return; }
 
             try
             {
-                var response = _processor.Process(req);
+                var response = _dispatcher.Dispatch(req);
                 Log(response.ToText());
             }
             catch (Exception ex) { Log($"Error: {ex.Message}"); }
-        }
-
-        private CommandRequest? ParseCommandLine(string input)
-        {
-            var parts = input.Trim().Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
-            string cmd = parts[0].ToLowerInvariant();
-            string args = parts.Length > 1 ? parts[1] : "";
-            var kv = ParseKvArgs(args);
-
-            return cmd switch
-            {
-                "find" => new CommandRequest
-                {
-                    Command = "find",
-                    Window = kv.Get("window", "w"),
-                    AutomationId = kv.Get("id", "automationid"),
-                    ElementName = kv.Get("name", "n"),
-                    SearchType = kv.Get("type", "t")
-                },
-                "exec" or "execute" => new CommandRequest
-                {
-                    Command = "execute",
-                    Action = kv.Get("action", "a"),
-                    Value = kv.Get("value", "v")
-                },
-                "ocr" => new CommandRequest
-                {
-                    Command = "ocr",
-                    Value = kv.Get("value", "region") ?? (args.Contains(',') ? args : null)
-                },
-                "ai" => new CommandRequest
-                {
-                    Command = "ai",
-                    Action = kv.Get("action", "a")
-                                   ?? args.Split(' ', StringSplitOptions.RemoveEmptyEntries)
-                                         .FirstOrDefault()?.ToLowerInvariant(),
-                    ModelPath = kv.Get("model"),
-                    MmProjPath = kv.Get("proj"),
-                    Value = kv.Get("value", "path", "v"),
-                    Prompt = kv.Get("prompt", "p")
-                },
-                "status" => new CommandRequest { Command = "status" },
-                "windows" => new CommandRequest { Command = "windows" },
-                "elements" => new CommandRequest
-                {
-                    Command = "elements",
-                    SearchType = kv.Get("type", "t") ?? (args.Length > 0 ? args.Trim() : null)
-                },
-                "help" => new CommandRequest { Command = "help" },
-                _ => null
-            };
-        }
-
-        private static Dictionary<string, string> ParseKvArgs(string input)
-        {
-            var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            int i = 0;
-            while (i < input.Length)
-            {
-                while (i < input.Length && input[i] == ' ') i++;
-                if (i >= input.Length) break;
-                int keyStart = i;
-                while (i < input.Length && input[i] != '=' && input[i] != ' ') i++;
-                string key = input[keyStart..i].Trim();
-                if (string.IsNullOrEmpty(key)) { i++; continue; }
-                if (i >= input.Length || input[i] != '=') { result[key] = ""; continue; }
-                i++; // skip '='
-                string value;
-                if (i < input.Length && input[i] == '"')
-                {
-                    i++;
-                    int vs = i;
-                    while (i < input.Length && input[i] != '"') i++;
-                    value = input[vs..i];
-                    if (i < input.Length) i++;
-                }
-                else
-                {
-                    int vs = i;
-                    while (i < input.Length && input[i] != ' ') i++;
-                    value = input[vs..i];
-                }
-                result[key] = value;
-            }
-            return result;
         }
 
         // ── Find ──────────────────────────────────────────────────────────
 
         private void btnFind_Click(object sender, EventArgs e)
         {
-            _foundElement = null;
-            _targetWindow = null;
+            _processor.SetCurrentTarget(null, null);
             try
             {
                 string title = txtWindowName.Text.Trim();
                 if (string.IsNullOrEmpty(title)) { Log("Enter a Window Name."); return; }
 
                 // Fuzzy window find
-                _targetWindow = _helper.FindWindowFuzzy(title, out string matchedTitle, out bool windowExact);
-                if (_targetWindow == null) { Log($"No window found for \"{title}\"."); return; }
+                var window = _helper.FindWindowFuzzy(title, out string matchedTitle, out bool windowExact);
+                if (window == null) { Log($"No window found for \"{title}\"."); return; }
 
                 if (!windowExact)
                 {
                     var answer = MessageBox.Show(
                         $"No exact window match.\nUse closest match?\n\n\"{matchedTitle}\"",
                         "Closest Window Match", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                    if (answer == DialogResult.No) { Log("Window match rejected."); _targetWindow = null; return; }
+                    if (answer == DialogResult.No) { Log("Window match rejected."); return; }
                 }
-                Log($"Window ({(windowExact ? "exact" : "fuzzy")}): \"{_targetWindow.Name}\"");
+                Log($"Window ({(windowExact ? "exact" : "fuzzy")}): \"{window.Name}\"");
 
                 string autoId = txtElementId.Text.Trim();
                 string name = txtElementName.Text.Trim();
@@ -423,8 +368,8 @@ namespace ApexComputerUse
                 // If no element search term, target the window itself
                 if (string.IsNullOrEmpty(autoId) && string.IsNullOrEmpty(name))
                 {
-                    _foundElement = _targetWindow;
-                    Log($"Targeting window: {_helper.Describe(_foundElement)}");
+                    _processor.SetCurrentTarget(window, window);
+                    Log($"Targeting window: {_helper.Describe(window)}");
                     return;
                 }
 
@@ -438,10 +383,15 @@ namespace ApexComputerUse
 
                 // Fuzzy element find
                 var el = _helper.FindElementFuzzy(
-                    _targetWindow, searchVal, filterType, searchById,
+                    window, searchVal, filterType, searchById,
                     out string matchedValue, out bool elementExact);
 
-                if (el == null) { Log($"No element found for \"{searchVal}\"."); return; }
+                if (el == null)
+                {
+                    _processor.SetCurrentTarget(window, null);
+                    Log($"No element found for \"{searchVal}\".");
+                    return;
+                }
 
                 if (!elementExact)
                 {
@@ -449,11 +399,16 @@ namespace ApexComputerUse
                     var answer = MessageBox.Show(
                         $"No exact element match for \"{searchVal}\".\nUse closest match?\n\n{field}: \"{matchedValue}\"",
                         "Closest Element Match", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                    if (answer == DialogResult.No) { Log("Element match rejected."); return; }
+                    if (answer == DialogResult.No)
+                    {
+                        _processor.SetCurrentTarget(window, null);
+                        Log("Element match rejected.");
+                        return;
+                    }
                 }
 
-                _foundElement = el;
-                Log($"Element ({(elementExact ? "exact" : "fuzzy")}): {_helper.Describe(_foundElement)}");
+                _processor.SetCurrentTarget(window, el);
+                Log($"Element ({(elementExact ? "exact" : "fuzzy")}): {_helper.Describe(el)}");
             }
             catch (Exception ex) { Log($"Error: {ex.Message}"); }
         }
@@ -462,13 +417,20 @@ namespace ApexComputerUse
 
         private void btnExecute_Click(object sender, EventArgs e)
         {
-            if (_foundElement == null) { Log("Find an element first."); return; }
+            var element = _processor.CurrentElement;
+            if (element == null) { Log("Find an element first."); return; }
+            if (!CommandProcessor.IsElementValid(element))
+            {
+                Log("Element is no longer available (target app closed or changed). Run 'Find' again.");
+                _processor.SetCurrentTarget(_processor.CurrentWindow, null);
+                return;
+            }
 
             string action = cmbAction.SelectedItem?.ToString() ?? "";
             string input = txtInput.Text.Trim();
             try
             {
-                string result = ExecuteAction(_foundElement, action, input);
+                string result = ExecuteAction(element, action, input);
                 Log(string.IsNullOrEmpty(result) ? $"'{action}' done." : $"Result: {result}");
             }
             catch (Exception ex) { Log($"Error: {ex.Message}"); }
@@ -609,9 +571,10 @@ namespace ApexComputerUse
 
         private string DragToElement(AutomationElement source, string targetId)
         {
-            if (_targetWindow == null) return "No window found.";
-            var target = _helper.FindByAutomationId(_targetWindow, targetId)
-                      ?? _helper.FindByName(_targetWindow, targetId);
+            var window = _processor.CurrentWindow;
+            if (window == null) return "No window found.";
+            var target = _helper.FindByAutomationId(window, targetId)
+                      ?? _helper.FindByName(window, targetId);
             if (target == null) return $"Target element '{targetId}' not found.";
             _helper.DragAndDrop(source, target);
             return "";
@@ -619,10 +582,11 @@ namespace ApexComputerUse
 
         private string WaitForElement(string automationId)
         {
-            if (_targetWindow == null) return "No window found.";
-            var el = _helper.WaitForElement(_targetWindow, automationId);
+            var window = _processor.CurrentWindow;
+            if (window == null) return "No window found.";
+            var el = _helper.WaitForElement(window, automationId);
             if (el == null) return $"'{automationId}' did not appear within timeout.";
-            _foundElement = el;
+            _processor.SetCurrentTarget(window, el);
             return $"Found: {_helper.Describe(el)}";
         }
 
@@ -692,7 +656,7 @@ namespace ApexComputerUse
                 _http = new HttpCommandServer(port, _processor, _sceneStore, _chatService, apiKey,
                             enableShellRun: appCfg.EnableShellRun,
                             bindAll: appCfg.HttpBindAll);
-                _http.OnLog += msg => { BeginInvoke(() => Log(msg)); AppLog.FromOnLog(msg); };
+                _http.OnLog += _logHandler;
                 _http.Start();
                 btnStartHttp.Text = "Stop HTTP";
                 string authNote = string.IsNullOrWhiteSpace(apiKey) ? " (no auth)" : " (auth enabled)";
@@ -723,7 +687,7 @@ namespace ApexComputerUse
             try
             {
                 _pipe = new PipeCommandServer(name, _processor);
-                _pipe.OnLog += msg => { BeginInvoke(() => Log(msg)); AppLog.FromOnLog(msg); };
+                _pipe.OnLog += _logHandler;
                 _pipe.Start();
                 btnStartPipe.Text = "Stop Pipe";
                 lblPipeStatus.Text = $"Running: {name}";
@@ -761,7 +725,7 @@ namespace ApexComputerUse
                     .ToList();
 
                 _telegram = new TelegramController(token, _processor, allowedIds.Count > 0 ? allowedIds : null);
-                _telegram.OnLog += msg => { BeginInvoke(() => Log(msg)); AppLog.FromOnLog(msg); };
+                _telegram.OnLog += _logHandler;
                 _telegram.Start();
                 btnStartTelegram.Text = "Stop Telegram";
                 string authNote = allowedIds.Count > 0
@@ -783,6 +747,23 @@ namespace ApexComputerUse
 
         private void Log(string msg) =>
             txtStatus.AppendText($"[{DateTime.Now:HH:mm:ss}] {msg}{Environment.NewLine}");
+
+        /// <summary>
+        /// Top-level exception boundary for <c>async void</c> event handlers.
+        /// Unhandled exceptions in async void fire-and-forget tasks otherwise propagate
+        /// through the synchronization context and can tear down the process.
+        /// </summary>
+        private async Task SafeRun(Func<Task> fn, string? context = null)
+        {
+            try { await fn(); }
+            catch (OperationCanceledException) { /* user cancellation — not an error */ }
+            catch (Exception ex)
+            {
+                string tag = context ?? "handler";
+                Log($"[{tag}] Unhandled: {ex.Message}");
+                AppLog.FromOnLog($"[{tag}] {ex}");
+            }
+        }
 
         // ── Status bar ────────────────────────────────────────────────────
 
@@ -812,11 +793,12 @@ namespace ApexComputerUse
             else
                 lblStatModel.Text = "Model: --";
 
-            // Network (total bytes/sec across all adapters)
+            // Network (total bytes/sec across all adapters).
+            // Iterates the cached adapter array; refreshed on NetworkAddressChanged.
             try
             {
                 long totalBytes = 0;
-                foreach (var nic in NetworkInterface.GetAllNetworkInterfaces())
+                foreach (var nic in _cachedNics)
                     if (nic.OperationalStatus == OperationalStatus.Up)
                     {
                         var stats = nic.GetIPv4Statistics();
@@ -834,6 +816,15 @@ namespace ApexComputerUse
                 _netBytesPrev = totalBytes;
             }
             catch { lblStatNet.Text = "Net: --"; }
+        }
+
+        private void RefreshNicCache()
+        {
+            try { _cachedNics = NetworkInterface.GetAllNetworkInterfaces(); }
+            catch { _cachedNics = Array.Empty<NetworkInterface>(); }
+            // Force recalc of the bytes delta — counters on the new adapter set aren't
+            // comparable to the old totals, so skip this tick's kbps display.
+            _netBytesPrev = -1;
         }
 
         // ── Chat tab ─────────────────────────────────────────────────────
@@ -922,28 +913,9 @@ namespace ApexComputerUse
         private static readonly string DefaultTessdataDir =
             Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "tessdata");
 
-        private static readonly (string Url, string RelPath, string Label)[] SetupFiles =
-        [
-            (
-                "https://huggingface.co/LiquidAI/LFM2.5-VL-450M-GGUF/resolve/main/LFM2.5-VL-450M-Q4_0.gguf",
-                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "models", "LFM2.5-VL-450M-Q4_0.gguf"),
-                "LFM2.5-VL model"
-            ),
-            (
-                "https://huggingface.co/LiquidAI/LFM2.5-VL-450M-GGUF/resolve/main/mmproj-LFM2.5-VL-450m-F16.gguf",
-                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "models", "mmproj-LFM2.5-VL-450m-F16.gguf"),
-                "projector"
-            ),
-            (
-                "https://github.com/tesseract-ocr/tessdata/raw/refs/heads/main/eng.traineddata",
-                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "tessdata", "eng.traineddata"),
-                "eng.traineddata"
-            ),
-        ];
-
         private void CheckFirstLaunch()
         {
-            bool anyMissing = SetupFiles.Any(f => !File.Exists(f.RelPath));
+            bool anyMissing = DownloadManager.SetupFiles.Any(f => !File.Exists(f.RelPath));
             if (!anyMissing) return;
 
             // Switch to Model tab so the user sees the Download All button
@@ -952,130 +924,42 @@ namespace ApexComputerUse
             lblDownloadStatus.Text = "First launch — click \"Download All\" to set up models and tessdata.";
         }
 
-        // Shared streaming download helper; returns true on success.
-        private async Task<bool> DownloadFileAsync(
-            string url, string destPath,
-            Action<string, Color> setStatus,
-            Action<int> setProgress,
-            CancellationToken ct)
+        private void WireDownloader()
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(destPath)!);
-            using var client = new System.Net.Http.HttpClient();
-            using var resp = await client.GetAsync(url, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, ct);
-            resp.EnsureSuccessStatusCode();
-
-            long total = resp.Content.Headers.ContentLength ?? -1;
-            using var src = await resp.Content.ReadAsStreamAsync(ct);
-            using var dest = File.Create(destPath);
-
-            var buffer = new byte[81920];
-            long downloaded = 0;
-            int read;
-            while ((read = await src.ReadAsync(buffer, ct)) > 0)
+            _downloader.Status += (msg, col) => BeginInvoke(() =>
             {
-                await dest.WriteAsync(buffer.AsMemory(0, read), ct);
-                downloaded += read;
-                if (total > 0)
-                {
-                    int pct = (int)(downloaded * 100 / total);
-                    BeginInvoke(() =>
-                    {
-                        setProgress(pct);
-                        setStatus($"{downloaded / 1024 / 1024} MB / {total / 1024 / 1024} MB  ({pct}%)", Color.DarkBlue);
-                    });
-                }
-            }
-            return true;
+                lblDownloadStatus.Text = msg;
+                lblDownloadStatus.ForeColor = col;
+            });
+            _downloader.Progress += pct => BeginInvoke(() => pbarDownload.Value = pct);
         }
 
         private async void btnDownloadAll_Click(object sender, EventArgs e)
         {
-            if (_downloadCts != null) { _downloadCts.Cancel(); return; }
+            if (_downloader.IsRunning) { _downloader.Cancel(); return; }
 
-            _downloadCts = new CancellationTokenSource();
             btnDownloadAll.Text = "Cancel";
             btnDownload.Enabled = false;
             pbarDownload.Value = 0;
 
             try
             {
-                for (int i = 0; i < SetupFiles.Length; i++)
+                bool ok = await _downloader.RunSetupAsync();
+                if (ok)
                 {
-                    var (url, dest, label) = SetupFiles[i];
-                    if (File.Exists(dest))
-                    {
-                        BeginInvoke(() =>
-                        {
-                            lblDownloadStatus.ForeColor = Color.Gray;
-                            lblDownloadStatus.Text = $"[{i + 1}/{SetupFiles.Length}] {label} already exists — skipping.";
-                        });
-                        await Task.Delay(400, _downloadCts.Token); // brief pause so user can read it
-                        continue;
-                    }
-
-                    BeginInvoke(() =>
-                    {
-                        pbarDownload.Value = 0;
-                        lblDownloadStatus.ForeColor = Color.DarkBlue;
-                        lblDownloadStatus.Text = $"[{i + 1}/{SetupFiles.Length}] Downloading {label}…";
-                    });
-
-                    await DownloadFileAsync(
-                        url, dest,
-                        (msg, col) => { lblDownloadStatus.Text = $"[{i + 1}/{SetupFiles.Length}] {label}: {msg}"; lblDownloadStatus.ForeColor = col; },
-                        pct => pbarDownload.Value = pct,
-                        _downloadCts.Token);
-                }
-
-                BeginInvoke(() =>
-                {
-                    pbarDownload.Value = 100;
-                    lblDownloadStatus.ForeColor = Color.Green;
-                    lblDownloadStatus.Text = "All files downloaded.";
-                    // Auto-populate model path boxes
-                    txtModelPath.Text = SetupFiles[0].RelPath;
-                    txtProjPath.Text = SetupFiles[1].RelPath;
+                    var files = DownloadManager.SetupFiles;
+                    txtModelPath.Text = files[0].RelPath;
+                    txtProjPath.Text  = files[1].RelPath;
                     SaveSettings();
-                    Log($"Setup complete. Model: {SetupFiles[0].RelPath}");
-                    Log($"Projector: {SetupFiles[1].RelPath}");
-                    Log($"Tessdata:  {SetupFiles[2].RelPath}");
-                });
-            }
-            catch (OperationCanceledException)
-            {
-                BeginInvoke(() =>
-                {
-                    lblDownloadStatus.ForeColor = Color.Gray;
-                    lblDownloadStatus.Text = "Cancelled.";
-                    // Clean up any partial file that was being written
-                    foreach (var (_, dest, _) in SetupFiles)
-                        if (File.Exists(dest))
-                            try
-                            {
-                                // Only delete if it looks incomplete (very small)
-                                if (new FileInfo(dest).Length < 1024) File.Delete(dest);
-                            }
-                            catch { }
-                });
-            }
-            catch (Exception ex)
-            {
-                BeginInvoke(() =>
-                {
-                    lblDownloadStatus.ForeColor = Color.Red;
-                    lblDownloadStatus.Text = $"Error: {ex.Message}";
-                    Log($"Download All error: {ex.Message}");
-                });
+                    Log($"Setup complete. Model: {files[0].RelPath}");
+                    Log($"Projector: {files[1].RelPath}");
+                    Log($"Tessdata:  {files[2].RelPath}");
+                }
             }
             finally
             {
-                _downloadCts?.Dispose();
-                _downloadCts = null;
-                BeginInvoke(() =>
-                {
-                    btnDownloadAll.Text = "Download All  (LFM2.5-VL model + projector + tessdata)";
-                    btnDownload.Enabled = true;
-                });
+                btnDownloadAll.Text = "Download All  (LFM2.5-VL model + projector + tessdata)";
+                btnDownload.Enabled = true;
             }
         }
 
@@ -1120,12 +1004,7 @@ namespace ApexComputerUse
 
         private async void btnDownload_Click(object sender, EventArgs e)
         {
-            // Toggle: if already downloading, cancel
-            if (_downloadCts != null)
-            {
-                _downloadCts.Cancel();
-                return;
-            }
+            if (_downloader.IsRunning) { _downloader.Cancel(); return; }
 
             string url = txtDownloadUrl.Text.Trim();
             if (string.IsNullOrWhiteSpace(url)) { Log("Enter a download URL."); return; }
@@ -1148,52 +1027,21 @@ namespace ApexComputerUse
             if (saveDlg.ShowDialog() != DialogResult.OK) return;
 
             string destPath = saveDlg.FileName;
-            _downloadCts = new CancellationTokenSource();
             btnDownload.Text = "Cancel";
             pbarDownload.Value = 0;
-            lblDownloadStatus.ForeColor = Color.DarkBlue;
-            lblDownloadStatus.Text = "Starting download…";
 
             try
             {
-                await DownloadFileAsync(
-                    url, destPath,
-                    (msg, col) => { lblDownloadStatus.Text = msg; lblDownloadStatus.ForeColor = col; },
-                    pct => pbarDownload.Value = pct,
-                    _downloadCts.Token);
-
-                BeginInvoke(() =>
+                bool ok = await _downloader.DownloadAsync(url, destPath);
+                if (ok)
                 {
-                    pbarDownload.Value = 100;
-                    lblDownloadStatus.ForeColor = Color.Green;
-                    lblDownloadStatus.Text = $"Done — {destPath}";
                     txtProjPath.Text = destPath;
                     Log($"Vision model downloaded to: {destPath}");
-                });
-            }
-            catch (OperationCanceledException)
-            {
-                BeginInvoke(() =>
-                {
-                    lblDownloadStatus.ForeColor = Color.Gray;
-                    lblDownloadStatus.Text = "Cancelled.";
-                    if (File.Exists(destPath)) try { File.Delete(destPath); } catch { }
-                });
-            }
-            catch (Exception ex)
-            {
-                BeginInvoke(() =>
-                {
-                    lblDownloadStatus.ForeColor = Color.Red;
-                    lblDownloadStatus.Text = $"Error: {ex.Message}";
-                    Log($"Download error: {ex.Message}");
-                });
+                }
             }
             finally
             {
-                _downloadCts?.Dispose();
-                _downloadCts = null;
-                BeginInvoke(() => btnDownload.Text = "Download");
+                btnDownload.Text = "Download";
             }
         }
 
@@ -1203,7 +1051,15 @@ namespace ApexComputerUse
             _statusTimer.Stop();
             _statusTimer.Dispose();
             _cpuCounter?.Dispose();
-            _downloadCts?.Cancel();
+            NetworkChange.NetworkAddressChanged -= _nicChangedHandler;
+            _downloader.Cancel();
+
+            // Unsubscribe before Stop so any in-flight log callbacks don't race the dispose.
+            _processor.OnLog -= _logHandler;
+            if (_http     != null) _http.OnLog     -= _logHandler;
+            if (_pipe     != null) _pipe.OnLog     -= _logHandler;
+            if (_telegram != null) _telegram.OnLog -= _logHandler;
+
             _http?.Stop();
             _telegram?.Stop();
             _pipe?.Stop();
@@ -1223,21 +1079,14 @@ namespace ApexComputerUse
             { Filter = "GGUF Projector|*.gguf", Title = "Select Multimodal Projector (.gguf)" };
             if (projDlg.ShowDialog() != DialogResult.OK) return;
 
-            await MtmdInteractiveModeExecute.RunComputerUseMode(modelDlg.FileName, projDlg.FileName);
+            await SafeRun(
+                () => MtmdInteractiveModeExecute.RunComputerUseMode(modelDlg.FileName, projDlg.FileName),
+                context: "AI Computer Use");
         }
 
         private void outputUiMapToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            // Sync the GUI tab's window to the processor whenever they differ
-            if (_targetWindow != null)
-            {
-                var targetHwnd = _targetWindow.Properties.NativeWindowHandle.ValueOrDefault;
-                var processorHwnd = _processor.CurrentWindow?.Properties.NativeWindowHandle.ValueOrDefault ?? IntPtr.Zero;
-                if (targetHwnd != processorHwnd)
-                    _processor.Process(new CommandRequest { Command = "find", Window = _targetWindow.Name });
-            }
-
-            var response = _processor.Process(new CommandRequest { Command = "elements" });
+            var response = _dispatcher.Dispatch(new CommandRequest { Command = "elements" });
             Log(response.ToText());
         }
 
@@ -1256,16 +1105,7 @@ namespace ApexComputerUse
 
         private void renderTestToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            // Sync the GUI tab's selected window to the processor if they differ
-            if (_targetWindow != null)
-            {
-                var targetHwnd = _targetWindow.Properties.NativeWindowHandle.ValueOrDefault;
-                var processorHwnd = _processor.CurrentWindow?.Properties.NativeWindowHandle.ValueOrDefault ?? IntPtr.Zero;
-                if (targetHwnd != processorHwnd)
-                    _processor.Process(new CommandRequest { Command = "find", Window = _targetWindow.Name });
-            }
-
-            var response = _processor.Process(new CommandRequest { Command = "elements" });
+            var response = _dispatcher.Dispatch(new CommandRequest { Command = "elements" });
             if (!response.Success || string.IsNullOrWhiteSpace(response.Data))
             {
                 Log("Render UI Map: no elements — select a window first.");
@@ -1297,6 +1137,7 @@ namespace ApexComputerUse
         private void sceneEditorToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var editor = new SceneEditorForm(_sceneStore);
+            _ = new SceneChatAgent(editor, _sceneStore, _chatService);
             editor.Show(this);
         }
 

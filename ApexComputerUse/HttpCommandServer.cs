@@ -14,6 +14,7 @@ namespace ApexComputerUse
     {
         private readonly HttpListener        _listener  = new();
         private readonly CommandProcessor    _processor;
+        private readonly CommandDispatcher   _dispatcher;
         private readonly SceneStore          _store;
         private readonly AiChatService?      _chatService;
         private readonly string?             _apiKey;
@@ -54,6 +55,7 @@ namespace ApexComputerUse
         {
             Port            = port;
             _processor      = processor;
+            _dispatcher     = new CommandDispatcher(processor);
             _store          = store;
             _chatService    = chatService;
             _apiKey         = string.IsNullOrWhiteSpace(apiKey) ? null : apiKey.Trim();
@@ -270,13 +272,13 @@ namespace ApexComputerUse
 
                         // ── Existing routes — adapted to ApexResult ────────────────
                         ("GET", "/status")
-                            => ApexResult.From("status",     _processor.Process(new CommandRequest { Command = "status" })),
+                            => ApexResult.From("status",     _dispatcher.Dispatch(new CommandRequest { Command = "status" })),
                         ("GET", "/windows")
-                            => ApexResult.From("windows",    _processor.Process(new CommandRequest { Command = "windows" })),
+                            => ApexResult.From("windows",    _dispatcher.Dispatch(new CommandRequest { Command = "windows" })),
                         ("GET", "/help")
-                            => ApexResult.From("help",       _processor.Process(new CommandRequest { Command = "help" })),
+                            => ApexResult.From("help",       _dispatcher.Dispatch(new CommandRequest { Command = "help" })),
                         ("GET", "/elements")
-                            => ApexResult.From("elements",   _processor.Process(new CommandRequest
+                            => ApexResult.From("elements",   _dispatcher.Dispatch(new CommandRequest
                             {
                                 Command        = "elements",
                                 SearchType     = req.QueryString["type"],
@@ -287,41 +289,42 @@ namespace ApexComputerUse
                                 Match          = req.QueryString["match"],                        // text-search Name/AutomationId/Value
                                 CollapseChains = string.Equals(req.QueryString["collapseChains"], "true", StringComparison.OrdinalIgnoreCase),
                                 IncludePath    = string.Equals(req.QueryString["includePath"],    "true", StringComparison.OrdinalIgnoreCase),
-                                Properties     = req.QueryString["properties"]                    // "extra" → value + helpText
+                                Properties     = req.QueryString["properties"],                   // "extra" → value + helpText
+                                ChangedSince   = req.QueryString["since"] ?? req.QueryString["changedSince"]
                             })),
                         ("GET", "/uimap")
-                            => ApexResult.From("uimap",      _processor.Process(new CommandRequest { Command = "uimap" })),
+                            => ApexResult.From("uimap",      _dispatcher.Dispatch(new CommandRequest { Command = "uimap" })),
                         ("GET", "/ai/status")
-                            => ApexResult.From("ai/status",  _processor.Process(new CommandRequest { Command = "ai", Action = "status" })),
+                            => ApexResult.From("ai/status",  _dispatcher.Dispatch(new CommandRequest { Command = "ai", Action = "status" })),
                         ("GET", "/chat/status")  => HandleChatStatus(),
                         ("POST", "/chat/reset")  => HandleChatReset(),
                         ("POST", "/find") or ("GET", "/find")
-                            => ApexResult.From("find",    _processor.Process(
+                            => ApexResult.From("find",    _dispatcher.Dispatch(
                                 method == "POST" ? FromJson(body, "find") : FromQueryString(req, "find"))),
                         ("POST", "/execute") or ("GET", "/execute")
-                            => ApexResult.From("execute", _processor.Process(
+                            => ApexResult.From("execute", _dispatcher.Dispatch(
                                 method == "POST" ? FromJson(body, "execute") : FromQueryString(req, "execute"))),
                         ("POST", "/exec") or ("GET", "/exec")
-                            => ApexResult.From("execute", _processor.Process(
+                            => ApexResult.From("execute", _dispatcher.Dispatch(
                                 method == "POST" ? FromJson(body, "execute") : FromQueryString(req, "execute"))),
                         ("POST", "/ocr") or ("GET", "/ocr")
-                            => ApexResult.From("ocr",     _processor.Process(
+                            => ApexResult.From("ocr",     _dispatcher.Dispatch(
                                 method == "POST" ? FromJson(body, "ocr") : FromQueryString(req, "ocr"))),
                         ("POST", "/capture") or ("GET", "/capture")
-                            => ApexResult.From("capture", _processor.Process(
+                            => ApexResult.From("capture", _dispatcher.Dispatch(
                                 method == "POST" ? FromJson(body, "capture") : FromQueryString(req, "capture"))),
                         ("POST", "/draw") or ("GET", "/draw")
-                            => ApexResult.From("draw",    _processor.Process(
+                            => ApexResult.From("draw",    _dispatcher.Dispatch(
                                 method == "POST" ? FromJson(body, "draw")    : FromQueryString(req, "draw"))),
                         ("GET", "/draw/demo") => HandleDrawDemo(req),
                         ("POST", "/ai/init")
-                            => ApexResult.From("ai/init",    _processor.Process(FromJson(body, "ai", "init"))),
+                            => ApexResult.From("ai/init",    _dispatcher.Dispatch(FromJson(body, "ai", "init"))),
                         ("POST", "/ai/describe")
-                            => ApexResult.From("ai/describe",_processor.Process(FromJson(body, "ai", "describe"))),
+                            => ApexResult.From("ai/describe",_dispatcher.Dispatch(FromJson(body, "ai", "describe"))),
                         ("POST", "/ai/file")
-                            => ApexResult.From("ai/file",    _processor.Process(FromJson(body, "ai", "file"))),
+                            => ApexResult.From("ai/file",    _dispatcher.Dispatch(FromJson(body, "ai", "file"))),
                         ("POST", "/ai/ask")
-                            => ApexResult.From("ai/ask",     _processor.Process(FromJson(body, "ai", "ask"))),
+                            => ApexResult.From("ai/ask",     _dispatcher.Dispatch(FromJson(body, "ai", "ask"))),
                         _ => new ApexResult
                         {
                             Success = false,
@@ -2582,37 +2585,8 @@ namespace ApexComputerUse
                 Properties     = req.QueryString["properties"],
             };
 
-        private static CommandRequest FromJson(string json, string command) =>
-            FromJson(json, command, null);
-
-        private static CommandRequest FromJson(string json, string command, string? action)
-        {
-            var r = new CommandRequest { Command = command, Action = action };
-            if (string.IsNullOrWhiteSpace(json)) return r;
-            try
-            {
-                using var doc  = JsonDocument.Parse(json);
-                var root = doc.RootElement;
-                r.Window       = root.Str("window");
-                r.AutomationId = root.Str("automationId") ?? root.Str("id") ?? root.Str("element");
-                r.ElementName  = root.Str("elementName")  ?? root.Str("name");
-                r.SearchType   = root.Str("searchType")   ?? root.Str("type");
-                r.Action       = root.Str("action") ?? action;
-                r.Value        = root.Str("value");
-                r.ModelPath    = root.Str("model")   ?? root.Str("modelPath");
-                r.MmProjPath   = root.Str("proj")    ?? root.Str("mmProjPath");
-                r.Prompt       = root.Str("prompt");
-                // Browser-friendly tree shaping (opt-in). All safe to miss — defaults are inert.
-                if (root.TryGetProperty("depth", out var dEl) && dEl.ValueKind == JsonValueKind.Number && dEl.TryGetInt32(out int dVal))
-                    r.Depth = dVal;
-                r.Match          = root.Str("match");
-                r.CollapseChains = root.Bool("collapseChains") ?? false;
-                r.IncludePath    = root.Bool("includePath")    ?? false;
-                r.Properties     = root.Str("properties");
-            }
-            catch (Exception ex) { AppLog.Debug($"[HTTP] Malformed JSON in request body — {ex.Message}"); }
-            return r;
-        }
+        private static CommandRequest FromJson(string json, string command, string? action = null)
+            => CommandRequestJsonMapper.FromJson(json, command, action);
 
         public void Dispose() => Stop();
     }

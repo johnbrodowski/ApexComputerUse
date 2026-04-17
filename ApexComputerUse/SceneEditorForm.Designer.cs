@@ -32,6 +32,15 @@ namespace ApexComputerUse
         private System.Windows.Forms.SplitContainer splitOuter;
         private System.Windows.Forms.SplitContainer splitInner;
         private System.Windows.Forms.SplitContainer splitRight;
+        private System.Windows.Forms.SplitContainer splitChat;
+
+        // ── Collab / chat dock ────────────────────────────────────────────
+        private System.Windows.Forms.Panel chatPanel;
+        private System.Windows.Forms.Label chatHeader;
+        private System.Windows.Forms.TextBox txtChatLog;
+        private System.Windows.Forms.Panel chatInputRow;
+        private System.Windows.Forms.TextBox txtChatInput;
+        private System.Windows.Forms.Button btnChatSend;
 
         // ── Canvas ────────────────────────────────────────────────────────
         private System.Windows.Forms.Panel canvasPanel;
@@ -115,6 +124,13 @@ namespace ApexComputerUse
             lblSceneInfo = new ToolStripStatusLabel();
             toolTip1 = new ToolTip(components);
             refreshTimer = new System.Windows.Forms.Timer(components);
+            splitChat = new SplitContainer();
+            chatPanel = new Panel();
+            chatHeader = new Label();
+            txtChatLog = new TextBox();
+            chatInputRow = new Panel();
+            txtChatInput = new TextBox();
+            btnChatSend = new Button();
             toolFlow.SuspendLayout();
             toolboxPanel.SuspendLayout();
             scenePanel.SuspendLayout();
@@ -130,6 +146,12 @@ namespace ApexComputerUse
             splitRight.Panel1.SuspendLayout();
             splitRight.Panel2.SuspendLayout();
             splitRight.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)splitChat).BeginInit();
+            splitChat.Panel1.SuspendLayout();
+            splitChat.Panel2.SuspendLayout();
+            splitChat.SuspendLayout();
+            chatPanel.SuspendLayout();
+            chatInputRow.SuspendLayout();
             layersPanel.SuspendLayout();
             layerBtnRow.SuspendLayout();
             rightBottom.SuspendLayout();
@@ -684,11 +706,106 @@ namespace ApexComputerUse
             lblSceneInfo.ForeColor = Color.FromArgb(156, 220, 254);
             lblSceneInfo.Name = "lblSceneInfo";
             lblSceneInfo.Size = new Size(0, 17);
-            // 
+            //
             // refreshTimer
-            // 
+            //
             refreshTimer.Interval = 400;
             refreshTimer.Tick += refreshTimer_Tick;
+            //
+            // splitChat
+            //
+            splitChat.BackColor = Color.FromArgb(63, 63, 70);
+            splitChat.Dock = DockStyle.Fill;
+            splitChat.Location = new Point(0, 34);
+            splitChat.Name = "splitChat";
+            splitChat.Orientation = Orientation.Horizontal;
+            //
+            // splitChat.Panel1
+            //
+            splitChat.Panel1.Controls.Add(splitOuter);
+            splitChat.Panel1MinSize = 200;
+            //
+            // splitChat.Panel2
+            //
+            splitChat.Panel2.Controls.Add(chatPanel);
+            splitChat.Panel2MinSize = 80;
+            splitChat.Size = new Size(1200, 693);
+            splitChat.SplitterDistance = 500;
+            splitChat.TabIndex = 3;
+            //
+            // chatPanel
+            //
+            chatPanel.BackColor = Color.FromArgb(30, 30, 30);
+            chatPanel.Controls.Add(txtChatLog);
+            chatPanel.Controls.Add(chatInputRow);
+            chatPanel.Controls.Add(chatHeader);
+            chatPanel.Dock = DockStyle.Fill;
+            chatPanel.Name = "chatPanel";
+            chatPanel.TabIndex = 0;
+            //
+            // chatHeader
+            //
+            chatHeader.BackColor = Color.FromArgb(45, 45, 48);
+            chatHeader.Dock = DockStyle.Top;
+            chatHeader.Font = new Font("Segoe UI", 7.5F);
+            chatHeader.ForeColor = Color.Gray;
+            chatHeader.Name = "chatHeader";
+            chatHeader.Padding = new Padding(6, 0, 0, 0);
+            chatHeader.Size = new Size(1200, 22);
+            chatHeader.TabIndex = 0;
+            chatHeader.Text = "COLLAB";
+            chatHeader.TextAlign = ContentAlignment.MiddleLeft;
+            //
+            // txtChatLog
+            //
+            txtChatLog.BackColor = Color.FromArgb(24, 24, 24);
+            txtChatLog.BorderStyle = BorderStyle.None;
+            txtChatLog.Dock = DockStyle.Fill;
+            txtChatLog.Font = new Font("Consolas", 9F);
+            txtChatLog.ForeColor = Color.FromArgb(212, 212, 212);
+            txtChatLog.Multiline = true;
+            txtChatLog.Name = "txtChatLog";
+            txtChatLog.ReadOnly = true;
+            txtChatLog.ScrollBars = ScrollBars.Vertical;
+            txtChatLog.TabIndex = 1;
+            txtChatLog.TabStop = false;
+            txtChatLog.WordWrap = true;
+            //
+            // chatInputRow
+            //
+            chatInputRow.BackColor = Color.FromArgb(37, 37, 38);
+            chatInputRow.Controls.Add(txtChatInput);
+            chatInputRow.Controls.Add(btnChatSend);
+            chatInputRow.Dock = DockStyle.Bottom;
+            chatInputRow.Padding = new Padding(4);
+            chatInputRow.Name = "chatInputRow";
+            chatInputRow.Size = new Size(1200, 32);
+            chatInputRow.TabIndex = 2;
+            //
+            // txtChatInput
+            //
+            txtChatInput.BackColor = Color.FromArgb(60, 60, 60);
+            txtChatInput.BorderStyle = BorderStyle.FixedSingle;
+            txtChatInput.Dock = DockStyle.Fill;
+            txtChatInput.Font = new Font("Segoe UI", 9.5F);
+            txtChatInput.ForeColor = Color.White;
+            txtChatInput.Name = "txtChatInput";
+            txtChatInput.TabIndex = 0;
+            txtChatInput.KeyDown += txtChatInput_KeyDown;
+            //
+            // btnChatSend
+            //
+            btnChatSend.BackColor = Color.FromArgb(0, 122, 204);
+            btnChatSend.Dock = DockStyle.Right;
+            btnChatSend.FlatAppearance.BorderSize = 0;
+            btnChatSend.FlatStyle = FlatStyle.Flat;
+            btnChatSend.ForeColor = Color.White;
+            btnChatSend.Name = "btnChatSend";
+            btnChatSend.Size = new Size(70, 24);
+            btnChatSend.TabIndex = 1;
+            btnChatSend.Text = "Send";
+            btnChatSend.UseVisualStyleBackColor = false;
+            btnChatSend.Click += btnChatSend_Click;
             // 
             // SceneEditorForm
             // 
@@ -696,7 +813,7 @@ namespace ApexComputerUse
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(30, 30, 30);
             ClientSize = new Size(1200, 749);
-            Controls.Add(splitOuter);
+            Controls.Add(splitChat);
             Controls.Add(toolFlow);
             Controls.Add(statusStrip);
             Font = new Font("Segoe UI", 9F);
@@ -723,6 +840,14 @@ namespace ApexComputerUse
             splitRight.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)splitRight).EndInit();
             splitRight.ResumeLayout(false);
+            splitChat.Panel1.ResumeLayout(false);
+            splitChat.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)splitChat).EndInit();
+            splitChat.ResumeLayout(false);
+            chatPanel.ResumeLayout(false);
+            chatPanel.PerformLayout();
+            chatInputRow.ResumeLayout(false);
+            chatInputRow.PerformLayout();
             layersPanel.ResumeLayout(false);
             layerBtnRow.ResumeLayout(false);
             rightBottom.ResumeLayout(false);

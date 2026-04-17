@@ -27,6 +27,10 @@ namespace ApexComputerUse
         public bool    IncludePath    { get; set; }
         /// <summary>elements/find — extra per-element properties. "extra" adds `value` (Value pattern) and `helpText`.</summary>
         public string? Properties     { get; set; }
+        /// <summary>elements — if set, the scan still runs but a full payload is only serialized
+        /// when the tree hash differs. A match returns a tiny <c>{"treeHash":"...","notModified":true}</c>
+        /// response so polling clients avoid round-tripping a megabyte of unchanged JSON.</summary>
+        public string? ChangedSince   { get; set; }
     }
 
     public class CommandResponse
@@ -67,11 +71,33 @@ namespace ApexComputerUse
         public AutomationElement? CurrentElement { get; private set; }
         public Window?            CurrentWindow  { get; private set; }
 
+        /// <summary>
+        /// Sets the current window/element from external callers (e.g. the Form1 GUI tab's
+        /// interactive Find flow, where fuzzy matching requires a user confirmation dialog
+        /// that doesn't fit cleanly inside <see cref="CmdFind"/>). Takes <c>_stateLock</c> so
+        /// the assignment is serialized against concurrent remote commands.
+        /// </summary>
+        public void SetCurrentTarget(Window? window, AutomationElement? element)
+        {
+            lock (_stateLock)
+            {
+                CurrentWindow  = window;
+                CurrentElement = element;
+                _windowDesc    = window  == null ? "(none)" : (window.Properties.Name.ValueOrDefault ?? "(none)");
+                _elementDesc   = element == null ? "(none)" : _helper.Describe(element);
+            }
+        }
+
         /// <summary>True when the AI/multimodal model has been loaded and is ready.</summary>
         public bool IsModelLoaded => _mtmd?.IsInitialized == true;
 
-        /// <summary>True while the model is generating a response (inference in progress).</summary>
-        public bool IsProcessing { get; private set; }
+        /// <summary>
+        /// True while the model is generating a response (inference in progress).
+        /// Written from the inference worker, read from the UI status timer —
+        /// marked <c>volatile</c> so cross-thread reads see a fresh value without a lock.
+        /// </summary>
+        private volatile bool _isProcessing;
+        public bool IsProcessing => _isProcessing;
 
         private string _windowDesc  = "(none)";
         private string _elementDesc = "(none)";
@@ -595,8 +621,21 @@ namespace ApexComputerUse
                 root = CollapseSingleChildChains(root);
 
             int count = CountNodes(root);
+            string treeHash = ComputeTreeHash(root);
 
-            string json = System.Text.Json.JsonSerializer.Serialize(root,
+            // Short-circuit for pollers that passed their last-seen hash: skip the expensive
+            // JSON serialization entirely when the tree hasn't changed structurally.
+            if (!string.IsNullOrEmpty(req.ChangedSince) &&
+                string.Equals(req.ChangedSince, treeHash, StringComparison.Ordinal))
+            {
+                string shortJson = System.Text.Json.JsonSerializer.Serialize(
+                    new { treeHash, notModified = true },
+                    new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+                return Ok($"{count} element(s) (unchanged)", shortJson);
+            }
+
+            string json = System.Text.Json.JsonSerializer.Serialize(
+                new { treeHash, root },
                 new System.Text.Json.JsonSerializerOptions
                 {
                     WriteIndented          = true,
@@ -605,6 +644,46 @@ namespace ApexComputerUse
                 });
 
             return Ok($"{count} element(s)", json);
+        }
+
+        /// <summary>
+        /// Deterministic structural hash of the emitted tree. Only identity fields
+        /// (id, controlType, automationId, name, rectangle, descendant counts) participate —
+        /// the caller can safely pass this back as <see cref="CommandRequest.ChangedSince"/> to
+        /// short-circuit unchanged polls. Uses SHA-256 so collisions aren't a concern for
+        /// polling-level change detection.
+        /// </summary>
+        private static string ComputeTreeHash(ElementNode? root)
+        {
+            using var sha = System.Security.Cryptography.SHA256.Create();
+            using var ms  = new System.IO.MemoryStream();
+            using (var writer = new System.IO.BinaryWriter(ms, System.Text.Encoding.UTF8, leaveOpen: true))
+                WriteNodeForHash(writer, root);
+            ms.Position = 0;
+            var bytes = sha.ComputeHash(ms);
+            return Convert.ToHexString(bytes).ToLowerInvariant();
+        }
+
+        private static void WriteNodeForHash(System.IO.BinaryWriter w, ElementNode? node)
+        {
+            if (node == null) { w.Write((byte)0); return; }
+            w.Write((byte)1);
+            w.Write(node.Id);
+            w.Write(node.ControlType ?? "");
+            w.Write(node.AutomationId ?? "");
+            w.Write(node.Name ?? "");
+            if (node.BoundingRectangle is { } r)
+            {
+                w.Write((byte)1);
+                w.Write(r.X); w.Write(r.Y); w.Write(r.Width); w.Write(r.Height);
+            }
+            else w.Write((byte)0);
+            w.Write(node.ChildCount ?? -1);
+            w.Write(node.DescendantCount ?? -1);
+            int childCount = node.Children?.Count ?? 0;
+            w.Write(childCount);
+            if (node.Children != null)
+                foreach (var c in node.Children) WriteNodeForHash(w, c);
         }
 
         // ── AI (Multimodal) commands ──────────────────────────────────────
@@ -691,14 +770,14 @@ namespace ApexComputerUse
             if (_mtmd == null || !_mtmd.IsInitialized) return Fail("AI not initialized. Use ai action=init first.");
             if (element == null)                        return Fail("No element selected. Use 'find' first.");
             string prompt = req.Prompt ?? req.Value ?? "Describe what you see in this UI element.";
-            IsProcessing = true;
+            _isProcessing = true;
             try
             {
                 string result = Task.Run(async () => await _mtmd.DescribeElementAsync(element, prompt))
                                     .GetAwaiter().GetResult();
                 return Ok("AI description", result);
             }
-            finally { IsProcessing = false; }
+            finally { _isProcessing = false; }
         }
 
         private CommandResponse CmdAiFile(CommandRequest req)
@@ -715,14 +794,14 @@ namespace ApexComputerUse
                 return Fail($"File not found: {Path.GetFileName(path)}");
 
             string prompt = req.Prompt ?? "Describe this media.";
-            IsProcessing = true;
+            _isProcessing = true;
             try
             {
                 string result = Task.Run(async () => await _mtmd.DescribeImageAsync(path, prompt))
                                     .GetAwaiter().GetResult();
                 return Ok($"AI file description ({Path.GetFileName(path)})", result);
             }
-            finally { IsProcessing = false; }
+            finally { _isProcessing = false; }
         }
 
         private CommandResponse CmdAiAsk(CommandRequest req, AutomationElement? element)
@@ -731,14 +810,14 @@ namespace ApexComputerUse
             if (element == null)                        return Fail("No element selected. Use 'find' first.");
             string prompt = req.Prompt ?? req.Value ?? "";
             if (string.IsNullOrWhiteSpace(prompt)) return Fail("prompt= required.");
-            IsProcessing = true;
+            _isProcessing = true;
             try
             {
                 string result = Task.Run(async () => await _mtmd.DescribeElementAsync(element, prompt))
                                     .GetAwaiter().GetResult();
                 return Ok("AI answer", result);
             }
-            finally { IsProcessing = false; }
+            finally { _isProcessing = false; }
         }
 
         private CommandResponse CmdScene(CommandRequest req)
@@ -1477,7 +1556,7 @@ namespace ApexComputerUse
         /// target app closed or navigated away).  Uses a lightweight property read so the
         /// COM call fails fast on stale references rather than hanging.
         /// </summary>
-        private static bool IsElementValid(AutomationElement el)
+        public static bool IsElementValid(AutomationElement el)
         {
             try { return el.Properties.ProcessId.ValueOrDefault > 0; }
             catch { return false; }

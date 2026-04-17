@@ -40,6 +40,16 @@ namespace ApexComputerUse
         private string _lastSceneUpdate = "";
         private int    _lastSceneCount  = -1;
 
+        // ── Collab diff tracking ──────────────────────────────────────────
+        private readonly HashSet<string> _prevShapeIds = new();
+
+        /// <summary>
+        /// Raised when the user submits a chat message from the collab dock.
+        /// The second argument is the scene id currently loaded (null if none),
+        /// so a listener (e.g. Form1) can route the prompt to the AI with scene context.
+        /// </summary>
+        public event Action<string, string?>? ChatMessageSubmitted;
+
         // ── Active drawing color ──────────────────────────────────────────
         private Color _activeColor = Color.FromArgb(74, 144, 217);
 
@@ -103,13 +113,125 @@ namespace ApexComputerUse
                 if (fresh != null && fresh.UpdatedAt != _lastSceneUpdate)
                 {
                     _lastSceneUpdate = fresh.UpdatedAt;
+                    LogExternalSceneDiff(fresh);
                     _scene = fresh;
                     _cacheValid = false;
                     RefreshLayerList();
-                    RefreshPropsPanel();
+                    // Skip rebuilding the props panel while the user is typing
+                    // in a prop field — it would steal focus and lose the edit.
+                    if (!pnlProps.ContainsFocus) RefreshPropsPanel();
                     canvasPanel.Invalidate();
                 }
             }
+        }
+
+        // ── Collab activity log ───────────────────────────────────────────
+        private void LogExternalSceneDiff(Scene fresh)
+        {
+            var curIds = new HashSet<string>();
+            var byId = new Dictionary<string, (string layer, string type)>();
+            foreach (var l in fresh.Layers)
+                foreach (var ss in l.Shapes)
+                {
+                    curIds.Add(ss.Id);
+                    byId[ss.Id] = (l.Name, ss.Shape?.Type ?? "shape");
+                }
+
+            // Nothing to diff against on first load — just seed.
+            if (_prevShapeIds.Count == 0)
+            {
+                foreach (var id in curIds) _prevShapeIds.Add(id);
+                return;
+            }
+
+            foreach (var id in curIds)
+                if (!_prevShapeIds.Contains(id))
+                {
+                    var (layer, type) = byId[id];
+                    AppendChatLog("ai", $"added {type} to {layer}");
+                }
+            foreach (var id in _prevShapeIds)
+                if (!curIds.Contains(id))
+                    AppendChatLog("ai", $"removed shape {id[..Math.Min(6, id.Length)]}");
+
+            _prevShapeIds.Clear();
+            foreach (var id in curIds) _prevShapeIds.Add(id);
+        }
+
+        /// <summary>
+        /// Call after any *local* mutation that refetches <c>_scene</c>, so the next
+        /// refresh-timer diff doesn't mis-attribute the user's own edit to the AI.
+        /// </summary>
+        private void SeedCollabTracker()
+        {
+            if (_scene == null) { _prevShapeIds.Clear(); return; }
+            _lastSceneUpdate = _scene.UpdatedAt;
+            _prevShapeIds.Clear();
+            foreach (var l in _scene.Layers)
+                foreach (var ss in l.Shapes)
+                    _prevShapeIds.Add(ss.Id);
+        }
+
+        /// <summary>
+        /// Append a line to the collab log. Safe to call from any thread.
+        /// Use for both AI-side replies and local notifications.
+        /// </summary>
+        public void AppendChatLog(string who, string message)
+        {
+            if (txtChatLog.InvokeRequired)
+            {
+                txtChatLog.BeginInvoke(() => AppendChatLog(who, message));
+                return;
+            }
+            string stamp = DateTime.Now.ToString("HH:mm");
+            string line = $"[{stamp}] {who}: {message}{Environment.NewLine}";
+            txtChatLog.AppendText(line);
+        }
+
+        /// <summary>
+        /// Begin an AI reply line — writes timestamp + "ai: " prefix. Pair with
+        /// <see cref="AppendChatStream"/> for each streamed token, then
+        /// <see cref="EndChatLine"/> when the response is complete.
+        /// </summary>
+        public void BeginAiLine()
+        {
+            if (txtChatLog.InvokeRequired) { txtChatLog.BeginInvoke(BeginAiLine); return; }
+            txtChatLog.AppendText($"[{DateTime.Now:HH:mm}] ai: ");
+        }
+
+        /// <summary>Append raw text to the log with no prefix or newline — for streaming tokens.</summary>
+        public void AppendChatStream(string text)
+        {
+            if (txtChatLog.InvokeRequired) { txtChatLog.BeginInvoke(() => AppendChatStream(text)); return; }
+            txtChatLog.AppendText(text);
+        }
+
+        /// <summary>Close the current streaming line with a newline.</summary>
+        public void EndChatLine()
+        {
+            if (txtChatLog.InvokeRequired) { txtChatLog.BeginInvoke(EndChatLine); return; }
+            txtChatLog.AppendText(Environment.NewLine);
+        }
+
+        // ── Chat input handlers ───────────────────────────────────────────
+        private void btnChatSend_Click(object? sender, EventArgs e) => SubmitChat();
+
+        private void txtChatInput_KeyDown(object? sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter && !e.Shift)
+            {
+                e.SuppressKeyPress = true;
+                SubmitChat();
+            }
+        }
+
+        private void SubmitChat()
+        {
+            string text = txtChatInput.Text.Trim();
+            if (text.Length == 0) return;
+            AppendChatLog("you", text);
+            txtChatInput.Clear();
+            ChatMessageSubmitted?.Invoke(text, _scene?.Id);
         }
 
         // ── Scene list ────────────────────────────────────────────────────
@@ -168,6 +290,7 @@ namespace ApexComputerUse
 
             _curShapeId = null;
             _cacheValid = false;
+            SeedCollabTracker();
 
             // Fit scene to canvas
             FitToCanvas();
@@ -231,6 +354,7 @@ namespace ApexComputerUse
             {
                 _store.UpdateLayer(_scene.Id, li.Layer.Id, null, !li.Layer.Visible, null, null, null);
                 _scene = _store.GetScene(_scene.Id)!;
+            SeedCollabTracker();
                 _cacheValid = false;
                 RefreshLayerList();
                 canvasPanel.Invalidate();
@@ -247,6 +371,7 @@ namespace ApexComputerUse
             _store.ReorderLayer(_scene.Id, ordered[idx].Id,     zb);
             _store.ReorderLayer(_scene.Id, ordered[idx + 1].Id, za);
             _scene = _store.GetScene(_scene.Id)!;
+            SeedCollabTracker();
             _cacheValid = false;
             RefreshLayerList();
             canvasPanel.Invalidate();
@@ -262,6 +387,7 @@ namespace ApexComputerUse
             _store.ReorderLayer(_scene.Id, ordered[idx].Id,     zb);
             _store.ReorderLayer(_scene.Id, ordered[idx - 1].Id, za);
             _scene = _store.GetScene(_scene.Id)!;
+            SeedCollabTracker();
             _cacheValid = false;
             RefreshLayerList();
             canvasPanel.Invalidate();
@@ -273,6 +399,7 @@ namespace ApexComputerUse
             string name = $"Layer {_scene.Layers.Count + 1}";
             var layer = _store.AddLayer(_scene.Id, name);
             _scene = _store.GetScene(_scene.Id)!;
+            SeedCollabTracker();
             _curLayerId = layer.Id;
             RefreshLayerList();
         }
@@ -287,6 +414,7 @@ namespace ApexComputerUse
             }
             _store.DeleteLayer(_scene.Id, _curLayerId);
             _scene = _store.GetScene(_scene.Id)!;
+            SeedCollabTracker();
             _curLayerId = _scene.Layers.Count > 0 ? _scene.Layers.OrderBy(l => l.ZIndex).First().Id : null;
             _curShapeId = null;
             _cacheValid = false;
@@ -544,6 +672,7 @@ namespace ApexComputerUse
             if (layer == null) return;
             var ss = _store.AddShape(_scene.Id, _curLayerId, newShape, _activeTool);
             _scene = _store.GetScene(_scene.Id)!;
+            SeedCollabTracker();
             _curShapeId = ss.Id;
             _cacheValid = false;
             canvasPanel.Invalidate();
@@ -854,6 +983,7 @@ namespace ApexComputerUse
             if (lid == null) return;
             _store.DeleteShape(_scene.Id, lid, _curShapeId);
             _scene = _store.GetScene(_scene.Id)!;
+            SeedCollabTracker();
             _curShapeId = null;
             _cacheValid = false;
             canvasPanel.Invalidate();

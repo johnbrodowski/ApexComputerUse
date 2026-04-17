@@ -5,7 +5,7 @@ namespace ApexComputerUse.Tests;
 
 /// <summary>
 /// Unit tests for <see cref="TelegramController.ParseCommand"/> and
-/// <see cref="TelegramController.ParseKeyValues"/>.
+/// <see cref="CommandLineParser.Tokenize"/>.
 /// Both methods are tested in isolation — no Telegram bot connection required.
 /// </summary>
 public class TelegramParseCommandTests
@@ -203,14 +203,14 @@ public class TelegramParseCommandTests
     [Fact]
     public void ParseKeyValues_SimpleKeyValue_Parsed()
     {
-        var d = TelegramController.ParseKeyValues("key=value");
+        var d = CommandLineParser.Tokenize("key=value");
         Assert.Equal("value", d["key"]);
     }
 
     [Fact]
     public void ParseKeyValues_MultipleKeyValues_AllParsed()
     {
-        var d = TelegramController.ParseKeyValues("a=1 b=2 c=3");
+        var d = CommandLineParser.Tokenize("a=1 b=2 c=3");
         Assert.Equal("1", d["a"]);
         Assert.Equal("2", d["b"]);
         Assert.Equal("3", d["c"]);
@@ -219,14 +219,14 @@ public class TelegramParseCommandTests
     [Fact]
     public void ParseKeyValues_QuotedValue_PreservesSpaces()
     {
-        var d = TelegramController.ParseKeyValues(@"window=""My Notepad""");
+        var d = CommandLineParser.Tokenize(@"window=""My Notepad""");
         Assert.Equal("My Notepad", d["window"]);
     }
 
     [Fact]
     public void ParseKeyValues_CaseInsensitiveKeys()
     {
-        var d = TelegramController.ParseKeyValues("Window=Calc");
+        var d = CommandLineParser.Tokenize("Window=Calc");
         Assert.Equal("Calc", d["window"]);   // stored as-is; lookup is case-insensitive
         Assert.Equal("Calc", d["WINDOW"]);
     }
@@ -234,14 +234,14 @@ public class TelegramParseCommandTests
     [Fact]
     public void ParseKeyValues_EmptyInput_ReturnsEmptyDictionary()
     {
-        var d = TelegramController.ParseKeyValues("");
+        var d = CommandLineParser.Tokenize("");
         Assert.Empty(d);
     }
 
     [Fact]
     public void ParseKeyValues_KeyWithoutEquals_StoredWithEmptyValue()
     {
-        var d = TelegramController.ParseKeyValues("flagonly");
+        var d = CommandLineParser.Tokenize("flagonly");
         Assert.True(d.ContainsKey("flagonly"));
         Assert.Equal("", d["flagonly"]);
     }

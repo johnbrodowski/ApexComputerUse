@@ -22,7 +22,7 @@ namespace ApexComputerUse
     public class TelegramController : IDisposable
     {
         private readonly TelegramBotClient _bot;
-        private readonly CommandProcessor  _processor;
+        private readonly CommandDispatcher _dispatcher;
         private readonly HashSet<long>?    _allowedChatIds;
         private CancellationTokenSource?   _cts;
 
@@ -39,7 +39,7 @@ namespace ApexComputerUse
                                   IReadOnlyCollection<long>? allowedChatIds = null)
         {
             _bot            = new TelegramBotClient(token);
-            _processor      = processor;
+            _dispatcher     = new CommandDispatcher(processor);
             _allowedChatIds = allowedChatIds?.Count > 0
                                 ? new HashSet<long>(allowedChatIds)
                                 : null;
@@ -98,7 +98,7 @@ namespace ApexComputerUse
                 return;
             }
 
-            var response = _processor.Process(req);
+            var response = _dispatcher.Dispatch(req);
 
             // Capture commands: send as photo instead of text
             if (response.Success && response.Data != null && req.Command == "capture")
@@ -155,106 +155,12 @@ namespace ApexComputerUse
             string cmd = parts[0].Split('@')[0].ToLowerInvariant();
             string args = parts.Length > 1 ? parts[1] : "";
 
-            var kv = ParseKeyValues(args);
-
-            return cmd switch
-            {
-                "find" => new CommandRequest
-                {
-                    Command      = "find",
-                    Window       = kv.Get("window", "w"),
-                    AutomationId = kv.Get("id", "automationid"),
-                    ElementName  = kv.Get("name", "n"),
-                    SearchType   = kv.Get("type", "t")
-                },
-                "execute" or "exec" => new CommandRequest
-                {
-                    Command = "execute",
-                    Action  = kv.Get("action", "a"),
-                    Value   = kv.Get("value", "v")
-                },
-                "ocr" => new CommandRequest
-                {
-                    Command = "ocr",
-                    Value   = kv.Get("value", "region") ?? (args.Contains(',') ? args : null)
-                },
-                "capture" => new CommandRequest
-                {
-                    Command = "capture",
-                    Action  = kv.Get("action", "a"),
-                    Value   = kv.Get("value", "v")
-                },
-                "status"   => new CommandRequest { Command = "status" },
-                "windows"  => new CommandRequest { Command = "windows" },
-                "elements" => new CommandRequest
-                {
-                    Command    = "elements",
-                    SearchType = kv.Get("type", "t") ?? (args.Length > 0 ? args : null)
-                },
-                "ai" => new CommandRequest
-                {
-                    Command      = "ai",
-                    Action       = kv.Get("action", "a") ?? (args.Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault()?.ToLowerInvariant()),
-                    ModelPath    = kv.Get("model"),
-                    MmProjPath   = kv.Get("proj"),
-                    Value        = kv.Get("value", "path", "v"),
-                    Prompt       = kv.Get("prompt", "p")
-                },
-                "help" or "start" => new CommandRequest { Command = "help" },
-                _ => new CommandRequest { Command = cmd, Action = cmd, Value = args }
-            };
-        }
-
-        /// Parses "key=value key2="multi word value" ..." into a dictionary.
-        internal static Dictionary<string, string> ParseKeyValues(string input)
-        {
-            var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            int i = 0;
-            while (i < input.Length)
-            {
-                while (i < input.Length && input[i] == ' ') i++;
-                if (i >= input.Length) break;
-
-                int keyStart = i;
-                while (i < input.Length && input[i] != '=' && input[i] != ' ') i++;
-                string key = input[keyStart..i].Trim();
-                if (string.IsNullOrEmpty(key)) { i++; continue; }
-
-                if (i >= input.Length || input[i] != '=') { result[key] = ""; continue; }
-                i++; // skip '='
-
-                string value;
-                if (i < input.Length && input[i] == '"')
-                {
-                    i++;
-                    int vs = i;
-                    while (i < input.Length && input[i] != '"') i++;
-                    value = input[vs..i];
-                    if (i < input.Length) i++;
-                }
-                else
-                {
-                    int vs = i;
-                    while (i < input.Length && input[i] != ' ') i++;
-                    value = input[vs..i];
-                }
-
-                result[key] = value;
-            }
-            return result;
+            // Telegram falls back to passthrough on unknown verbs so the processor can emit
+            // "Unknown command 'foo'. Try 'help'." rather than silently swallowing the message.
+            return CommandLineParser.Build(cmd, args)
+                   ?? new CommandRequest { Command = cmd, Action = cmd, Value = args };
         }
 
         public void Dispose() => Stop();
-    }
-
-    internal static class DictExtensions
-    {
-        /// Returns the value for the first key that exists in the dictionary.
-        public static string? Get(this Dictionary<string, string> d, params string[] keys)
-        {
-            foreach (var k in keys)
-                if (d.TryGetValue(k, out var v) && !string.IsNullOrWhiteSpace(v)) return v;
-            return null;
-        }
     }
 }
