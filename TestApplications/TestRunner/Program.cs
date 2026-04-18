@@ -350,13 +350,44 @@ while (cycle < maxCycles && !ct.IsCancellationRequested)
 
     // 3. Run test suite ────────────────────────────────────────────────────────
     var suiteTimer = Stopwatch.StartNew();
+    var currentCycle = cycle;
+    Action<TestResult> onResult = richConsole
+        ? r =>
+        {
+            if (r.Skipped)
+                Console.WriteLine($"  ⏭️ {r.Name} (skipped — previously passed)");
+            else if (r.Passed)
+                Console.WriteLine($"  ✅ {r.Name}" + (r.ElapsedMs.HasValue ? $"  (elapsed={r.ElapsedMs}ms)" : ""));
+            else
+            {
+                var cmd = string.IsNullOrEmpty(r.Command) ? "" : $"  cmd={r.Command}";
+                Console.WriteLine($"  ❌ {r.Name}{cmd}");
+                Console.WriteLine($"       ↳ {r.Detail}");
+            }
+        }
+        : r =>
+        {
+            Console.WriteLine(JsonSerializer.Serialize(new
+            {
+                Event = "test_result",
+                Cycle = currentCycle,
+                r.Name,
+                r.Passed,
+                r.Skipped,
+                r.Command,
+                r.Detail,
+                r.ElapsedMs
+            }));
+        };
+
     var result = await new TestSuite(
         client,
         actionDelayMs,
         uiSettleDelayMs,
         runOnlyFailed ? previouslyPassed : null,
         config.WebBaseUrl,
-        config.WebPagePaths
+        config.WebPagePaths,
+        onResult
     ).RunAsync(ct);
     suiteTimer.Stop();
     suiteMs = suiteTimer.ElapsedMilliseconds;
@@ -367,13 +398,11 @@ while (cycle < maxCycles && !ct.IsCancellationRequested)
     {
         var skippedMsg = result.Skipped > 0 ? $", {result.Skipped} skipped" : "";
         Console.WriteLine($"\n[Results] {result.Passed} passed, {result.Failed} failed{skippedMsg}");
-        foreach (var r in result.Results)
+        foreach (var r in result.Results.Where(r => !r.Passed && !r.Skipped))
         {
-            if (r.Skipped)
-                Console.WriteLine($"  ⏭️ {r.Name} (skipped — previously passed)");
-            else
-                Console.WriteLine($"  {(r.Passed ? "✅" : "❌")} {r.Name}" +
-                                  (r.Passed ? "" : $"\n       ↳ {r.Detail}"));
+            var cmd = string.IsNullOrEmpty(r.Command) ? "" : $"  cmd={r.Command}";
+            Console.WriteLine($"  ❌ {r.Name}{cmd}");
+            Console.WriteLine($"       ↳ {r.Detail}");
         }
     }
     else
@@ -391,7 +420,9 @@ while (cycle < maxCycles && !ct.IsCancellationRequested)
                 r.Name,
                 r.Passed,
                 r.Skipped,
-                r.Detail
+                r.Command,
+                r.Detail,
+                r.ElapsedMs
             })
         }));
     }
