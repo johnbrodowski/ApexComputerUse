@@ -3,6 +3,14 @@ namespace ApexUIBridge.TestRunner;
 public sealed class RunnerConfig
 {
     // ── Loop control ──────────────────────────────────────────────────────────
+
+    // ── Runner mode ───────────────────────────────────────────────────────────
+    /// <summary>
+    /// Optional runner mode: "demo" or "benchmark".
+    /// CLI --mode overrides this value.
+    /// </summary>
+    public string? Mode { get; init; }
+
     /// <summary>Total number of build → launch → test → stop cycles to run.</summary>
     public int MaxCycles { get; init; } = 10;
 

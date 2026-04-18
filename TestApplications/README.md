@@ -77,6 +77,29 @@ Cycle-based orchestrator.
 - Handles build/launch/test/teardown loops.
 - Launches WinForms + WPF targets, waits for bridge readiness, runs suite, reports progress/final status.
 - Supports skip-passed mode and persisted test results.
+- Supports `demo` / `benchmark` mode via CLI (`--mode`) or config (`"Mode": "demo"|"benchmark"`).
+  - `demo`: lower effective cycle count, human speed profile, rich per-step console output.
+  - `benchmark`: higher effective cycle count, fast speed profile, strict machine-readable (JSON line) console output.
+
+Concrete examples:
+
+```bash
+# Demo mode from CLI (rich console output)
+dotnet run --project TestRunner -- --mode demo
+
+# Benchmark mode from CLI with explicit config path (JSON-line output)
+dotnet run --project TestRunner -- ./runner-config.json --mode benchmark
+```
+
+```json
+// runner-config.json
+{
+  "Mode": "benchmark",
+  "MaxCycles": 25,
+  "ReportEveryN": 10,
+  "RunOnlyFailed": true
+}
+```
 
 ---
 
