@@ -22,6 +22,12 @@ public sealed class RunnerConfig
     /// <summary>Path to the WPF test app exe. Launched once, left running.</summary>
     public string WpfExePath { get; init; } = "";
 
+    /// <summary>Base URL for the web test target (optional).</summary>
+    public string WebBaseUrl { get; init; } = "";
+
+    /// <summary>Optional web test page paths (for example: "/form", "/table").</summary>
+    public string[] WebPagePaths { get; init; } = Array.Empty<string>();
+
     // ── Bridge API ────────────────────────────────────────────────────────────
     public string BridgeBaseUrl      { get; init; } = "http://localhost:8765";
     public int    ApiReadyTimeoutSec { get; init; } = 30;
@@ -59,4 +65,21 @@ public sealed class RunnerConfig
     /// </summary>
     public string StopFlagPath { get; init; } =
         Path.Combine(Path.GetTempPath(), "ApexUIBridge_stop.flag");
+
+    // ── Pacing ────────────────────────────────────────────────────────────────
+    /// <summary>
+    /// Optional pacing preset: Fast, Normal, or Human.
+    /// Explicit delay values override the selected profile when greater than 0.
+    /// </summary>
+    public string SpeedProfile { get; init; } = "Normal";
+
+    /// <summary>
+    /// Delay between action steps in the test suite (milliseconds). 0 = use profile default.
+    /// </summary>
+    public int ActionDelayMs { get; init; } = 0;
+
+    /// <summary>
+    /// Delay after UI-changing operations before reading state (milliseconds). 0 = use profile default.
+    /// </summary>
+    public int UiSettleDelayMs { get; init; } = 0;
 }

@@ -51,6 +51,17 @@ var ct       = cts.Token;
 var telegram = new TelegramNotifier(config.TelegramBotToken, config.TelegramChatId);
 var builder  = new BuildRunner(config.SolutionPath, config.BuildConfiguration);
 
+var normalizedSpeedProfile = (config.SpeedProfile ?? "Normal").Trim();
+var (defaultActionDelayMs, defaultUiSettleDelayMs) = normalizedSpeedProfile.ToLowerInvariant() switch
+{
+    "fast" => (50, 120),
+    "human" => (350, 900),
+    _ => (120, 300)
+};
+var actionDelayMs = config.ActionDelayMs > 0 ? config.ActionDelayMs : defaultActionDelayMs;
+var uiSettleDelayMs = config.UiSettleDelayMs > 0 ? config.UiSettleDelayMs : defaultUiSettleDelayMs;
+Console.WriteLine($"[Runner] Speed profile: {normalizedSpeedProfile} (ActionDelayMs={actionDelayMs}, UiSettleDelayMs={uiSettleDelayMs})");
+
 // ── Load previous test results for skip-passed logic ────────────────────────
 var previouslyPassed = new HashSet<string>();
 if (config.RunOnlyFailed && File.Exists(config.TestResultsPath))
@@ -211,6 +222,22 @@ while (cycle < config.MaxCycles && !ct.IsCancellationRequested)
     }
     Console.WriteLine("[Runner] Bridge API ready.");
 
+    // 2b. Ensure web targets are reachable before discovery/interactions ───────
+    if (!string.IsNullOrWhiteSpace(config.WebBaseUrl))
+    {
+        Console.WriteLine("[Runner] Waiting for web target pages...");
+        var webReady = await WaitForWebTargetsAsync(config, ct);
+        if (!webReady)
+        {
+            Console.WriteLine("[Runner] Web target did not become ready in time — skipping cycle.");
+            await telegram.SendAsync(
+                $"⚠️ <b>Cycle {cycle}</b> — Web target not ready after {config.ApiReadyTimeoutSec}s", ct);
+            await bridge.StopAsync();
+            continue;
+        }
+        Console.WriteLine("[Runner] Web target pages ready.");
+    }
+
     // 3. Run test suite ────────────────────────────────────────────────────────
     var suiteTimer = Stopwatch.StartNew();
     var result = await new TestSuite(client, config.RunOnlyFailed ? previouslyPassed : null).RunAsync(ct);
@@ -314,3 +341,50 @@ if (ct.IsCancellationRequested && history.Count < config.MaxCycles)
 
 Console.WriteLine("[Runner] Done. Test-target apps will be closed.");
 return 0;
+
+static async Task<bool> WaitForWebTargetsAsync(RunnerConfig config, CancellationToken ct)
+{
+    using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(5) };
+    var deadline = DateTime.UtcNow.AddSeconds(config.ApiReadyTimeoutSec);
+    var pages = config.WebPagePaths.Length > 0 ? config.WebPagePaths : ["/"];
+
+    while (DateTime.UtcNow < deadline && !ct.IsCancellationRequested)
+    {
+        var allReady = true;
+        foreach (var page in pages)
+        {
+            var targetUrl = BuildWebUrl(config.WebBaseUrl, page);
+            try
+            {
+                using var response = await http.GetAsync(targetUrl, ct);
+                if (!response.IsSuccessStatusCode)
+                {
+                    allReady = false;
+                    break;
+                }
+            }
+            catch
+            {
+                allReady = false;
+                break;
+            }
+        }
+
+        if (allReady) return true;
+        await Task.Delay(500, ct).ConfigureAwait(false);
+    }
+
+    return false;
+}
+
+static string BuildWebUrl(string webBaseUrl, string pagePath)
+{
+    if (Uri.TryCreate(pagePath, UriKind.Absolute, out var absolute))
+        return absolute.ToString();
+
+    var baseUrl = webBaseUrl.TrimEnd('/');
+    if (string.IsNullOrWhiteSpace(pagePath) || pagePath == "/")
+        return baseUrl;
+
+    return $"{baseUrl}/{pagePath.TrimStart('/')}";
+}
