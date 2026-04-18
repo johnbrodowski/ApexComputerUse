@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>ApexUIBridge.TestApplications.WinFormsApplication</AssemblyName>
+    <RootNamespace>ApexUIBridge.TestApplications.WinFormsApplication</RootNamespace>
+    <Description>ApexUIBridge Test Application - WinForms Application</Description>
+  </PropertyGroup>
+
+</Project>

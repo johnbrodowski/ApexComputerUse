@@ -1,0 +1,1232 @@
+<Window x:Class="WpfApplication.TortureTestWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:WpfApplication"
+        Title="ApexUIBridge Test Application - WPF Torture Test"
+        Height="860" Width="1160" MinHeight="700" MinWidth="900"
+        WindowStartupLocation="CenterScreen">
+
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolVis" />
+
+        <Style x:Key="SectionHeader" TargetType="TextBlock">
+            <Setter Property="FontSize"     Value="11"/>
+            <Setter Property="FontWeight"   Value="Bold"/>
+            <Setter Property="Foreground"   Value="#FF2B5BB0"/>
+            <Setter Property="Margin"       Value="0,6,0,2"/>
+        </Style>
+
+        <Style x:Key="FormLabel" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin"            Value="4,0,6,0"/>
+            <Setter Property="MinWidth"          Value="120"/>
+        </Style>
+
+        <Style x:Key="FieldRow" TargetType="StackPanel">
+            <Setter Property="Orientation" Value="Horizontal"/>
+            <Setter Property="Margin"      Value="0,3,0,3"/>
+        </Style>
+
+        <Style x:Key="StatusDot" TargetType="Ellipse">
+            <Setter Property="Width"              Value="10"/>
+            <Setter Property="Height"             Value="10"/>
+            <Setter Property="VerticalAlignment"  Value="Center"/>
+            <Setter Property="Margin"             Value="0,0,4,0"/>
+        </Style>
+    </Window.Resources>
+
+    <DockPanel>
+
+        <!-- ══ MENU ══════════════════════════════════════════════════════════ -->
+        <Menu DockPanel.Dock="Top" AutomationProperties.AutomationId="TortureMenu">
+            <MenuItem Header="_File" AutomationProperties.AutomationId="FileMenu">
+                <MenuItem Header="_New Profile"    InputGestureText="Ctrl+N" AutomationProperties.AutomationId="NewProfile"/>
+                <MenuItem Header="_Open..."        InputGestureText="Ctrl+O" AutomationProperties.AutomationId="OpenProfile"/>
+                <MenuItem Header="_Save"           InputGestureText="Ctrl+S" AutomationProperties.AutomationId="SaveProfile"/>
+                <MenuItem Header="Save _As..."     AutomationProperties.AutomationId="SaveAs"/>
+                <Separator/>
+                <MenuItem Header="Import Settings..." AutomationProperties.AutomationId="ImportSettings"/>
+                <MenuItem Header="Export Settings..." AutomationProperties.AutomationId="ExportSettings"/>
+                <Separator/>
+                <MenuItem Header="E_xit" AutomationProperties.AutomationId="Exit" Click="OnExit"/>
+            </MenuItem>
+            <MenuItem Header="_Edit" AutomationProperties.AutomationId="EditMenu">
+                <MenuItem Header="_Undo"      InputGestureText="Ctrl+Z"/>
+                <MenuItem Header="_Redo"      InputGestureText="Ctrl+Y"/>
+                <Separator/>
+                <MenuItem Header="_Copy">
+                    <MenuItem Header="Copy as Plain Text"/>
+                    <MenuItem Header="Copy as JSON"/>
+                    <MenuItem Header="Copy as XML"/>
+                </MenuItem>
+                <MenuItem Header="_Paste"     InputGestureText="Ctrl+V"/>
+                <Separator/>
+                <MenuItem Header="Select _All" InputGestureText="Ctrl+A"/>
+                <MenuItem Header="_Find..."    InputGestureText="Ctrl+F"/>
+            </MenuItem>
+            <MenuItem Header="_View" AutomationProperties.AutomationId="ViewMenu">
+                <MenuItem Header="Show _Grid Lines" IsCheckable="True" IsChecked="True"/>
+                <MenuItem Header="Show _Status Bar"  IsCheckable="True" IsChecked="True"/>
+                <MenuItem Header="_Compact Layout"   IsCheckable="True"/>
+                <Separator/>
+                <MenuItem Header="_Refresh"  InputGestureText="F5"/>
+                <MenuItem Header="Reset _Layout"/>
+            </MenuItem>
+            <MenuItem Header="_Tools" AutomationProperties.AutomationId="ToolsMenu">
+                <MenuItem Header="_Options..."/>
+                <MenuItem Header="_Diagnostics"/>
+                <MenuItem Header="_Language">
+                    <MenuItem Header="English (US)" IsCheckable="True" IsChecked="True"/>
+                    <MenuItem Header="Français"     IsCheckable="True"/>
+                    <MenuItem Header="Deutsch"      IsCheckable="True"/>
+                    <MenuItem Header="日本語"        IsCheckable="True"/>
+                </MenuItem>
+                <Separator/>
+                <MenuItem Header="_Plugins..."/>
+            </MenuItem>
+            <MenuItem Header="_Help" AutomationProperties.AutomationId="HelpMenu">
+                <MenuItem Header="_Documentation"      InputGestureText="F1"/>
+                <MenuItem Header="_Release Notes"/>
+                <Separator/>
+                <MenuItem Header="Check for _Updates..."/>
+                <MenuItem Header="_About"/>
+            </MenuItem>
+        </Menu>
+
+        <!-- ══ TOOLBAR ═══════════════════════════════════════════════════════ -->
+        <ToolBarTray DockPanel.Dock="Top" AutomationProperties.AutomationId="TortureToolbar">
+            <ToolBar AutomationProperties.AutomationId="MainToolBar">
+                <Button Content="New"  ToolTip="New Profile"  AutomationProperties.AutomationId="TbNew"/>
+                <Button Content="Open" ToolTip="Open Profile" AutomationProperties.AutomationId="TbOpen"/>
+                <Button Content="Save" ToolTip="Save Profile" AutomationProperties.AutomationId="TbSave"/>
+                <Separator/>
+                <TextBlock Text="Environment:" VerticalAlignment="Center" Margin="4,0"/>
+                <ComboBox Width="110" SelectedIndex="0" AutomationProperties.AutomationId="TbEnvironment">
+                    <ComboBoxItem>Development</ComboBoxItem>
+                    <ComboBoxItem>Staging</ComboBoxItem>
+                    <ComboBoxItem>Production</ComboBoxItem>
+                    <ComboBoxItem>DR</ComboBoxItem>
+                </ComboBox>
+                <Separator/>
+                <Button AutomationProperties.AutomationId="TbConnect">
+                    <Button.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Connect via VPN"/>
+                            <MenuItem Header="Connect via Proxy"/>
+                            <MenuItem Header="Connect Direct"/>
+                        </ContextMenu>
+                    </Button.ContextMenu>
+                    Connect ▾
+                </Button>
+                <ComboBox Width="130" SelectedIndex="0" AutomationProperties.AutomationId="TbMode">
+                    <ComboBoxItem>Normal Mode</ComboBoxItem>
+                    <ComboBoxItem>Read-Only Mode</ComboBoxItem>
+                    <ComboBoxItem>Maintenance Mode</ComboBoxItem>
+                    <ComboBoxItem>Debug Mode</ComboBoxItem>
+                </ComboBox>
+                <Separator/>
+                <TextBox Width="150" Text="Search..." AutomationProperties.AutomationId="TbSearch"/>
+                <Separator/>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Ellipse Style="{StaticResource StatusDot}" Fill="LimeGreen"/>
+                    <TextBlock Text="Connected" VerticalAlignment="Center"/>
+                </StackPanel>
+                <ProgressBar Width="80" Height="14" Value="65" Margin="6,0,0,0" AutomationProperties.AutomationId="TbSyncProgress"/>
+            </ToolBar>
+        </ToolBarTray>
+
+        <!-- ══ STATUS BAR ═════════════════════════════════════════════════════ -->
+        <StatusBar DockPanel.Dock="Bottom" AutomationProperties.AutomationId="TortureStatusBar">
+            <StatusBarItem><TextBlock Text="Ready" AutomationProperties.AutomationId="SbReady"/></StatusBarItem>
+            <Separator/>
+            <StatusBarItem><TextBlock Text="Profile: Default"/></StatusBarItem>
+            <Separator/>
+            <StatusBarItem HorizontalAlignment="Right">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="User: Administrator" Margin="0,0,12,0"/>
+                    <TextBlock Text="11:00:00" Margin="0,0,12,0" AutomationProperties.AutomationId="SbClock"/>
+                    <TextBlock Text="0 Alerts" Margin="0,0,12,0"/>
+                    <ProgressBar Width="80" Height="12" Value="65" VerticalAlignment="Center"/>
+                </StackPanel>
+            </StatusBarItem>
+        </StatusBar>
+
+        <!-- ══ MAIN TAB CONTROL ═══════════════════════════════════════════════ -->
+        <TabControl AutomationProperties.AutomationId="MainTabs">
+
+            <!-- ── TAB 1: IDENTITY ──────────────────────────────────────── -->
+            <TabItem Header="Identity" AutomationProperties.AutomationId="TabIdentity">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <Grid Margin="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Row 0: Name -->
+                        <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource FormLabel}" Text="First Name:"/>
+                        <TextBox   Grid.Row="0" Grid.Column="1" Text="John" Margin="0,3" AutomationProperties.AutomationId="FirstName"/>
+                        <TextBlock Grid.Row="0" Grid.Column="2" Style="{StaticResource FormLabel}" Text="Last Name:"/>
+                        <TextBox   Grid.Row="0" Grid.Column="3" Text="Doe"  Margin="0,3" AutomationProperties.AutomationId="LastName"/>
+
+                        <!-- Row 1: Employee ID / Department -->
+                        <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource FormLabel}" Text="Employee ID:"/>
+                        <TextBox   Grid.Row="1" Grid.Column="1" Text="EMP-00042" Margin="0,3" AutomationProperties.AutomationId="EmployeeId"/>
+                        <TextBlock Grid.Row="1" Grid.Column="2" Style="{StaticResource FormLabel}" Text="Department:"/>
+                        <ComboBox  Grid.Row="1" Grid.Column="3" Margin="0,3" SelectedItem="{Binding SelectedDepartment}" AutomationProperties.AutomationId="Department">
+                            <ComboBoxItem>Engineering</ComboBoxItem>
+                            <ComboBoxItem>Finance</ComboBoxItem>
+                            <ComboBoxItem>HR</ComboBoxItem>
+                            <ComboBoxItem IsSelected="True">IT Operations</ComboBoxItem>
+                            <ComboBoxItem>Legal</ComboBoxItem>
+                            <ComboBoxItem>Marketing</ComboBoxItem>
+                            <ComboBoxItem>Sales</ComboBoxItem>
+                        </ComboBox>
+
+                        <!-- Row 2: Phone / Extension -->
+                        <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource FormLabel}" Text="Phone:"/>
+                        <TextBox   Grid.Row="2" Grid.Column="1" Text="(555) 867-5309" Margin="0,3" AutomationProperties.AutomationId="Phone"/>
+                        <TextBlock Grid.Row="2" Grid.Column="2" Style="{StaticResource FormLabel}" Text="Extension:"/>
+                        <TextBox   Grid.Row="2" Grid.Column="3" Text="1042" Margin="0,3" AutomationProperties.AutomationId="Extension"/>
+
+                        <!-- Row 3: Email / Username -->
+                        <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource FormLabel}" Text="Email:"/>
+                        <TextBox   Grid.Row="3" Grid.Column="1" Text="john.doe@company.com" Margin="0,3" AutomationProperties.AutomationId="Email"/>
+                        <TextBlock Grid.Row="3" Grid.Column="2" Style="{StaticResource FormLabel}" Text="Username:"/>
+                        <TextBox   Grid.Row="3" Grid.Column="3" Text="jdoe" Margin="0,3" AutomationProperties.AutomationId="Username"/>
+
+                        <!-- Row 4: Password / Confirm -->
+                        <TextBlock  Grid.Row="4" Grid.Column="0" Style="{StaticResource FormLabel}" Text="Password:"/>
+                        <PasswordBox Grid.Row="4" Grid.Column="1" Margin="0,3" AutomationProperties.AutomationId="Password"/>
+                        <TextBlock  Grid.Row="4" Grid.Column="2" Style="{StaticResource FormLabel}" Text="Confirm:"/>
+                        <PasswordBox Grid.Row="4" Grid.Column="3" Margin="0,3" AutomationProperties.AutomationId="ConfirmPassword"/>
+
+                        <!-- Row 5: Hire date / Salary -->
+                        <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource FormLabel}" Text="Hire Date:"/>
+                        <DatePicker Grid.Row="5" Grid.Column="1" Margin="0,3" AutomationProperties.AutomationId="HireDate"/>
+                        <TextBlock Grid.Row="5" Grid.Column="2" Style="{StaticResource FormLabel}" Text="Annual Salary:"/>
+                        <TextBox   Grid.Row="5" Grid.Column="3" Text="85,000.00" Margin="0,3" AutomationProperties.AutomationId="Salary"/>
+
+                        <!-- Row 6: Status / Location -->
+                        <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource FormLabel}" Text="Status:"/>
+                        <ComboBox  Grid.Row="6" Grid.Column="1" Margin="0,3" SelectedIndex="0" AutomationProperties.AutomationId="Status">
+                            <ComboBoxItem>Active</ComboBoxItem>
+                            <ComboBoxItem>On Leave</ComboBoxItem>
+                            <ComboBoxItem>Suspended</ComboBoxItem>
+                            <ComboBoxItem>Terminated</ComboBoxItem>
+                        </ComboBox>
+                        <TextBlock Grid.Row="6" Grid.Column="2" Style="{StaticResource FormLabel}" Text="Location:"/>
+                        <ComboBox  Grid.Row="6" Grid.Column="3" Margin="0,3" IsEditable="True" Text="New York" AutomationProperties.AutomationId="Location">
+                            <ComboBoxItem>New York</ComboBoxItem>
+                            <ComboBoxItem>London</ComboBoxItem>
+                            <ComboBoxItem>Tokyo</ComboBoxItem>
+                            <ComboBoxItem>Sydney</ComboBoxItem>
+                            <ComboBoxItem>Berlin</ComboBoxItem>
+                            <ComboBoxItem>Remote</ComboBoxItem>
+                        </ComboBox>
+
+                        <!-- Row 7: Access Level slider -->
+                        <TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource FormLabel}" Text="Access Level:"/>
+                        <Slider Grid.Row="7" Grid.Column="1" Minimum="1" Maximum="5" Value="{Binding AccessLevel}" TickFrequency="1"
+                                IsSnapToTickEnabled="True" TickPlacement="BottomRight" Margin="0,3"
+                                AutomationProperties.AutomationId="AccessLevel"/>
+                        <TextBlock Grid.Row="7" Grid.Column="2" Style="{StaticResource FormLabel}" Text="Employment Type:"/>
+                        <StackPanel Grid.Row="7" Grid.Column="3" Orientation="Horizontal" Margin="0,3">
+                            <RadioButton Content="Full-Time"  GroupName="EmpType" IsChecked="True" Margin="0,0,10,0" AutomationProperties.AutomationId="EmpFullTime"/>
+                            <RadioButton Content="Part-Time"  GroupName="EmpType" Margin="0,0,10,0" AutomationProperties.AutomationId="EmpPartTime"/>
+                            <RadioButton Content="Contractor" GroupName="EmpType" AutomationProperties.AutomationId="EmpContractor"/>
+                        </StackPanel>
+
+                        <!-- Row 8: Flags -->
+                        <TextBlock Grid.Row="8" Grid.Column="0" Style="{StaticResource FormLabel}" Text="Flags:"/>
+                        <WrapPanel Grid.Row="8" Grid.Column="1" Grid.ColumnSpan="3" Margin="0,3">
+                            <CheckBox Content="AD Sync"        IsChecked="True" Margin="0,0,12,0" AutomationProperties.AutomationId="FlagAdSync"/>
+                            <CheckBox Content="MFA Enabled"    IsChecked="True" Margin="0,0,12,0" AutomationProperties.AutomationId="FlagMfa"/>
+                            <CheckBox Content="VPN Access"     Margin="0,0,12,0" AutomationProperties.AutomationId="FlagVpn"/>
+                            <CheckBox Content="Remote Desktop" Margin="0,0,12,0" AutomationProperties.AutomationId="FlagRdp"/>
+                            <CheckBox Content="Admin Override" Margin="0,0,12,0" AutomationProperties.AutomationId="FlagAdmin"/>
+                            <CheckBox Content="API Access"     IsChecked="True"  Margin="0,0,12,0" AutomationProperties.AutomationId="FlagApi"/>
+                        </WrapPanel>
+
+                        <!-- Row 9: Notes (RichTextBox) -->
+                        <TextBlock Grid.Row="9" Grid.Column="0" Style="{StaticResource FormLabel}" Text="Notes:" VerticalAlignment="Top" Margin="4,6,6,0"/>
+                        <RichTextBox Grid.Row="9" Grid.Column="1" Grid.ColumnSpan="3" Height="80" Margin="0,3"
+                                     AutomationProperties.AutomationId="Notes" VerticalScrollBarVisibility="Auto">
+                            <FlowDocument>
+                                <Paragraph>Senior engineer. Approved for production deployments.</Paragraph>
+                                <Paragraph>Last reviewed: <Bold>Q3 2025</Bold>. Performance rating: <Italic>Exceeds Expectations</Italic>.</Paragraph>
+                            </FlowDocument>
+                        </RichTextBox>
+
+                        <!-- Row 10: Title spinner sim / Years of service -->
+                        <TextBlock Grid.Row="10" Grid.Column="0" Style="{StaticResource FormLabel}" Text="Title:"/>
+                        <ComboBox  Grid.Row="10" Grid.Column="1" Margin="0,3" SelectedIndex="0" AutomationProperties.AutomationId="Title">
+                            <ComboBoxItem>Mr.</ComboBoxItem>
+                            <ComboBoxItem>Ms.</ComboBoxItem>
+                            <ComboBoxItem>Mrs.</ComboBoxItem>
+                            <ComboBoxItem>Dr.</ComboBoxItem>
+                            <ComboBoxItem>Prof.</ComboBoxItem>
+                            <ComboBoxItem>Mx.</ComboBoxItem>
+                        </ComboBox>
+                        <TextBlock Grid.Row="10" Grid.Column="2" Style="{StaticResource FormLabel}" Text="Years of Service:"/>
+                        <!-- Simulated NumericUpDown using RepeatButton -->
+                        <StackPanel Grid.Row="10" Grid.Column="3" Orientation="Horizontal" Margin="0,3">
+                            <TextBox x:Name="YearsBox" Text="5" Width="60" VerticalContentAlignment="Center"
+                                     AutomationProperties.AutomationId="YearsOfService"/>
+                            <StackPanel>
+                                <RepeatButton Content="▲" Height="13" Width="20" Click="OnYearsUp"   AutomationProperties.AutomationId="YearsUp"/>
+                                <RepeatButton Content="▼" Height="13" Width="20" Click="OnYearsDown" AutomationProperties.AutomationId="YearsDown"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- Row 11: UUID readonly -->
+                        <TextBlock Grid.Row="11" Grid.Column="0" Style="{StaticResource FormLabel}" Text="UUID:"/>
+                        <TextBox   Grid.Row="11" Grid.Column="1" Grid.ColumnSpan="3"
+                                   Text="f47ac10b-58cc-4372-a567-0e02b2c3d479"
+                                   IsReadOnly="True" Background="{x:Static SystemColors.ControlBrush}"
+                                   Margin="0,3" AutomationProperties.AutomationId="UUID"/>
+
+                        <!-- Row 12: 3-state checkboxes -->
+                        <TextBlock Grid.Row="12" Grid.Column="0" Style="{StaticResource FormLabel}" Text="Consent:"/>
+                        <WrapPanel Grid.Row="12" Grid.Column="1" Grid.ColumnSpan="3" Margin="0,3">
+                            <CheckBox Content="Terms of Service"   IsChecked="True"  IsThreeState="False" Margin="0,0,14,0" AutomationProperties.AutomationId="ConsentTos"/>
+                            <CheckBox Content="Privacy Policy"     IsChecked="True"  IsThreeState="False" Margin="0,0,14,0" AutomationProperties.AutomationId="ConsentPrivacy"/>
+                            <CheckBox Content="Marketing Emails"   IsChecked="{x:Null}" IsThreeState="True" Margin="0,0,14,0" AutomationProperties.AutomationId="ConsentMarketing"/>
+                            <CheckBox Content="Data Sharing"       IsChecked="False" IsThreeState="True"  Margin="0,0,14,0" AutomationProperties.AutomationId="ConsentData"/>
+                        </WrapPanel>
+                    </Grid>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ── TAB 2: NETWORK ────────────────────────────────────────── -->
+            <TabItem Header="Network" AutomationProperties.AutomationId="TabNetwork">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="5"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Left Panel -->
+                    <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
+                        <StackPanel Margin="10">
+                            <TextBlock Text="Connection" Style="{StaticResource SectionHeader}"/>
+                            <GroupBox Header="Primary Connection" Margin="0,4,0,8">
+                                <Grid Margin="6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="110"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource FormLabel}" Text="Protocol:"/>
+                                    <ComboBox  Grid.Row="0" Grid.Column="1" Margin="0,3" SelectedIndex="0" AutomationProperties.AutomationId="Protocol">
+                                        <ComboBoxItem>HTTPS</ComboBoxItem>
+                                        <ComboBoxItem>HTTP</ComboBoxItem>
+                                        <ComboBoxItem>WebSocket</ComboBoxItem>
+                                        <ComboBoxItem>gRPC</ComboBoxItem>
+                                        <ComboBoxItem>AMQP</ComboBoxItem>
+                                    </ComboBox>
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource FormLabel}" Text="Hostname:"/>
+                                    <TextBox   Grid.Row="1" Grid.Column="1" Text="api.company.internal" Margin="0,3" AutomationProperties.AutomationId="Hostname"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource FormLabel}" Text="Port:"/>
+                                    <TextBox   Grid.Row="2" Grid.Column="1" Text="443" Margin="0,3" AutomationProperties.AutomationId="Port"/>
+                                    <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource FormLabel}" Text="Timeout (s):"/>
+                                    <Slider    Grid.Row="3" Grid.Column="1" Minimum="1" Maximum="300" Value="30" Margin="0,3"
+                                               AutomationProperties.AutomationId="Timeout" TickFrequency="30" TickPlacement="BottomRight"/>
+                                    <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource FormLabel}" Text="Retries:"/>
+                                    <Slider    Grid.Row="4" Grid.Column="1" Minimum="0" Maximum="10" Value="3" IsSnapToTickEnabled="True"
+                                               TickFrequency="1" TickPlacement="BottomRight" Margin="0,3" AutomationProperties.AutomationId="Retries"/>
+                                    <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource FormLabel}" Text="Auth Token:"/>
+                                    <PasswordBox Grid.Row="5" Grid.Column="1" Margin="0,3" AutomationProperties.AutomationId="AuthToken"/>
+                                </Grid>
+                            </GroupBox>
+
+                            <GroupBox Header="TLS / Security" Margin="0,0,0,8">
+                                <StackPanel Margin="6">
+                                    <CheckBox Content="Verify Server Certificate" IsChecked="True" Margin="0,2" AutomationProperties.AutomationId="TlsVerify"/>
+                                    <CheckBox Content="Client Certificate Auth"   Margin="0,2" AutomationProperties.AutomationId="TlsClientCert"/>
+                                    <CheckBox Content="Mutual TLS (mTLS)"         Margin="0,2" AutomationProperties.AutomationId="TlsMutual"/>
+                                    <CheckBox Content="Certificate Pinning"       Margin="0,2" AutomationProperties.AutomationId="TlsPinning"/>
+                                    <CheckBox Content="HSTS Enforcement" IsChecked="True" Margin="0,2" AutomationProperties.AutomationId="TlsHsts"/>
+                                </StackPanel>
+                            </GroupBox>
+
+                            <GroupBox Header="Connection Mode" Margin="0,0,0,8">
+                                <StackPanel Margin="6">
+                                    <RadioButton Content="Direct"         GroupName="ConnMode" IsChecked="True" Margin="0,2" AutomationProperties.AutomationId="ConnDirect"/>
+                                    <RadioButton Content="Via Proxy"      GroupName="ConnMode" Margin="0,2" AutomationProperties.AutomationId="ConnProxy"/>
+                                    <RadioButton Content="Via VPN Tunnel" GroupName="ConnMode" Margin="0,2" AutomationProperties.AutomationId="ConnVpn"/>
+                                    <RadioButton Content="SSH Tunnel"     GroupName="ConnMode" Margin="0,2" AutomationProperties.AutomationId="ConnSsh"/>
+                                </StackPanel>
+                            </GroupBox>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" Background="#FFD0D0D0"/>
+
+                    <!-- Right Panel -->
+                    <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
+                        <StackPanel Margin="10">
+                            <GroupBox Header="Bandwidth Limits" Margin="0,0,0,8">
+                                <Grid Margin="6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource FormLabel}" Text="Upload (Mbps):"/>
+                                    <Slider    Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="1000" Value="{Binding UploadLimit}"
+                                               TickFrequency="100" TickPlacement="BottomRight" AutomationProperties.AutomationId="UploadLimit"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource FormLabel}" Text="Download (Mbps):"/>
+                                    <Slider    Grid.Row="1" Grid.Column="1" Minimum="0" Maximum="1000" Value="{Binding DownloadLimit}"
+                                               TickFrequency="100" TickPlacement="BottomRight" AutomationProperties.AutomationId="DownloadLimit"/>
+                                </Grid>
+                            </GroupBox>
+
+                            <GroupBox Header="Endpoint Priority (Multi-select)" Margin="0,0,0,8">
+                                <ListBox Height="130" SelectionMode="Extended" Margin="4" AutomationProperties.AutomationId="EndpointList">
+                                    <ListBoxItem>api.company.internal (Primary)</ListBoxItem>
+                                    <ListBoxItem>api-eu.company.internal (Failover EU)</ListBoxItem>
+                                    <ListBoxItem>api-ap.company.internal (Failover APAC)</ListBoxItem>
+                                    <ListBoxItem>10.0.0.42:8080 (Local Dev)</ListBoxItem>
+                                    <ListBoxItem>localhost:3000 (Mock)</ListBoxItem>
+                                </ListBox>
+                            </GroupBox>
+
+                            <GroupBox Header="Enabled Features" Margin="0,0,0,8">
+                                <StackPanel Margin="6">
+                                    <CheckBox Content="Auto-reconnect"        IsChecked="True"  Margin="0,2" AutomationProperties.AutomationId="FeatReconnect"/>
+                                    <CheckBox Content="Compression (gzip)"   IsChecked="True"  Margin="0,2" AutomationProperties.AutomationId="FeatGzip"/>
+                                    <CheckBox Content="Keep-Alive"           IsChecked="True"  Margin="0,2" AutomationProperties.AutomationId="FeatKeepAlive"/>
+                                    <CheckBox Content="HTTP/2 Multiplexing"  Margin="0,2" AutomationProperties.AutomationId="FeatHttp2"/>
+                                    <CheckBox Content="Connection Pooling"   IsChecked="True"  Margin="0,2" AutomationProperties.AutomationId="FeatPooling"/>
+                                    <CheckBox Content="Circuit Breaker"      Margin="0,2" AutomationProperties.AutomationId="FeatCircuitBreaker"/>
+                                    <CheckBox Content="Rate Limiting"        Margin="0,2" AutomationProperties.AutomationId="FeatRateLimit"/>
+                                    <CheckBox Content="Request Signing (HMAC)" Margin="0,2" AutomationProperties.AutomationId="FeatHmac"/>
+                                </StackPanel>
+                            </GroupBox>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </TabItem>
+
+            <!-- ── TAB 3: SCHEDULER ──────────────────────────────────────── -->
+            <TabItem Header="Scheduler" AutomationProperties.AutomationId="TabScheduler">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="5"/>
+                        <RowDefinition Height="180"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Top: schedule config + calendar -->
+                    <Grid Grid.Row="0" Margin="10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="140"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="140"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource FormLabel}" Text="Job Name:"/>
+                                <TextBox   Grid.Row="0" Grid.Column="1" Text="nightly-backup" Margin="0,3" AutomationProperties.AutomationId="JobName"/>
+                                <TextBlock Grid.Row="0" Grid.Column="2" Style="{StaticResource FormLabel}" Text="Job Type:"/>
+                                <ComboBox  Grid.Row="0" Grid.Column="3" SelectedIndex="0" Margin="0,3" AutomationProperties.AutomationId="JobType">
+                                    <ComboBoxItem>Backup</ComboBoxItem>
+                                    <ComboBoxItem>Sync</ComboBoxItem>
+                                    <ComboBoxItem>Report</ComboBoxItem>
+                                    <ComboBoxItem>Cleanup</ComboBoxItem>
+                                    <ComboBoxItem>Notification</ComboBoxItem>
+                                    <ComboBoxItem>Health Check</ComboBoxItem>
+                                </ComboBox>
+                                <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource FormLabel}" Text="Frequency:"/>
+                                <ComboBox  Grid.Row="1" Grid.Column="1" SelectedIndex="2" Margin="0,3" AutomationProperties.AutomationId="Frequency">
+                                    <ComboBoxItem>Every Minute</ComboBoxItem>
+                                    <ComboBoxItem>Hourly</ComboBoxItem>
+                                    <ComboBoxItem>Daily</ComboBoxItem>
+                                    <ComboBoxItem>Weekly</ComboBoxItem>
+                                    <ComboBoxItem>Monthly</ComboBoxItem>
+                                    <ComboBoxItem>Custom Cron</ComboBoxItem>
+                                </ComboBox>
+                                <TextBlock Grid.Row="1" Grid.Column="2" Style="{StaticResource FormLabel}" Text="Start Date:"/>
+                                <DatePicker Grid.Row="1" Grid.Column="3" Margin="0,3" AutomationProperties.AutomationId="SchedStartDate"/>
+                                <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource FormLabel}" Text="Cron Expression:"/>
+                                <TextBox   Grid.Row="2" Grid.Column="1" Text="0 2 * * *" Margin="0,3" AutomationProperties.AutomationId="CronExpr"/>
+                                <TextBlock Grid.Row="2" Grid.Column="2" Style="{StaticResource FormLabel}" Text="End Date:"/>
+                                <DatePicker Grid.Row="2" Grid.Column="3" Margin="0,3" AutomationProperties.AutomationId="SchedEndDate"/>
+                                <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource FormLabel}" Text="Priority:"/>
+                                <Slider Grid.Row="3" Grid.Column="1" Minimum="1" Maximum="10" Value="5"
+                                        IsSnapToTickEnabled="True" TickFrequency="1" TickPlacement="BottomRight" Margin="0,3"
+                                        AutomationProperties.AutomationId="JobPriority"/>
+                                <TextBlock Grid.Row="3" Grid.Column="2" Style="{StaticResource FormLabel}" Text="Max Runtime (min):"/>
+                                <TextBox   Grid.Row="3" Grid.Column="3" Text="60" Margin="0,3" AutomationProperties.AutomationId="MaxRuntime"/>
+                                <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource FormLabel}" Text="Notifications:"/>
+                                <WrapPanel Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="3" Margin="0,3">
+                                    <CheckBox Content="Enabled"              IsChecked="True" Margin="0,0,12,0" AutomationProperties.AutomationId="JobEnabled"/>
+                                    <CheckBox Content="Notify on Success"    IsChecked="True" Margin="0,0,12,0" AutomationProperties.AutomationId="NotifySuccess"/>
+                                    <CheckBox Content="Notify on Failure"    IsChecked="True" Margin="0,0,12,0" AutomationProperties.AutomationId="NotifyFailure"/>
+                                    <CheckBox Content="Retry on Failure"     Margin="0,0,12,0" AutomationProperties.AutomationId="RetryOnFail"/>
+                                    <CheckBox Content="Run on Missed Schedule" Margin="0,0,12,0" AutomationProperties.AutomationId="RunOnMissed"/>
+                                </WrapPanel>
+                            </Grid>
+                        </StackPanel>
+                        <!-- Calendar -->
+                        <Calendar Grid.Column="1" SelectionMode="MultipleRange" AutomationProperties.AutomationId="JobCalendar"/>
+                    </Grid>
+
+                    <GridSplitter Grid.Row="1" Height="5" HorizontalAlignment="Stretch" Background="#FFD0D0D0"/>
+
+                    <!-- Bottom: Job list -->
+                    <ListView Grid.Row="2" Margin="10,4,10,4" ItemsSource="{Binding Jobs}"
+                              AutomationProperties.AutomationId="JobList">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Width="150" Header="Job Name"   DisplayMemberBinding="{Binding Name}"/>
+                                <GridViewColumn Width="100" Header="Type"       DisplayMemberBinding="{Binding Type}"/>
+                                <GridViewColumn Width="100" Header="Frequency"  DisplayMemberBinding="{Binding Frequency}"/>
+                                <GridViewColumn Width="140" Header="Last Run"   DisplayMemberBinding="{Binding LastRun}"/>
+                                <GridViewColumn Width="140" Header="Next Run"   DisplayMemberBinding="{Binding NextRun}"/>
+                                <GridViewColumn Width="80"  Header="Status"     DisplayMemberBinding="{Binding Status}"/>
+                                <GridViewColumn Width="80"  Header="Duration"   DisplayMemberBinding="{Binding Duration}"/>
+                                <GridViewColumn Width="70"  Header="Enabled">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <CheckBox IsChecked="{Binding IsEnabled}" HorizontalAlignment="Center"
+                                                      AutomationProperties.AutomationId="JobEnabledCell"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                </Grid>
+            </TabItem>
+
+            <!-- ── TAB 4: LAYOUT PANELS ──────────────────────────────────── -->
+            <TabItem Header="Layout" AutomationProperties.AutomationId="TabLayout">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="5"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Left: WrapPanel + UniformGrid -->
+                    <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
+                        <StackPanel Margin="8">
+                            <GroupBox Header="WrapPanel — Action Buttons" Margin="0,0,0,10">
+                                <WrapPanel Margin="6">
+                                    <Button Content="Apply"    Width="80" Height="30" Margin="3" AutomationProperties.AutomationId="BtnApply"/>
+                                    <Button Content="Reset"    Width="80" Height="30" Margin="3" AutomationProperties.AutomationId="BtnReset"/>
+                                    <Button Content="Preview"  Width="80" Height="30" Margin="3" AutomationProperties.AutomationId="BtnPreview"/>
+                                    <Button Content="Export"   Width="80" Height="30" Margin="3" AutomationProperties.AutomationId="BtnExport"/>
+                                    <Button Content="Import"   Width="80" Height="30" Margin="3" AutomationProperties.AutomationId="BtnImport"/>
+                                    <Button Content="Validate" Width="80" Height="30" Margin="3" AutomationProperties.AutomationId="BtnValidate"/>
+                                    <Button Content="Deploy"   Width="80" Height="30" Margin="3" AutomationProperties.AutomationId="BtnDeploy"/>
+                                    <Button Content="Rollback" Width="80" Height="30" Margin="3" AutomationProperties.AutomationId="BtnRollback"/>
+                                    <Button Content="Restart"  Width="80" Height="30" Margin="3" AutomationProperties.AutomationId="BtnRestart"/>
+                                    <Button Content="Shutdown" Width="80" Height="30" Margin="3" AutomationProperties.AutomationId="BtnShutdown"/>
+                                    <Button Content="Refresh"  Width="80" Height="30" Margin="3" AutomationProperties.AutomationId="BtnRefresh"/>
+                                    <Button Content="Cancel"   Width="80" Height="30" Margin="3" AutomationProperties.AutomationId="BtnCancel"/>
+                                </WrapPanel>
+                            </GroupBox>
+
+                            <GroupBox Header="UniformGrid — 3×3 Controls" Margin="0,0,0,10">
+                                <UniformGrid Rows="3" Columns="3" Margin="6">
+                                    <TextBox Text="Cell 1,1" Margin="2" AutomationProperties.AutomationId="Grid11"/>
+                                    <ComboBox SelectedIndex="0" Margin="2" AutomationProperties.AutomationId="Grid12">
+                                        <ComboBoxItem>Option A</ComboBoxItem>
+                                        <ComboBoxItem>Option B</ComboBoxItem>
+                                        <ComboBoxItem>Option C</ComboBoxItem>
+                                    </ComboBox>
+                                    <CheckBox Content="Cell 1,3" Margin="2" IsChecked="True" AutomationProperties.AutomationId="Grid13"/>
+                                    <Button Content="Action A" Margin="2" AutomationProperties.AutomationId="Grid21"/>
+                                    <Slider Minimum="0" Maximum="100" Value="50" Margin="2" AutomationProperties.AutomationId="Grid22"/>
+                                    <ProgressBar Value="75" Margin="2" AutomationProperties.AutomationId="Grid23"/>
+                                    <RadioButton Content="Option 1" GroupName="UG" Margin="2" IsChecked="True" AutomationProperties.AutomationId="Grid31"/>
+                                    <RadioButton Content="Option 2" GroupName="UG" Margin="2" AutomationProperties.AutomationId="Grid32"/>
+                                    <RadioButton Content="Option 3" GroupName="UG" Margin="2" AutomationProperties.AutomationId="Grid33"/>
+                                </UniformGrid>
+                            </GroupBox>
+
+                            <GroupBox Header="DockPanel Nesting" Margin="0,0,0,10">
+                                <DockPanel Margin="6" Height="100">
+                                    <Button DockPanel.Dock="Top"    Content="Top Toolbar Button"  Height="28" AutomationProperties.AutomationId="DockTop"/>
+                                    <Button DockPanel.Dock="Bottom" Content="Bottom Status Bar"    Height="28" AutomationProperties.AutomationId="DockBottom"/>
+                                    <Button DockPanel.Dock="Left"   Content="Nav" Width="50"       AutomationProperties.AutomationId="DockLeft"/>
+                                    <Button DockPanel.Dock="Right"  Content="Side" Width="50"      AutomationProperties.AutomationId="DockRight"/>
+                                    <TextBox Text="Center fill content area" AutomationProperties.AutomationId="DockCenter"/>
+                                </DockPanel>
+                            </GroupBox>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" Background="#FFD0D0D0"/>
+
+                    <!-- Right: Canvas + Viewbox + ScrollBar demo -->
+                    <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
+                        <StackPanel Margin="8">
+                            <GroupBox Header="Canvas with Shapes" Margin="0,0,0,10">
+                                <Canvas Height="180" Background="#FFF8F8F8" AutomationProperties.AutomationId="ShapeCanvas">
+                                    <Rectangle Canvas.Left="10"  Canvas.Top="10"  Width="80" Height="50" Fill="SteelBlue"  Stroke="Navy" StrokeThickness="2"/>
+                                    <Ellipse   Canvas.Left="110" Canvas.Top="10"  Width="80" Height="50" Fill="Gold"       Stroke="DarkGoldenrod" StrokeThickness="2"/>
+                                    <Polygon   Canvas.Left="210" Canvas.Top="60"  Fill="Tomato" Stroke="DarkRed" StrokeThickness="2"
+                                               Points="0,-50 30,0 -30,0"/>
+                                    <TextBlock Canvas.Left="10"  Canvas.Top="75"  Text="Canvas TextBlock" FontSize="11" Foreground="#FF444444"/>
+                                    <Button    Canvas.Left="10"  Canvas.Top="100" Content="Canvas Button" Width="110" AutomationProperties.AutomationId="CanvasBtn"/>
+                                    <CheckBox  Canvas.Left="130" Canvas.Top="105" Content="Canvas CheckBox" IsChecked="True" AutomationProperties.AutomationId="CanvasCb"/>
+                                    <Slider    Canvas.Left="10"  Canvas.Top="140" Width="200" Value="60" AutomationProperties.AutomationId="CanvasSlider"/>
+                                </Canvas>
+                            </GroupBox>
+
+                            <GroupBox Header="Viewbox — Scales Content" Margin="0,0,0,10">
+                                <Viewbox Stretch="Uniform" Height="100" AutomationProperties.AutomationId="TortureViewbox">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Content="Small Button" Width="90" Height="30" AutomationProperties.AutomationId="ViewboxBtn"/>
+                                        <TextBlock Text="Scaled Text" FontSize="16" FontWeight="Bold" VerticalAlignment="Center" Margin="10,0"/>
+                                        <Ellipse Width="30" Height="30" Fill="CornflowerBlue"/>
+                                    </StackPanel>
+                                </Viewbox>
+                            </GroupBox>
+
+                            <GroupBox Header="ScrollBar Controls" Margin="0,0,0,10">
+                                <StackPanel Margin="6">
+                                    <TextBlock Text="Horizontal:" Margin="0,0,0,2"/>
+                                    <ScrollBar Orientation="Horizontal" Minimum="0" Maximum="100" Value="30" Height="18" Margin="0,0,0,6" AutomationProperties.AutomationId="HScrollBar1"/>
+                                    <ScrollBar Orientation="Horizontal" Minimum="0" Maximum="200" Value="80" Height="18" Margin="0,0,0,6" AutomationProperties.AutomationId="HScrollBar2"/>
+                                    <TextBlock Text="Vertical:" Margin="0,4,0,2"/>
+                                    <StackPanel Orientation="Horizontal">
+                                        <ScrollBar Orientation="Vertical" Minimum="0" Maximum="100" Value="40" Width="18" Height="80" Margin="0,0,8,0" AutomationProperties.AutomationId="VScrollBar1"/>
+                                        <ScrollBar Orientation="Vertical" Minimum="0" Maximum="100" Value="75" Width="18" Height="80" AutomationProperties.AutomationId="VScrollBar2"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </GroupBox>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </TabItem>
+
+            <!-- ── TAB 5: DATA ───────────────────────────────────────────── -->
+            <TabItem Header="Data" AutomationProperties.AutomationId="TabData">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="5"/>
+                        <RowDefinition Height="200"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- DataGrid -->
+                    <DataGrid Grid.Row="0" Margin="8" ItemsSource="{Binding Services}"
+                              AutoGenerateColumns="False" CanUserAddRows="False"
+                              AlternatingRowBackground="AliceBlue" GridLinesVisibility="Horizontal"
+                              AutomationProperties.AutomationId="ServicesGrid">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn     Header="Service"     Binding="{Binding ServiceName}" Width="150"/>
+                            <DataGridTextColumn     Header="Host"        Binding="{Binding Host}"        Width="160"/>
+                            <DataGridTextColumn     Header="Port"        Binding="{Binding Port}"        Width="60"/>
+                            <DataGridCheckBoxColumn    Header="Enabled"     Binding="{Binding IsEnabled}"   Width="70"/>
+                            <DataGridComboBoxColumn    Header="Environment" SelectedItemBinding="{Binding Environment}" Width="120">
+                                <DataGridComboBoxColumn.ItemsSource>
+                                    <x:Array Type="sys:String" xmlns:sys="clr-namespace:System;assembly=mscorlib">
+                                        <sys:String>Dev</sys:String>
+                                        <sys:String>Staging</sys:String>
+                                        <sys:String>Production</sys:String>
+                                    </x:Array>
+                                </DataGridComboBoxColumn.ItemsSource>
+                            </DataGridComboBoxColumn>
+                            <DataGridTextColumn     Header="Latency (ms)" Binding="{Binding Latency}"   Width="100"/>
+                            <DataGridTextColumn     Header="Last Seen"    Binding="{Binding LastSeen}"  Width="140"/>
+                            <DataGridTemplateColumn    Header="Health"       Width="100">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <ProgressBar Value="{Binding Latency}" Maximum="200" Height="14"
+                                                     AutomationProperties.AutomationId="HealthBar"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <GridSplitter Grid.Row="1" Height="5" HorizontalAlignment="Stretch" Background="#FFD0D0D0"/>
+
+                    <!-- TreeView + ItemsControl -->
+                    <Grid Grid.Row="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="5"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <GroupBox Grid.Column="0" Header="Deep TreeView" Margin="8,4,4,8">
+                            <TreeView AutomationProperties.AutomationId="DeepTree">
+                                <TreeViewItem Header="Infrastructure" IsExpanded="True">
+                                    <TreeViewItem Header="Compute">
+                                        <TreeViewItem Header="web-01 (running)"/>
+                                        <TreeViewItem Header="web-02 (running)"/>
+                                        <TreeViewItem Header="worker-01 (idle)"/>
+                                    </TreeViewItem>
+                                    <TreeViewItem Header="Database" IsExpanded="True">
+                                        <TreeViewItem Header="Primary (postgres-01)"/>
+                                        <TreeViewItem Header="Replica">
+                                            <TreeViewItem Header="replica-eu-01"/>
+                                            <TreeViewItem Header="replica-ap-01"/>
+                                        </TreeViewItem>
+                                    </TreeViewItem>
+                                    <TreeViewItem Header="Cache">
+                                        <TreeViewItem Header="redis-01"/>
+                                        <TreeViewItem Header="redis-02"/>
+                                    </TreeViewItem>
+                                </TreeViewItem>
+                                <TreeViewItem Header="Networking">
+                                    <TreeViewItem Header="Load Balancers">
+                                        <TreeViewItem Header="lb-prod-01"/>
+                                        <TreeViewItem Header="lb-prod-02"/>
+                                    </TreeViewItem>
+                                    <TreeViewItem Header="Firewalls"/>
+                                    <TreeViewItem Header="VPN Gateways"/>
+                                </TreeViewItem>
+                            </TreeView>
+                        </GroupBox>
+
+                        <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" Background="#FFD0D0D0"/>
+
+                        <GroupBox Grid.Column="2" Header="ItemsControl with DataTemplate" Margin="4,4,8,8">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <ItemsControl ItemsSource="{Binding Jobs}" AutomationProperties.AutomationId="JobsItemsControl">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border BorderBrush="#FFD0D0D0" BorderThickness="0,0,0,1" Padding="4,3">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" Text="{Binding Name}" FontWeight="SemiBold"/>
+                                                    <TextBlock Grid.Column="1" Text="{Binding Status}" Foreground="Gray" FontSize="10"/>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </GroupBox>
+                    </Grid>
+                </Grid>
+            </TabItem>
+
+            <!-- ── TAB 6: LOGS ───────────────────────────────────────────── -->
+            <TabItem Header="Logs" AutomationProperties.AutomationId="TabLogs">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="200"/>
+                        <ColumnDefinition Width="5"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Filter TreeView with CheckBoxes -->
+                    <GroupBox Grid.Column="0" Header="Filter by Service" Margin="8,8,4,8">
+                        <TreeView AutomationProperties.AutomationId="LogFilterTree">
+                            <TreeViewItem IsExpanded="True">
+                                <TreeViewItem.Header>
+                                    <CheckBox Content="All Services" IsChecked="True"/>
+                                </TreeViewItem.Header>
+                                <TreeViewItem>
+                                    <TreeViewItem.Header><CheckBox Content="AuthService" IsChecked="True"/></TreeViewItem.Header>
+                                    <TreeViewItem><TreeViewItem.Header><CheckBox Content="Login"         IsChecked="True"/></TreeViewItem.Header></TreeViewItem>
+                                    <TreeViewItem><TreeViewItem.Header><CheckBox Content="Token Refresh" IsChecked="True"/></TreeViewItem.Header></TreeViewItem>
+                                    <TreeViewItem><TreeViewItem.Header><CheckBox Content="Logout"/></TreeViewItem.Header></TreeViewItem>
+                                </TreeViewItem>
+                                <TreeViewItem>
+                                    <TreeViewItem.Header><CheckBox Content="UserAPI" IsChecked="True"/></TreeViewItem.Header>
+                                    <TreeViewItem><TreeViewItem.Header><CheckBox Content="GET /users"  IsChecked="True"/></TreeViewItem.Header></TreeViewItem>
+                                    <TreeViewItem><TreeViewItem.Header><CheckBox Content="POST /users" IsChecked="True"/></TreeViewItem.Header></TreeViewItem>
+                                    <TreeViewItem><TreeViewItem.Header><CheckBox Content="DELETE /users"/></TreeViewItem.Header></TreeViewItem>
+                                </TreeViewItem>
+                                <TreeViewItem>
+                                    <TreeViewItem.Header><CheckBox Content="PaymentGateway" IsChecked="True"/></TreeViewItem.Header>
+                                    <TreeViewItem><TreeViewItem.Header><CheckBox Content="Charge"  IsChecked="True"/></TreeViewItem.Header></TreeViewItem>
+                                    <TreeViewItem><TreeViewItem.Header><CheckBox Content="Refund"/></TreeViewItem.Header></TreeViewItem>
+                                    <TreeViewItem><TreeViewItem.Header><CheckBox Content="Webhook" IsChecked="True"/></TreeViewItem.Header></TreeViewItem>
+                                </TreeViewItem>
+                            </TreeViewItem>
+                        </TreeView>
+                    </GroupBox>
+
+                    <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" Background="#FFD0D0D0"/>
+
+                    <!-- Log viewer -->
+                    <DockPanel Grid.Column="2" Margin="4,8,8,8">
+                        <!-- Filter bar -->
+                        <ToolBar DockPanel.Dock="Top" AutomationProperties.AutomationId="LogToolbar">
+                            <TextBlock Text="Level:" VerticalAlignment="Center"/>
+                            <ComboBox Width="90" SelectedIndex="0" AutomationProperties.AutomationId="LogLevel">
+                                <ComboBoxItem>All Levels</ComboBoxItem>
+                                <ComboBoxItem>DEBUG</ComboBoxItem>
+                                <ComboBoxItem>INFO</ComboBoxItem>
+                                <ComboBoxItem>WARN</ComboBoxItem>
+                                <ComboBoxItem>ERROR</ComboBoxItem>
+                            </ComboBox>
+                            <TextBox Width="160" Text="Filter text..." Margin="4,0" AutomationProperties.AutomationId="LogFilter"/>
+                            <CheckBox Content="Auto-scroll" IsChecked="True" VerticalAlignment="Center" AutomationProperties.AutomationId="LogAutoScroll"/>
+                            <CheckBox Content="Word wrap"   VerticalAlignment="Center" Margin="8,0,0,0" AutomationProperties.AutomationId="LogWordWrap"/>
+                            <Button Content="Clear" Margin="8,0,0,0" AutomationProperties.AutomationId="LogClear" Click="OnClearLog"/>
+                        </ToolBar>
+                        <!-- Log RichTextBox -->
+                        <RichTextBox x:Name="LogBox" Background="#FF121212" Foreground="#FFDDDDDD"
+                                     FontFamily="Consolas" FontSize="11"
+                                     IsReadOnly="True" VerticalScrollBarVisibility="Auto"
+                                     HorizontalScrollBarVisibility="Auto"
+                                     AutomationProperties.AutomationId="LogRichTextBox">
+                            <FlowDocument>
+                                <Paragraph>
+                                    <Run Foreground="#FF4FC3F7">[2026-03-25 11:00:01]</Run>
+                                    <Run Foreground="#FF81C784"> [INFO ] </Run>
+                                    <Run>[AuthService  ] User jdoe logged in from 10.0.0.5</Run>
+                                </Paragraph>
+                                <Paragraph>
+                                    <Run Foreground="#FF4FC3F7">[2026-03-25 11:00:01]</Run>
+                                    <Run Foreground="#FF90A4AE"> [DEBUG] </Run>
+                                    <Run>[AuthService  ] JWT issued, exp=3600s</Run>
+                                </Paragraph>
+                                <Paragraph>
+                                    <Run Foreground="#FF4FC3F7">[2026-03-25 11:00:02]</Run>
+                                    <Run Foreground="#FF81C784"> [INFO ] </Run>
+                                    <Run>[UserAPI      ] GET /users/42 → 200 OK (8ms)</Run>
+                                </Paragraph>
+                                <Paragraph>
+                                    <Run Foreground="#FF4FC3F7">[2026-03-25 11:00:04]</Run>
+                                    <Run Foreground="#FFFFB74D"> [WARN ] </Run>
+                                    <Run>[CacheService ] Cache miss rate 42% (threshold: 20%)</Run>
+                                </Paragraph>
+                                <Paragraph>
+                                    <Run Foreground="#FF4FC3F7">[2026-03-25 11:00:05]</Run>
+                                    <Run Foreground="#FFEF5350"> [ERROR] </Run>
+                                    <Run>[NotifySvc    ] AMQP connection refused: 10.0.0.99:5672</Run>
+                                </Paragraph>
+                                <Paragraph>
+                                    <Run Foreground="#FF4FC3F7">[2026-03-25 11:00:05]</Run>
+                                    <Run Foreground="#FFEF5350"> [ERROR] </Run>
+                                    <Run>[NotifySvc    ] Retry 1/3 failed — backing off 5s</Run>
+                                </Paragraph>
+                                <Paragraph>
+                                    <Run Foreground="#FF4FC3F7">[2026-03-25 11:00:06]</Run>
+                                    <Run Foreground="#FF81C784"> [INFO ] </Run>
+                                    <Run>[System       ] Health check passed (5/5 services)</Run>
+                                </Paragraph>
+                                <Paragraph>
+                                    <Run Foreground="#FF4FC3F7">[2026-03-25 11:00:10]</Run>
+                                    <Run Foreground="#FFFFB74D"> [WARN ] </Run>
+                                    <Run>[PaymentGateway] Latency spike: 445ms (avg: 145ms)</Run>
+                                </Paragraph>
+                            </FlowDocument>
+                        </RichTextBox>
+                    </DockPanel>
+                </Grid>
+            </TabItem>
+
+            <!-- ── TAB 7: DISPLAY ────────────────────────────────────────── -->
+            <TabItem Header="Display" AutomationProperties.AutomationId="TabDisplay">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <WrapPanel Margin="10" ItemWidth="320">
+
+                        <!-- TextBlock styles -->
+                        <GroupBox Header="TextBlock Styles" Margin="0,0,10,10" Width="310">
+                            <StackPanel Margin="8">
+                                <TextBlock Text="Normal TextBlock"/>
+                                <TextBlock Text="Bold TextBlock"              FontWeight="Bold"/>
+                                <TextBlock Text="Italic TextBlock"            FontStyle="Italic" Foreground="Gray"/>
+                                <TextBlock Text="Large Heading"               FontSize="16" FontWeight="Bold" Foreground="DarkBlue"/>
+                                <TextBlock Text="Warning Text"                FontWeight="Bold" Foreground="DarkOrange"/>
+                                <TextBlock Text="Error Text"                  FontWeight="Bold" Foreground="Red"/>
+                                <TextBlock Text="Success Text"                FontWeight="Bold" Foreground="Green"/>
+                                <TextBlock TextDecorations="Strikethrough"    Text="Strikethrough Text"  Foreground="Gray"/>
+                                <TextBlock TextDecorations="Underline"        Text="Underlined Text"     Foreground="Navy"/>
+                                <TextBlock Text="Consolas Monospace" FontFamily="Consolas" FontSize="11" Background="#FFF0F0F0" Padding="3"/>
+                                <TextBlock Margin="0,6,0,0">
+                                    <Run Text="Mixed " FontWeight="Bold"/>
+                                    <Run Text="inline " FontStyle="Italic" Foreground="SteelBlue"/>
+                                    <Run Text="runs " TextDecorations="Underline" Foreground="Purple"/>
+                                    <Run Text="in one block"/>
+                                </TextBlock>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <!-- Hyperlinks -->
+                        <GroupBox Header="Hyperlinks" Margin="0,0,10,10" Width="310">
+                            <StackPanel Margin="8">
+                                <TextBlock Margin="0,4">
+                                    <Hyperlink AutomationProperties.AutomationId="DocLink">Visit documentation portal</Hyperlink>
+                                </TextBlock>
+                                <TextBlock Margin="0,4">
+                                    GitHub —
+                                    <Hyperlink AutomationProperties.AutomationId="GithubLink">ApexUIBridge</Hyperlink>
+                                    — MIT License
+                                </TextBlock>
+                                <TextBlock Margin="0,4">
+                                    <Hyperlink AutomationProperties.AutomationId="SupportLink">support@company.com</Hyperlink>
+                                </TextBlock>
+                                <TextBlock Margin="0,4">
+                                    <Hyperlink IsEnabled="False" AutomationProperties.AutomationId="DisabledLink">Disabled hyperlink</Hyperlink>
+                                </TextBlock>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <!-- ProgressBars + Indeterminate -->
+                        <GroupBox Header="Progress Bars" Margin="0,0,10,10" Width="310">
+                            <StackPanel Margin="8">
+                                <TextBlock Text="CPU:" Margin="0,0,0,2"/>
+                                <ProgressBar Value="72"          Height="16" Margin="0,0,0,6" AutomationProperties.AutomationId="PbCpu"/>
+                                <TextBlock Text="RAM:" Margin="0,0,0,2"/>
+                                <ProgressBar Value="55"          Height="16" Margin="0,0,0,6" AutomationProperties.AutomationId="PbRam"/>
+                                <TextBlock Text="Disk:" Margin="0,0,0,2"/>
+                                <ProgressBar Value="88"          Height="16" Margin="0,0,0,6" Foreground="OrangeRed" AutomationProperties.AutomationId="PbDisk"/>
+                                <TextBlock Text="Network:" Margin="0,0,0,2"/>
+                                <ProgressBar Value="34"          Height="16" Margin="0,0,0,6" AutomationProperties.AutomationId="PbNet"/>
+                                <TextBlock Text="Indeterminate (loading):" Margin="0,0,0,2"/>
+                                <ProgressBar IsIndeterminate="True" Height="16" AutomationProperties.AutomationId="PbIndeterminate"/>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <!-- Borders / visual states -->
+                        <GroupBox Header="Borders &amp; Visual States" Margin="0,0,10,10" Width="310">
+                            <StackPanel Margin="8">
+                                <Border BorderBrush="Gray"       BorderThickness="1"    Padding="6" Margin="0,3" CornerRadius="0">
+                                    <TextBlock Text="Flat border (1px gray)"/>
+                                </Border>
+                                <Border BorderBrush="SteelBlue"  BorderThickness="2"    Padding="6" Margin="0,3" CornerRadius="4">
+                                    <TextBlock Text="Rounded border (4px, 2px blue)"/>
+                                </Border>
+                                <Border Background="LightYellow" BorderBrush="Goldenrod" BorderThickness="1" Padding="6" Margin="0,3">
+                                    <TextBlock Text="Warning style border" Foreground="DarkGoldenrod" FontWeight="Bold"/>
+                                </Border>
+                                <Border Background="#FFFFE8E8"   BorderBrush="Red"       BorderThickness="1" Padding="6" Margin="0,3">
+                                    <TextBlock Text="Error style border" Foreground="DarkRed" FontWeight="Bold"/>
+                                </Border>
+                                <Border Background="#FFE8FFE8"   BorderBrush="Green"     BorderThickness="1" Padding="6" Margin="0,3">
+                                    <TextBlock Text="Success style border" Foreground="DarkGreen" FontWeight="Bold"/>
+                                </Border>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <!-- Disabled / IsEnabled states -->
+                        <GroupBox Header="Control States" Margin="0,0,10,10" Width="310">
+                            <Grid Margin="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="140"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource FormLabel}" Text="Disabled TextBox:"/>
+                                <TextBox   Grid.Row="0" Grid.Column="1" Text="Cannot edit" IsEnabled="False" Margin="0,2" AutomationProperties.AutomationId="DisabledTextBox"/>
+                                <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource FormLabel}" Text="ReadOnly TextBox:"/>
+                                <TextBox   Grid.Row="1" Grid.Column="1" Text="Read only"   IsReadOnly="True" Margin="0,2" AutomationProperties.AutomationId="ReadOnlyTextBox"/>
+                                <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource FormLabel}" Text="Disabled Button:"/>
+                                <Button    Grid.Row="2" Grid.Column="1" Content="Disabled" IsEnabled="False" Margin="0,2" AutomationProperties.AutomationId="DisabledButton"/>
+                                <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource FormLabel}" Text="Disabled CheckBox:"/>
+                                <CheckBox  Grid.Row="3" Grid.Column="1" Content="Disabled (on)" IsChecked="True" IsEnabled="False" Margin="0,2" AutomationProperties.AutomationId="DisabledCheckBox"/>
+                                <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource FormLabel}" Text="Disabled ComboBox:"/>
+                                <ComboBox  Grid.Row="4" Grid.Column="1" IsEnabled="False" Margin="0,2" AutomationProperties.AutomationId="DisabledComboBox">
+                                    <ComboBoxItem>Disabled item</ComboBoxItem>
+                                </ComboBox>
+                                <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource FormLabel}" Text="Disabled Slider:"/>
+                                <Slider    Grid.Row="5" Grid.Column="1" Value="60" IsEnabled="False" Margin="0,2" AutomationProperties.AutomationId="DisabledSlider"/>
+                            </Grid>
+                        </GroupBox>
+
+                    </WrapPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ── TAB 8: WPF SPECIFICS ──────────────────────────────────── -->
+            <TabItem Header="WPF" AutomationProperties.AutomationId="TabWpf">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <WrapPanel Margin="10">
+
+                        <!-- Expanders -->
+                        <GroupBox Header="Expander" Width="340" Margin="0,0,10,10">
+                            <StackPanel Margin="6">
+                                <Expander Header="▶ Server Configuration" IsExpanded="True" AutomationProperties.AutomationId="ExpanderServer">
+                                    <StackPanel Margin="16,4,4,4">
+                                        <CheckBox Content="Enable HTTP/2"        IsChecked="True"  Margin="0,2"/>
+                                        <CheckBox Content="Enable QUIC (HTTP/3)" Margin="0,2"/>
+                                        <CheckBox Content="Force HTTPS redirect" IsChecked="True"  Margin="0,2"/>
+                                    </StackPanel>
+                                </Expander>
+                                <Expander Header="▶ Logging Options" Margin="0,4,0,0" AutomationProperties.AutomationId="ExpanderLogging">
+                                    <StackPanel Margin="16,4,4,4">
+                                        <CheckBox Content="Structured logging (JSON)" IsChecked="True" Margin="0,2"/>
+                                        <CheckBox Content="Log request bodies"        Margin="0,2"/>
+                                        <CheckBox Content="Async log writer"          IsChecked="True" Margin="0,2"/>
+                                    </StackPanel>
+                                </Expander>
+                                <Expander Header="▶ Feature Flags (collapsed)" Margin="0,4,0,0" AutomationProperties.AutomationId="ExpanderFeatures">
+                                    <StackPanel Margin="16,4,4,4">
+                                        <CheckBox Content="Dark Mode"    Margin="0,2"/>
+                                        <CheckBox Content="Beta UI"      Margin="0,2"/>
+                                        <CheckBox Content="A/B Testing"  Margin="0,2"/>
+                                    </StackPanel>
+                                </Expander>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <!-- ToggleButton + RepeatButton + Thumb -->
+                        <GroupBox Header="Button Variants" Width="280" Margin="0,0,10,10">
+                            <StackPanel Margin="6">
+                                <TextBlock Text="ToggleButton:" Margin="0,0,0,2"/>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                    <ToggleButton Content="Toggle OFF" Width="110" AutomationProperties.AutomationId="Toggle1" Margin="0,0,6,0"/>
+                                    <ToggleButton Content="Toggle ON"  Width="110" IsChecked="True" AutomationProperties.AutomationId="Toggle2"/>
+                                </StackPanel>
+                                <TextBlock Text="RepeatButton (hold to fire):" Margin="0,0,0,2"/>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                    <RepeatButton Content="◀◀ Hold" Width="90" Interval="200" AutomationProperties.AutomationId="RepeatLeft" Margin="0,0,6,0"/>
+                                    <RepeatButton Content="Hold ▶▶" Width="90" Interval="200" AutomationProperties.AutomationId="RepeatRight"/>
+                                </StackPanel>
+                                <TextBlock Text="Thumb (draggable handle):" Margin="0,0,0,2"/>
+                                <Thumb Width="60" Height="20" Background="SteelBlue" AutomationProperties.AutomationId="DragThumb"/>
+                                <TextBlock Text="CheckBox variants:" Margin="0,8,0,2"/>
+                                <CheckBox Content="Normal (unchecked)"  AutomationProperties.AutomationId="CbNormal"    Margin="0,2"/>
+                                <CheckBox Content="Checked"             IsChecked="True" AutomationProperties.AutomationId="CbChecked"   Margin="0,2"/>
+                                <CheckBox Content="Indeterminate"       IsChecked="{x:Null}" IsThreeState="True" AutomationProperties.AutomationId="CbIndet" Margin="0,2"/>
+                                <CheckBox Content="Disabled (checked)"  IsChecked="True" IsEnabled="False" AutomationProperties.AutomationId="CbDisabled" Margin="0,2"/>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <!-- Popup demo -->
+                        <GroupBox Header="Popup" Width="280" Margin="0,0,10,10">
+                            <StackPanel Margin="6">
+                                <TextBlock Text="Click the button to open a Popup:" TextWrapping="Wrap" Margin="0,0,0,6"/>
+                                <ToggleButton x:Name="PopupToggle" Content="Open Popup ▾"
+                                              Width="140" HorizontalAlignment="Left"
+                                              AutomationProperties.AutomationId="PopupToggleBtn"/>
+                                <Popup IsOpen="{Binding IsChecked, ElementName=PopupToggle}"
+                                       PlacementTarget="{Binding ElementName=PopupToggle}"
+                                       Placement="Bottom" StaysOpen="False"
+                                       AutomationProperties.AutomationId="TorturePopup">
+                                    <Border Background="White" BorderBrush="#FFAAAAAA" BorderThickness="1"
+                                            Padding="12" Width="220">
+                                        <StackPanel>
+                                            <TextBlock Text="Popup Menu" FontWeight="Bold" Margin="0,0,0,6"/>
+                                            <CheckBox  Content="Option A" IsChecked="True" Margin="0,2" AutomationProperties.AutomationId="PopupOptA"/>
+                                            <CheckBox  Content="Option B" Margin="0,2" AutomationProperties.AutomationId="PopupOptB"/>
+                                            <CheckBox  Content="Option C" Margin="0,2" AutomationProperties.AutomationId="PopupOptC"/>
+                                            <Separator Margin="0,6"/>
+                                            <Button Content="Apply &amp; Close" AutomationProperties.AutomationId="PopupApply"/>
+                                        </StackPanel>
+                                    </Border>
+                                </Popup>
+                                <TextBlock Text="Context menu (right-click below):" Margin="0,16,0,4" TextWrapping="Wrap"/>
+                                <Border Background="#FFF0F4FF" BorderBrush="#FFAACCFF" BorderThickness="1" Padding="10" Height="50">
+                                    <Border.ContextMenu>
+                                        <ContextMenu AutomationProperties.AutomationId="BorderContextMenu">
+                                            <MenuItem Header="Copy"        AutomationProperties.AutomationId="CtxCopy"/>
+                                            <MenuItem Header="Paste"       AutomationProperties.AutomationId="CtxPaste"/>
+                                            <Separator/>
+                                            <MenuItem Header="Properties" AutomationProperties.AutomationId="CtxProps"/>
+                                            <MenuItem Header="Sub-menu">
+                                                <MenuItem Header="Sub-item A"/>
+                                                <MenuItem Header="Sub-item B"/>
+                                                <MenuItem Header="Sub-item C"/>
+                                            </MenuItem>
+                                        </ContextMenu>
+                                    </Border.ContextMenu>
+                                    <TextBlock Text="Right-click for ContextMenu" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="SteelBlue"/>
+                                </Border>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <!-- InkCanvas -->
+                        <GroupBox Header="InkCanvas (draw with mouse)" Width="340" Margin="0,0,10,10">
+                            <StackPanel Margin="6">
+                                <Border BorderBrush="Gray" BorderThickness="1">
+                                    <InkCanvas x:Name="TortureInkCanvas" Height="150" Background="White"
+                                               AutomationProperties.AutomationId="TortureInkCanvas"/>
+                                </Border>
+                                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                    <Button Content="Clear Ink" Width="90" Margin="0,0,6,0" Click="OnClearInk" AutomationProperties.AutomationId="ClearInkBtn"/>
+                                    <TextBlock Text="Ink mode:" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                    <ComboBox Width="100" SelectedIndex="0" AutomationProperties.AutomationId="InkMode">
+                                        <ComboBoxItem>Ink (draw)</ComboBoxItem>
+                                        <ComboBoxItem>Erase by point</ComboBoxItem>
+                                        <ComboBoxItem>Erase by stroke</ComboBoxItem>
+                                        <ComboBoxItem>Select</ComboBoxItem>
+                                        <ComboBoxItem>None</ComboBoxItem>
+                                    </ComboBox>
+                                </StackPanel>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <!-- Nested TabControl -->
+                        <GroupBox Header="Nested TabControl" Width="320" Margin="0,0,10,10">
+                            <TabControl Height="160" Margin="4" AutomationProperties.AutomationId="NestedTabs">
+                                <TabItem Header="Sub A" AutomationProperties.AutomationId="SubTabA">
+                                    <StackPanel Margin="6">
+                                        <TextBox Text="Field in sub-tab A" Margin="0,3" AutomationProperties.AutomationId="SubTabAField"/>
+                                        <CheckBox Content="Sub-tab A option" IsChecked="True" AutomationProperties.AutomationId="SubTabACb"/>
+                                    </StackPanel>
+                                </TabItem>
+                                <TabItem Header="Sub B" AutomationProperties.AutomationId="SubTabB">
+                                    <StackPanel Margin="6">
+                                        <Slider Minimum="0" Maximum="100" Value="42" Margin="0,3" AutomationProperties.AutomationId="SubTabBSlider"/>
+                                        <ProgressBar Value="42" Height="14" AutomationProperties.AutomationId="SubTabBPb"/>
+                                    </StackPanel>
+                                </TabItem>
+                                <TabItem Header="Sub C" AutomationProperties.AutomationId="SubTabC">
+                                    <ListBox Margin="4" AutomationProperties.AutomationId="SubTabCList">
+                                        <ListBoxItem>Nested item 1</ListBoxItem>
+                                        <ListBoxItem>Nested item 2</ListBoxItem>
+                                        <ListBoxItem>Nested item 3</ListBoxItem>
+                                    </ListBox>
+                                </TabItem>
+                            </TabControl>
+                        </GroupBox>
+
+                    </WrapPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ── TAB 9: DIALOGS ────────────────────────────────────────── -->
+            <TabItem Header="Dialogs" AutomationProperties.AutomationId="TabDialogs">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="12">
+                        <GroupBox Header="Standard Dialog Launchers" Margin="0,0,0,12">
+                            <WrapPanel Margin="8">
+                                <Button Content="Open File..."    Width="140" Height="34" Margin="4" Click="OnOpenFile"    AutomationProperties.AutomationId="DlgOpenFile"/>
+                                <Button Content="Save File..."    Width="140" Height="34" Margin="4" Click="OnSaveFile"    AutomationProperties.AutomationId="DlgSaveFile"/>
+                                <Button Content="Browse Folder.." Width="140" Height="34" Margin="4" Click="OnBrowseFolder" AutomationProperties.AutomationId="DlgFolder"/>
+                                <Button Content="Choose Font..."  Width="140" Height="34" Margin="4" Click="OnChooseFont"  AutomationProperties.AutomationId="DlgFont"/>
+                                <Button Content="Choose Color..." Width="140" Height="34" Margin="4" Click="OnChooseColor" AutomationProperties.AutomationId="DlgColor"/>
+                                <Button Content="MessageBox Info"    Width="140" Height="34" Margin="4" Click="OnMsgInfo"    AutomationProperties.AutomationId="DlgMsgInfo"/>
+                                <Button Content="MessageBox Warning" Width="140" Height="34" Margin="4" Click="OnMsgWarn"    AutomationProperties.AutomationId="DlgMsgWarn"/>
+                                <Button Content="MessageBox Error"   Width="140" Height="34" Margin="4" Click="OnMsgError"   AutomationProperties.AutomationId="DlgMsgError"/>
+                                <Button Content="MessageBox Question" Width="140" Height="34" Margin="4" Click="OnMsgQuestion" AutomationProperties.AutomationId="DlgMsgQuestion"/>
+                            </WrapPanel>
+                        </GroupBox>
+
+                        <GroupBox Header="Miscellaneous Controls" Margin="0,0,0,12">
+                            <Grid Margin="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="160"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="160"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource FormLabel}" Text="Date picker:"/>
+                                <DatePicker Grid.Row="0" Grid.Column="1" Margin="0,3" AutomationProperties.AutomationId="MiscDatePicker"/>
+                                <TextBlock Grid.Row="0" Grid.Column="2" Style="{StaticResource FormLabel}" Text="Calendar:"/>
+                                <Calendar Grid.Row="0" Grid.Column="3" Margin="0,3" SelectionMode="SingleDate" AutomationProperties.AutomationId="MiscCalendar"/>
+
+                                <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource FormLabel}" Text="Editable ComboBox:"/>
+                                <ComboBox  Grid.Row="1" Grid.Column="1" IsEditable="True" Text="Custom value" Margin="0,3" AutomationProperties.AutomationId="MiscEditCombo">
+                                    <ComboBoxItem>Option A</ComboBoxItem>
+                                    <ComboBoxItem>Option B</ComboBoxItem>
+                                    <ComboBoxItem>Option C</ComboBoxItem>
+                                </ComboBox>
+                                <TextBlock Grid.Row="1" Grid.Column="2" Style="{StaticResource FormLabel}" Text="Multiline TextBox:"/>
+                                <TextBox   Grid.Row="1" Grid.Column="3" Height="60" TextWrapping="Wrap"
+                                           AcceptsReturn="True" VerticalScrollBarVisibility="Auto"
+                                           Text="Line one&#x0a;Line two&#x0a;Line three"
+                                           Margin="0,3" AutomationProperties.AutomationId="MiscMultilineTextBox"/>
+
+                                <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource FormLabel}" Text="Separator:"/>
+                                <Separator Grid.Row="2" Grid.Column="1" Margin="0,6"/>
+
+                                <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource FormLabel}" Text="Slider (vertical):"/>
+                                <Slider    Grid.Row="3" Grid.Column="1" Orientation="Vertical" Height="80"
+                                           Minimum="0" Maximum="100" Value="60"
+                                           TickFrequency="10" TickPlacement="BottomRight"
+                                           HorizontalAlignment="Left" Margin="0,3"
+                                           AutomationProperties.AutomationId="MiscVertSlider"/>
+                                <TextBlock Grid.Row="3" Grid.Column="2" Style="{StaticResource FormLabel}" Text="Radio group:"/>
+                                <StackPanel Grid.Row="3" Grid.Column="3" Margin="0,3">
+                                    <RadioButton Content="Choice Alpha"   GroupName="MiscGroup" IsChecked="True" Margin="0,2" AutomationProperties.AutomationId="MiscRadioA"/>
+                                    <RadioButton Content="Choice Beta"    GroupName="MiscGroup" Margin="0,2" AutomationProperties.AutomationId="MiscRadioB"/>
+                                    <RadioButton Content="Choice Gamma"   GroupName="MiscGroup" Margin="0,2" AutomationProperties.AutomationId="MiscRadioC"/>
+                                    <RadioButton Content="Choice Delta"   GroupName="MiscGroup" Margin="0,2" AutomationProperties.AutomationId="MiscRadioD"/>
+                                </StackPanel>
+
+                                <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource FormLabel}" Text="ListBox (multi):"/>
+                                <ListBox   Grid.Row="4" Grid.Column="1" Height="90" SelectionMode="Multiple" Margin="0,3"
+                                           AutomationProperties.AutomationId="MiscMultiListBox">
+                                    <ListBoxItem>Apple</ListBoxItem>
+                                    <ListBoxItem>Banana</ListBoxItem>
+                                    <ListBoxItem>Cherry</ListBoxItem>
+                                    <ListBoxItem>Date</ListBoxItem>
+                                    <ListBoxItem>Elderberry</ListBoxItem>
+                                </ListBox>
+                                <TextBlock Grid.Row="4" Grid.Column="2" Style="{StaticResource FormLabel}" Text="FlowDocument:"/>
+                                <FlowDocumentScrollViewer Grid.Row="4" Grid.Column="3" Height="90" Margin="0,3"
+                                                          AutomationProperties.AutomationId="MiscFlowDoc">
+                                    <FlowDocument>
+                                        <Paragraph FontWeight="Bold">FlowDocument Viewer</Paragraph>
+                                        <Paragraph>Supports <Bold>bold</Bold>, <Italic>italic</Italic>, and <Hyperlink>hyperlinks</Hyperlink>.</Paragraph>
+                                        <List>
+                                            <ListItem><Paragraph>Bullet one</Paragraph></ListItem>
+                                            <ListItem><Paragraph>Bullet two</Paragraph></ListItem>
+                                        </List>
+                                    </FlowDocument>
+                                </FlowDocumentScrollViewer>
+                            </Grid>
+                        </GroupBox>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+        </TabControl>
+    </DockPanel>
+</Window>

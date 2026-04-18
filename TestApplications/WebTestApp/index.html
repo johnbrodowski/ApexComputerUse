@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ApexUIBridge Test Application - Web</title>
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; font-size: 13px; }
+        body { margin: 0; padding: 0; background: #f0f0f0; }
+
+        /* Menu Bar */
+        .menu-bar { background: #f5f5f5; border-bottom: 1px solid #ccc; padding: 2px 0; display: flex; }
+        .menu-item { position: relative; padding: 4px 12px; cursor: pointer; }
+        .menu-item:hover { background: #e5e5e5; }
+        .menu-dropdown { display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ccc; box-shadow: 2px 2px 5px rgba(0,0,0,0.2); min-width: 120px; z-index: 100; }
+        .menu-item:hover > .menu-dropdown { display: block; }
+        .menu-dropdown-item { padding: 6px 20px; cursor: pointer; position: relative; }
+        .menu-dropdown-item:hover { background: #0078d4; color: white; }
+        .submenu { display: none; position: absolute; left: 100%; top: 0; background: white; border: 1px solid #ccc; box-shadow: 2px 2px 5px rgba(0,0,0,0.2); min-width: 100px; }
+        .menu-dropdown-item:hover > .submenu { display: block; }
+
+        /* Tab Control */
+        .tab-container { background: white; margin: 0; }
+        .tab-buttons { display: flex; background: #f0f0f0; border-bottom: 1px solid #ccc; }
+        .tab-btn { padding: 8px 16px; border: 1px solid transparent; border-bottom: none; cursor: pointer; background: #e0e0e0; margin-right: 2px; }
+        .tab-btn.active { background: white; border-color: #ccc; border-bottom: 1px solid white; margin-bottom: -1px; }
+        .tab-content { display: none; padding: 10px; min-height: 340px; }
+        .tab-content.active { display: block; }
+
+        /* Form Controls */
+        label { color: blue; }
+        input[type="text"], input[type="password"], input[type="number"], input[type="date"], select {
+            padding: 2px 4px; border: 1px solid #888; }
+        input[type="text"].green-text { color: green; }
+        button { padding: 4px 12px; cursor: pointer; }
+
+        /* Slider */
+        input[type="range"] { width: 150px; }
+
+        /* Progress Bar */
+        .progress-bar { width: 100px; height: 10px; background: #e0e0e0; border: 1px solid #888; }
+        .progress-fill { height: 100%; background: #06b025; }
+
+        /* ListBox */
+        .listbox { width: 120px; height: 70px; border: 1px solid #888; overflow-y: auto; background: white; }
+        .listbox-item { padding: 2px 4px; cursor: pointer; }
+        .listbox-item:hover { background: #e5e5e5; }
+        .listbox-item.selected { background: #0078d4; color: white; }
+
+        /* TreeView */
+        .treeview { border: 1px solid #888; background: white; padding: 4px; min-height: 60px; }
+        .tree-node { padding-left: 16px; }
+        .tree-node > .tree-label { cursor: pointer; display: flex; align-items: center; }
+        .tree-node > .tree-label:hover { background: #e5e5e5; }
+        .tree-toggle { width: 16px; display: inline-block; cursor: pointer; }
+        .tree-children { display: none; }
+        .tree-node.expanded > .tree-children { display: block; }
+
+        /* ListView / DataGrid */
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ccc; padding: 4px 8px; text-align: left; }
+        th { background: #f0f0f0; }
+        tr:hover { background: #e5f3ff; }
+        tr.selected { background: #0078d4; color: white; }
+
+        /* GroupBox */
+        .groupbox { border: 1px solid #888; padding: 10px; margin: 5px 0; }
+        .groupbox-title { margin-top: -20px; background: white; display: inline-block; padding: 0 4px; }
+
+        /* Context Menu */
+        .context-menu { display: none; position: absolute; background: white; border: 1px solid #ccc; box-shadow: 2px 2px 5px rgba(0,0,0,0.2); z-index: 200; }
+        .context-menu.visible { display: block; }
+        .context-menu-item { padding: 6px 20px; cursor: pointer; position: relative; }
+        .context-menu-item:hover { background: #0078d4; color: white; }
+
+        /* Scrollable Panel */
+        .scroll-panel { width: 80px; height: 80px; overflow: auto; border: 1px solid #888; }
+
+        /* Status Bar */
+        .status-bar { background: #f5f5f5; border-top: 1px solid #ccc; padding: 4px 8px; font-size: 12px; }
+
+        /* Layout helpers */
+        .row { display: flex; align-items: center; margin: 8px 0; gap: 10px; flex-wrap: wrap; }
+        .col { display: flex; flex-direction: column; gap: 5px; }
+    </style>
+</head>
+<body>
+    <!-- Menu Bar -->
+    <nav class="menu-bar" role="menubar">
+        <div class="menu-item" role="menuitem" tabindex="0">
+            <span><u>F</u>ile</span>
+            <div class="menu-dropdown" role="menu">
+                <div class="menu-dropdown-item" role="menuitem" id="menu-exit">E<u>x</u>it</div>
+            </div>
+        </div>
+        <div class="menu-item" role="menuitem" tabindex="0">
+            <span><u>E</u>dit</span>
+            <div class="menu-dropdown" role="menu">
+                <div class="menu-dropdown-item" role="menuitem">
+                    Copy
+                    <div class="submenu" role="menu">
+                        <div class="menu-dropdown-item" role="menuitem" id="menu-copy-plain">Plain</div>
+                        <div class="menu-dropdown-item" role="menuitem" id="menu-copy-fancy">Fancy</div>
+                    </div>
+                </div>
+                <div class="menu-dropdown-item" role="menuitem" id="menu-paste">Paste</div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Tab Control -->
+    <div class="tab-container">
+        <div class="tab-buttons" role="tablist">
+            <button class="tab-btn active" role="tab" aria-selected="true" data-tab="simple">Simple Controls</button>
+            <button class="tab-btn" role="tab" aria-selected="false" data-tab="complex">Complex Controls</button>
+        </div>
+
+        <!-- Tab 1: Simple Controls -->
+        <div id="tab-simple" class="tab-content active" role="tabpanel">
+            <div class="row">
+                <label id="test-label">Test Label</label>
+                <input type="text" id="TextBox" name="TextBox" class="green-text" value="Test TextBox" aria-label="TextBox">
+                <select id="EditableCombo" name="EditableCombo" aria-label="Editable Combo">
+                    <option value="">-- Select --</option>
+                    <option value="1">Item 1</option>
+                    <option value="2">Item 2</option>
+                    <option value="3">Item 3</option>
+                </select>
+                <select id="NonEditableCombo" name="NonEditableCombo" aria-label="Non-Editable Combo">
+                    <option value="1">Item 1</option>
+                    <option value="2">Item 2</option>
+                    <option value="3">Item 3</option>
+                    <option value="4">Item 4</option>
+                </select>
+            </div>
+
+            <div class="row">
+                <input type="password" id="PasswordBox" name="PasswordBox" value="MyPassword" aria-label="Password">
+                <div class="listbox" id="ListBox" role="listbox" aria-label="ListBox">
+                    <div class="listbox-item" role="option">ListBox Item #1</div>
+                    <div class="listbox-item" role="option">ListBox Item #2</div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col">
+                    <label><input type="checkbox" id="SimpleCheckBox" name="SimpleCheckBox"> Test Checkbox</label>
+                    <label><input type="checkbox" id="ThreeStateCheckBox" name="ThreeStateCheckBox" class="three-state"> 3-Way Test Checkbox</label>
+                    <label><input type="radio" id="RadioButton1" name="radioGroup" value="1"> RadioButton1</label>
+                    <label><input type="radio" id="RadioButton2" name="radioGroup" value="2"> RadioButton2</label>
+                </div>
+                <div class="col">
+                    <div>
+                        <div class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">
+                            <div class="progress-fill" id="ProgressBar" style="width: 50%;"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <input type="range" id="Slider" name="Slider" min="0" max="10" value="5" aria-label="Slider">
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <button id="button1" aria-haspopup="true">ContextMenu</button>
+                <div class="scroll-panel">
+                    <button id="button2" style="width: 200px; height: 200px;">BigButton</button>
+                </div>
+                <div>
+                    <label>Spinner</label>
+                    <input type="number" id="numericUpDown1" name="numericUpDown1" value="0" min="0" max="100" aria-label="Spinner">
+                </div>
+                <div>
+                    <input type="date" id="dateTimePicker1" name="dateTimePicker1" aria-label="Date Picker">
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 2: Complex Controls -->
+        <div id="tab-complex" class="tab-content" role="tabpanel">
+            <div class="groupbox">
+                <div class="groupbox-title">Tree</div>
+                <div class="treeview" id="treeView1" role="tree" aria-label="TreeView">
+                    <div class="tree-node" role="treeitem" aria-expanded="false">
+                        <div class="tree-label"><span class="tree-toggle">+</span> Lvl1 a</div>
+                        <div class="tree-children">
+                            <div class="tree-node" role="treeitem"><div class="tree-label"><span class="tree-toggle"></span> Lvl2 a</div></div>
+                            <div class="tree-node" role="treeitem" aria-expanded="false">
+                                <div class="tree-label"><span class="tree-toggle">+</span> Lvl2 b</div>
+                                <div class="tree-children">
+                                    <div class="tree-node" role="treeitem"><div class="tree-label"><span class="tree-toggle"></span> Lvl3 a</div></div>
+                                </div>
+                            </div>
+                            <div class="tree-node" role="treeitem"><div class="tree-label"><span class="tree-toggle"></span> Lvl2 c</div></div>
+                        </div>
+                    </div>
+                    <div class="tree-node" role="treeitem"><div class="tree-label"><span class="tree-toggle"></span> Lvl1 b</div></div>
+                </div>
+            </div>
+
+            <div class="groupbox">
+                <div class="groupbox-title">ListView</div>
+                <table id="listView1" role="grid" aria-label="ListView">
+                    <thead><tr><th>Key</th><th>Value</th></tr></thead>
+                    <tbody>
+                        <tr role="row"><td>1</td><td>10</td></tr>
+                        <tr role="row"><td>2</td><td>20</td></tr>
+                        <tr role="row"><td>3</td><td>30</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <div class="groupbox" style="width: 150px;">
+                    <div class="groupbox-title">Large List with Scroll</div>
+                    <div style="max-height: 100px; overflow-y: auto;">
+                        <table id="LargeListView" role="grid" aria-label="Large ListView">
+                            <thead><tr><th>Key</th><th>Value</th></tr></thead>
+                            <tbody>
+                                <tr role="row"><td>1</td><td>10</td></tr>
+                                <tr role="row"><td>2</td><td>20</td></tr>
+                                <tr role="row"><td>3</td><td>30</td></tr>
+                                <tr role="row"><td>4</td><td>40</td></tr>
+                                <tr role="row"><td>5</td><td>50</td></tr>
+                                <tr role="row"><td>6</td><td>60</td></tr>
+                                <tr role="row"><td>VeryLongKey</td><td>VeryLongValue</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="groupbox" style="flex: 1;">
+                    <div class="groupbox-title">DataGridView</div>
+                    <table id="dataGridView" role="grid" aria-label="DataGridView">
+                        <thead><tr><th>Column1</th><th>Column2</th><th>Column3</th></tr></thead>
+                        <tbody>
+                            <tr role="row"><td contenteditable="true">Cell 1-1</td><td contenteditable="true">Cell 1-2</td><td contenteditable="true">Cell 1-3</td></tr>
+                            <tr role="row"><td contenteditable="true">Cell 2-1</td><td contenteditable="true">Cell 2-2</td><td contenteditable="true">Cell 2-3</td></tr>
+                            <tr role="row"><td contenteditable="true">Cell 3-1</td><td contenteditable="true">Cell 3-2</td><td contenteditable="true">Cell 3-3</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Context Menu -->
+    <div class="context-menu" id="contextMenu">
+        <div class="context-menu-item" id="context1">Context 1</div>
+        <div class="context-menu-item" id="context2">
+            Context 2
+            <div class="submenu">
+                <div class="context-menu-item" id="innerContext">Inner Context</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Bar -->
+    <div class="status-bar" role="status">Ready</div>
+
+    <script>
+        // Tab switching
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); });
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                btn.classList.add('active');
+                btn.setAttribute('aria-selected', 'true');
+                document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+            });
+        });
+
+        // Tree expand/collapse
+        document.querySelectorAll('.tree-label').forEach(label => {
+            label.addEventListener('click', () => {
+                const node = label.parentElement;
+                const toggle = label.querySelector('.tree-toggle');
+                if (node.querySelector('.tree-children')) {
+                    node.classList.toggle('expanded');
+                    const expanded = node.classList.contains('expanded');
+                    node.setAttribute('aria-expanded', expanded);
+                    toggle.textContent = expanded ? '-' : '+';
+                }
+            });
+        });
+
+        // ListBox selection
+        document.querySelectorAll('.listbox-item').forEach(item => {
+            item.addEventListener('click', () => {
+                item.parentElement.querySelectorAll('.listbox-item').forEach(i => i.classList.remove('selected'));
+                item.classList.add('selected');
+            });
+        });
+
+        // Table row selection
+        document.querySelectorAll('table tbody tr').forEach(row => {
+            row.addEventListener('click', () => {
+                row.parentElement.querySelectorAll('tr').forEach(r => r.classList.remove('selected'));
+                row.classList.add('selected');
+            });
+        });
+
+        // Context menu
+        const contextBtn = document.getElementById('button1');
+        const contextMenu = document.getElementById('contextMenu');
+
+        contextBtn.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            contextMenu.style.left = e.pageX + 'px';
+            contextMenu.style.top = e.pageY + 'px';
+            contextMenu.classList.add('visible');
+        });
+
+        contextBtn.addEventListener('click', (e) => {
+            contextMenu.style.left = e.pageX + 'px';
+            contextMenu.style.top = e.pageY + 'px';
+            contextMenu.classList.add('visible');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!contextMenu.contains(e.target) && e.target !== contextBtn) {
+                contextMenu.classList.remove('visible');
+            }
+        });
+
+        // Three-state checkbox
+        const threeState = document.getElementById('ThreeStateCheckBox');
+        let state = 0;
+        threeState.addEventListener('click', (e) => {
+            e.preventDefault();
+            state = (state + 1) % 3;
+            threeState.checked = state === 1;
+            threeState.indeterminate = state === 2;
+        });
+
+        // Menu exit
+        document.getElementById('menu-exit').addEventListener('click', () => {
+            if (confirm('Exit application?')) window.close();
+        });
+    </script>
+</body>
+</html>

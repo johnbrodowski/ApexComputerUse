@@ -1,0 +1,124 @@
+{
+  "DefaultProvider": "OpenAI",
+  "TimeoutSeconds": 120,
+  "LoggingVerbosity": "Information",
+  "RetryPolicy": {
+    "MaxAttempts": 3,
+    "BaseDelayMilliseconds": 200,
+    "CircuitBreakerEnabled": false,
+    "CircuitBreakerFailureThreshold": 5,
+    "CircuitBreakerDurationSeconds": 30
+  },
+  "Providers": {
+    "OpenAI": {
+      "ProviderType": "OpenAI",
+      "ApiKey": "sk-YOUR_OPENAI_API_KEY",
+      "BaseUrl": "https://api.openai.com/v1",
+      "StreamingEnabled": true,
+      "Defaults": {
+        "Model": "gpt-4o",
+        "Temperature": 0.7,
+        "MaxTokens": 4096,
+        "TopP": 1.0,
+        "SystemPrompt": "You are a helpful assistant.",
+        "SampleQuery": "What can you help me with today?"
+      }
+    },
+    "Anthropic": {
+      "ProviderType": "Anthropic",
+      "ApiKey": "sk-ant-YOUR_ANTHROPIC_API_KEY",
+      "BaseUrl": "https://api.anthropic.com/v1",
+      "StreamingEnabled": true,
+      "Defaults": {
+        "Model": "claude-sonnet-4-5-20250929",
+        "Temperature": 0.7,
+        "MaxTokens": 4096,
+        "TopP": 1.0,
+        "SystemPrompt": "You are a helpful assistant.",
+        "SampleQuery": "What can you help me with today?"
+      }
+    },
+    "DeepSeek": {
+      "ProviderType": "DeepSeek",
+      "ApiKey": "YOUR_DEEPSEEK_API_KEY",
+      "BaseUrl": "https://api.deepseek.com",
+      "StreamingEnabled": true,
+      "Defaults": {
+        "Model": "deepseek-chat",
+        "Temperature": 0.7,
+        "MaxTokens": 4096,
+        "TopP": 1.0,
+        "SystemPrompt": "You are a helpful assistant.",
+        "SampleQuery": "What can you help me with today?"
+      }
+    },
+    "Grok": {
+      "ProviderType": "Grok",
+      "ApiKey": "YOUR_XAI_API_KEY",
+      "BaseUrl": "https://api.x.ai/v1",
+      "StreamingEnabled": true,
+      "Defaults": {
+        "Model": "grok-3-beta",
+        "Temperature": 0.7,
+        "MaxTokens": 4096,
+        "TopP": 1.0,
+        "SystemPrompt": "You are a helpful assistant.",
+        "SampleQuery": "What can you help me with today?"
+      }
+    },
+    "Groq": {
+      "ProviderType": "Groq",
+      "ApiKey": "gsk_YOUR_GROQ_API_KEY",
+      "BaseUrl": "https://api.groq.com/openai/v1",
+      "StreamingEnabled": true,
+      "Defaults": {
+        "Model": "llama-3.3-70b-versatile",
+        "Temperature": 0.7,
+        "MaxTokens": 4096,
+        "TopP": 1.0,
+        "SystemPrompt": "You are a helpful assistant.",
+        "SampleQuery": "What can you help me with today?"
+      }
+    },
+    "Duck": {
+      "ProviderType": "Duck",
+      "ApiKey": "",
+      "BaseUrl": "",
+      "StreamingEnabled": true,
+      "Defaults": {
+        "Model": "gpt-4o-mini",
+        "Temperature": 0.7,
+        "MaxTokens": 4096,
+        "TopP": 1.0,
+        "SystemPrompt": "You are a helpful assistant.",
+        "SampleQuery": "What can you help me with today?"
+      }
+    },
+    "LMStudio": {
+      "ProviderType": "LMStudio",
+      "BaseUrl": "http://localhost:1234/v1",
+      "StreamingEnabled": true,
+      "Defaults": {
+        "Model": "local-model",
+        "Temperature": 0.7,
+        "MaxTokens": 4096,
+        "TopP": 1.0,
+        "SystemPrompt": "You are a helpful assistant.",
+        "SampleQuery": "What can you help me with today?"
+      }
+    },
+    "LlamaSharp": {
+      "ProviderType": "LlamaSharp",
+      "LocalModelPath": "models",
+      "StreamingEnabled": true,
+      "Defaults": {
+        "Model": "model.gguf",
+        "Temperature": 0.1,
+        "MaxTokens": 4096,
+        "TopP": 1.0,
+        "SystemPrompt": "You are a helpful assistant.",
+        "SampleQuery": "What can you help me with today?"
+      }
+    }
+  }
+}
