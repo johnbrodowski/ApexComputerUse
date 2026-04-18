@@ -1,5 +1,6 @@
 namespace ApexUIBridge.TestRunner;
 
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 
 /// <summary>
@@ -9,12 +10,24 @@ using System.Text.RegularExpressions;
 public sealed class TestSuite
 {
     private readonly BridgeClient _client;
+    private readonly int _actionDelayMs;
+    private readonly int _uiSettleDelayMs;
     private readonly HashSet<string> _skipTests;
+    private readonly string _webBaseUrl;
+    private readonly string[] _webPagePaths;
 
-    public TestSuite(BridgeClient client, HashSet<string>? skipTests = null)
+    public TestSuite(
+        BridgeClient client,
+        HashSet<string>? skipTests = null,
+        string? webBaseUrl = null,
+        string[]? webPagePaths = null)
     {
         _client = client;
+        _actionDelayMs = actionDelayMs;
+        _uiSettleDelayMs = uiSettleDelayMs;
         _skipTests = skipTests ?? new HashSet<string>();
+        _webBaseUrl = webBaseUrl ?? "";
+        _webPagePaths = webPagePaths ?? Array.Empty<string>();
     }
 
     public async Task<CycleResult> RunAsync(CancellationToken ct)
@@ -32,9 +45,24 @@ public sealed class TestSuite
             r => r.Success && (r.Data?.Contains("ApexUIBridge Test Application - WPF") ?? false),
             ct);
 
+        if (!string.IsNullOrWhiteSpace(_webBaseUrl))
+        {
+            var webPages = _webPagePaths.Length > 0 ? _webPagePaths : ["/"];
+            foreach (var page in webPages)
+            {
+                var webTarget = BuildWebTarget(_webBaseUrl, page);
+                await Test(results, $"SCAN_WINDOW — web page visible ({webTarget})",
+                    $"SCAN_WINDOW {webTarget}",
+                    r => r.Success && !string.IsNullOrWhiteSpace(r.Data),
+                    ct);
+            }
+        }
+
         // ── WinForms window ────────────────────────────────────────────────────
+        var wfScanSw = Stopwatch.StartNew();
         var wfScan = await _client.SendAsync("SCAN_WINDOW ApexUIBridge Test Application - WinForms", ct);
-        results.Add(Result("SCAN_WINDOW WinForms", wfScan.Success, wfScan.Message));
+        wfScanSw.Stop();
+        results.Add(Result("SCAN_WINDOW WinForms", wfScan.Success, wfScan.Message, wfScanSw.ElapsedMilliseconds));
 
         if (wfScan.Success && wfScan.Data is { } wfData)
         {
@@ -113,8 +141,10 @@ public sealed class TestSuite
         }
 
         // ── WPF window ─────────────────────────────────────────────────────────
+        var wpfScanSw = Stopwatch.StartNew();
         var wpfScan = await _client.SendAsync("SCAN_WINDOW ApexUIBridge Test Application - WPF", ct);
-        results.Add(Result("SCAN_WINDOW WPF", wpfScan.Success, wpfScan.Message));
+        wpfScanSw.Stop();
+        results.Add(Result("SCAN_WINDOW WPF", wpfScan.Success, wpfScan.Message, wpfScanSw.ElapsedMilliseconds));
 
         if (wpfScan.Success && wpfScan.Data is { } wpfData)
         {
@@ -157,12 +187,15 @@ public sealed class TestSuite
                     r => r.Success,
                     ct);
                 // Give WPF time to process the ICommand and push the binding update through UIA
-                await Task.Delay(800, ct);
+                await Task.Delay(_uiSettleDelayMs, ct);
                 // Re-scan so the element registry reflects the new Content="Invoked!" Name value
+                var afterClickScanSw = Stopwatch.StartNew();
                 var afterClickScan = await _client.SendAsync("SCAN_WINDOW ApexUIBridge Test Application - WPF", ct);
+                afterClickScanSw.Stop();
                 results.Add(Result("WPF InvokableButton → 'Invoked!' (after re-scan)",
                     afterClickScan.Success && (afterClickScan.Data?.Contains("'Invoked!'") ?? false),
-                    afterClickScan.Success ? "Button name did not change to 'Invoked!'" : afterClickScan.Message));
+                    afterClickScan.Success ? "Button name did not change to 'Invoked!'" : afterClickScan.Message,
+                    afterClickScanSw.ElapsedMilliseconds));
             }
 
             // Non-editable ComboBox
@@ -212,10 +245,12 @@ public sealed class TestSuite
         const string p = "WF Torture";
 
         // Re-scan the main WinForms window to get the Tools menu element
+        var mainScanSw = Stopwatch.StartNew();
         var mainScan = await _client.SendAsync("SCAN_WINDOW ApexUIBridge Test Application - WinForms", ct);
+        mainScanSw.Stop();
         if (!mainScan.Success || mainScan.Data == null)
         {
-            results.Add(Result($"{p}: re-scan main window", false, mainScan.Message)); return;
+            results.Add(Result($"{p}: re-scan main window", false, mainScan.Message, mainScanSw.ElapsedMilliseconds)); return;
         }
 
         // WinForms ToolStripDropDown opens as a SEPARATE floating HWND —
@@ -231,11 +266,13 @@ public sealed class TestSuite
 
         await Test(results, $"{p}: keyboard open TortureTestForm via Alt+T,T",
             $"SEND_KEYS {toolsId} {{ALT}}tt", r => r.Success, ct);
-        await Task.Delay(1400, ct);
+        await Task.Delay(_uiSettleDelayMs, ct);
 
         // Scan the torture test window (title contains "UI Torture Test")
+        var scanSw = Stopwatch.StartNew();
         var scan = await _client.SendAsync("SCAN_WINDOW UI Torture Test", ct);
-        results.Add(Result($"{p}: SCAN_WINDOW", scan.Success, scan.Message));
+        scanSw.Stop();
+        results.Add(Result($"{p}: SCAN_WINDOW", scan.Success, scan.Message, scanSw.ElapsedMilliseconds));
         if (!scan.Success || scan.Data == null) return;
         var td = scan.Data;
         // WinForms creates ALL tab-page controls at startup — no rescan needed per tab.
@@ -246,7 +283,7 @@ public sealed class TestSuite
 
         // ── Switch to Network tab ──────────────────────────────────────────────
         await Torture_ClickTab(results, $"{p}: switch → Network", td, "'Network'", ct);
-        await Task.Delay(250, ct);
+        await Task.Delay(_actionDelayMs, ct);
 
         // Network tab — TLS CheckBoxes
         foreach (var name in new[] { "Verify Server Certificate", "Certificate Pinning" })
@@ -258,13 +295,13 @@ public sealed class TestSuite
 
         // ── Switch to Scheduler tab ────────────────────────────────────────────
         await Torture_ClickTab(results, $"{p}: switch → Scheduler", td, "'Scheduler'", ct);
-        await Task.Delay(250, ct);
+        await Task.Delay(_actionDelayMs, ct);
 
         await Torture_Toggle(results, $"{p}: toggle 'Retry on Failure'", td, "'Retry on Failure'", ct);
 
         // ── Switch to Logs tab ─────────────────────────────────────────────────
         await Torture_ClickTab(results, $"{p}: switch → Logs", td, "'Logs'", ct);
-        await Task.Delay(250, ct);
+        await Task.Delay(_actionDelayMs, ct);
 
         await Torture_Toggle(results, $"{p}: toggle 'Auto-scroll'", td, "'Auto-scroll'", ct);
 
@@ -279,18 +316,22 @@ public sealed class TestSuite
         const string p = "WPF Torture";
 
         // Open via Tools › Open Torture Test Window...
+        var mainScanSw = Stopwatch.StartNew();
         var mainScan = await _client.SendAsync("SCAN_WINDOW ApexUIBridge Test Application - WPF", ct);
+        mainScanSw.Stop();
         if (!mainScan.Success || mainScan.Data == null)
         {
-            results.Add(Result($"{p}: re-scan main window", false, mainScan.Message)); return;
+            results.Add(Result($"{p}: re-scan main window", false, mainScan.Message, mainScanSw.ElapsedMilliseconds)); return;
         }
 
         // Click the Tools menu to expand it (no AutomationId — find by name "'Tools'")
         var toolsId = FindId(mainScan.Data, "'Tools'");
         if (toolsId.HasValue)
         {
+            var clickToolsSw = Stopwatch.StartNew();
             await _client.SendAsync($"CLICK {toolsId}", ct);
-            await Task.Delay(350, ct);
+            clickToolsSw.Stop();
+            await Task.Delay(_actionDelayMs, ct);
         }
 
         var expandedScan = await _client.SendAsync("SCAN_WINDOW ApexUIBridge Test Application - WPF", ct);
@@ -305,11 +346,13 @@ public sealed class TestSuite
 
         await Test(results, $"{p}: click 'Open Torture Test Window...'",
             $"CLICK {menuItemId}", r => r.Success, ct);
-        await Task.Delay(1400, ct);
+        await Task.Delay(_uiSettleDelayMs, ct);
 
         // Initial scan — Identity tab is selected by default
+        var scanSw = Stopwatch.StartNew();
         var scan = await _client.SendAsync("SCAN_WINDOW WPF Torture Test", ct);
-        results.Add(Result($"{p}: SCAN_WINDOW", scan.Success, scan.Message));
+        scanSw.Stop();
+        results.Add(Result($"{p}: SCAN_WINDOW", scan.Success, scan.Message, scanSw.ElapsedMilliseconds));
         if (!scan.Success || scan.Data == null) return;
         var td = scan.Data;
         // `td` contains Identity tab content + all tab headers (stable IDs across rescans)
@@ -333,21 +376,25 @@ public sealed class TestSuite
         // WPF TabControl only loads the SELECTED tab's content into the UIA tree;
         // a fresh SCAN_WINDOW is required after every tab switch to see new controls.
         await Torture_ClickTab(results, $"{p}: switch → [TabNetwork]", td, "[TabNetwork]", ct);
-        await Task.Delay(300, ct);
+        await Task.Delay(_actionDelayMs, ct);
+        var networkScanSw = Stopwatch.StartNew();
         var networkScan = await _client.SendAsync("SCAN_WINDOW WPF Torture Test", ct);
+        networkScanSw.Stop();
         if (networkScan.Success && networkScan.Data is { } networkData)
         {
             await Torture_Type(results, $"{p}: TYPE [Port]", networkData, "[Port]", "9443", ct);
         }
         else
         {
-            results.Add(Result($"{p}: SCAN_WINDOW after [TabNetwork]", false, networkScan.Message));
+            results.Add(Result($"{p}: SCAN_WINDOW after [TabNetwork]", false, networkScan.Message, networkScanSw.ElapsedMilliseconds));
         }
 
         // ── Scheduler tab ─────────────────────────────────────────────────────
         await Torture_ClickTab(results, $"{p}: switch → [TabScheduler]", td, "[TabScheduler]", ct);
-        await Task.Delay(300, ct);
+        await Task.Delay(_actionDelayMs, ct);
+        var schedulerScanSw = Stopwatch.StartNew();
         var schedulerScan = await _client.SendAsync("SCAN_WINDOW WPF Torture Test", ct);
+        schedulerScanSw.Stop();
         if (schedulerScan.Success && schedulerScan.Data is { } schedulerData)
         {
             await Torture_Toggle(results, $"{p}: toggle [RetryOnFail]", schedulerData, "[RetryOnFail]", ct);
@@ -355,13 +402,15 @@ public sealed class TestSuite
         }
         else
         {
-            results.Add(Result($"{p}: SCAN_WINDOW after [TabScheduler]", false, schedulerScan.Message));
+            results.Add(Result($"{p}: SCAN_WINDOW after [TabScheduler]", false, schedulerScan.Message, schedulerScanSw.ElapsedMilliseconds));
         }
 
         // ── Layout tab — WrapPanel action buttons ─────────────────────────────
         await Torture_ClickTab(results, $"{p}: switch → [TabLayout]", td, "[TabLayout]", ct);
-        await Task.Delay(300, ct);
+        await Task.Delay(_actionDelayMs, ct);
+        var layoutScanSw = Stopwatch.StartNew();
         var layoutScan = await _client.SendAsync("SCAN_WINDOW WPF Torture Test", ct);
+        layoutScanSw.Stop();
         if (layoutScan.Success && layoutScan.Data is { } layoutData)
         {
             foreach (var btn in new[] { "[BtnApply]", "[BtnValidate]", "[BtnReset]", "[BtnRefresh]", "[BtnExport]", "[BtnDeploy]" })
@@ -375,13 +424,15 @@ public sealed class TestSuite
         }
         else
         {
-            results.Add(Result($"{p}: SCAN_WINDOW after [TabLayout]", false, layoutScan.Message));
+            results.Add(Result($"{p}: SCAN_WINDOW after [TabLayout]", false, layoutScan.Message, layoutScanSw.ElapsedMilliseconds));
         }
 
         // ── WPF tab — Expanders, ToggleButtons, CheckBox, nested sub-tabs ─────
         await Torture_ClickTab(results, $"{p}: switch → [TabWpf]", td, "[TabWpf]", ct);
-        await Task.Delay(300, ct);
+        await Task.Delay(_actionDelayMs, ct);
+        var wpfTabScanSw = Stopwatch.StartNew();
         var wpfTabScan = await _client.SendAsync("SCAN_WINDOW WPF Torture Test", ct);
+        wpfTabScanSw.Stop();
         if (wpfTabScan.Success && wpfTabScan.Data is { } wpfTabData)
         {
             // Expanders (support ExpandCollapsePattern)
@@ -409,7 +460,7 @@ public sealed class TestSuite
         }
         else
         {
-            results.Add(Result($"{p}: SCAN_WINDOW after [TabWpf]", false, wpfTabScan.Message));
+            results.Add(Result($"{p}: SCAN_WINDOW after [TabWpf]", false, wpfTabScan.Message, wpfTabScanSw.ElapsedMilliseconds));
         }
 
         // ── Return to Identity ─────────────────────────────────────────────────
@@ -459,12 +510,14 @@ public sealed class TestSuite
             results.Add(new TestResult(name, true, "Skipped — previously passed", Skipped: true));
             return;
         }
+        var sw = Stopwatch.StartNew();
         var r = await _client.SendAsync(command, ct);
-        results.Add(Result(name, assert(r), r.Message));
+        sw.Stop();
+        results.Add(Result(name, assert(r), r.Message, sw.ElapsedMilliseconds));
     }
 
-    private static TestResult Result(string name, bool passed, string detail) =>
-        new(name, passed, detail);
+    private static TestResult Result(string name, bool passed, string detail, long? elapsedMs = null) =>
+        new(name, passed, detail, ElapsedMs: elapsedMs);
 
     /// <summary>Find the first element ID whose line contains <paramref name="text"/>.</summary>
     private static long? FindId(string scanData, string text)
@@ -489,10 +542,22 @@ public sealed class TestSuite
         }
         return null;
     }
+
+    private static string BuildWebTarget(string webBaseUrl, string pagePath)
+    {
+        if (Uri.TryCreate(pagePath, UriKind.Absolute, out var absolute))
+            return absolute.ToString();
+
+        var baseUrl = webBaseUrl.TrimEnd('/');
+        if (string.IsNullOrWhiteSpace(pagePath) || pagePath == "/")
+            return baseUrl;
+
+        return $"{baseUrl}/{pagePath.TrimStart('/')}";
+    }
 }
 
 // ── Result types ───────────────────────────────────────────────────────────────
-public sealed record TestResult(string Name, bool Passed, string Detail, bool Skipped = false);
+public sealed record TestResult(string Name, bool Passed, string Detail, bool Skipped = false, long? ElapsedMs = null);
 
 public sealed class CycleResult
 {
@@ -508,8 +573,15 @@ public sealed class CycleResult
 
     public string Summary()
     {
+        var latencies = Results.Where(r => r.ElapsedMs.HasValue).Select(r => r.ElapsedMs!.Value).ToList();
+        var totalMs = latencies.Sum();
+        var averageMs = latencies.Count > 0 ? latencies.Average() : 0;
+        var maxMs = latencies.Count > 0 ? latencies.Max() : 0;
         var skippedLine = Skipped > 0 ? $"   ⏭️ {Skipped} skipped" : "";
-        return $"✅ {Passed} passed   ❌ {Failed} failed{skippedLine}\n" +
+        var timingLine = latencies.Count > 0
+            ? $"\n⏱️ total {totalMs}ms   avg {averageMs:F1}ms   max {maxMs}ms"
+            : "";
+        return $"✅ {Passed} passed   ❌ {Failed} failed{skippedLine}{timingLine}\n" +
             string.Join("\n", Results.Where(r => !r.Skipped).Select(r =>
                 $"  {(r.Passed ? "✅" : "❌")} {r.Name}" +
                 (r.Passed ? "" : $"\n       ↳ {r.Detail}")));
