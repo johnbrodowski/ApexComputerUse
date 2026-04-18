@@ -22,6 +22,12 @@ public sealed class RunnerConfig
     /// <summary>Path to the WPF test app exe. Launched once, left running.</summary>
     public string WpfExePath { get; init; } = "";
 
+    /// <summary>Base URL for the web test target (optional).</summary>
+    public string WebBaseUrl { get; init; } = "";
+
+    /// <summary>Optional web test page paths (for example: "/form", "/table").</summary>
+    public string[] WebPagePaths { get; init; } = Array.Empty<string>();
+
     // ── Bridge API ────────────────────────────────────────────────────────────
     public string BridgeBaseUrl      { get; init; } = "http://localhost:8765";
     public int    ApiReadyTimeoutSec { get; init; } = 30;
