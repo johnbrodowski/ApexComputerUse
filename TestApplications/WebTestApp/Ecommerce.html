@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AGPA E-Commerce Test App</title>
+  <style>
+    :root { --brand:#2d6cdf; --bg:#f5f7fb; --card:#fff; --text:#1f2937; --muted:#6b7280; --ok:#0f9d58; }
+    body { margin:0; font-family:Segoe UI,Arial,sans-serif; background:var(--bg); color:var(--text); }
+    header { background:#111827; color:white; padding:16px 24px; display:flex; align-items:center; gap:16px; }
+    .logo { font-weight:700; font-size:20px; }
+    .search { flex:1; display:flex; gap:8px; }
+    input, select, button { border:1px solid #cbd5e1; border-radius:8px; padding:10px 12px; font-size:14px; }
+    input, select { background:white; }
+    button { background:var(--brand); color:white; border:none; cursor:pointer; }
+    main { display:grid; grid-template-columns:280px 1fr 340px; gap:18px; padding:20px; }
+    .panel { background:var(--card); border-radius:12px; padding:16px; box-shadow:0 1px 4px rgba(0,0,0,.08); }
+    .products { display:grid; grid-template-columns:repeat(2, minmax(240px, 1fr)); gap:14px; }
+    .product { border:1px solid #e5e7eb; border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:8px; }
+    .price { color:var(--ok); font-weight:600; }
+    .small { color:var(--muted); font-size:12px; }
+    .row { display:flex; gap:10px; align-items:center; }
+    .spaced { display:flex; justify-content:space-between; margin:10px 0; }
+    .totals { border-top:1px solid #e5e7eb; margin-top:12px; padding-top:10px; }
+    .muted { color:var(--muted); }
+    .checkout { width:100%; margin-top:8px; font-weight:600; }
+    footer { margin-top:14px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">ApexShop</div>
+    <div class="search">
+      <input id="searchProducts" aria-label="Search products" placeholder="Search products" />
+      <select id="categoryFilter" aria-label="Category filter">
+        <option>All Categories</option>
+        <option>Shoes</option>
+        <option>Apparel</option>
+        <option>Accessories</option>
+      </select>
+      <button id="searchButton">Search</button>
+    </div>
+    <button id="headerCartButton" aria-label="Open cart">Cart ( <span id="cartCount">0</span> )</button>
+  </header>
+
+  <main>
+    <section class="panel" aria-label="Filters">
+      <h2>Filters</h2>
+      <label for="priceRange">Price range</label>
+      <input id="priceRange" aria-label="Price range" type="range" min="20" max="250" value="140" />
+      <div class="small">Current max price: <strong id="priceText">140</strong></div>
+
+      <h3>Shipping</h3>
+      <div><input id="shipFree" type="checkbox" /> <label for="shipFree">Free shipping</label></div>
+      <div><input id="shipExpress" type="checkbox" /> <label for="shipExpress">Express eligible</label></div>
+
+      <h3>Brand</h3>
+      <select id="brandFilter" aria-label="Brand filter">
+        <option>Any Brand</option>
+        <option>AGPA Athletics</option>
+        <option>North Trail</option>
+        <option>Orbit Labs</option>
+      </select>
+    </section>
+
+    <section class="panel" aria-label="Product results">
+      <h2>Featured products</h2>
+      <div class="products">
+        <article class="product">
+          <h3>Velocity Runner 4</h3>
+          <div class="small">Men's Running Shoes</div>
+          <div class="price">$119.99</div>
+          <button class="addToCart">Add to Cart</button>
+          <button>Save for Later</button>
+        </article>
+        <article class="product">
+          <h3>Summit Trail GTX</h3>
+          <div class="small">Waterproof Hiking Shoes</div>
+          <div class="price">$159.00</div>
+          <button class="addToCart">Add to Cart</button>
+          <button>View Details</button>
+        </article>
+        <article class="product">
+          <h3>CoreFit Tee</h3>
+          <div class="small">Breathable training shirt</div>
+          <div class="price">$34.50</div>
+          <button class="addToCart">Add to Cart</button>
+          <button>View Details</button>
+        </article>
+        <article class="product">
+          <h3>Urban Commuter Pack</h3>
+          <div class="small">18L Laptop backpack</div>
+          <div class="price">$79.95</div>
+          <button class="addToCart">Add to Cart</button>
+          <button>Compare</button>
+        </article>
+      </div>
+    </section>
+
+    <aside class="panel" aria-label="Cart summary">
+      <h2>Cart summary</h2>
+      <div class="spaced"><span>Velocity Runner 4</span><span>$119.99</span></div>
+      <label for="cartQuantity">Quantity</label>
+      <input id="cartQuantity" aria-label="Quantity" type="number" min="1" max="5" value="1" />
+
+      <div class="row" style="margin-top:10px;">
+        <input id="couponCode" aria-label="Coupon code" placeholder="Coupon code" />
+        <button id="applyCoupon">Apply Coupon</button>
+      </div>
+
+      <div class="totals">
+        <div class="spaced"><span class="muted">Subtotal</span><span id="subtotal">$119.99</span></div>
+        <div class="spaced"><span class="muted">Shipping</span><span>$0.00</span></div>
+        <div class="spaced"><strong>Total</strong><strong id="total">$119.99</strong></div>
+      </div>
+
+      <button id="checkoutButton" class="checkout">Checkout</button>
+
+      <footer>
+        <label for="newsletterEmail">Email address</label>
+        <input id="newsletterEmail" aria-label="Email address" placeholder="Email address" />
+        <button id="subscribeButton" style="margin-top:8px;">Subscribe</button>
+      </footer>
+    </aside>
+  </main>
+
+  <script>
+    const cartCount = document.getElementById('cartCount');
+    const priceRange = document.getElementById('priceRange');
+    const priceText = document.getElementById('priceText');
+    const qty = document.getElementById('cartQuantity');
+    const total = document.getElementById('total');
+    const subtotal = document.getElementById('subtotal');
+
+    function recalc() {
+      const unit = 119.99;
+      const q = Math.max(1, parseInt(qty.value || '1', 10));
+      const sum = (unit * q).toFixed(2);
+      subtotal.textContent = `$${sum}`;
+      total.textContent = `$${sum}`;
+    }
+
+    document.querySelectorAll('.addToCart').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const count = parseInt(cartCount.textContent || '0', 10) + 1;
+        cartCount.textContent = count.toString();
+      });
+    });
+
+    priceRange.addEventListener('input', () => priceText.textContent = priceRange.value);
+    qty.addEventListener('input', recalc);
+    recalc();
+  </script>
+</body>
+</html>

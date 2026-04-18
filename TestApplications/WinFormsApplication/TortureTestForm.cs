@@ -891,6 +891,11 @@ namespace WinFormsApplication
         private static Label BoldLabel(string text) =>
             new Label { Text = text, Font = new Font("Segoe UI", 9, FontStyle.Bold), Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleCenter, BackColor = SystemColors.ControlLight };
 
+        private void InitializeComponent()
+        {
+
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing) { _toolTip?.Dispose(); }
