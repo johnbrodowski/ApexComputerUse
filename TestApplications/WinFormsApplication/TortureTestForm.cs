@@ -21,34 +21,64 @@ namespace WinFormsApplication
         private void BuildUI()
         {
             SuspendLayout();
-            var menu = BuildMenuStrip();
-            var toolbar = BuildToolStrip();
-            var status = BuildStatusStrip();
-            var tabs = new TabControl { Dock = DockStyle.Fill, Font = new Font("Segoe UI", 9f) };
-            tabs.TabPages.Add(BuildIdentityTab());
-            tabs.TabPages.Add(BuildNetworkTab());
-            tabs.TabPages.Add(BuildSchedulerTab());
-            tabs.TabPages.Add(BuildLayoutTab());
-            tabs.TabPages.Add(BuildDataTab());
-            tabs.TabPages.Add(BuildLogsTab());
-            tabs.TabPages.Add(BuildDisplayTab());
-            tabs.TabPages.Add(BuildDatesTab());
-            tabs.TabPages.Add(BuildDialogsTab());
-            Controls.Add(tabs);
-            Controls.Add(status);
-            Controls.Add(toolbar);
-            Controls.Add(menu);
-            MainMenuStrip = menu;
-            EnsureControlsVisible(this);
+            ApplyMenu(menuStripMain, BuildMenuStrip());
+            ApplyToolStrip(toolStripMain, BuildToolStrip());
+            ApplyStatusStrip(statusStripMain, BuildStatusStrip());
+            ApplyTabPage(tabIdentity, BuildIdentityTab());
+            ApplyTabPage(tabNetwork, BuildNetworkTab());
+            ApplyTabPage(tabScheduler, BuildSchedulerTab());
+            ApplyTabPage(tabLayout, BuildLayoutTab());
+            ApplyTabPage(tabData, BuildDataTab());
+            ApplyTabPage(tabLogs, BuildLogsTab());
+            ApplyTabPage(tabDisplay, BuildDisplayTab());
+            ApplyTabPage(tabDates, BuildDatesTab());
+            ApplyTabPage(tabDialogs, BuildDialogsTab());
             ResumeLayout();
         }
 
-        private static void EnsureControlsVisible(Control control)
+        private static void ApplyMenu(MenuStrip target, MenuStrip source)
         {
-            control.Visible = true;
-            foreach (Control child in control.Controls)
+            target.Items.Clear();
+            while (source.Items.Count > 0)
             {
-                EnsureControlsVisible(child);
+                var item = source.Items[0];
+                source.Items.RemoveAt(0);
+                target.Items.Add(item);
+            }
+        }
+
+        private static void ApplyToolStrip(ToolStrip target, ToolStrip source)
+        {
+            target.Items.Clear();
+            while (source.Items.Count > 0)
+            {
+                var item = source.Items[0];
+                source.Items.RemoveAt(0);
+                target.Items.Add(item);
+            }
+        }
+
+        private static void ApplyStatusStrip(StatusStrip target, StatusStrip source)
+        {
+            target.Items.Clear();
+            while (source.Items.Count > 0)
+            {
+                var item = source.Items[0];
+                source.Items.RemoveAt(0);
+                target.Items.Add(item);
+            }
+        }
+
+        private static void ApplyTabPage(TabPage target, TabPage source)
+        {
+            target.Padding = source.Padding;
+            target.AutoScroll = source.AutoScroll;
+            target.Controls.Clear();
+            while (source.Controls.Count > 0)
+            {
+                var child = source.Controls[0];
+                source.Controls.RemoveAt(0);
+                target.Controls.Add(child);
             }
         }
 
