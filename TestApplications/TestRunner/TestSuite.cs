@@ -10,11 +10,19 @@ public sealed class TestSuite
 {
     private readonly BridgeClient _client;
     private readonly HashSet<string> _skipTests;
+    private readonly string _webBaseUrl;
+    private readonly string[] _webPagePaths;
 
-    public TestSuite(BridgeClient client, HashSet<string>? skipTests = null)
+    public TestSuite(
+        BridgeClient client,
+        HashSet<string>? skipTests = null,
+        string? webBaseUrl = null,
+        string[]? webPagePaths = null)
     {
         _client = client;
         _skipTests = skipTests ?? new HashSet<string>();
+        _webBaseUrl = webBaseUrl ?? "";
+        _webPagePaths = webPagePaths ?? Array.Empty<string>();
     }
 
     public async Task<CycleResult> RunAsync(CancellationToken ct)
@@ -31,6 +39,19 @@ public sealed class TestSuite
             "LIST_WINDOWS",
             r => r.Success && (r.Data?.Contains("ApexUIBridge Test Application - WPF") ?? false),
             ct);
+
+        if (!string.IsNullOrWhiteSpace(_webBaseUrl))
+        {
+            var webPages = _webPagePaths.Length > 0 ? _webPagePaths : ["/"];
+            foreach (var page in webPages)
+            {
+                var webTarget = BuildWebTarget(_webBaseUrl, page);
+                await Test(results, $"SCAN_WINDOW — web page visible ({webTarget})",
+                    $"SCAN_WINDOW {webTarget}",
+                    r => r.Success && !string.IsNullOrWhiteSpace(r.Data),
+                    ct);
+            }
+        }
 
         // ── WinForms window ────────────────────────────────────────────────────
         var wfScan = await _client.SendAsync("SCAN_WINDOW ApexUIBridge Test Application - WinForms", ct);
@@ -488,6 +509,18 @@ public sealed class TestSuite
             if (m.Success && long.TryParse(m.Groups[1].Value, out var id)) return id;
         }
         return null;
+    }
+
+    private static string BuildWebTarget(string webBaseUrl, string pagePath)
+    {
+        if (Uri.TryCreate(pagePath, UriKind.Absolute, out var absolute))
+            return absolute.ToString();
+
+        var baseUrl = webBaseUrl.TrimEnd('/');
+        if (string.IsNullOrWhiteSpace(pagePath) || pagePath == "/")
+            return baseUrl;
+
+        return $"{baseUrl}/{pagePath.TrimStart('/')}";
     }
 }
 
