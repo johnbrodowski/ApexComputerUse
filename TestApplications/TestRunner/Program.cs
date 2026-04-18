@@ -50,6 +50,17 @@ var ct       = cts.Token;
 var telegram = new TelegramNotifier(config.TelegramBotToken, config.TelegramChatId);
 var builder  = new BuildRunner(config.SolutionPath, config.BuildConfiguration);
 
+var normalizedSpeedProfile = (config.SpeedProfile ?? "Normal").Trim();
+var (defaultActionDelayMs, defaultUiSettleDelayMs) = normalizedSpeedProfile.ToLowerInvariant() switch
+{
+    "fast" => (50, 120),
+    "human" => (350, 900),
+    _ => (120, 300)
+};
+var actionDelayMs = config.ActionDelayMs > 0 ? config.ActionDelayMs : defaultActionDelayMs;
+var uiSettleDelayMs = config.UiSettleDelayMs > 0 ? config.UiSettleDelayMs : defaultUiSettleDelayMs;
+Console.WriteLine($"[Runner] Speed profile: {normalizedSpeedProfile} (ActionDelayMs={actionDelayMs}, UiSettleDelayMs={uiSettleDelayMs})");
+
 // ── Load previous test results for skip-passed logic ────────────────────────
 var previouslyPassed = new HashSet<string>();
 if (config.RunOnlyFailed && File.Exists(config.TestResultsPath))
