@@ -149,6 +149,35 @@ await using var wpfApp = new ProcessManager("WPF Test App", config.WpfExePath, i
 if (richConsole) Console.WriteLine("[Runner] Starting test-target applications...");
 await winFormsApp.StartAsync(ct);
 await wpfApp.StartAsync(ct);
+
+// Optional: start built-in static file server and open each configured page in a browser
+WebServer? webServer = null;
+if (!string.IsNullOrWhiteSpace(config.WebBaseUrl) && !string.IsNullOrWhiteSpace(config.WebRootPath))
+{
+    webServer = new WebServer(config.WebBaseUrl, config.WebRootPath);
+    webServer.Start();
+}
+if (!string.IsNullOrWhiteSpace(config.WebBaseUrl))
+{
+    var pages = config.WebPagePaths.Length > 0 ? config.WebPagePaths : new[] { "/" };
+    foreach (var page in pages)
+    {
+        var url = BuildWebUrl(config.WebBaseUrl, page);
+        try
+        {
+            var psi = string.IsNullOrWhiteSpace(config.WebBrowserExe)
+                ? new ProcessStartInfo { FileName = url, UseShellExecute = true }
+                : new ProcessStartInfo { FileName = config.WebBrowserExe, Arguments = url, UseShellExecute = false };
+            Process.Start(psi);
+            if (richConsole) Console.WriteLine($"[Runner] Opened browser → {url}");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"[Runner] Failed to open browser for {url}: {ex.Message}");
+        }
+    }
+}
+
 await Task.Delay(3000, ct);  // give GUIs time to render before scanning
 
 await telegram.SendAsync(
@@ -535,6 +564,8 @@ if (ct.IsCancellationRequested && history.Count < maxCycles)
         $"🛑 <b>TestRunner cancelled</b> after {history.Count}/{maxCycles} cycles.",
         CancellationToken.None);
 }
+
+if (webServer is not null) await webServer.DisposeAsync();
 
 if (richConsole) Console.WriteLine("[Runner] Done. Test-target apps will be closed.");
 return 0;

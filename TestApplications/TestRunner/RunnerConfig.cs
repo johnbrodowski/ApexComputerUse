@@ -36,6 +36,18 @@ public sealed class RunnerConfig
     /// <summary>Optional web test page paths (for example: "/form", "/table").</summary>
     public string[] WebPagePaths { get; init; } = Array.Empty<string>();
 
+    /// <summary>
+    /// Folder to serve statically via a built-in HttpListener at WebBaseUrl.
+    /// Leave empty to point WebBaseUrl at an already-running external server.
+    /// </summary>
+    public string WebRootPath { get; init; } = "";
+
+    /// <summary>
+    /// Optional path to the browser executable used to open web pages.
+    /// Leave empty to open with the OS default browser (shell-associated handler).
+    /// </summary>
+    public string WebBrowserExe { get; init; } = "";
+
     // ── Bridge API ────────────────────────────────────────────────────────────
     public string BridgeBaseUrl      { get; init; } = "http://localhost:8765";
     public int    ApiReadyTimeoutSec { get; init; } = 30;
