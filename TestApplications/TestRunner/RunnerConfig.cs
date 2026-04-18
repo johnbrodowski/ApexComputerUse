@@ -41,6 +41,17 @@ public sealed class RunnerConfig
     public string TestResultsPath { get; init; } =
         Path.Combine(Path.GetTempPath(), "ApexUIBridge_test_results.json");
 
+    /// <summary>
+    /// Path to append-friendly benchmark output (JSON Lines: one compact JSON record per cycle).
+    /// </summary>
+    public string BenchmarkResultsPath { get; init; } =
+        Path.Combine(Path.GetTempPath(), "ApexUIBridge_benchmark_results.jsonl");
+
+    /// <summary>
+    /// Human-readable speed mode label (for example: "human" or "fast").
+    /// </summary>
+    public string SpeedProfile { get; init; } = "human";
+
     // ── Stop coordination ─────────────────────────────────────────────────────
     /// <summary>
     /// If this file exists the runner cancels immediately.
