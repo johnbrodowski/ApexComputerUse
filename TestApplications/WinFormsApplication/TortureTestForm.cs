@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -8,6 +9,7 @@ namespace WinFormsApplication
     {
         private readonly ToolTip _toolTip = new ToolTip();
         private ProgressBar _marqueeBar = null!;
+        private bool _uiBuilt;
 
         public TortureTestForm()
         {
@@ -16,10 +18,21 @@ namespace WinFormsApplication
             MinimumSize = new Size(900, 700);
             StartPosition = FormStartPosition.CenterScreen;
             InitializeComponent();
+
+            if (LicenseManager.UsageMode == LicenseUsageMode.Designtime)
+            {
+                BuildUI();
+            }
         }
 
         private void BuildUI()
         {
+            if (_uiBuilt)
+            {
+                return;
+            }
+
+            _uiBuilt = true;
             SuspendLayout();
             var menu = BuildMenuStrip();
             var toolbar = BuildToolStrip();
