@@ -4,7 +4,7 @@ using System.Windows.Forms;
 
 namespace WinFormsApplication
 {
-    public class TortureTestForm : Form
+    public partial class TortureTestForm : Form
     {
         private readonly ToolTip _toolTip = new ToolTip();
         private ProgressBar _marqueeBar = null!;
@@ -15,7 +15,7 @@ namespace WinFormsApplication
             Size = new Size(1150, 850);
             MinimumSize = new Size(900, 700);
             StartPosition = FormStartPosition.CenterScreen;
-            BuildUI();
+            InitializeComponent();
         }
 
         private void BuildUI()
