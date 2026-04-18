@@ -319,7 +319,12 @@ while (cycle < config.MaxCycles && !ct.IsCancellationRequested)
 
     // 3. Run test suite ────────────────────────────────────────────────────────
     var suiteTimer = Stopwatch.StartNew();
-    var result = await new TestSuite(client, config.RunOnlyFailed ? previouslyPassed : null).RunAsync(ct);
+    var result = await new TestSuite(
+        client,
+        config.ActionDelayMs,
+        config.UiSettleDelayMs,
+        config.RunOnlyFailed ? previouslyPassed : null
+    ).RunAsync(ct);
     suiteTimer.Stop();
     suiteMs = suiteTimer.ElapsedMilliseconds;
     history.Add((cycle, result));

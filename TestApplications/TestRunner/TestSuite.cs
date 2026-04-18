@@ -18,6 +18,8 @@ public sealed class TestSuite
 
     public TestSuite(
         BridgeClient client,
+        int actionDelayMs = 100,
+        int uiSettleDelayMs = 250,
         HashSet<string>? skipTests = null,
         string? webBaseUrl = null,
         string[]? webPagePaths = null)
