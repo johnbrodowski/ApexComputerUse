@@ -50,6 +50,17 @@ var ct       = cts.Token;
 var telegram = new TelegramNotifier(config.TelegramBotToken, config.TelegramChatId);
 var builder  = new BuildRunner(config.SolutionPath, config.BuildConfiguration);
 
+var normalizedSpeedProfile = (config.SpeedProfile ?? "Normal").Trim();
+var (defaultActionDelayMs, defaultUiSettleDelayMs) = normalizedSpeedProfile.ToLowerInvariant() switch
+{
+    "fast" => (50, 120),
+    "human" => (350, 900),
+    _ => (120, 300)
+};
+var actionDelayMs = config.ActionDelayMs > 0 ? config.ActionDelayMs : defaultActionDelayMs;
+var uiSettleDelayMs = config.UiSettleDelayMs > 0 ? config.UiSettleDelayMs : defaultUiSettleDelayMs;
+Console.WriteLine($"[Runner] Speed profile: {normalizedSpeedProfile} (ActionDelayMs={actionDelayMs}, UiSettleDelayMs={uiSettleDelayMs})");
+
 // ── Load previous test results for skip-passed logic ────────────────────────
 var previouslyPassed = new HashSet<string>();
 if (config.RunOnlyFailed && File.Exists(config.TestResultsPath))
@@ -134,7 +145,11 @@ while (cycle < config.MaxCycles && !ct.IsCancellationRequested)
     Console.WriteLine("[Runner] Bridge API ready.");
 
     // 3. Run test suite ────────────────────────────────────────────────────────
-    var result = await new TestSuite(client, config.RunOnlyFailed ? previouslyPassed : null).RunAsync(ct);
+    var result = await new TestSuite(
+        client,
+        actionDelayMs,
+        uiSettleDelayMs,
+        config.RunOnlyFailed ? previouslyPassed : null).RunAsync(ct);
     history.Add((cycle, result));
 
     // Print to console

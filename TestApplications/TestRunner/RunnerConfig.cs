@@ -48,4 +48,21 @@ public sealed class RunnerConfig
     /// </summary>
     public string StopFlagPath { get; init; } =
         Path.Combine(Path.GetTempPath(), "ApexUIBridge_stop.flag");
+
+    // ── Pacing ────────────────────────────────────────────────────────────────
+    /// <summary>
+    /// Optional pacing preset: Fast, Normal, or Human.
+    /// Explicit delay values override the selected profile when greater than 0.
+    /// </summary>
+    public string SpeedProfile { get; init; } = "Normal";
+
+    /// <summary>
+    /// Delay between action steps in the test suite (milliseconds). 0 = use profile default.
+    /// </summary>
+    public int ActionDelayMs { get; init; } = 0;
+
+    /// <summary>
+    /// Delay after UI-changing operations before reading state (milliseconds). 0 = use profile default.
+    /// </summary>
+    public int UiSettleDelayMs { get; init; } = 0;
 }
