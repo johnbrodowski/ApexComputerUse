@@ -103,8 +103,9 @@ else
     }));
 }
 
-var normalizedSpeedProfile = (config.SpeedProfile ?? "Normal").Trim();
-var (defaultActionDelayMs, defaultUiSettleDelayMs) = normalizedSpeedProfile.ToLowerInvariant() switch
+// Mode (demo/benchmark) takes precedence over the config's SpeedProfile label.
+var effectiveSpeedProfile = speedProfile;
+var (defaultActionDelayMs, defaultUiSettleDelayMs) = effectiveSpeedProfile.ToLowerInvariant() switch
 {
     "fast" => (50, 120),
     "human" => (350, 900),
@@ -112,7 +113,8 @@ var (defaultActionDelayMs, defaultUiSettleDelayMs) = normalizedSpeedProfile.ToLo
 };
 var actionDelayMs = config.ActionDelayMs > 0 ? config.ActionDelayMs : defaultActionDelayMs;
 var uiSettleDelayMs = config.UiSettleDelayMs > 0 ? config.UiSettleDelayMs : defaultUiSettleDelayMs;
-Console.WriteLine($"[Runner] Speed profile: {normalizedSpeedProfile} (ActionDelayMs={actionDelayMs}, UiSettleDelayMs={uiSettleDelayMs})");
+if (richConsole)
+    Console.WriteLine($"[Runner] Speed profile: {effectiveSpeedProfile} (ActionDelayMs={actionDelayMs}, UiSettleDelayMs={uiSettleDelayMs})");
 
 // ── Load previous test results for skip-passed logic ────────────────────────
 var previouslyPassed = new HashSet<string>();
@@ -126,14 +128,16 @@ if (runOnlyFailed && File.Exists(config.TestResultsPath))
         if (saved != null)
             foreach (var kv in saved.Where(kv => kv.Value))
                 previouslyPassed.Add(kv.Key);
-        Console.WriteLine($"[Runner] RunOnlyFailed=true — {previouslyPassed.Count} previously-passed tests will be skipped.");
+        if (richConsole)
+            Console.WriteLine($"[Runner] RunOnlyFailed=true — {previouslyPassed.Count} previously-passed tests will be skipped.");
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"[Runner] Warning: could not load {config.TestResultsPath}: {ex.Message}");
+        if (richConsole)
+            Console.WriteLine($"[Runner] Warning: could not load {config.TestResultsPath}: {ex.Message}");
     }
 }
-else if (runOnlyFailed)
+else if (runOnlyFailed && richConsole)
 {
     Console.WriteLine("[Runner] RunOnlyFailed=true but no previous results file found — running all tests.");
 }
@@ -174,7 +178,8 @@ void AppendBenchmarkRecord(
         var benchmarkRecord = new
         {
             TimestampUtc = startedAtUtc,
-            config.SpeedProfile,
+            Mode = mode,
+            SpeedProfile = effectiveSpeedProfile,
             Cycle = cycleNumber,
             Passed = passed,
             Failed = failed,
@@ -198,11 +203,12 @@ void AppendBenchmarkRecord(
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"[Runner] Warning: could not append benchmark record: {ex.Message}");
+        if (richConsole)
+            Console.WriteLine($"[Runner] Warning: could not append benchmark record: {ex.Message}");
     }
 }
 
-while (cycle < config.MaxCycles && !ct.IsCancellationRequested)
+while (cycle < maxCycles && !ct.IsCancellationRequested)
 {
     cycle++;
     var cycleStartedAtUtc = DateTimeOffset.UtcNow;
@@ -210,12 +216,14 @@ while (cycle < config.MaxCycles && !ct.IsCancellationRequested)
     long buildMs = 0;
     long bridgeReadyMs = 0;
     long suiteMs = 0;
-    Console.WriteLine($"\n{"─",60}");
-    Console.WriteLine($"[Runner] Cycle {cycle}/{config.MaxCycles}");
-    Console.WriteLine($"{"─",60}");
-
-    // 1. Build ─────────────────────────────────────────────────────────────────
-    Console.WriteLine("[Runner] Building ApexUIBridge...");
+    if (richConsole)
+    {
+        var divider = new string('─', 60);
+        Console.WriteLine($"\n{divider}");
+        Console.WriteLine($"[Runner] Cycle {cycle}/{maxCycles}");
+        Console.WriteLine(divider);
+        Console.WriteLine("[Runner] Building ApexUIBridge...");
+    }
     var buildTimer = Stopwatch.StartNew();
     var build = await builder.BuildAsync(ct);
     buildTimer.Stop();
@@ -304,26 +312,51 @@ while (cycle < config.MaxCycles && !ct.IsCancellationRequested)
     // 2b. Ensure web targets are reachable before discovery/interactions ───────
     if (!string.IsNullOrWhiteSpace(config.WebBaseUrl))
     {
-        Console.WriteLine("[Runner] Waiting for web target pages...");
+        if (richConsole) Console.WriteLine("[Runner] Waiting for web target pages...");
         var webReady = await WaitForWebTargetsAsync(config, ct);
         if (!webReady)
         {
-            Console.WriteLine("[Runner] Web target did not become ready in time — skipping cycle.");
+            if (richConsole)
+            {
+                Console.WriteLine("[Runner] Web target did not become ready in time — skipping cycle.");
+            }
+            else
+            {
+                Console.WriteLine(JsonSerializer.Serialize(new
+                {
+                    Event = "web_not_ready",
+                    Cycle = cycle,
+                    TimeoutSeconds = config.ApiReadyTimeoutSec
+                }));
+            }
             await telegram.SendAsync(
                 $"⚠️ <b>Cycle {cycle}</b> — Web target not ready after {config.ApiReadyTimeoutSec}s", ct);
             await bridge.StopAsync();
+            cycleTimer.Stop();
+            AppendBenchmarkRecord(
+                cycleNumber: cycle,
+                passed: 0,
+                failed: 0,
+                skipped: 0,
+                startedAtUtc: cycleStartedAtUtc,
+                cycleMs: cycleTimer.ElapsedMilliseconds,
+                buildMs: buildMs,
+                bridgeReadyMs: bridgeReadyMs,
+                suiteMs: suiteMs);
             continue;
         }
-        Console.WriteLine("[Runner] Web target pages ready.");
+        if (richConsole) Console.WriteLine("[Runner] Web target pages ready.");
     }
 
     // 3. Run test suite ────────────────────────────────────────────────────────
     var suiteTimer = Stopwatch.StartNew();
     var result = await new TestSuite(
         client,
-        config.ActionDelayMs,
-        config.UiSettleDelayMs,
-        config.RunOnlyFailed ? previouslyPassed : null
+        actionDelayMs,
+        uiSettleDelayMs,
+        runOnlyFailed ? previouslyPassed : null,
+        config.WebBaseUrl,
+        config.WebPagePaths
     ).RunAsync(ct);
     suiteTimer.Stop();
     suiteMs = suiteTimer.ElapsedMilliseconds;
@@ -380,7 +413,8 @@ while (cycle < config.MaxCycles && !ct.IsCancellationRequested)
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"[Runner] Warning: could not save results: {ex.Message}");
+        if (richConsole)
+            Console.WriteLine($"[Runner] Warning: could not save results: {ex.Message}");
     }
 
     // 4. Stop Bridge before next cycle (fresh build will produce new binary) ───

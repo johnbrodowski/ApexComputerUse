@@ -61,8 +61,11 @@ public sealed class RunnerConfig
     public string BenchmarkResultsPath { get; init; } =
         Path.Combine(Path.GetTempPath(), "ApexUIBridge_benchmark_results.jsonl");
 
+    // ── Pacing ────────────────────────────────────────────────────────────────
     /// <summary>
-    /// Human-readable speed mode label (for example: "human" or "fast").
+    /// Pacing preset: "fast", "normal", or "human".
+    /// Explicit delay values override the selected profile when greater than 0.
+    /// In demo/benchmark mode the --mode flag picks a profile regardless of this value.
     /// </summary>
     public string SpeedProfile { get; init; } = "human";
 
@@ -73,13 +76,6 @@ public sealed class RunnerConfig
     /// </summary>
     public string StopFlagPath { get; init; } =
         Path.Combine(Path.GetTempPath(), "ApexUIBridge_stop.flag");
-
-    // ── Pacing ────────────────────────────────────────────────────────────────
-    /// <summary>
-    /// Optional pacing preset: Fast, Normal, or Human.
-    /// Explicit delay values override the selected profile when greater than 0.
-    /// </summary>
-  //  public string SpeedProfile { get; init; } = "Normal";
 
     /// <summary>
     /// Delay between action steps in the test suite (milliseconds). 0 = use profile default.
