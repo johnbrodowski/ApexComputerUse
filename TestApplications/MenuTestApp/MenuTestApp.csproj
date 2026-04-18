@@ -6,8 +6,9 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
-    <AssemblyName>MenuTestApp</AssemblyName>
-    <RootNamespace>MenuTestApp</RootNamespace>
+    <AssemblyName>ApexUIBridge.TestApplications.MenuTestApp</AssemblyName>
+    <RootNamespace>ApexUIBridge.TestApplications.MenuTestApp</RootNamespace>
+    <Description>ApexUIBridge Test Application - Menu Test App</Description>
   </PropertyGroup>
 
 </Project>

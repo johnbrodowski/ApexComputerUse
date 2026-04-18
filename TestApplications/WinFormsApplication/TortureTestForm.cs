@@ -11,7 +11,7 @@ namespace WinFormsApplication
 
         public TortureTestForm()
         {
-            Text = "System Configuration Console — UI Torture Test";
+            Text = "ApexUIBridge Test Application - WinForms Torture Test";
             Size = new Size(1150, 850);
             MinimumSize = new Size(900, 700);
             StartPosition = FormStartPosition.CenterScreen;
