@@ -39,7 +39,17 @@ namespace WinFormsApplication
             Controls.Add(toolbar);
             Controls.Add(menu);
             MainMenuStrip = menu;
+            EnsureControlsVisible(this);
             ResumeLayout();
+        }
+
+        private static void EnsureControlsVisible(Control control)
+        {
+            control.Visible = true;
+            foreach (Control child in control.Controls)
+            {
+                EnsureControlsVisible(child);
+            }
         }
 
         // ── MENU ─────────────────────────────────────────────────────────────────
