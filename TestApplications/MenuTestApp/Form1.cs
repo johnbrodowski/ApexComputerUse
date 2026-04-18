@@ -11,6 +11,6 @@ public partial class Form1 : Form
 
     private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        MessageBox.Show("FlaUI Menu Test App\nVersion 1.0", "About", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        MessageBox.Show("ApexUIBridge Test Application - Menu\nVersion 1.0", "About", MessageBoxButtons.OK, MessageBoxIcon.Information);
     }
 }

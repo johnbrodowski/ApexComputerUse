@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApplication"
         mc:Ignorable="d"
-        Title="FlaUI WPF Test App"
+        Title="ApexUIBridge Test Application - WPF"
         Height="515.931" Width="629.303"
         ResizeMode="CanResize">
     <Window.Resources>

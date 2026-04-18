@@ -4,7 +4,8 @@
     <TargetFramework>net10.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <RootNamespace>ApexUIBridge.TestRunner</RootNamespace>
-    <AssemblyName>ApexUIBridge.TestRunner</AssemblyName>
+    <RootNamespace>ApexUIBridge.TestApplications.TestRunner</RootNamespace>
+    <AssemblyName>ApexUIBridge.TestApplications.TestRunner</AssemblyName>
+    <Description>ApexUIBridge Test Application - Test Runner</Description>
   </PropertyGroup>
 </Project>

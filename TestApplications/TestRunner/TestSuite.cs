@@ -24,16 +24,16 @@ public sealed class TestSuite
         // ── Discovery ──────────────────────────────────────────────────────────
         await Test(results, "LIST_WINDOWS — WinForms app visible",
             "LIST_WINDOWS",
-            r => r.Success && (r.Data?.Contains("FlaUI WinForms Test App") ?? false),
+            r => r.Success && (r.Data?.Contains("ApexUIBridge Test Application - WinForms") ?? false),
             ct);
 
         await Test(results, "LIST_WINDOWS — WPF app visible",
             "LIST_WINDOWS",
-            r => r.Success && (r.Data?.Contains("FlaUI WPF Test App") ?? false),
+            r => r.Success && (r.Data?.Contains("ApexUIBridge Test Application - WPF") ?? false),
             ct);
 
         // ── WinForms window ────────────────────────────────────────────────────
-        var wfScan = await _client.SendAsync("SCAN_WINDOW FlaUI WinForms Test App", ct);
+        var wfScan = await _client.SendAsync("SCAN_WINDOW ApexUIBridge Test Application - WinForms", ct);
         results.Add(Result("SCAN_WINDOW WinForms", wfScan.Success, wfScan.Message));
 
         if (wfScan.Success && wfScan.Data is { } wfData)
@@ -113,7 +113,7 @@ public sealed class TestSuite
         }
 
         // ── WPF window ─────────────────────────────────────────────────────────
-        var wpfScan = await _client.SendAsync("SCAN_WINDOW FlaUI WPF Test App", ct);
+        var wpfScan = await _client.SendAsync("SCAN_WINDOW ApexUIBridge Test Application - WPF", ct);
         results.Add(Result("SCAN_WINDOW WPF", wpfScan.Success, wpfScan.Message));
 
         if (wpfScan.Success && wpfScan.Data is { } wpfData)
@@ -159,7 +159,7 @@ public sealed class TestSuite
                 // Give WPF time to process the ICommand and push the binding update through UIA
                 await Task.Delay(800, ct);
                 // Re-scan so the element registry reflects the new Content="Invoked!" Name value
-                var afterClickScan = await _client.SendAsync("SCAN_WINDOW FlaUI WPF Test App", ct);
+                var afterClickScan = await _client.SendAsync("SCAN_WINDOW ApexUIBridge Test Application - WPF", ct);
                 results.Add(Result("WPF InvokableButton → 'Invoked!' (after re-scan)",
                     afterClickScan.Success && (afterClickScan.Data?.Contains("'Invoked!'") ?? false),
                     afterClickScan.Success ? "Button name did not change to 'Invoked!'" : afterClickScan.Message));
@@ -212,7 +212,7 @@ public sealed class TestSuite
         const string p = "WF Torture";
 
         // Re-scan the main WinForms window to get the Tools menu element
-        var mainScan = await _client.SendAsync("SCAN_WINDOW FlaUI WinForms Test App", ct);
+        var mainScan = await _client.SendAsync("SCAN_WINDOW ApexUIBridge Test Application - WinForms", ct);
         if (!mainScan.Success || mainScan.Data == null)
         {
             results.Add(Result($"{p}: re-scan main window", false, mainScan.Message)); return;
@@ -279,7 +279,7 @@ public sealed class TestSuite
         const string p = "WPF Torture";
 
         // Open via Tools › Open Torture Test Window...
-        var mainScan = await _client.SendAsync("SCAN_WINDOW FlaUI WPF Test App", ct);
+        var mainScan = await _client.SendAsync("SCAN_WINDOW ApexUIBridge Test Application - WPF", ct);
         if (!mainScan.Success || mainScan.Data == null)
         {
             results.Add(Result($"{p}: re-scan main window", false, mainScan.Message)); return;
@@ -293,7 +293,7 @@ public sealed class TestSuite
             await Task.Delay(350, ct);
         }
 
-        var expandedScan = await _client.SendAsync("SCAN_WINDOW FlaUI WPF Test App", ct);
+        var expandedScan = await _client.SendAsync("SCAN_WINDOW ApexUIBridge Test Application - WPF", ct);
         var menuItemId = expandedScan.Success
             ? FindId(expandedScan.Data ?? "", "Open Torture Test Window")
             : null;

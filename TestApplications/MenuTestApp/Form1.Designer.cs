@@ -258,7 +258,7 @@ partial class Form1
         label1.Name = "label1";
         label1.Size = new Size(600, 354);
         label1.TabIndex = 2;
-        label1.Text = "FlaUI Menu Test Application";
+        label1.Text = "ApexUIBridge Test Application - Menu";
         label1.TextAlign = ContentAlignment.MiddleCenter;
         //
         // Form1
@@ -271,7 +271,7 @@ partial class Form1
         Controls.Add(menuStrip1);
         MainMenuStrip = menuStrip1;
         Name = "Form1";
-        Text = "FlaUI Menu Test App";
+        Text = "ApexUIBridge Test Application - Menu";
         menuStrip1.ResumeLayout(false);
         menuStrip1.PerformLayout();
         statusStrip1.ResumeLayout(false);

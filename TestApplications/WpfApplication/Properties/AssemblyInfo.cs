@@ -6,11 +6,11 @@ using System.Windows;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 
-[assembly: AssemblyTitle("WpfApplication")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("ApexUIBridge Test Application - WPF")]
+[assembly: AssemblyDescription("ApexUIBridge Test Application - WPF Application")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("WpfApplication")]
+[assembly: AssemblyProduct("ApexUIBridge Test Applications")]
 [assembly: AssemblyCopyright("Copyright © 2016-2021")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
