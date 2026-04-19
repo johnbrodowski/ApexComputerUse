@@ -9,10 +9,12 @@ public sealed class BridgeClient : IDisposable
     private readonly HttpClient _http;
     private readonly string     _base;
 
-    public BridgeClient(string baseUrl)
+    public BridgeClient(string baseUrl, string? apiKey = null)
     {
         _base = baseUrl.TrimEnd('/');
         _http = new HttpClient { Timeout = TimeSpan.FromSeconds(20) };
+        if (!string.IsNullOrWhiteSpace(apiKey))
+            _http.DefaultRequestHeaders.Add("X-Api-Key", apiKey);
     }
 
     /// <summary>POST a bridge command and return the parsed response.</summary>
@@ -34,7 +36,7 @@ public sealed class BridgeClient : IDisposable
         }
     }
 
-    /// <summary>Poll /status until it responds 200 or the timeout elapses.</summary>
+    /// <summary>Poll /health (unauthenticated) until it responds 200 or the timeout elapses.</summary>
     public async Task<bool> WaitForReadyAsync(int timeoutSeconds, CancellationToken ct)
     {
         var deadline = DateTime.UtcNow.AddSeconds(timeoutSeconds);
@@ -42,7 +44,7 @@ public sealed class BridgeClient : IDisposable
         {
             try
             {
-                var r = await _http.GetAsync($"{_base}/status", ct);
+                var r = await _http.GetAsync($"{_base}/health", ct);
                 if (r.IsSuccessStatusCode) return true;
             }
             catch { /* not up yet */ }

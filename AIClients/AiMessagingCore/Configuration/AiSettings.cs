@@ -63,14 +63,26 @@ public static class AiSettings
     }
 
     /// <summary>
-    /// Loads from the default path: <c>&lt;app-base&gt;/ai-settings.json</c>.
+    /// Loads from the default path (<c>%APPDATA%\ApexComputerUse\ai-settings.json</c>),
+    /// migrating from the old app-directory location if needed.
     /// </summary>
     public static AiLibrarySettings Load()
-        => LoadFromFile(DefaultFilePath);
+    {
+        string oldPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ai-settings.json");
+        if (!File.Exists(DefaultFilePath) && File.Exists(oldPath))
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(DefaultFilePath)!);
+            File.Move(oldPath, DefaultFilePath);
+        }
+        return LoadFromFile(DefaultFilePath);
+    }
 
     /// <summary>Saves <paramref name="settings"/> to <paramref name="path"/>.</summary>
     public static void SaveToFile(AiLibrarySettings settings, string path)
-        => File.WriteAllText(path, JsonSerializer.Serialize(settings, JsonOptions));
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+        File.WriteAllText(path, JsonSerializer.Serialize(settings, JsonOptions));
+    }
 
     /// <summary>Saves to the default path.</summary>
     public static void Save(AiLibrarySettings settings)
@@ -109,9 +121,12 @@ public static class AiSettings
         }
     }
 
-    /// <summary>Default settings file path: next to the executable.</summary>
+    /// <summary>Default settings file path: <c>%APPDATA%\ApexComputerUse\ai-settings.json</c>.</summary>
     public static readonly string DefaultFilePath =
-        Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ai-settings.json");
+        Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "ApexComputerUse",
+            "ai-settings.json");
 
     private static AiLibrarySettings CreateDefault() => new()
     {

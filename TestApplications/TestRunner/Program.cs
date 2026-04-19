@@ -251,8 +251,11 @@ while (cycle < maxCycles && !ct.IsCancellationRequested)
         Console.WriteLine($"\n{divider}");
         Console.WriteLine($"[Runner] Cycle {cycle}/{maxCycles}");
         Console.WriteLine(divider);
-        Console.WriteLine("[Runner] Building ApexUIBridge...");
     }
+
+    if (!config.SkipBuild)
+    {
+    if (richConsole) Console.WriteLine("[Runner] Building ApexComputerUse...");
     var buildTimer = Stopwatch.StartNew();
     var build = await builder.BuildAsync(ct);
     buildTimer.Stop();
@@ -260,7 +263,7 @@ while (cycle < maxCycles && !ct.IsCancellationRequested)
     if (!build.Success)
     {
         var snippet = build.Output.Length > 600
-            ? build.Output[..600] + "…"
+            ? "…" + build.Output[^600..]
             : build.Output;
         if (richConsole)
         {
@@ -293,12 +296,16 @@ while (cycle < maxCycles && !ct.IsCancellationRequested)
         break;
     }
     if (richConsole) Console.WriteLine("[Runner] Build OK.");
+    } // end if (!config.SkipBuild)
 
-    // 2. Launch ApexUIBridge ───────────────────────────────────────────────────
-    await using var bridge = new ProcessManager("ApexUIBridge", config.BridgeExePath, isGui: true);
-    await bridge.StartAsync(ct);
+    // 2. Launch ApexComputerUse ───────────────────────────────────────────────────
+    await using var bridge = new ProcessManager("ApexComputerUse", config.BridgeExePath, isGui: true);
+    var bridgeEnv = string.IsNullOrWhiteSpace(config.BridgeApiKey)
+        ? null
+        : new Dictionary<string, string> { ["APEX_API_KEY"] = config.BridgeApiKey };
+    await bridge.StartAsync(ct, bridgeEnv);
 
-    using var client = new BridgeClient(config.BridgeBaseUrl);
+    using var client = new BridgeClient(config.BridgeBaseUrl, config.BridgeApiKey);
     if (richConsole) Console.WriteLine("[Runner] Waiting for Bridge API...");
 
     var readyTimer = Stopwatch.StartNew();
@@ -384,14 +391,14 @@ while (cycle < maxCycles && !ct.IsCancellationRequested)
         ? r =>
         {
             if (r.Skipped)
-                Console.WriteLine($"  ⏭️ {r.Name} (skipped — previously passed)");
+                Console.WriteLine($"  SKIP {r.Name} (previously passed)");
             else if (r.Passed)
-                Console.WriteLine($"  ✅ {r.Name}" + (r.ElapsedMs.HasValue ? $"  (elapsed={r.ElapsedMs}ms)" : ""));
+                Console.WriteLine($"  PASS {r.Name}" + (r.ElapsedMs.HasValue ? $"  ({r.ElapsedMs}ms)" : ""));
             else
             {
                 var cmd = string.IsNullOrEmpty(r.Command) ? "" : $"  cmd={r.Command}";
-                Console.WriteLine($"  ❌ {r.Name}{cmd}");
-                Console.WriteLine($"       ↳ {r.Detail}");
+                Console.WriteLine($"  FAIL {r.Name}{cmd}");
+                Console.WriteLine($"       {r.Detail}");
             }
         }
         : r =>
@@ -430,8 +437,8 @@ while (cycle < maxCycles && !ct.IsCancellationRequested)
         foreach (var r in result.Results.Where(r => !r.Passed && !r.Skipped))
         {
             var cmd = string.IsNullOrEmpty(r.Command) ? "" : $"  cmd={r.Command}";
-            Console.WriteLine($"  ❌ {r.Name}{cmd}");
-            Console.WriteLine($"       ↳ {r.Detail}");
+            Console.WriteLine($"  FAIL {r.Name}{cmd}");
+            Console.WriteLine($"       {r.Detail}");
         }
     }
     else
@@ -513,16 +520,16 @@ if (history.Count > 0)
     var cycleLines = string.Join("\n",
         history.Select(h =>
         {
-            var sk = h.Result.Skipped > 0 ? $" ⏭️{h.Result.Skipped}" : "";
-            return $"  Cycle {h.Cycle}: ✅{h.Result.Passed} ❌{h.Result.Failed}{sk}";
+            var sk = h.Result.Skipped > 0 ? $" SKIP:{h.Result.Skipped}" : "";
+            return $"  Cycle {h.Cycle}: PASS:{h.Result.Passed} FAIL:{h.Result.Failed}{sk}";
         }));
 
-    var skipSummary = totalSkipped > 0 ? $"   ⏭️ {totalSkipped} skipped" : "";
+    var skipSummary = totalSkipped > 0 ? $"   SKIP: {totalSkipped}" : "";
     var summary =
-        $"{(allGreen ? "🏆" : "⚠️")} <b>TestRunner Complete</b>\n" +
+        $"{(allGreen ? "[PASS]" : "[FAIL]")} <b>TestRunner Complete</b>\n" +
         $"Mode: <b>{mode}</b>   Speed profile: <b>{speedProfile}</b>\n" +
         $"Cycles run: <b>{history.Count}/{maxCycles}</b>\n" +
-        $"Total: ✅ {totalPass} passed   ❌ {totalFail} failed{skipSummary}\n\n" +
+        $"Total: PASS:{totalPass}  FAIL:{totalFail}{skipSummary}\n\n" +
         cycleLines;
 
     if (richConsole)
@@ -567,7 +574,12 @@ if (ct.IsCancellationRequested && history.Count < maxCycles)
 
 if (webServer is not null) await webServer.DisposeAsync();
 
-if (richConsole) Console.WriteLine("[Runner] Done. Test-target apps will be closed.");
+if (richConsole)
+{
+    Console.WriteLine("[Runner] Done. Test-target apps will be closed.");
+    Console.WriteLine("\nPress any key to close...");
+    Console.ReadKey(intercept: true);
+}
 return 0;
 
 static async Task<bool> WaitForWebTargetsAsync(RunnerConfig config, CancellationToken ct)

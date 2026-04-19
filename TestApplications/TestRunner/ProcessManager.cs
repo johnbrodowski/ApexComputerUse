@@ -21,7 +21,8 @@ public sealed class ProcessManager : IAsyncDisposable
         _isGui = isGui;
     }
 
-    public Task StartAsync(CancellationToken ct = default)
+    public Task StartAsync(CancellationToken ct = default,
+        IReadOnlyDictionary<string, string>? env = null)
     {
         if (!File.Exists(_exe))
             throw new FileNotFoundException($"Executable not found: {_exe}", _exe);
@@ -34,6 +35,8 @@ public sealed class ProcessManager : IAsyncDisposable
             RedirectStandardOutput = !_isGui,
             RedirectStandardError  = !_isGui,
         };
+        if (env != null)
+            foreach (var (k, v) in env) psi.Environment[k] = v;
 
         _process = Process.Start(psi)
             ?? throw new InvalidOperationException($"Failed to start {_name}");

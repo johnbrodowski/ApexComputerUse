@@ -17,6 +17,13 @@ public sealed class RunnerConfig
     /// <summary>Send a Telegram progress report every N cycles. 0 = only on completion.</summary>
     public int ReportEveryN { get; init; } = 3;
 
+    // ── Build ─────────────────────────────────────────────────────────────────
+    /// <summary>
+    /// When true, skip the dotnet build step and use the already-compiled executables.
+    /// Useful for iterative test runs where the code hasn't changed.
+    /// </summary>
+    public bool SkipBuild { get; init; } = false;
+
     // ── Paths ─────────────────────────────────────────────────────────────────
     /// <summary>Path to the ApexUIBridge .sln file (used for dotnet build).</summary>
     public string SolutionPath { get; init; } = "";
@@ -51,8 +58,12 @@ public sealed class RunnerConfig
     // ── Bridge API ────────────────────────────────────────────────────────────
     public string BridgeBaseUrl      { get; init; } = "http://localhost:8765";
     public int    ApiReadyTimeoutSec { get; init; } = 30;
+    /// <summary>
+    /// API key injected into the bridge process as APEX_API_KEY and sent with every
+    /// BridgeClient request. Leave empty only if the bridge has auth disabled.
+    /// </summary>
+    public string BridgeApiKey       { get; init; } = "";
 
-    // ── Build ─────────────────────────────────────────────────────────────────
     public string BuildConfiguration { get; init; } = "Debug";
 
     // ── Telegram ──────────────────────────────────────────────────────────────

@@ -204,6 +204,26 @@ namespace ApexComputerUse
 
         private void LoadSettings()
         {
+            // Layer 1: user preferences from %APPDATA%\ApexComputerUse\settings.json
+            try
+            {
+                if (File.Exists(SettingsFile))
+                {
+                    var s = JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(SettingsFile));
+                    if (s != null)
+                    {
+                        if (!string.IsNullOrWhiteSpace(s.ModelPath)) txtModelPath.Text = s.ModelPath;
+                        if (!string.IsNullOrWhiteSpace(s.ProjPath)) txtProjPath.Text = s.ProjPath;
+                        if (!string.IsNullOrWhiteSpace(s.ApiKey)) txtApiKey.Text = s.ApiKey;
+                        if (!string.IsNullOrWhiteSpace(s.AllowedChatIds)) txtAllowedChatIds.Text = s.AllowedChatIds;
+                    }
+                }
+            }
+            catch (Exception ex) { AppLog.Warning($"LoadSettings: settings file appears corrupt and was ignored — {ex.Message}"); }
+
+            if (string.IsNullOrWhiteSpace(txtApiKey.Text)) EnsureApiKey();
+
+            // Layer 2: deployment config / env vars (APEX_*) — highest priority, applied last
             var cfg = AppConfig.Current;
             if (cfg.HttpPort != 8081) txtHttpPort.Text = cfg.HttpPort.ToString();
             if (!string.IsNullOrWhiteSpace(cfg.PipeName) &&
@@ -213,23 +233,6 @@ namespace ApexComputerUse
             if (!string.IsNullOrWhiteSpace(cfg.ApiKey)) txtApiKey.Text = cfg.ApiKey;
             if (!string.IsNullOrWhiteSpace(cfg.AllowedChatIds)) txtAllowedChatIds.Text = cfg.AllowedChatIds;
             if (!string.IsNullOrWhiteSpace(cfg.TelegramToken)) txtBotToken.Text = cfg.TelegramToken;
-
-            try
-            {
-                if (!File.Exists(SettingsFile))
-                {
-                    EnsureApiKey();
-                    return;
-                }
-                var s = JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(SettingsFile));
-                if (s == null) return;
-                if (!string.IsNullOrWhiteSpace(s.ModelPath)) txtModelPath.Text = s.ModelPath;
-                if (!string.IsNullOrWhiteSpace(s.ProjPath)) txtProjPath.Text = s.ProjPath;
-                if (!string.IsNullOrWhiteSpace(s.ApiKey)) txtApiKey.Text = s.ApiKey;
-                else EnsureApiKey();
-                if (!string.IsNullOrWhiteSpace(s.AllowedChatIds)) txtAllowedChatIds.Text = s.AllowedChatIds;
-            }
-            catch (Exception ex) { AppLog.Warning($"LoadSettings: settings file appears corrupt and was ignored — {ex.Message}"); }
         }
 
         private void SaveSettings()

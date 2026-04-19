@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.Json;
 
 namespace ApexComputerUse
@@ -62,7 +63,7 @@ namespace ApexComputerUse
                 catch (Exception ex)
                 {
                     // Logged after AppLog is configured; writing to stderr as fallback.
-                    Console.Error.WriteLine($"[AppConfig] appsettings.json parse error: {ex.Message}");
+                    Debug.WriteLine($"[AppConfig] appsettings.json parse error: {ex.Message}");
                 }
             }
 

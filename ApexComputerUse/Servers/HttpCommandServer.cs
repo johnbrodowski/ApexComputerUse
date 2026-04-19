@@ -177,6 +177,13 @@ namespace ApexComputerUse
             try
             {
 
+            // ── Unauthenticated health probe (safe to expose; no sensitive data) ─
+            if (method == "GET" && rawPath.TrimEnd('/').Equals("/health", StringComparison.OrdinalIgnoreCase))
+            {
+                statusCode = await WriteResponse(res, HandleHealth(), "json");
+                return;
+            }
+
             // ── Auth gate ─────────────────────────────────────────────────
             if (!IsAuthenticated(req))
             {
