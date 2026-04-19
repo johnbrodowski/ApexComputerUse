@@ -569,8 +569,50 @@ namespace ApexComputerUse
 
         // ── TextBox / PasswordBox ─────────────────────────────────────────
 
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool SetForegroundWindow(IntPtr hWnd);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll", SetLastError = true)]
+        private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int x, int y, int cx, int cy, uint uFlags);
+
+        private const uint SWP_NOSIZE    = 0x0001;
+        private const uint SWP_NOZORDER  = 0x0004;
+        private const uint SWP_SHOWWINDOW = 0x0040;
+
+        private static void BringContainerWindowToFront(AutomationElement el)
+        {
+            var cur = el;
+            while (cur != null)
+            {
+                if (cur.Properties.ControlType.ValueOrDefault == FlaUI.Core.Definitions.ControlType.Window)
+                {
+                    var hwnd = cur.Properties.NativeWindowHandle.ValueOrDefault;
+                    if (hwnd != IntPtr.Zero)
+                    {
+                        // Move off-screen windows into view so keyboard input reaches them.
+                        var rect = cur.Properties.BoundingRectangle.ValueOrDefault;
+                        if (rect.X < -100 || rect.Y < -100)
+                        {
+                            SetWindowPos(hwnd, IntPtr.Zero, 100, 100, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
+                            Thread.Sleep(100);
+                        }
+                        SetForegroundWindow(hwnd);
+                    }
+                    return;
+                }
+                try { cur = cur.Parent; } catch { return; }
+            }
+        }
+
         public void EnterText(AutomationElement el, string text)
         {
+            // Prefer Value pattern (same as setvalue) — avoids keyboard/focus issues entirely.
+            if (el.Patterns.Value.TryGetPattern(out var vp) && !vp.IsReadOnly.ValueOrDefault)
+            {
+                vp.SetValue(text);
+                return;
+            }
+
             // Keyboard.Type can leave Shift latched after shifted characters (e.g. &, $).
             // Clipboard paste avoids keyboard simulation entirely and handles all characters correctly.
             Exception? clipEx = null;
@@ -588,6 +630,7 @@ namespace ApexComputerUse
                 el.AsTextBox().Enter(text);
                 return;
             }
+            BringContainerWindowToFront(el);
             el.Focus();
             Thread.Sleep(FocusDelayMs);
             Keyboard.TypeSimultaneously(VirtualKeyShort.CONTROL, VirtualKeyShort.KEY_V);

@@ -58,6 +58,23 @@ namespace ApexComputerUse
                            testRunnerExePath: cfg.TestRunnerExePath,
                            testRunnerConfigPath: cfg.TestRunnerConfigPath);
                 Http.OnLog += _logHandler;
+                Http.OnShutdownRequested += () =>
+                {
+                    // Marshal to the UI thread so Application.Exit is called from the message loop.
+                    try
+                    {
+                        if (System.Windows.Forms.Application.OpenForms.Count > 0)
+                        {
+                            var form = System.Windows.Forms.Application.OpenForms[0]!;
+                            form.BeginInvoke(() => System.Windows.Forms.Application.Exit());
+                        }
+                        else
+                        {
+                            System.Windows.Forms.Application.Exit();
+                        }
+                    }
+                    catch { Environment.Exit(0); }
+                };
                 Http.Start();
                 _btnStartHttp.Text = "Stop HTTP";
                 string authNote = string.IsNullOrWhiteSpace(apiKey) ? " (no auth)" : " (auth enabled)";

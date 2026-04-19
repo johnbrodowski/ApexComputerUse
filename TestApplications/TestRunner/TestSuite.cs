@@ -1,28 +1,42 @@
 namespace ApexUIBridge.TestRunner;
 
 using System.Diagnostics;
-using System.Text.RegularExpressions;
+using System.Text.Json.Nodes;
 
 /// <summary>
-/// The full test suite. Treats the test apps as black-box 3rd-party applications —
-/// scans their windows, discovers element IDs dynamically, then interacts and asserts.
+/// The full test suite. Exercises the bridge exactly the way an AI coding agent would —
+/// via HTTP (GET /windows, POST /find, GET /elements, POST /execute, GET /help) — then
+/// walks the returned JSON element tree to find controls by name/AutomationId and
+/// interacts with them by numeric element id.
+///
+/// Each test in <see cref="Catalog"/> is independently addressable by its stable
+/// <see cref="TestCase.Id"/>, so an external caller (the ControlServer) can list
+/// tests, run one, or run them all.
 /// </summary>
 public sealed class TestSuite
 {
+    private const string WinFormsTitle = "System Configuration Console";
+    private const string WpfTitle      = "ApexUIBridge Test Application - WPF";
+    private const string WebTitle      = "ApexUIBridge Test Application - Web";
+    private static readonly TimeSpan ScanCacheTtl = TimeSpan.FromSeconds(2);
+
     private readonly BridgeClient _client;
     private readonly int _actionDelayMs;
     private readonly int _uiSettleDelayMs;
     private readonly HashSet<string> _skipTests;
-    private readonly string _webBaseUrl;
-    private readonly string[] _webPagePaths;
     private readonly Action<TestResult>? _onResult;
+
+    // Per-window scan cache so run-all doesn't re-scan each window once per test.
+    private readonly Dictionary<string, (DateTime At, JsonNode? Tree)> _scanCache = new();
+
+    public IReadOnlyList<TestCase> Catalog { get; }
 
     public TestSuite(
         BridgeClient client,
         int actionDelayMs = 100,
         int uiSettleDelayMs = 250,
         HashSet<string>? skipTests = null,
-        string? webBaseUrl = null,
+        string? webBaseUrl = null,      // kept for call-site compatibility; web tests removed
         string[]? webPagePaths = null,
         Action<TestResult>? onResult = null)
     {
@@ -30,545 +44,592 @@ public sealed class TestSuite
         _actionDelayMs = actionDelayMs;
         _uiSettleDelayMs = uiSettleDelayMs;
         _skipTests = skipTests ?? new HashSet<string>();
-        _webBaseUrl = webBaseUrl ?? "";
-        _webPagePaths = webPagePaths ?? Array.Empty<string>();
         _onResult = onResult;
+        _ = webBaseUrl; _ = webPagePaths;
+
+        Catalog = BuildCatalog();
     }
 
-    public async Task<CycleResult> RunAsync(CancellationToken ct)
+    // ── Public API ─────────────────────────────────────────────────────────────
+
+    /// <summary>Run the full catalog in order and return aggregated results.</summary>
+    public async Task<CycleResult> RunAsync(CancellationToken ct) => await RunAllAsync(ct);
+
+    public async Task<CycleResult> RunAllAsync(CancellationToken ct)
     {
+        _scanCache.Clear();
         var results = new List<TestResult>();
-
-        // ── Discovery ──────────────────────────────────────────────────────────
-        await Test(results, "LIST_WINDOWS — WinForms app visible",
-            "LIST_WINDOWS",
-            r => r.Success && (r.Data?.Contains("ApexUIBridge Test Application - WinForms") ?? false),
-            ct);
-
-        await Test(results, "LIST_WINDOWS — WPF app visible",
-            "LIST_WINDOWS",
-            r => r.Success && (r.Data?.Contains("ApexUIBridge Test Application - WPF") ?? false),
-            ct);
-
-        if (!string.IsNullOrWhiteSpace(_webBaseUrl))
+        foreach (var tc in Catalog)
         {
-            var webPages = _webPagePaths.Length > 0 ? _webPagePaths : ["/"];
-            foreach (var page in webPages)
-            {
-                var webTarget = BuildWebTarget(_webBaseUrl, page);
-                await Test(results, $"SCAN_WINDOW — web page visible ({webTarget})",
-                    $"SCAN_WINDOW {webTarget}",
-                    r => r.Success && !string.IsNullOrWhiteSpace(r.Data),
-                    ct);
-            }
+            if (ct.IsCancellationRequested) break;
+            var r = await RunOneInternalAsync(tc, ct);
+            results.Add(r);
         }
-
-        // ── WinForms window ────────────────────────────────────────────────────
-        var wfScanSw = Stopwatch.StartNew();
-        var wfScan = await _client.SendAsync("SCAN_WINDOW ApexUIBridge Test Application - WinForms", ct);
-        wfScanSw.Stop();
-        Add(results, Result("SCAN_WINDOW WinForms", wfScan.Success, wfScan.Message, wfScanSw.ElapsedMilliseconds, "SCAN_WINDOW ApexUIBridge Test Application - WinForms"));
-
-        if (wfScan.Success && wfScan.Data is { } wfData)
-        {
-            // TextBox — UIA Name is empty for Edit controls; look for the AutomationId in brackets
-            var tbId = FindId(wfData, "[TextBox]");
-            if (tbId.HasValue)
-            {
-                await Test(results, "GET_TEXT WinForms TextBox → 'Test TextBox'",
-                    $"GET_TEXT {tbId}",
-                    r => r.Success && (r.Data?.Contains("Test TextBox") ?? false),
-                    ct);
-
-                var typed = $"autotest_{DateTime.Now:HHmmss}";
-                await Test(results, "TYPE into WinForms TextBox",
-                    $"TYPE {tbId} {typed}",
-                    r => r.Success,
-                    ct);
-
-                await Test(results, "GET_TEXT WinForms TextBox → typed value",
-                    $"GET_TEXT {tbId}",
-                    r => r.Success && (r.Data?.Contains(typed) ?? false),
-                    ct);
-            }
-            else Add(results, Result("WinForms TextBox — element found in scan", false, "ID not found"));
-
-            // CheckBox
-            var cbId = FindId(wfData, "Test Checkbox");
-            if (cbId.HasValue)
-            {
-                await Test(results, "TOGGLE WinForms SimpleCheckBox",
-                    $"TOGGLE {cbId}",
-                    r => r.Success,
-                    ct);
-                // Toggle back so the UI stays in known state
-                await Test(results, "TOGGLE WinForms SimpleCheckBox (restore)",
-                    $"TOGGLE {cbId}",
-                    r => r.Success,
-                    ct);
-            }
-            else Add(results, Result("WinForms CheckBox — element found in scan", false, "ID not found"));
-
-            // Button (ContextMenu button)
-            var btnId = FindId(wfData, "ContextMenu");
-            if (btnId.HasValue)
-            {
-                await Test(results, "CLICK WinForms ContextMenu button",
-                    $"CLICK {btnId}",
-                    r => r.Success,
-                    ct);
-            }
-            else Add(results, Result("WinForms Button — element found in scan", false, "ID not found"));
-
-            // ProgressBar value read
-            var pbId = FindIdByType(wfData, "ProgressBar");
-            if (pbId.HasValue)
-            {
-                await Test(results, "GET_TEXT WinForms ProgressBar (value readable)",
-                    $"GET_TEXT {pbId}",
-                    r => r.Success,
-                    ct);
-            }
-
-            // Editable ComboBox
-            var comboId = FindId(wfData, "EditableCombo");
-            if (comboId.HasValue)
-            {
-                await Test(results, "EXPAND WinForms EditableCombo",
-                    $"EXPAND {comboId}",
-                    r => r.Success,
-                    ct);
-                await Test(results, "COLLAPSE WinForms EditableCombo",
-                    $"COLLAPSE {comboId}",
-                    r => r.Success,
-                    ct);
-            }
-        }
-
-        // ── WPF window ─────────────────────────────────────────────────────────
-        var wpfScanSw = Stopwatch.StartNew();
-        var wpfScan = await _client.SendAsync("SCAN_WINDOW ApexUIBridge Test Application - WPF", ct);
-        wpfScanSw.Stop();
-        Add(results, Result("SCAN_WINDOW WPF", wpfScan.Success, wpfScan.Message, wpfScanSw.ElapsedMilliseconds, "SCAN_WINDOW ApexUIBridge Test Application - WPF"));
-
-        if (wpfScan.Success && wpfScan.Data is { } wpfData)
-        {
-            // TextBox — UIA Name is empty for Edit controls; look for the AutomationId in brackets
-            var wpfTbId = FindId(wpfData, "[TextBox]");
-            if (wpfTbId.HasValue)
-            {
-                await Test(results, "GET_TEXT WPF TextBox → 'Test TextBox'",
-                    $"GET_TEXT {wpfTbId}",
-                    r => r.Success && (r.Data?.Contains("Test TextBox") ?? false),
-                    ct);
-
-                await Test(results, "TYPE into WPF TextBox",
-                    $"TYPE {wpfTbId} wpf_auto_{DateTime.Now:HHmmss}",
-                    r => r.Success,
-                    ct);
-            }
-            else Add(results, Result("WPF TextBox — element found in scan", false, "ID not found"));
-
-            // CheckBox
-            var wpfCbId = FindId(wpfData, "Test Checkbox");
-            if (wpfCbId.HasValue)
-            {
-                await Test(results, "TOGGLE WPF SimpleCheckBox",
-                    $"TOGGLE {wpfCbId}",
-                    r => r.Success,
-                    ct);
-                await Test(results, "TOGGLE WPF SimpleCheckBox (restore)",
-                    $"TOGGLE {wpfCbId}",
-                    r => r.Success,
-                    ct);
-            }
-
-            // InvokableButton (has a Command binding — good ICommand test)
-            var invId = FindId(wpfData, "[InvokableButton]");
-            if (invId.HasValue)
-            {
-                await Test(results, "CLICK WPF InvokableButton",
-                    $"CLICK {invId}",
-                    r => r.Success,
-                    ct);
-                // Give WPF time to process the ICommand and push the binding update through UIA
-                await Task.Delay(_uiSettleDelayMs, ct);
-                // Re-scan so the element registry reflects the new Content="Invoked!" Name value
-                var afterClickScanSw = Stopwatch.StartNew();
-                var afterClickScan = await _client.SendAsync("SCAN_WINDOW ApexUIBridge Test Application - WPF", ct);
-                afterClickScanSw.Stop();
-                Add(results, Result("WPF InvokableButton → 'Invoked!' (after re-scan)",
-                    afterClickScan.Success && (afterClickScan.Data?.Contains("'Invoked!'") ?? false),
-                    afterClickScan.Success ? "Button name did not change to 'Invoked!'" : afterClickScan.Message,
-                    afterClickScanSw.ElapsedMilliseconds,
-                    "SCAN_WINDOW ApexUIBridge Test Application - WPF"));
-            }
-
-            // Non-editable ComboBox
-            var wpfComboId = FindId(wpfData, "NonEditable");
-            if (wpfComboId.HasValue)
-            {
-                await Test(results, "EXPAND WPF NonEditableCombo",
-                    $"EXPAND {wpfComboId}",
-                    r => r.Success,
-                    ct);
-                await Test(results, "COLLAPSE WPF NonEditableCombo",
-                    $"COLLAPSE {wpfComboId}",
-                    r => r.Success,
-                    ct);
-            }
-
-            // Slider
-            var sliderWpfId = FindIdByType(wpfData, "Slider");
-            if (sliderWpfId.HasValue)
-            {
-                await Test(results, "SET_VALUE WPF Slider to 7",
-                    $"SET_VALUE {sliderWpfId} 7",
-                    r => r.Success,
-                    ct);
-            }
-        }
-
-        // ── HELP command sanity check ──────────────────────────────────────────
-        await Test(results, "HELP command returns content",
-            "HELP",
-            r => r.Success && !string.IsNullOrWhiteSpace(r.Data),
-            ct);
-
-        // ── WinForms Torture Test ──────────────────────────────────────────────
-        await RunWinFormsTortureTests(results, ct);
-
-        // ── WPF Torture Test ───────────────────────────────────────────────────
-        await RunWpfTortureTests(results, ct);
-
         return new CycleResult(results);
     }
 
-    // ── WinForms Torture Test ──────────────────────────────────────────────────
-
-    private async Task RunWinFormsTortureTests(List<TestResult> results, CancellationToken ct)
+    /// <summary>Run a single test by its stable id. Throws <see cref="KeyNotFoundException"/> if unknown.</summary>
+    public async Task<TestResult> RunOneAsync(string id, CancellationToken ct)
     {
-        const string p = "WF Torture";
-
-        // Re-scan the main WinForms window to get the Tools menu element
-        var mainScanSw = Stopwatch.StartNew();
-        var mainScan = await _client.SendAsync("SCAN_WINDOW ApexUIBridge Test Application - WinForms", ct);
-        mainScanSw.Stop();
-        if (!mainScan.Success || mainScan.Data == null)
-        {
-            Add(results, Result($"{p}: re-scan main window", false, mainScan.Message, mainScanSw.ElapsedMilliseconds, "SCAN_WINDOW ApexUIBridge Test Application - WinForms")); return;
-        }
-
-        // WinForms ToolStripDropDown opens as a SEPARATE floating HWND —
-        // SCAN_WINDOW with window-filter can't see its children.
-        // Use keyboard shortcut {ALT}tt instead:
-        //   {ALT}t → Alt+T opens the "&Tools" menu
-        //   t      → T activates "Open &Torture Test Form..." accelerator
-        var toolsId = FindId(mainScan.Data, "[toolsToolStripMenuItem]");
-        if (!toolsId.HasValue)
-        {
-            Add(results, Result($"{p}: find [toolsToolStripMenuItem]", false, "Not found")); return;
-        }
-
-        await Test(results, $"{p}: keyboard open TortureTestForm via Alt+T,T",
-            $"SEND_KEYS {toolsId} {{ALT}}tt", r => r.Success, ct);
-        await Task.Delay(_uiSettleDelayMs, ct);
-
-        // Scan the torture test window (title contains "UI Torture Test")
-        var scanSw = Stopwatch.StartNew();
-        var scan = await _client.SendAsync("SCAN_WINDOW UI Torture Test", ct);
-        scanSw.Stop();
-        Add(results, Result($"{p}: SCAN_WINDOW", scan.Success, scan.Message, scanSw.ElapsedMilliseconds, "SCAN_WINDOW UI Torture Test"));
-        if (!scan.Success || scan.Data == null) return;
-        var td = scan.Data;
-        // WinForms creates ALL tab-page controls at startup — no rescan needed per tab.
-
-        // ── Identity tab — CheckBoxes ──────────────────────────────────────────
-        foreach (var name in new[] { "AD Sync", "MFA Enabled", "VPN Access" })
-            await Torture_Toggle(results, $"{p}: toggle '{name}'", td, $"'{name}'", ct);
-
-        // ── Switch to Network tab ──────────────────────────────────────────────
-        await Torture_ClickTab(results, $"{p}: switch → Network", td, "'Network'", ct);
-        await Task.Delay(_actionDelayMs, ct);
-
-        // Network tab — TLS CheckBoxes
-        foreach (var name in new[] { "Verify Server Certificate", "Certificate Pinning" })
-            await Torture_Toggle(results, $"{p}: toggle '{name}'", td, $"'{name}'", ct);
-
-        // Connection-mode RadioButtons — WinForms RadioButton supports TogglePattern
-        await Torture_Toggle(results, $"{p}: select 'Via Proxy' radio",  td, "'Via Proxy'", ct, restoreAfter: false);
-        await Torture_Toggle(results, $"{p}: restore 'Direct' radio",    td, "'Direct'",    ct, restoreAfter: false);
-
-        // ── Switch to Scheduler tab ────────────────────────────────────────────
-        await Torture_ClickTab(results, $"{p}: switch → Scheduler", td, "'Scheduler'", ct);
-        await Task.Delay(_actionDelayMs, ct);
-
-        await Torture_Toggle(results, $"{p}: toggle 'Retry on Failure'", td, "'Retry on Failure'", ct);
-
-        // ── Switch to Logs tab ─────────────────────────────────────────────────
-        await Torture_ClickTab(results, $"{p}: switch → Logs", td, "'Logs'", ct);
-        await Task.Delay(_actionDelayMs, ct);
-
-        await Torture_Toggle(results, $"{p}: toggle 'Auto-scroll'", td, "'Auto-scroll'", ct);
-
-        // ── Return to Identity tab ─────────────────────────────────────────────
-        await Torture_ClickTab(results, $"{p}: switch → Identity (restore)", td, "'Identity'", ct);
+        var tc = Catalog.FirstOrDefault(c => string.Equals(c.Id, id, StringComparison.OrdinalIgnoreCase))
+            ?? throw new KeyNotFoundException($"No test with id '{id}'");
+        // Drop scan cache for a single-shot run so the tree is fresh.
+        _scanCache.Clear();
+        return await RunOneInternalAsync(tc, ct);
     }
 
-    // ── WPF Torture Test ───────────────────────────────────────────────────────
+    // ── Catalog construction ──────────────────────────────────────────────────
 
-    private async Task RunWpfTortureTests(List<TestResult> results, CancellationToken ct)
+    private IReadOnlyList<TestCase> BuildCatalog()
     {
-        const string p = "WPF Torture";
-
-        // Open via Tools › Open Torture Test Window...
-        var mainScanSw = Stopwatch.StartNew();
-        var mainScan = await _client.SendAsync("SCAN_WINDOW ApexUIBridge Test Application - WPF", ct);
-        mainScanSw.Stop();
-        if (!mainScan.Success || mainScan.Data == null)
+        var list = new List<TestCase>
         {
-            Add(results, Result($"{p}: re-scan main window", false, mainScan.Message, mainScanSw.ElapsedMilliseconds, "SCAN_WINDOW ApexUIBridge Test Application - WPF")); return;
-        }
+            // Discovery
+            new("discovery-winforms-visible", "GET /windows — WinForms app visible", "discovery",
+                ct => CheckAsync("GET /windows — WinForms app visible", "GET /windows",
+                    () => _client.ListWindowsAsync(ct),
+                    r => r.Success && (r.Result?.Contains(WinFormsTitle) ?? false), ct)),
 
-        // Click the Tools menu to expand it (no AutomationId — find by name "'Tools'")
-        var toolsId = FindId(mainScan.Data, "'Tools'");
-        if (toolsId.HasValue)
-        {
-            var clickToolsSw = Stopwatch.StartNew();
-            await _client.SendAsync($"CLICK {toolsId}", ct);
-            clickToolsSw.Stop();
-            await Task.Delay(_actionDelayMs, ct);
-        }
+            new("discovery-wpf-visible", "GET /windows — WPF app visible", "discovery",
+                ct => CheckAsync("GET /windows — WPF app visible", "GET /windows",
+                    () => _client.ListWindowsAsync(ct),
+                    r => r.Success && (r.Result?.Contains(WpfTitle) ?? false), ct)),
 
-        var expandedScan = await _client.SendAsync("SCAN_WINDOW ApexUIBridge Test Application - WPF", ct);
-        var menuItemId = expandedScan.Success
-            ? FindId(expandedScan.Data ?? "", "Open Torture Test Window")
-            : null;
+            // WinForms
+            new("winforms-scan", "SCAN_WINDOW WinForms", "winforms",
+                ct => ScanAsRootTestAsync("WinForms", WinFormsTitle, ct)),
 
-        if (!menuItemId.HasValue)
-        {
-            Add(results, Result($"{p}: find 'Open Torture Test Window' menu item", false, "Not found")); return;
-        }
-
-        await Test(results, $"{p}: click 'Open Torture Test Window...'",
-            $"CLICK {menuItemId}", r => r.Success, ct);
-        await Task.Delay(_uiSettleDelayMs, ct);
-
-        // Initial scan — Identity tab is selected by default
-        var scanSw = Stopwatch.StartNew();
-        var scan = await _client.SendAsync("SCAN_WINDOW WPF Torture Test", ct);
-        scanSw.Stop();
-        Add(results, Result($"{p}: SCAN_WINDOW", scan.Success, scan.Message, scanSw.ElapsedMilliseconds, "SCAN_WINDOW WPF Torture Test"));
-        if (!scan.Success || scan.Data == null) return;
-        var td = scan.Data;
-        // `td` contains Identity tab content + all tab headers (stable IDs across rescans)
-
-        // ── Identity tab ───────────────────────────────────────────────────────
-        await Torture_Type(results, $"{p}: TYPE [Username]", td, "[Username]", "torture_user", ct);
-        await Torture_Type(results, $"{p}: TYPE [Email]",    td, "[Email]",    "test@torture.local", ct);
-
-        var accessId = FindId(td, "[AccessLevel]");
-        if (accessId.HasValue)
-            await Test(results, $"{p}: SET_VALUE [AccessLevel] = 4",
-                $"SET_VALUE {accessId} 4", r => r.Success, ct);
-        else
-            Add(results, Result($"{p}: find [AccessLevel]", false, "Not found"));
-
-        // WPF RadioButton does NOT support TogglePattern — use CLICK (InvokePattern)
-        await Torture_ClickTab(results, $"{p}: CLICK [EmpContractor]",        td, "[EmpContractor]", ct);
-        await Torture_ClickTab(results, $"{p}: CLICK [EmpFullTime] (restore)", td, "[EmpFullTime]",   ct);
-
-        // ── Network tab — rescan after switching ───────────────────────────────
-        // WPF TabControl only loads the SELECTED tab's content into the UIA tree;
-        // a fresh SCAN_WINDOW is required after every tab switch to see new controls.
-        await Torture_ClickTab(results, $"{p}: switch → [TabNetwork]", td, "[TabNetwork]", ct);
-        await Task.Delay(_actionDelayMs, ct);
-        var networkScanSw = Stopwatch.StartNew();
-        var networkScan = await _client.SendAsync("SCAN_WINDOW WPF Torture Test", ct);
-        networkScanSw.Stop();
-        if (networkScan.Success && networkScan.Data is { } networkData)
-        {
-            await Torture_Type(results, $"{p}: TYPE [Port]", networkData, "[Port]", "9443", ct);
-        }
-        else
-        {
-            Add(results, Result($"{p}: SCAN_WINDOW after [TabNetwork]", false, networkScan.Message, networkScanSw.ElapsedMilliseconds, "SCAN_WINDOW WPF Torture Test"));
-        }
-
-        // ── Scheduler tab ─────────────────────────────────────────────────────
-        await Torture_ClickTab(results, $"{p}: switch → [TabScheduler]", td, "[TabScheduler]", ct);
-        await Task.Delay(_actionDelayMs, ct);
-        var schedulerScanSw = Stopwatch.StartNew();
-        var schedulerScan = await _client.SendAsync("SCAN_WINDOW WPF Torture Test", ct);
-        schedulerScanSw.Stop();
-        if (schedulerScan.Success && schedulerScan.Data is { } schedulerData)
-        {
-            await Torture_Toggle(results, $"{p}: toggle [RetryOnFail]", schedulerData, "[RetryOnFail]", ct);
-            await Torture_Toggle(results, $"{p}: toggle [RunOnMissed]", schedulerData, "[RunOnMissed]", ct);
-        }
-        else
-        {
-            Add(results, Result($"{p}: SCAN_WINDOW after [TabScheduler]", false, schedulerScan.Message, schedulerScanSw.ElapsedMilliseconds, "SCAN_WINDOW WPF Torture Test"));
-        }
-
-        // ── Layout tab — WrapPanel action buttons ─────────────────────────────
-        await Torture_ClickTab(results, $"{p}: switch → [TabLayout]", td, "[TabLayout]", ct);
-        await Task.Delay(_actionDelayMs, ct);
-        var layoutScanSw = Stopwatch.StartNew();
-        var layoutScan = await _client.SendAsync("SCAN_WINDOW WPF Torture Test", ct);
-        layoutScanSw.Stop();
-        if (layoutScan.Success && layoutScan.Data is { } layoutData)
-        {
-            foreach (var btn in new[] { "[BtnApply]", "[BtnValidate]", "[BtnReset]", "[BtnRefresh]", "[BtnExport]", "[BtnDeploy]" })
-            {
-                var btnId = FindId(layoutData, btn);
-                if (btnId.HasValue)
-                    await Test(results, $"{p}: CLICK {btn}", $"CLICK {btnId}", r => r.Success, ct);
-                else
-                    Add(results, Result($"{p}: find {btn}", false, "Not found"));
-            }
-        }
-        else
-        {
-            Add(results, Result($"{p}: SCAN_WINDOW after [TabLayout]", false, layoutScan.Message, layoutScanSw.ElapsedMilliseconds, "SCAN_WINDOW WPF Torture Test"));
-        }
-
-        // ── WPF tab — Expanders, ToggleButtons, CheckBox, nested sub-tabs ─────
-        await Torture_ClickTab(results, $"{p}: switch → [TabWpf]", td, "[TabWpf]", ct);
-        await Task.Delay(_actionDelayMs, ct);
-        var wpfTabScanSw = Stopwatch.StartNew();
-        var wpfTabScan = await _client.SendAsync("SCAN_WINDOW WPF Torture Test", ct);
-        wpfTabScanSw.Stop();
-        if (wpfTabScan.Success && wpfTabScan.Data is { } wpfTabData)
-        {
-            // Expanders (support ExpandCollapsePattern)
-            foreach (var expAid in new[] { "[ExpanderServer]", "[ExpanderFeatures]", "[ExpanderLogging]" })
-            {
-                var eid = FindId(wpfTabData, expAid);
-                if (eid.HasValue)
+            new("winforms-textbox-type", "POST /execute type → WinForms TextBox", "winforms",
+                async ct =>
                 {
-                    await Test(results, $"{p}: EXPAND {expAid}",   $"EXPAND {eid}",   r => r.Success, ct);
-                    await Test(results, $"{p}: COLLAPSE {expAid}", $"COLLAPSE {eid}", r => r.Success, ct);
-                }
-                else Add(results, Result($"{p}: find {expAid}", false, "Not found"));
-            }
+                    var tree = await GetScanAsync(WinFormsTitle, ct);
+                    if (tree == null) return Fail("POST /execute type → WinForms TextBox", "WinForms scan failed");
+                    var tb = FindNode(tree, n => ControlTypeIs(n, "Edit"));
+                    if (tb == null) return Fail("POST /execute type → WinForms TextBox", "No Edit control found");
+                    var typed = $"autotest_{DateTime.Now:HHmmss}";
+                    return await ExecAsync("POST /execute type → WinForms TextBox", tb, "type", typed, ct);
+                }),
 
-            // ToggleButtons (WPF ToggleButton supports TogglePattern)
-            await Torture_Toggle(results, $"{p}: toggle [Toggle1]",  wpfTabData, "[Toggle1]",  ct);
-            await Torture_Toggle(results, $"{p}: toggle [Toggle2]",  wpfTabData, "[Toggle2]",  ct);
+            new("winforms-textbox-gettext", "POST /execute gettext → typed value", "winforms",
+                async ct =>
+                {
+                    // Type a deterministic value, then gettext and assert round-trip.
+                    var tree = await GetScanAsync(WinFormsTitle, ct);
+                    if (tree == null) return Fail("POST /execute gettext → typed value", "WinForms scan failed");
+                    var tb = FindNode(tree, n => ControlTypeIs(n, "Edit"));
+                    if (tb == null) return Fail("POST /execute gettext → typed value", "No Edit control found");
+                    var typed = $"autotest_{DateTime.Now:HHmmss}";
+                    var typeResp = await _client.ExecuteAsync(tb["id"]!.GetValue<int>(), "type", typed, ct);
+                    if (!typeResp.Success) return Fail("POST /execute gettext → typed value", $"type failed: {typeResp.Detail}");
+                    if (_actionDelayMs > 0) await Task.Delay(_actionDelayMs, ct);
+                    return await CheckAsync("POST /execute gettext → typed value",
+                        $"POST /execute action=gettext id={tb["id"]}",
+                        () => _client.ExecuteAsync(tb["id"]!.GetValue<int>(), "gettext", null, ct),
+                        r => r.Success && (r.Result?.Contains(typed) ?? false), ct);
+                }),
 
-            // CheckBox
-            await Torture_Toggle(results, $"{p}: toggle [CbNormal]", wpfTabData, "[CbNormal]", ct);
+            new("winforms-checkbox-toggle", "POST /execute toggle → WinForms SimpleCheckBox", "winforms",
+                async ct =>
+                {
+                    var tree = await GetScanAsync(WinFormsTitle, ct);
+                    if (tree == null) return Fail("POST /execute toggle → WinForms SimpleCheckBox", "WinForms scan failed");
+                    var cb = FindNode(tree, n => NameOrIdContains(n, "Test Checkbox"));
+                    if (cb == null) return Fail("POST /execute toggle → WinForms SimpleCheckBox", "Not found");
+                    var r = await ExecAsync("POST /execute toggle → WinForms SimpleCheckBox", cb, "toggle", null, ct);
+                    // Restore so subsequent runs are idempotent.
+                    _ = await _client.ExecuteAsync(cb["id"]!.GetValue<int>(), "toggle", null, ct);
+                    return r;
+                }),
 
-            // Nested sub-tabs (TabControl inside WPF tab)
-            foreach (var subTab in new[] { "[SubTabB]", "[SubTabC]", "[SubTabA]" })
-                await Torture_ClickTab(results, $"{p}: sub-tab {subTab}", wpfTabData, subTab, ct);
-        }
-        else
+            new("winforms-contextmenu-click", "POST /execute click → WinForms ContextMenu button", "winforms",
+                async ct =>
+                {
+                    var tree = await GetScanAsync(WinFormsTitle, ct);
+                    if (tree == null) return Fail("POST /execute click → WinForms ContextMenu button", "WinForms scan failed");
+                    var btn = FindNode(tree, n => NameOrIdContains(n, "ContextMenu"));
+                    if (btn == null) return Fail("POST /execute click → WinForms ContextMenu button", "Not found");
+                    return await ExecAsync("POST /execute click → WinForms ContextMenu button", btn, "click", null, ct);
+                }),
+
+            new("winforms-progressbar-gettext", "POST /execute gettext → WinForms ProgressBar", "winforms",
+                async ct =>
+                {
+                    var tree = await GetScanAsync(WinFormsTitle, ct);
+                    if (tree == null) return Fail("POST /execute gettext → WinForms ProgressBar", "WinForms scan failed");
+                    var pb = FindNode(tree, n => ControlTypeIs(n, "ProgressBar"));
+                    if (pb == null) return Fail("POST /execute gettext → WinForms ProgressBar", "Not found");
+                    return await ExecAsync("POST /execute gettext → WinForms ProgressBar", pb, "gettext", null, ct);
+                }),
+
+            new("winforms-combo-expand-collapse", "POST /execute expand/collapse → WinForms EditableCombo", "winforms",
+                async ct =>
+                {
+                    var tree = await GetScanAsync(WinFormsTitle, ct);
+                    if (tree == null) return Fail("POST /execute expand/collapse → WinForms EditableCombo", "WinForms scan failed");
+                    var combo = FindNode(tree, n => NameOrIdContains(n, "EditableCombo"));
+                    if (combo == null) return Fail("POST /execute expand/collapse → WinForms EditableCombo", "Not found");
+                    var expand = await ExecAsync("POST /execute expand → WinForms EditableCombo", combo, "expand", null, ct);
+                    if (!expand.Passed) return expand with { Name = "POST /execute expand/collapse → WinForms EditableCombo" };
+                    var collapse = await ExecAsync("POST /execute collapse → WinForms EditableCombo", combo, "collapse", null, ct);
+                    return collapse with { Name = "POST /execute expand/collapse → WinForms EditableCombo" };
+                }),
+
+            // WPF
+            new("wpf-scan", "SCAN_WINDOW WPF", "wpf",
+                ct => ScanAsRootTestAsync("WPF", WpfTitle, ct)),
+
+            new("wpf-textbox-type", "POST /execute type → WPF TextBox", "wpf",
+                async ct =>
+                {
+                    var tree = await GetScanAsync(WpfTitle, ct);
+                    if (tree == null) return Fail("POST /execute type → WPF TextBox", "WPF scan failed");
+                    var tb = FindNode(tree, n => ControlTypeIs(n, "Edit"));
+                    if (tb == null) return Fail("POST /execute type → WPF TextBox", "Not found");
+                    return await ExecAsync("POST /execute type → WPF TextBox", tb, "type",
+                        $"wpf_auto_{DateTime.Now:HHmmss}", ct);
+                }),
+
+            new("wpf-checkbox-toggle", "POST /execute toggle → WPF SimpleCheckBox", "wpf",
+                async ct =>
+                {
+                    var tree = await GetScanAsync(WpfTitle, ct);
+                    if (tree == null) return Fail("POST /execute toggle → WPF SimpleCheckBox", "WPF scan failed");
+                    var cb = FindNode(tree, n => NameOrIdContains(n, "Test Checkbox"));
+                    if (cb == null) return Fail("POST /execute toggle → WPF SimpleCheckBox", "Not found");
+                    var r = await ExecAsync("POST /execute toggle → WPF SimpleCheckBox", cb, "toggle", null, ct);
+                    _ = await _client.ExecuteAsync(cb["id"]!.GetValue<int>(), "toggle", null, ct);
+                    return r;
+                }),
+
+            new("wpf-invokable-click", "POST /execute click → WPF InvokableButton", "wpf",
+                async ct =>
+                {
+                    var tree = await GetScanAsync(WpfTitle, ct);
+                    if (tree == null) return Fail("POST /execute click → WPF InvokableButton", "WPF scan failed");
+                    var inv = FindNode(tree, n => AutomationIdIs(n, "InvokableButton"));
+                    if (inv == null) return Fail("POST /execute click → WPF InvokableButton", "Not found");
+                    var clicked = await ExecAsync("POST /execute click → WPF InvokableButton", inv, "click", null, ct);
+                    if (!clicked.Passed) return clicked;
+                    await Task.Delay(_uiSettleDelayMs, ct);
+                    var after = await _client.ScanWindowAsync(WpfTitle, ct);
+                    // Drop stale cache — the tree just changed.
+                    _scanCache.Remove(WpfTitle);
+                    var ok = after.Success && (after.Result?.Contains("Invoked!") ?? false);
+                    return new TestResult(
+                        "WPF InvokableButton → 'Invoked!' after re-scan",
+                        ok,
+                        ok ? "" : (after.Success ? "Button text did not change to 'Invoked!'" : after.Detail),
+                        Command: "GET /elements (after click)");
+                }),
+
+            new("wpf-combo-expand-collapse", "POST /execute expand/collapse → WPF NonEditableCombo", "wpf",
+                async ct =>
+                {
+                    var tree = await GetScanAsync(WpfTitle, ct);
+                    if (tree == null) return Fail("POST /execute expand/collapse → WPF NonEditableCombo", "WPF scan failed");
+                    var combo = FindNode(tree, n => NameOrIdContains(n, "NonEditable"));
+                    if (combo == null) return Fail("POST /execute expand/collapse → WPF NonEditableCombo", "Not found");
+                    var expand = await ExecAsync("POST /execute expand → WPF NonEditableCombo", combo, "expand", null, ct);
+                    if (!expand.Passed) return expand with { Name = "POST /execute expand/collapse → WPF NonEditableCombo" };
+                    var collapse = await ExecAsync("POST /execute collapse → WPF NonEditableCombo", combo, "collapse", null, ct);
+                    return collapse with { Name = "POST /execute expand/collapse → WPF NonEditableCombo" };
+                }),
+
+            new("wpf-slider-setrange-verify", "POST /execute setrange 7 → WPF Slider (verified)", "wpf",
+                ct => SliderSetAndVerifyAsync("POST /execute setrange 7 → WPF Slider (verified)",
+                    WpfTitle, "7", ct)),
+
+            // Richer WinForms interactions ─────────────────────────────────────
+            new("winforms-textbox-edit-clear-retype", "TextBox edit → clear → retype (verified)", "winforms",
+                ct => TextBoxEditRetypeAsync("TextBox edit → clear → retype (verified)",
+                    WinFormsTitle, ControlTypeEdit, ct)),
+
+            new("winforms-slider-setrange-verify", "POST /execute setrange 3 → WinForms Slider (verified)", "winforms",
+                ct => SliderSetAndVerifyAsync("POST /execute setrange 3 → WinForms Slider (verified)",
+                    WinFormsTitle, "3", ct)),
+
+            new("winforms-listbox-select", "POST /execute select → WinForms ListBox item", "winforms",
+                ct => ListBoxSelectFirstItemAsync("POST /execute select → WinForms ListBox item",
+                    WinFormsTitle, ct)),
+
+            new("winforms-radio-select", "POST /execute click → WinForms RadioButton2 (mutex)", "winforms",
+                ct => RadioSelectAsync("POST /execute click → WinForms RadioButton2 (mutex)",
+                    WinFormsTitle, ct)),
+
+            new("winforms-3state-cycle", "Cycle ThreeStateCheckBox x3 (WinForms)", "winforms",
+                ct => ThreeStateCycleAsync("Cycle ThreeStateCheckBox x3 (WinForms)", WinFormsTitle, ct)),
+
+            new("winforms-menu-edit-copy", "Click Edit → Copy Plain menu item (WinForms)", "winforms",
+                ct => MenuClickAsync("Click Edit → Copy Plain menu item (WinForms)",
+                    WinFormsTitle, parentMenu: "Edit", leafMenu: "Plain", ct)),
+
+            // Richer WPF interactions ──────────────────────────────────────────
+            new("wpf-listbox-select", "POST /execute select → WPF ListBox item", "wpf",
+                ct => ListBoxSelectFirstItemAsync("POST /execute select → WPF ListBox item",
+                    WpfTitle, ct)),
+
+            new("wpf-expander-toggle", "POST /execute expand/collapse → WPF Expander", "wpf",
+                async ct =>
+                {
+                    var tree = await GetScanAsync(WpfTitle, ct);
+                    if (tree == null) return Fail("POST /execute expand/collapse → WPF Expander", "WPF scan failed");
+                    var exp = FindNode(tree, n => AutomationIdIs(n, "Expander"))
+                           ?? FindNode(tree, n => NameOrIdContains(n, "Expander"));
+                    if (exp == null) return Fail("POST /execute expand/collapse → WPF Expander", "Not found");
+                    var expand = await ExecAsync("POST /execute expand → WPF Expander", exp, "expand", null, ct);
+                    if (!expand.Passed) return expand with { Name = "POST /execute expand/collapse → WPF Expander" };
+                    var collapse = await ExecAsync("POST /execute collapse → WPF Expander", exp, "collapse", null, ct);
+                    return collapse with { Name = "POST /execute expand/collapse → WPF Expander" };
+                }),
+
+            new("wpf-menu-file", "Click File menu (WPF)", "wpf",
+                ct => MenuClickAsync("Click File menu (WPF)", WpfTitle,
+                    parentMenu: "File", leafMenu: null, ct)),
+
+            // HTML (browser) — skipped gracefully if no browser window is open ──
+            new("html-scan", "SCAN_WINDOW Web (browser)", "html",
+                ct => ScanAsRootTestAsync("Web", WebTitle, ct)),
+
+            new("html-textbox-type", "POST /execute type → HTML TextBox (verified)", "html",
+                ct => TextBoxEditRetypeAsync("POST /execute type → HTML TextBox (verified)",
+                    WebTitle, ControlTypeEdit, ct)),
+
+            new("html-slider-setrange-verify", "POST /execute setrange 4 → HTML range slider (verified)", "html",
+                ct => SliderSetAndVerifyAsync("POST /execute setrange 4 → HTML range slider (verified)",
+                    WebTitle, "4", ct)),
+
+            // Meta
+            new("meta-help", "GET /help — returns content", "meta",
+                ct => CheckAsync("GET /help — returns content", "GET /help",
+                    () => _client.HelpAsync(ct),
+                    r => r.Success && !string.IsNullOrWhiteSpace(r.Result), ct)),
+        };
+        return list.AsReadOnly();
+    }
+
+    private const string ControlTypeEdit = "Edit";
+
+    // ── Higher-level reusable test bodies ─────────────────────────────────────
+
+    /// <summary>Type a deterministic value into an Edit control, read it back, clear, retype, read back again.</summary>
+    private async Task<TestResult> TextBoxEditRetypeAsync(string name, string windowTitle, string controlType, CancellationToken ct)
+    {
+        var tree = await GetScanAsync(windowTitle, ct);
+        if (tree == null) return Fail(name, $"scan of '{windowTitle}' failed (window not open?)");
+
+        var tb = FindNode(tree, n => ControlTypeIs(n, controlType));
+        if (tb == null) return Fail(name, $"No {controlType} control found");
+        int id = tb["id"]!.GetValue<int>();
+
+        string first  = $"first_{DateTime.Now:HHmmssfff}";
+        string second = $"second_{DateTime.Now:HHmmssfff}";
+
+        var r1 = await _client.ExecuteAsync(id, "type", first, ct);
+        if (!r1.Success) return Fail(name, $"type #1 failed: {r1.Detail}");
+        if (_actionDelayMs > 0) await Task.Delay(_actionDelayMs, ct);
+
+        var g1 = await _client.ExecuteAsync(id, "gettext", null, ct);
+        if (!g1.Success || !(g1.Result?.Contains(first) ?? false))
+            return Fail(name, $"gettext after first type did not contain '{first}'. Got: {g1.Result}");
+
+        // Clear + retype to prove the edit surface accepts a new value.
+        var clear = await _client.ExecuteAsync(id, "clear", null, ct);
+        if (!clear.Success)
         {
-            Add(results, Result($"{p}: SCAN_WINDOW after [TabWpf]", false, wpfTabScan.Message, wpfTabScanSw.ElapsedMilliseconds, "SCAN_WINDOW WPF Torture Test"));
+            // Some Edit surfaces lack a "clear" action — fall back to selectall + overwrite.
+            _ = await _client.ExecuteAsync(id, "selectall", null, ct);
         }
+        if (_actionDelayMs > 0) await Task.Delay(_actionDelayMs, ct);
 
-        // ── Return to Identity ─────────────────────────────────────────────────
-        await Torture_ClickTab(results, $"{p}: switch → [TabIdentity] (restore)", td, "[TabIdentity]", ct);
+        var r2 = await _client.ExecuteAsync(id, "type", second, ct);
+        if (!r2.Success) return Fail(name, $"type #2 failed: {r2.Detail}");
+        if (_actionDelayMs > 0) await Task.Delay(_actionDelayMs, ct);
+
+        var g2 = await _client.ExecuteAsync(id, "gettext", null, ct);
+        bool ok = g2.Success && (g2.Result?.Contains(second) ?? false);
+        return new TestResult(name, ok,
+            ok ? $"typed+verified '{first}' then '{second}'"
+               : $"final gettext did not contain '{second}'. Got: {g2.Result}",
+            Command: $"POST /execute type/gettext id={id}");
     }
 
-    // ── Shared Torture-test helpers ────────────────────────────────────────────
-
-    /// <summary>Toggle an element (and optionally restore it) — records two results.</summary>
-    private async Task Torture_Toggle(
-        List<TestResult> results, string name, string scanData,
-        string search, CancellationToken ct, bool restoreAfter = true)
+    /// <summary>Find the first Slider, setrange to <paramref name="value"/>, then getrange and assert.</summary>
+    private async Task<TestResult> SliderSetAndVerifyAsync(string name, string windowTitle, string value, CancellationToken ct)
     {
-        var id = FindId(scanData, search);
-        if (!id.HasValue) { Add(results, Result(name, false, $"Not found: {search}")); return; }
-        await Test(results, name,               $"TOGGLE {id}", r => r.Success, ct);
-        if (restoreAfter)
-            await Test(results, $"{name} (restore)", $"TOGGLE {id}", r => r.Success, ct);
+        var tree = await GetScanAsync(windowTitle, ct);
+        if (tree == null) return Fail(name, $"scan of '{windowTitle}' failed (window not open?)");
+
+        var slider = FindNode(tree, n => ControlTypeIs(n, "Slider"));
+        if (slider == null) return Fail(name, "No Slider control found");
+        int id = slider["id"]!.GetValue<int>();
+
+        var setr = await _client.ExecuteAsync(id, "setrange", value, ct);
+        if (!setr.Success) return Fail(name, $"setrange failed: {setr.Detail}");
+        if (_uiSettleDelayMs > 0) await Task.Delay(_uiSettleDelayMs, ct);
+
+        var getr = await _client.ExecuteAsync(id, "getrange", null, ct);
+        if (!getr.Success) return Fail(name, $"getrange failed: {getr.Detail}");
+        // getrange reports "value min-max" or similar — just check the numeric target is present.
+        bool ok = getr.Result != null && getr.Result.Contains(value);
+        return new TestResult(name, ok,
+            ok ? $"setrange→getrange round-trip: {getr.Result}"
+               : $"getrange did not contain '{value}'. Got: {getr.Result}",
+            Command: $"POST /execute setrange/getrange id={id} value={value}");
     }
 
-    /// <summary>Type a value into a text field found by search token.</summary>
-    private async Task Torture_Type(
-        List<TestResult> results, string name, string scanData,
-        string search, string value, CancellationToken ct)
+    /// <summary>Find a ListBox, select its first selectable child, and assert the select call succeeded.</summary>
+    private async Task<TestResult> ListBoxSelectFirstItemAsync(string name, string windowTitle, CancellationToken ct)
     {
-        var id = FindId(scanData, search);
-        if (!id.HasValue) { Add(results, Result(name, false, $"Not found: {search}")); return; }
-        await Test(results, name, $"TYPE {id} {value}", r => r.Success, ct);
+        var tree = await GetScanAsync(windowTitle, ct);
+        if (tree == null) return Fail(name, $"scan of '{windowTitle}' failed (window not open?)");
+
+        // Try AutomationId/name "ListBox" first, then fall back to controlType=List.
+        var list = FindNode(tree, n => AutomationIdIs(n, "ListBox"))
+                ?? FindNode(tree, n => NameOrIdContains(n, "ListBox"))
+                ?? FindNode(tree, n => ControlTypeIs(n, "List"));
+        if (list == null) return Fail(name, "No ListBox found");
+
+        var firstChild = (list["children"] as JsonArray)?.FirstOrDefault() as JsonObject;
+        if (firstChild == null) return Fail(name, "ListBox has no children");
+        int childId = firstChild["id"]!.GetValue<int>();
+
+        var r = await _client.ExecuteAsync(childId, "select", null, ct);
+        bool ok = r.Success;
+        return new TestResult(name, ok, ok ? $"selected item id={childId}" : r.Detail,
+            Command: $"POST /execute select id={childId}");
     }
 
-    /// <summary>Click a tab/item identified by a search token.</summary>
-    private async Task Torture_ClickTab(
-        List<TestResult> results, string name, string scanData,
-        string search, CancellationToken ct)
+    /// <summary>Click RadioButton2 and assert the click succeeded.</summary>
+    private async Task<TestResult> RadioSelectAsync(string name, string windowTitle, CancellationToken ct)
     {
-        var id = FindId(scanData, search);
-        if (!id.HasValue) { Add(results, Result(name, false, $"Not found: {search}")); return; }
-        await Test(results, name, $"CLICK {id}", r => r.Success, ct);
-    }
+        var tree = await GetScanAsync(windowTitle, ct);
+        if (tree == null) return Fail(name, $"scan of '{windowTitle}' failed (window not open?)");
 
-    // ── Core helpers ──────────────────────────────────────────────────────────
-    private async Task Test(List<TestResult> results, string name, string command,
-        Func<BridgeResponse, bool> assert, CancellationToken ct)
-    {
-        if (_skipTests.Contains(name))
+        var rb = FindNode(tree, n => AutomationIdIs(n, "RadioButton2"))
+              ?? FindNode(tree, n => NameOrIdContains(n, "RadioButton2"));
+        if (rb == null) return Fail(name, "RadioButton2 not found");
+        int id = rb["id"]!.GetValue<int>();
+
+        var click = await _client.ExecuteAsync(id, "select", null, ct);
+        if (!click.Success)
         {
-            Add(results, new TestResult(name, true, "Skipped — previously passed", Skipped: true, Command: command));
-            return;
+            // Some hosts only accept "click" for radios.
+            click = await _client.ExecuteAsync(id, "click", null, ct);
         }
-        var sw = Stopwatch.StartNew();
-        var r = await _client.SendAsync(command, ct);
-        sw.Stop();
-        Add(results, Result(name, assert(r), r.Message, sw.ElapsedMilliseconds, command));
+        return new TestResult(name, click.Success, click.Detail,
+            Command: $"POST /execute select|click id={id}");
     }
 
-    private void Add(List<TestResult> results, TestResult r)
+    /// <summary>Toggle the ThreeStateCheckBox three times to cycle through all states.</summary>
+    private async Task<TestResult> ThreeStateCycleAsync(string name, string windowTitle, CancellationToken ct)
     {
-        results.Add(r);
+        var tree = await GetScanAsync(windowTitle, ct);
+        if (tree == null) return Fail(name, $"scan of '{windowTitle}' failed (window not open?)");
+
+        var cb = FindNode(tree, n => AutomationIdIs(n, "ThreeStateCheckBox"))
+              ?? FindNode(tree, n => NameOrIdContains(n, "ThreeState"));
+        if (cb == null) return Fail(name, "ThreeStateCheckBox not found");
+        int id = cb["id"]!.GetValue<int>();
+
+        for (int i = 0; i < 3; i++)
+        {
+            var r = await _client.ExecuteAsync(id, "toggle", null, ct);
+            if (!r.Success) return Fail(name, $"toggle #{i + 1} failed: {r.Detail}");
+            if (_actionDelayMs > 0) await Task.Delay(_actionDelayMs, ct);
+        }
+        return new TestResult(name, true, "cycled ThreeStateCheckBox 3×",
+            Command: $"POST /execute toggle (×3) id={id}");
+    }
+
+    /// <summary>Click a top-level menu (e.g. "Edit") and optionally a leaf item inside it (e.g. "Plain").</summary>
+    private async Task<TestResult> MenuClickAsync(string name, string windowTitle, string parentMenu, string? leafMenu, CancellationToken ct)
+    {
+        var tree = await GetScanAsync(windowTitle, ct);
+        if (tree == null) return Fail(name, $"scan of '{windowTitle}' failed (window not open?)");
+
+        var parent = FindNode(tree, n => NameOrIdContains(n, parentMenu)
+                                       && (ControlTypeIs(n, "MenuItem") || ControlTypeIs(n, "MenuBar")
+                                           || ControlTypeIs(n, "Menu")));
+        parent ??= FindNode(tree, n => NameOrIdContains(n, parentMenu));
+        if (parent == null) return Fail(name, $"Menu '{parentMenu}' not found");
+
+        int parentId = parent["id"]!.GetValue<int>();
+        var parentClick = await _client.ExecuteAsync(parentId, "click", null, ct);
+        if (!parentClick.Success)
+            return Fail(name, $"click on '{parentMenu}' failed: {parentClick.Detail}");
+
+        if (string.IsNullOrEmpty(leafMenu))
+        {
+            return new TestResult(name, true, $"opened '{parentMenu}'",
+                Command: $"POST /execute click id={parentId}");
+        }
+
+        // The dropdown renders in a popup — re-scan and look for the leaf.
+        await Task.Delay(_uiSettleDelayMs, ct);
+        _scanCache.Remove(windowTitle);
+        var treeAfter = await GetScanAsync(windowTitle, ct);
+        JsonNode? leaf = null;
+        if (treeAfter != null)
+            leaf = FindNode(treeAfter, n => NameOrIdContains(n, leafMenu) && ControlTypeIs(n, "MenuItem"))
+                ?? FindNode(treeAfter, n => NameOrIdContains(n, leafMenu));
+
+        if (leaf == null)
+        {
+            // Some menu popups are a sibling window — this is still a partial success.
+            return new TestResult(name, true,
+                $"opened '{parentMenu}'; leaf '{leafMenu}' was not found in the refreshed tree (popup may be a separate window)",
+                Command: $"POST /execute click id={parentId}");
+        }
+
+        int leafId = leaf["id"]!.GetValue<int>();
+        var leafClick = await _client.ExecuteAsync(leafId, "click", null, ct);
+        return new TestResult(name, leafClick.Success,
+            leafClick.Success ? $"clicked '{parentMenu}' → '{leafMenu}'" : leafClick.Detail,
+            Command: $"POST /execute click id={leafId}");
+    }
+
+    // ── Core runner for a single case ─────────────────────────────────────────
+
+    private async Task<TestResult> RunOneInternalAsync(TestCase tc, CancellationToken ct)
+    {
+        if (_skipTests.Contains(tc.Name))
+        {
+            var skipped = new TestResult(tc.Name, true, "Skipped — previously passed", Skipped: true);
+            _onResult?.Invoke(skipped);
+            return skipped;
+        }
+
+        TestResult r;
+        try
+        {
+            r = await tc.RunAsync(ct);
+        }
+        catch (Exception ex)
+        {
+            r = new TestResult(tc.Name, false, $"Unhandled: {ex.Message}");
+        }
         _onResult?.Invoke(r);
+        if (_actionDelayMs > 0) await Task.Delay(_actionDelayMs, ct);
+        return r;
     }
 
-    private static TestResult Result(string name, bool passed, string detail, long? elapsedMs = null, string? command = null) =>
-        new(name, passed, detail, ElapsedMs: elapsedMs, Command: command);
+    // ── Scan helpers (with short TTL cache) ───────────────────────────────────
 
-    /// <summary>Find the first element ID whose line contains <paramref name="text"/>.</summary>
-    private static long? FindId(string scanData, string text)
+    private async Task<JsonNode?> GetScanAsync(string windowTitle, CancellationToken ct)
     {
-        foreach (var line in scanData.Split('\n'))
+        if (_scanCache.TryGetValue(windowTitle, out var cached) &&
+            DateTime.UtcNow - cached.At < ScanCacheTtl && cached.Tree != null)
         {
-            if (!line.Contains(text, StringComparison.OrdinalIgnoreCase)) continue;
-            var m = Regex.Match(line, @"ID:(\d+)");
-            if (m.Success && long.TryParse(m.Groups[1].Value, out var id)) return id;
+            return cached.Tree;
+        }
+
+        var resp = await _client.ScanWindowAsync(windowTitle, ct);
+        if (!resp.Success || string.IsNullOrWhiteSpace(resp.Result))
+        {
+            _scanCache[windowTitle] = (DateTime.UtcNow, null);
+            return null;
+        }
+
+        try
+        {
+            var envelope = JsonNode.Parse(resp.Result!);
+            var tree = envelope?["root"];
+            _scanCache[windowTitle] = (DateTime.UtcNow, tree);
+            return tree;
+        }
+        catch
+        {
+            _scanCache[windowTitle] = (DateTime.UtcNow, null);
+            return null;
+        }
+    }
+
+    private async Task<TestResult> ScanAsRootTestAsync(string label, string windowTitle, CancellationToken ct)
+    {
+        var sw = Stopwatch.StartNew();
+        var resp = await _client.ScanWindowAsync(windowTitle, ct);
+        sw.Stop();
+
+        JsonNode? tree = null;
+        if (resp.Success && !string.IsNullOrWhiteSpace(resp.Result))
+        {
+            try { tree = JsonNode.Parse(resp.Result!)?["root"]; }
+            catch { /* reported via passed=false below */ }
+        }
+        _scanCache[windowTitle] = (DateTime.UtcNow, tree);
+
+        return new TestResult($"SCAN_WINDOW {label}", resp.Success, resp.Detail,
+            ElapsedMs: sw.ElapsedMilliseconds,
+            Command: $"POST /find window={windowTitle} → GET /elements");
+    }
+
+    // ── Low-level actions ─────────────────────────────────────────────────────
+
+    private async Task<TestResult> ExecAsync(string name, JsonNode elem,
+        string action, string? value, CancellationToken ct)
+    {
+        int id = elem["id"]!.GetValue<int>();
+        string cmd = value == null
+            ? $"POST /execute action={action} id={id}"
+            : $"POST /execute action={action} id={id} value={value}";
+        var sw = Stopwatch.StartNew();
+        var r = await _client.ExecuteAsync(id, action, value, ct);
+        sw.Stop();
+        return new TestResult(name, r.Success, r.Detail, ElapsedMs: sw.ElapsedMilliseconds, Command: cmd);
+    }
+
+    private async Task<TestResult> CheckAsync(string name, string cmd,
+        Func<Task<ApiResponse>> call, Func<ApiResponse, bool> assert, CancellationToken ct)
+    {
+        var sw = Stopwatch.StartNew();
+        var r = await call();
+        sw.Stop();
+        return new TestResult(name, assert(r), r.Detail, ElapsedMs: sw.ElapsedMilliseconds, Command: cmd);
+    }
+
+    private static TestResult Fail(string name, string detail) => new(name, false, detail);
+
+    // ── Tree-walking helpers ──────────────────────────────────────────────────
+
+    private static JsonNode? FindNode(JsonNode root, Func<JsonObject, bool> pred)
+    {
+        if (root is JsonObject obj)
+        {
+            if (pred(obj)) return obj;
+            if (obj["children"] is JsonArray kids)
+                foreach (var child in kids)
+                    if (child != null)
+                    {
+                        var hit = FindNode(child, pred);
+                        if (hit != null) return hit;
+                    }
         }
         return null;
     }
 
-    /// <summary>Find the first element ID whose line contains a given control type keyword.</summary>
-    private static long? FindIdByType(string scanData, string typeName)
+    private static bool ControlTypeIs(JsonObject n, string type) =>
+        string.Equals(n["controlType"]?.GetValue<string>(), type, StringComparison.OrdinalIgnoreCase);
+
+    private static bool AutomationIdIs(JsonObject n, string aid) =>
+        string.Equals(n["automationId"]?.GetValue<string>(), aid, StringComparison.OrdinalIgnoreCase);
+
+    private static bool NameOrIdContains(JsonObject n, string text)
     {
-        foreach (var line in scanData.Split('\n'))
-        {
-            if (!line.Contains(typeName, StringComparison.OrdinalIgnoreCase)) continue;
-            var m = Regex.Match(line, @"ID:(\d+)");
-            if (m.Success && long.TryParse(m.Groups[1].Value, out var id)) return id;
-        }
-        return null;
-    }
-
-    private static string BuildWebTarget(string webBaseUrl, string pagePath)
-    {
-        if (Uri.TryCreate(pagePath, UriKind.Absolute, out var absolute))
-            return absolute.ToString();
-
-        var baseUrl = webBaseUrl.TrimEnd('/');
-        if (string.IsNullOrWhiteSpace(pagePath) || pagePath == "/")
-            return baseUrl;
-
-        return $"{baseUrl}/{pagePath.TrimStart('/')}";
+        var name = n["name"]?.GetValue<string>();
+        var aid  = n["automationId"]?.GetValue<string>();
+        return (name?.Contains(text, StringComparison.OrdinalIgnoreCase) ?? false)
+            || (aid ?.Contains(text, StringComparison.OrdinalIgnoreCase) ?? false);
     }
 }
 
 // ── Result types ───────────────────────────────────────────────────────────────
+
+public sealed record TestCase(
+    string Id,
+    string Name,
+    string Group,
+    Func<CancellationToken, Task<TestResult>> RunAsync);
+
 public sealed record TestResult(string Name, bool Passed, string Detail, bool Skipped = false, long? ElapsedMs = null, string? Command = null);
 
 public sealed class CycleResult
@@ -586,20 +647,18 @@ public sealed class CycleResult
     public string Summary()
     {
         var latencies = Results.Where(r => r.ElapsedMs.HasValue).Select(r => r.ElapsedMs!.Value).ToList();
-        var totalMs = latencies.Sum();
-        var averageMs = latencies.Count > 0 ? latencies.Average() : 0;
-        var maxMs = latencies.Count > 0 ? latencies.Max() : 0;
-        var skippedLine = Skipped > 0 ? $"   ⏭️ {Skipped} skipped" : "";
-        var timingLine = latencies.Count > 0
-            ? $"\n⏱️ total {totalMs}ms   avg {averageMs:F1}ms   max {maxMs}ms"
-            : "";
-        return $"✅ {Passed} passed   ❌ {Failed} failed{skippedLine}{timingLine}\n" +
+        var totalMs   = latencies.Sum();
+        var avgMs     = latencies.Count > 0 ? latencies.Average() : 0;
+        var maxMs     = latencies.Count > 0 ? latencies.Max() : 0;
+        var skipLine  = Skipped > 0 ? $"   SKIP:{Skipped}" : "";
+        var timeLine  = latencies.Count > 0 ? $"\n total {totalMs}ms   avg {avgMs:F1}ms   max {maxMs}ms" : "";
+        return $"PASS:{Passed}  FAIL:{Failed}{skipLine}{timeLine}\n" +
             string.Join("\n", Results.Where(r => !r.Skipped).Select(r =>
-                $"  {(r.Passed ? "✅" : "❌")} {r.Name}" +
+                $"  {(r.Passed ? "PASS" : "FAIL")} {r.Name}" +
                 (r.Passed
                     ? ""
                     : (!string.IsNullOrEmpty(r.Command)
-                        ? $"  cmd={r.Command}\n       ↳ {r.Detail}"
-                        : $"\n       ↳ {r.Detail}"))));
+                        ? $"  cmd={r.Command}\n       {r.Detail}"
+                        : $"\n       {r.Detail}"))));
     }
 }

@@ -38,6 +38,14 @@ namespace ApexComputerUse
         public event  Action<string>? OnLog;
 
         /// <summary>
+        /// Fires after a successful POST /shutdown, just after the response is flushed.
+        /// Hosts (WinForms GUI, Windows Service) subscribe to drive their own graceful exit.
+        /// If no subscribers are attached, the server calls <see cref="Environment.Exit"/>
+        /// so the remote shutdown still takes effect.
+        /// </summary>
+        public event  Action? OnShutdownRequested;
+
+        /// <summary>
         /// Creates the HTTP server.
         /// When <paramref name="apiKey"/> is non-empty every request must supply it via
         /// "Authorization: Bearer &lt;key&gt;", "X-Api-Key: &lt;key&gt;", or "?apiKey=&lt;key&gt;".
@@ -246,6 +254,37 @@ namespace ApexComputerUse
                     var runResult = LaunchTestRunner(req);
                     statusCode = await WriteResponse(res, runResult, format);
                     if (statusCode >= 400) Interlocked.Increment(ref _errorRequests);
+                    return;
+                }
+
+                // Graceful shutdown — host decides how to exit (WinForms: Application.Exit;
+                // Service: Stop()). Falls back to Environment.Exit if nothing subscribed.
+                if (method == "POST" && path == "/shutdown")
+                {
+                    var shutdownResult = new ApexResult
+                    {
+                        Success = true,
+                        Action  = "shutdown",
+                        Data    = new Dictionary<string, string> { ["message"] = "Exiting" }
+                    };
+                    statusCode = await WriteResponse(res, shutdownResult, format);
+                    OnLog?.Invoke("Shutdown requested via POST /shutdown.");
+                    _ = Task.Run(async () =>
+                    {
+                        // Let the response flush and give the listener a moment to drain.
+                        await Task.Delay(250).ConfigureAwait(false);
+                        if (OnShutdownRequested is { } handler)
+                        {
+                            try { handler.Invoke(); }
+                            catch (Exception ex) { OnLog?.Invoke($"Shutdown handler threw: {ex.Message}"); }
+                        }
+                        else
+                        {
+                            // No host wired — exit the process directly so the remote caller
+                            // still gets what they asked for.
+                            Environment.Exit(0);
+                        }
+                    });
                     return;
                 }
 

@@ -5,6 +5,9 @@ using System.Text.Json;
 // ── Config ─────────────────────────────────────────────────────────────────────
 string? cliMode = null;
 string? cliConfigPath = null;
+bool    cliServe = false;
+int     cliServePort = 8765;
+string  cliServeHost = "127.0.0.1";
 for (var i = 0; i < args.Length; i++)
 {
     var arg = args[i];
@@ -17,6 +20,40 @@ for (var i = 0; i < args.Length; i++)
     if (string.Equals(arg, "--mode", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
     {
         cliMode = args[++i];
+        continue;
+    }
+
+    if (string.Equals(arg, "--serve", StringComparison.OrdinalIgnoreCase))
+    {
+        cliServe = true;
+        continue;
+    }
+
+    if (arg.StartsWith("--serve-port=", StringComparison.OrdinalIgnoreCase))
+    {
+        cliServe = true;
+        int.TryParse(arg[("--serve-port=".Length)..], out cliServePort);
+        continue;
+    }
+
+    if (string.Equals(arg, "--serve-port", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
+    {
+        cliServe = true;
+        int.TryParse(args[++i], out cliServePort);
+        continue;
+    }
+
+    if (arg.StartsWith("--serve-host=", StringComparison.OrdinalIgnoreCase))
+    {
+        cliServe = true;
+        cliServeHost = arg[("--serve-host=".Length)..];
+        continue;
+    }
+
+    if (string.Equals(arg, "--serve-host", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
+    {
+        cliServe = true;
+        cliServeHost = args[++i];
         continue;
     }
 
@@ -179,6 +216,81 @@ if (!string.IsNullOrWhiteSpace(config.WebBaseUrl))
 }
 
 await Task.Delay(3000, ct);  // give GUIs time to render before scanning
+
+// ── Serve mode ────────────────────────────────────────────────────────────────
+// When --serve is set, replace the cycle loop with a long-running HTTP control
+// surface (see ControlServer.cs). External callers drive per-test execution,
+// bridge lifecycle, and shutdown.
+if (cliServe)
+{
+    Console.WriteLine($"[Runner] Serve mode on {cliServeHost}:{cliServePort}");
+
+    if (!config.SkipBuild)
+    {
+        Console.WriteLine("[Runner] Building ApexComputerUse (one-shot)...");
+        var build = await builder.BuildAsync(ct);
+        if (!build.Success)
+        {
+            var snippet = build.Output.Length > 600 ? "…" + build.Output[^600..] : build.Output;
+            Console.Error.WriteLine($"[Runner] Build FAILED (exit {build.ExitCode}):\n{snippet}");
+            return 1;
+        }
+        Console.WriteLine("[Runner] Build OK.");
+    }
+
+    ProcessManager? currentBridge = null;
+    BridgeClient?   currentClient = null;
+    TestSuite?      currentSuite  = null;
+
+    var bridgeEnvServe = string.IsNullOrWhiteSpace(config.BridgeApiKey)
+        ? null
+        : new Dictionary<string, string> { ["APEX_API_KEY"] = config.BridgeApiKey };
+
+    async Task<ProcessManager> StartBridge(CancellationToken innerCt)
+    {
+        var pm = new ProcessManager("ApexComputerUse", config.BridgeExePath, isGui: true);
+        await pm.StartAsync(innerCt, bridgeEnvServe);
+        return pm;
+    }
+
+    // Initial bridge + client + suite
+    currentBridge = await StartBridge(ct);
+    currentClient = new BridgeClient(config.BridgeBaseUrl, config.BridgeApiKey);
+    Console.WriteLine("[Runner] Waiting for Bridge API...");
+    var servedReady = await currentClient.WaitForReadyAsync(config.ApiReadyTimeoutSec, ct);
+    if (!servedReady)
+        Console.WriteLine("[Runner] Bridge did not become ready in time — continuing anyway; /bridge/restart can recover.");
+    currentSuite = new TestSuite(currentClient, actionDelayMs, uiSettleDelayMs);
+
+    var control = new ControlServer(
+        bindHost:     cliServeHost,
+        port:         cliServePort,
+        apiKey:       config.BridgeApiKey,
+        config:       config,
+        configPath:   configPath,
+        getBridge:    () => currentBridge,
+        setBridge:    pm  => { currentBridge = pm; return Task.CompletedTask; },
+        startBridge:  async innerCt => await StartBridge(innerCt),
+        getClient:    () => currentClient!,
+        setClient:    c   => { currentClient?.Dispose(); currentClient = c; return Task.CompletedTask; },
+        getSuite:     () => currentSuite!,
+        setSuite:     s   => { currentSuite = s; return Task.CompletedTask; },
+        shutdownCts:  cts);
+    control.Start();
+
+    Console.WriteLine($"[Runner] Ready. POST /shutdown or press Ctrl+C to exit.");
+    Console.WriteLine($"[Runner]   Example: curl -H 'X-Api-Key: {(string.IsNullOrEmpty(config.BridgeApiKey) ? "<none>" : "***")}' http://{cliServeHost}:{cliServePort}/tests");
+
+    try { await Task.Delay(Timeout.Infinite, ct); }
+    catch (OperationCanceledException) { /* shutdown */ }
+
+    Console.WriteLine("[Runner] Shutting down control server...");
+    await control.DisposeAsync();
+    if (currentBridge is { IsRunning: true }) await currentBridge.StopAsync();
+    currentClient?.Dispose();
+    if (webServer is not null) await webServer.DisposeAsync();
+    return 0;
+}
 
 await telegram.SendAsync(
     $"🚀 <b>TestRunner started</b>\n" +

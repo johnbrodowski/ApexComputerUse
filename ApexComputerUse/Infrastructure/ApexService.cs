@@ -48,6 +48,12 @@ namespace ApexComputerUse
                         testRunnerExePath:    cfg.TestRunnerExePath,
                         testRunnerConfigPath: cfg.TestRunnerConfigPath);
             _http.OnLog += AppLog.FromOnLog;
+            _http.OnShutdownRequested += () =>
+            {
+                // Request a clean SCM stop so OnStop runs and logs flush.
+                try { Stop(); }
+                catch { Environment.Exit(0); }
+            };
 
             _pipe = new PipeCommandServer(cfg.PipeName, _processor);
             _pipe.OnLog += AppLog.FromOnLog;
