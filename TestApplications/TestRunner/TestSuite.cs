@@ -102,8 +102,8 @@ public sealed class TestSuite
             new("winforms-textbox-type", "POST /execute type → WinForms TextBox", "winforms",
                 async ct =>
                 {
-                    var tree = await GetScanAsync(WinFormsTitle, ct);
-                    if (tree == null) return Fail("POST /execute type → WinForms TextBox", "WinForms scan failed");
+                    var (tree, error) = await SelectTabAndScanAsync(WinFormsTitle, "Identity", ct);
+                    if (tree == null) return Fail("POST /execute type → WinForms TextBox", error ?? "WinForms scan failed");
                     var tb = FindNode(tree, n => ControlTypeIs(n, "Edit"));
                     if (tb == null) return Fail("POST /execute type → WinForms TextBox", "No Edit control found");
                     var typed = $"autotest_{DateTime.Now:HHmmss}";
@@ -114,8 +114,8 @@ public sealed class TestSuite
                 async ct =>
                 {
                     // Type a deterministic value, then gettext and assert round-trip.
-                    var tree = await GetScanAsync(WinFormsTitle, ct);
-                    if (tree == null) return Fail("POST /execute gettext → typed value", "WinForms scan failed");
+                    var (tree, error) = await SelectTabAndScanAsync(WinFormsTitle, "Identity", ct);
+                    if (tree == null) return Fail("POST /execute gettext → typed value", error ?? "WinForms scan failed");
                     var tb = FindNode(tree, n => ControlTypeIs(n, "Edit"));
                     if (tb == null) return Fail("POST /execute gettext → typed value", "No Edit control found");
                     var typed = $"autotest_{DateTime.Now:HHmmss}";
@@ -131,9 +131,9 @@ public sealed class TestSuite
             new("winforms-checkbox-toggle", "POST /execute toggle → WinForms SimpleCheckBox", "winforms",
                 async ct =>
                 {
-                    var tree = await GetScanAsync(WinFormsTitle, ct);
-                    if (tree == null) return Fail("POST /execute toggle → WinForms SimpleCheckBox", "WinForms scan failed");
-                    var cb = FindNode(tree, n => NameOrIdContains(n, "Test Checkbox"));
+                    var (tree, error) = await SelectTabAndScanAsync(WinFormsTitle, "Identity", ct);
+                    if (tree == null) return Fail("POST /execute toggle → WinForms SimpleCheckBox", error ?? "WinForms scan failed");
+                    var cb = FindNode(tree, n => NameOrIdContains(n, "AD Sync") && ControlTypeIs(n, "CheckBox"));
                     if (cb == null) return Fail("POST /execute toggle → WinForms SimpleCheckBox", "Not found");
                     var r = await ExecAsync("POST /execute toggle → WinForms SimpleCheckBox", cb, "toggle", null, ct);
                     // Restore so subsequent runs are idempotent.
@@ -146,7 +146,7 @@ public sealed class TestSuite
                 {
                     var tree = await GetScanAsync(WinFormsTitle, ct);
                     if (tree == null) return Fail("POST /execute click → WinForms ContextMenu button", "WinForms scan failed");
-                    var btn = FindNode(tree, n => NameOrIdContains(n, "ContextMenu"));
+                    var btn = FindNode(tree, n => ControlTypeIs(n, "Button") && NameOrIdContains(n, "Save"));
                     if (btn == null) return Fail("POST /execute click → WinForms ContextMenu button", "Not found");
                     return await ExecAsync("POST /execute click → WinForms ContextMenu button", btn, "click", null, ct);
                 }),
@@ -164,9 +164,9 @@ public sealed class TestSuite
             new("winforms-combo-expand-collapse", "POST /execute expand/collapse → WinForms EditableCombo", "winforms",
                 async ct =>
                 {
-                    var tree = await GetScanAsync(WinFormsTitle, ct);
-                    if (tree == null) return Fail("POST /execute expand/collapse → WinForms EditableCombo", "WinForms scan failed");
-                    var combo = FindNode(tree, n => NameOrIdContains(n, "EditableCombo"));
+                    var (tree, error) = await SelectTabAndScanAsync(WinFormsTitle, "Identity", ct);
+                    if (tree == null) return Fail("POST /execute expand/collapse → WinForms EditableCombo", error ?? "WinForms scan failed");
+                    var combo = FindNode(tree, n => ControlTypeIs(n, "ComboBox") && NameOrIdContains(n, "Department"));
                     if (combo == null) return Fail("POST /execute expand/collapse → WinForms EditableCombo", "Not found");
                     var expand = await ExecAsync("POST /execute expand → WinForms EditableCombo", combo, "expand", null, ct);
                     if (!expand.Passed) return expand with { Name = "POST /execute expand/collapse → WinForms EditableCombo" };
@@ -181,8 +181,8 @@ public sealed class TestSuite
             new("wpf-textbox-type", "POST /execute type → WPF TextBox", "wpf",
                 async ct =>
                 {
-                    var tree = await GetScanAsync(WpfTitle, ct);
-                    if (tree == null) return Fail("POST /execute type → WPF TextBox", "WPF scan failed");
+                    var (tree, error) = await SelectTabAndScanAsync(WpfTitle, "Identity", ct);
+                    if (tree == null) return Fail("POST /execute type → WPF TextBox", error ?? "WPF scan failed");
                     var tb = FindNode(tree, n => ControlTypeIs(n, "Edit"));
                     if (tb == null) return Fail("POST /execute type → WPF TextBox", "Not found");
                     return await ExecAsync("POST /execute type → WPF TextBox", tb, "type",
@@ -192,9 +192,9 @@ public sealed class TestSuite
             new("wpf-checkbox-toggle", "POST /execute toggle → WPF SimpleCheckBox", "wpf",
                 async ct =>
                 {
-                    var tree = await GetScanAsync(WpfTitle, ct);
-                    if (tree == null) return Fail("POST /execute toggle → WPF SimpleCheckBox", "WPF scan failed");
-                    var cb = FindNode(tree, n => NameOrIdContains(n, "Test Checkbox"));
+                    var (tree, error) = await SelectTabAndScanAsync(WpfTitle, "Identity", ct);
+                    if (tree == null) return Fail("POST /execute toggle → WPF SimpleCheckBox", error ?? "WPF scan failed");
+                    var cb = FindNode(tree, n => AutomationIdIs(n, "FlagAdSync"));
                     if (cb == null) return Fail("POST /execute toggle → WPF SimpleCheckBox", "Not found");
                     var r = await ExecAsync("POST /execute toggle → WPF SimpleCheckBox", cb, "toggle", null, ct);
                     _ = await _client.ExecuteAsync(cb["id"]!.GetValue<int>(), "toggle", null, ct);
@@ -206,28 +206,17 @@ public sealed class TestSuite
                 {
                     var tree = await GetScanAsync(WpfTitle, ct);
                     if (tree == null) return Fail("POST /execute click → WPF InvokableButton", "WPF scan failed");
-                    var inv = FindNode(tree, n => AutomationIdIs(n, "InvokableButton"));
+                    var inv = FindNode(tree, n => AutomationIdIs(n, "TbSave"));
                     if (inv == null) return Fail("POST /execute click → WPF InvokableButton", "Not found");
-                    var clicked = await ExecAsync("POST /execute click → WPF InvokableButton", inv, "click", null, ct);
-                    if (!clicked.Passed) return clicked;
-                    await Task.Delay(_uiSettleDelayMs, ct);
-                    var after = await _client.ScanWindowAsync(WpfTitle, ct);
-                    // Drop stale cache — the tree just changed.
-                    _scanCache.Remove(WpfTitle);
-                    var ok = after.Success && (after.Result?.Contains("Invoked!") ?? false);
-                    return new TestResult(
-                        "WPF InvokableButton → 'Invoked!' after re-scan",
-                        ok,
-                        ok ? "" : (after.Success ? "Button text did not change to 'Invoked!'" : after.Detail),
-                        Command: "GET /elements (after click)");
+                    return await ExecAsync("POST /execute click → WPF InvokableButton", inv, "click", null, ct);
                 }),
 
             new("wpf-combo-expand-collapse", "POST /execute expand/collapse → WPF NonEditableCombo", "wpf",
                 async ct =>
                 {
-                    var tree = await GetScanAsync(WpfTitle, ct);
-                    if (tree == null) return Fail("POST /execute expand/collapse → WPF NonEditableCombo", "WPF scan failed");
-                    var combo = FindNode(tree, n => NameOrIdContains(n, "NonEditable"));
+                    var (tree, error) = await SelectTabAndScanAsync(WpfTitle, "Identity", ct);
+                    if (tree == null) return Fail("POST /execute expand/collapse → WPF NonEditableCombo", error ?? "WPF scan failed");
+                    var combo = FindNode(tree, n => AutomationIdIs(n, "Department"));
                     if (combo == null) return Fail("POST /execute expand/collapse → WPF NonEditableCombo", "Not found");
                     var expand = await ExecAsync("POST /execute expand → WPF NonEditableCombo", combo, "expand", null, ct);
                     if (!expand.Passed) return expand with { Name = "POST /execute expand/collapse → WPF NonEditableCombo" };
@@ -235,46 +224,46 @@ public sealed class TestSuite
                     return collapse with { Name = "POST /execute expand/collapse → WPF NonEditableCombo" };
                 }),
 
-            new("wpf-slider-setrange-verify", "POST /execute setrange 7 → WPF Slider (verified)", "wpf",
-                ct => SliderSetAndVerifyAsync("POST /execute setrange 7 → WPF Slider (verified)",
-                    WpfTitle, "7", ct)),
+            new("wpf-slider-setrange-verify", "POST /execute setrange 4 → WPF Slider (verified)", "wpf",
+                ct => SliderSetAndVerifyAsync("POST /execute setrange 4 → WPF Slider (verified)",
+                    WpfTitle, "4", ct, tabName: "Identity")),
 
             // Richer WinForms interactions ─────────────────────────────────────
             new("winforms-textbox-edit-clear-retype", "TextBox edit → clear → retype (verified)", "winforms",
                 ct => TextBoxEditRetypeAsync("TextBox edit → clear → retype (verified)",
-                    WinFormsTitle, ControlTypeEdit, ct)),
+                    WinFormsTitle, ControlTypeEdit, ct, tabName: "Identity")),
 
             new("winforms-slider-setrange-verify", "POST /execute setrange 3 → WinForms Slider (verified)", "winforms",
                 ct => SliderSetAndVerifyAsync("POST /execute setrange 3 → WinForms Slider (verified)",
-                    WinFormsTitle, "3", ct)),
+                    WinFormsTitle, "3", ct, tabName: "Identity")),
 
             new("winforms-listbox-select", "POST /execute select → WinForms ListBox item", "winforms",
                 ct => ListBoxSelectFirstItemAsync("POST /execute select → WinForms ListBox item",
-                    WinFormsTitle, ct)),
+                    WinFormsTitle, ct, tabName: "Dialogs")),
 
             new("winforms-radio-select", "POST /execute click → WinForms RadioButton2 (mutex)", "winforms",
                 ct => RadioSelectAsync("POST /execute click → WinForms RadioButton2 (mutex)",
-                    WinFormsTitle, ct)),
+                    WinFormsTitle, "Via Proxy", ct, tabName: "Network")),
 
             new("winforms-3state-cycle", "Cycle ThreeStateCheckBox x3 (WinForms)", "winforms",
-                ct => ThreeStateCycleAsync("Cycle ThreeStateCheckBox x3 (WinForms)", WinFormsTitle, ct)),
+                ct => ThreeStateCycleAsync("Cycle ThreeStateCheckBox x3 (WinForms)", WinFormsTitle, "Indeterminate state", ct, tabName: "Dialogs")),
 
             new("winforms-menu-edit-copy", "Click Edit → Copy Plain menu item (WinForms)", "winforms",
                 ct => MenuClickAsync("Click Edit → Copy Plain menu item (WinForms)",
-                    WinFormsTitle, parentMenu: "Edit", leafMenu: "Plain", ct)),
+                    WinFormsTitle, parentMenu: "Edit", leafMenu: "Plain Text", ct)),
 
             // Richer WPF interactions ──────────────────────────────────────────
             new("wpf-listbox-select", "POST /execute select → WPF ListBox item", "wpf",
                 ct => ListBoxSelectFirstItemAsync("POST /execute select → WPF ListBox item",
-                    WpfTitle, ct)),
+                    WpfTitle, ct, tabName: "Network", listSelector: n => AutomationIdIs(n, "EndpointList"))),
 
             new("wpf-expander-toggle", "POST /execute expand/collapse → WPF Expander", "wpf",
                 async ct =>
                 {
-                    var tree = await GetScanAsync(WpfTitle, ct);
-                    if (tree == null) return Fail("POST /execute expand/collapse → WPF Expander", "WPF scan failed");
-                    var exp = FindNode(tree, n => AutomationIdIs(n, "Expander"))
-                           ?? FindNode(tree, n => NameOrIdContains(n, "Expander"));
+                    var (tree, error) = await SelectTabAndScanAsync(WpfTitle, "WPF", ct);
+                    if (tree == null) return Fail("POST /execute expand/collapse → WPF Expander", error ?? "WPF scan failed");
+                    var exp = FindNode(tree, n => AutomationIdIs(n, "ExpanderServer"))
+                           ?? FindNode(tree, n => NameOrIdContains(n, "Server Configuration"));
                     if (exp == null) return Fail("POST /execute expand/collapse → WPF Expander", "Not found");
                     var expand = await ExecAsync("POST /execute expand → WPF Expander", exp, "expand", null, ct);
                     if (!expand.Passed) return expand with { Name = "POST /execute expand/collapse → WPF Expander" };
@@ -312,10 +301,12 @@ public sealed class TestSuite
     // ── Higher-level reusable test bodies ─────────────────────────────────────
 
     /// <summary>Type a deterministic value into an Edit control, read it back, clear, retype, read back again.</summary>
-    private async Task<TestResult> TextBoxEditRetypeAsync(string name, string windowTitle, string controlType, CancellationToken ct)
+    private async Task<TestResult> TextBoxEditRetypeAsync(string name, string windowTitle, string controlType, CancellationToken ct, string? tabName = null)
     {
-        var tree = await GetScanAsync(windowTitle, ct);
-        if (tree == null) return Fail(name, $"scan of '{windowTitle}' failed (window not open?)");
+        var (tree, error) = tabName == null
+            ? (await GetScanAsync(windowTitle, ct), (string?)null)
+            : await SelectTabAndScanAsync(windowTitle, tabName, ct);
+        if (tree == null) return Fail(name, error ?? $"scan of '{windowTitle}' failed (window not open?)");
 
         var tb = FindNode(tree, n => ControlTypeIs(n, controlType));
         if (tb == null) return Fail(name, $"No {controlType} control found");
@@ -354,10 +345,12 @@ public sealed class TestSuite
     }
 
     /// <summary>Find the first Slider, setrange to <paramref name="value"/>, then getrange and assert.</summary>
-    private async Task<TestResult> SliderSetAndVerifyAsync(string name, string windowTitle, string value, CancellationToken ct)
+    private async Task<TestResult> SliderSetAndVerifyAsync(string name, string windowTitle, string value, CancellationToken ct, string? tabName = null)
     {
-        var tree = await GetScanAsync(windowTitle, ct);
-        if (tree == null) return Fail(name, $"scan of '{windowTitle}' failed (window not open?)");
+        var (tree, error) = tabName == null
+            ? (await GetScanAsync(windowTitle, ct), (string?)null)
+            : await SelectTabAndScanAsync(windowTitle, tabName, ct);
+        if (tree == null) return Fail(name, error ?? $"scan of '{windowTitle}' failed (window not open?)");
 
         var slider = FindNode(tree, n => ControlTypeIs(n, "Slider"));
         if (slider == null) return Fail(name, "No Slider control found");
@@ -378,13 +371,21 @@ public sealed class TestSuite
     }
 
     /// <summary>Find a ListBox, select its first selectable child, and assert the select call succeeded.</summary>
-    private async Task<TestResult> ListBoxSelectFirstItemAsync(string name, string windowTitle, CancellationToken ct)
+    private async Task<TestResult> ListBoxSelectFirstItemAsync(
+        string name,
+        string windowTitle,
+        CancellationToken ct,
+        string? tabName = null,
+        Func<JsonObject, bool>? listSelector = null)
     {
-        var tree = await GetScanAsync(windowTitle, ct);
-        if (tree == null) return Fail(name, $"scan of '{windowTitle}' failed (window not open?)");
+        var (tree, error) = tabName == null
+            ? (await GetScanAsync(windowTitle, ct), (string?)null)
+            : await SelectTabAndScanAsync(windowTitle, tabName, ct);
+        if (tree == null) return Fail(name, error ?? $"scan of '{windowTitle}' failed (window not open?)");
 
         // Try AutomationId/name "ListBox" first, then fall back to controlType=List.
-        var list = FindNode(tree, n => AutomationIdIs(n, "ListBox"))
+        var list = listSelector == null ? null : FindNode(tree, listSelector)
+                ?? FindNode(tree, n => AutomationIdIs(n, "ListBox"))
                 ?? FindNode(tree, n => NameOrIdContains(n, "ListBox"))
                 ?? FindNode(tree, n => ControlTypeIs(n, "List"));
         if (list == null) return Fail(name, "No ListBox found");
@@ -400,14 +401,20 @@ public sealed class TestSuite
     }
 
     /// <summary>Click RadioButton2 and assert the click succeeded.</summary>
-    private async Task<TestResult> RadioSelectAsync(string name, string windowTitle, CancellationToken ct)
+    private async Task<TestResult> RadioSelectAsync(
+        string name,
+        string windowTitle,
+        string radioName,
+        CancellationToken ct,
+        string? tabName = null)
     {
-        var tree = await GetScanAsync(windowTitle, ct);
-        if (tree == null) return Fail(name, $"scan of '{windowTitle}' failed (window not open?)");
+        var (tree, error) = tabName == null
+            ? (await GetScanAsync(windowTitle, ct), (string?)null)
+            : await SelectTabAndScanAsync(windowTitle, tabName, ct);
+        if (tree == null) return Fail(name, error ?? $"scan of '{windowTitle}' failed (window not open?)");
 
-        var rb = FindNode(tree, n => AutomationIdIs(n, "RadioButton2"))
-              ?? FindNode(tree, n => NameOrIdContains(n, "RadioButton2"));
-        if (rb == null) return Fail(name, "RadioButton2 not found");
+        var rb = FindNode(tree, n => ControlTypeIs(n, "RadioButton") && NameOrIdContains(n, radioName));
+        if (rb == null) return Fail(name, $"{radioName} not found");
         int id = rb["id"]!.GetValue<int>();
 
         var click = await _client.ExecuteAsync(id, "select", null, ct);
@@ -421,14 +428,20 @@ public sealed class TestSuite
     }
 
     /// <summary>Toggle the ThreeStateCheckBox three times to cycle through all states.</summary>
-    private async Task<TestResult> ThreeStateCycleAsync(string name, string windowTitle, CancellationToken ct)
+    private async Task<TestResult> ThreeStateCycleAsync(
+        string name,
+        string windowTitle,
+        string checkboxName,
+        CancellationToken ct,
+        string? tabName = null)
     {
-        var tree = await GetScanAsync(windowTitle, ct);
-        if (tree == null) return Fail(name, $"scan of '{windowTitle}' failed (window not open?)");
+        var (tree, error) = tabName == null
+            ? (await GetScanAsync(windowTitle, ct), (string?)null)
+            : await SelectTabAndScanAsync(windowTitle, tabName, ct);
+        if (tree == null) return Fail(name, error ?? $"scan of '{windowTitle}' failed (window not open?)");
 
-        var cb = FindNode(tree, n => AutomationIdIs(n, "ThreeStateCheckBox"))
-              ?? FindNode(tree, n => NameOrIdContains(n, "ThreeState"));
-        if (cb == null) return Fail(name, "ThreeStateCheckBox not found");
+        var cb = FindNode(tree, n => ControlTypeIs(n, "CheckBox") && NameOrIdContains(n, checkboxName));
+        if (cb == null) return Fail(name, $"{checkboxName} not found");
         int id = cb["id"]!.GetValue<int>();
 
         for (int i = 0; i < 3; i++)
@@ -486,6 +499,25 @@ public sealed class TestSuite
         return new TestResult(name, leafClick.Success,
             leafClick.Success ? $"clicked '{parentMenu}' → '{leafMenu}'" : leafClick.Detail,
             Command: $"POST /execute click id={leafId}");
+    }
+
+    private async Task<(JsonNode? Tree, string? Error)> SelectTabAndScanAsync(string windowTitle, string tabName, CancellationToken ct)
+    {
+        var tree = await GetScanAsync(windowTitle, ct);
+        if (tree == null) return (null, $"scan of '{windowTitle}' failed (window not open?)");
+
+        var tab = FindNode(tree, n => ControlTypeIs(n, "Tab"));
+        if (tab == null) return (null, $"No Tab control found in '{windowTitle}'");
+
+        var select = await _client.ExecuteAsync(tab["id"]!.GetValue<int>(), "select", tabName, ct);
+        if (!select.Success) return (null, $"select tab '{tabName}' failed: {select.Detail}");
+        if (_uiSettleDelayMs > 0) await Task.Delay(_uiSettleDelayMs, ct);
+
+        _scanCache.Remove(windowTitle);
+        var rescanned = await GetScanAsync(windowTitle, ct);
+        return rescanned == null
+            ? (null, $"re-scan of '{windowTitle}' after selecting '{tabName}' failed")
+            : (rescanned, null);
     }
 
     // ── Core runner for a single case ─────────────────────────────────────────

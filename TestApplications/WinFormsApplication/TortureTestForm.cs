@@ -18,6 +18,15 @@ namespace WinFormsApplication
             BuildUI();
         }
 
+        protected override void OnShown(EventArgs e)
+        {
+            base.OnShown(e);
+            var wa = Screen.FromControl(this).WorkingArea;
+            int x = Math.Max(wa.Left,  Math.Min(Left, wa.Right  - Width));
+            int y = Math.Max(wa.Top,   Math.Min(Top,  wa.Bottom - Height));
+            if (x != Left || y != Top) Location = new Point(x, y);
+        }
+
         private void BuildUI()
         {
             SuspendLayout();

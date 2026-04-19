@@ -69,9 +69,17 @@ namespace ApexComputerUse
             var exact = all.FirstOrDefault(w => w.Name.Equals(title, StringComparison.OrdinalIgnoreCase));
             if (exact != null) { matchedTitle = exact.Name; isExact = true; return exact.AsWindow(); }
 
-            // 2. Contains
+            // 2. Contains — if multiple match, prefer StartsWith over mid-string, then shortest name.
             var contains = all.Where(w => w.Name.Contains(title, StringComparison.OrdinalIgnoreCase)).ToArray();
-            if (contains.Length == 1) { matchedTitle = contains[0].Name; isExact = false; return contains[0].AsWindow(); }
+            if (contains.Length >= 1)
+            {
+                var best = contains
+                    .OrderByDescending(w => w.Name.StartsWith(title, StringComparison.OrdinalIgnoreCase))
+                    .ThenBy(w => w.Name.Length)
+                    .First();
+                matchedTitle = best.Name; isExact = false;
+                return best.AsWindow();
+            }
 
             // 3. Closest Levenshtein (with distance threshold)
             var closest = all.MinBy(w => Levenshtein(title.ToLower(), w.Name.ToLower()));
@@ -533,30 +541,51 @@ namespace ApexComputerUse
         public void ToggleCheckBox(AutomationElement el)
         {
             if (el.Patterns.Toggle.TryGetPattern(out var p)) p.Toggle();
-            else el.AsCheckBox().Toggle();
+            else ClickElement(el);
         }
 
         public string GetToggleState(AutomationElement el)
         {
             if (el.Patterns.Toggle.TryGetPattern(out var p))
                 return p.ToggleState.ValueOrDefault.ToString();
-            return "Toggle pattern not supported";
+
+            return IsCheckBoxChecked(el) switch
+            {
+                true => ToggleState.On.ToString(),
+                false => ToggleState.Off.ToString(),
+                null => ToggleState.Indeterminate.ToString()
+            };
         }
 
         /// <summary>Sets a toggle element to a specific on (true) or off (false) state.</summary>
         public void SetToggleState(AutomationElement el, bool targetOn)
         {
-            if (!el.Patterns.Toggle.TryGetPattern(out var p))
-                throw new InvalidOperationException("Toggle pattern not supported");
-            var state = p.ToggleState.ValueOrDefault;
-            bool isOn = state == ToggleState.On;
-            if (isOn != targetOn) p.Toggle();
-            // Handle 3-state: if we toggled to Indeterminate, toggle once more
-            if (p.ToggleState.ValueOrDefault == ToggleState.Indeterminate) p.Toggle();
+            if (el.Patterns.Toggle.TryGetPattern(out var p))
+            {
+                var state = p.ToggleState.ValueOrDefault;
+                bool isOn = state == ToggleState.On;
+                if (isOn != targetOn) p.Toggle();
+                // Handle 3-state: if we toggled to Indeterminate, toggle once more
+                if (p.ToggleState.ValueOrDefault == ToggleState.Indeterminate) p.Toggle();
+                return;
+            }
+
+            for (int i = 0; i < 3; i++)
+            {
+                var state = IsCheckBoxChecked(el);
+                if (state.HasValue && state.Value == targetOn) return;
+                ClickElement(el);
+                Thread.Sleep(100);
+            }
+
+            throw new InvalidOperationException("Unable to set checkbox state");
         }
 
-        public bool? IsCheckBoxChecked(AutomationElement el) =>
-            el.AsCheckBox().IsChecked;
+        public bool? IsCheckBoxChecked(AutomationElement el)
+        {
+            try { return el.AsCheckBox().IsChecked; }
+            catch { return null; }
+        }
 
         // ── ExpandCollapse pattern ────────────────────────────────────────
 
@@ -919,8 +948,14 @@ namespace ApexComputerUse
         /// </summary>
         public void SelectComboBoxItem(AutomationElement el, string text)
         {
-            // 1. If the element IS a List, select the named child item directly via SelectionItem
             var ownType = el.Properties.ControlType.ValueOrDefault;
+            if (ownType == ControlType.Tab)
+            {
+                SelectTabByName(el, text);
+                return;
+            }
+
+            // 1. If the element IS a List, select the named child item directly via SelectionItem
             if (ownType == ControlType.List)
             {
                 var items = el.FindAllChildren(cf => cf.ByControlType(ControlType.ListItem));
@@ -976,6 +1011,12 @@ namespace ApexComputerUse
         /// <summary>Selects a ComboBox or ListBox item by zero-based index.</summary>
         public void SelectByIndex(AutomationElement el, int index)
         {
+            if (el.Properties.ControlType.ValueOrDefault == ControlType.Tab)
+            {
+                SelectTab(el, index);
+                return;
+            }
+
             // Handle plain List element (e.g. WinForms ListBox / multi-select ListBox)
             if (el.Properties.ControlType.ValueOrDefault == ControlType.List)
             {
