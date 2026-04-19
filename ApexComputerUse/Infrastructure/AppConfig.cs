@@ -35,6 +35,8 @@ namespace ApexComputerUse
         public string ApiKey          { get; init; } = "";
         public string AllowedChatIds  { get; init; } = "";
         public string TelegramToken   { get; init; } = "";
+        public string TestRunnerExePath    { get; init; } = "";
+        public string TestRunnerConfigPath { get; init; } = "";
 
         // ── Singleton ─────────────────────────────────────────────────────
 
@@ -96,6 +98,8 @@ namespace ApexComputerUse
                 ApiKey         = Str(root,  "ApiKey")         ?? cfg.ApiKey,
                 AllowedChatIds = Str(root,  "AllowedChatIds") ?? cfg.AllowedChatIds,
                 TelegramToken  = Str(root,  "TelegramToken")  ?? cfg.TelegramToken,
+                TestRunnerExePath    = Str(root, "TestRunnerExePath")    ?? cfg.TestRunnerExePath,
+                TestRunnerConfigPath = Str(root, "TestRunnerConfigPath") ?? cfg.TestRunnerConfigPath,
             };
         }
 
@@ -121,6 +125,8 @@ namespace ApexComputerUse
                 ApiKey         = E("API_KEY")           ?? cfg.ApiKey,
                 AllowedChatIds = E("ALLOWED_CHAT_IDS")  ?? cfg.AllowedChatIds,
                 TelegramToken  = E("TELEGRAM_TOKEN")    ?? cfg.TelegramToken,
+                TestRunnerExePath    = E("TEST_RUNNER_EXE_PATH")    ?? cfg.TestRunnerExePath,
+                TestRunnerConfigPath = E("TEST_RUNNER_CONFIG_PATH") ?? cfg.TestRunnerConfigPath,
             };
         }
     }

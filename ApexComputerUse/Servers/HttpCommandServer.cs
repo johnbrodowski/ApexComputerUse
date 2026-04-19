@@ -20,6 +20,8 @@ namespace ApexComputerUse
         private readonly string?             _apiKey;
         private readonly bool                _enableShellRun;
         private readonly bool                _bindAll;
+        private readonly string?             _testRunnerExePath;
+        private readonly string?             _testRunnerConfigPath;
         private readonly DateTime            _startTime = DateTime.UtcNow;
         private          CancellationTokenSource? _cts;
         private          Task?              _listenTask;
@@ -51,7 +53,9 @@ namespace ApexComputerUse
         public HttpCommandServer(int port, CommandProcessor processor, SceneStore store,
                                  AiChatService? chatService = null,
                                  string? apiKey = null, bool enableShellRun = false,
-                                 bool bindAll = false)
+                                 bool bindAll = false,
+                                 string? testRunnerExePath = null,
+                                 string? testRunnerConfigPath = null)
         {
             Port            = port;
             _processor      = processor;
@@ -61,6 +65,8 @@ namespace ApexComputerUse
             _apiKey         = string.IsNullOrWhiteSpace(apiKey) ? null : apiKey.Trim();
             _enableShellRun = enableShellRun;
             _bindAll        = bindAll;
+            _testRunnerExePath    = string.IsNullOrWhiteSpace(testRunnerExePath)    ? null : testRunnerExePath.Trim();
+            _testRunnerConfigPath = string.IsNullOrWhiteSpace(testRunnerConfigPath) ? null : testRunnerConfigPath.Trim();
         }
 
         // ── Lifecycle ─────────────────────────────────────────────────────
@@ -224,6 +230,15 @@ namespace ApexComputerUse
                 if (method == "POST" && path == "/chat/send")
                 {
                     await HandleChatSendAsync(req, res, body);
+                    return;
+                }
+
+                // Launch TestRunner as a detached child process
+                if (method == "POST" && path == "/run-tests")
+                {
+                    var runResult = LaunchTestRunner(req);
+                    statusCode = await WriteResponse(res, runResult, format);
+                    if (statusCode >= 400) Interlocked.Increment(ref _errorRequests);
                     return;
                 }
 
@@ -660,6 +675,81 @@ namespace ApexComputerUse
 
             sw.Write("data: [DONE]\n\n");
             try { res.Close(); } catch { /* client may have disconnected */ }
+        }
+
+        private ApexResult LaunchTestRunner(HttpListenerRequest req)
+        {
+            if (_testRunnerExePath is null || !File.Exists(_testRunnerExePath))
+            {
+                return new ApexResult
+                {
+                    Success = false,
+                    Action  = "run-tests",
+                    Error   = "TestRunner is not configured. Set TestRunnerExePath in appsettings.json " +
+                              "or the APEX_TEST_RUNNER_EXE_PATH environment variable."
+                };
+            }
+
+            string? mode = req.QueryString["mode"]?.Trim().ToLowerInvariant();
+            if (!string.IsNullOrEmpty(mode) && mode != "demo" && mode != "benchmark")
+            {
+                return new ApexResult
+                {
+                    Success = false,
+                    Action  = "run-tests",
+                    Error   = $"Invalid mode '{mode}'. Use 'demo' or 'benchmark'."
+                };
+            }
+
+            var args = new List<string>();
+            if (!string.IsNullOrWhiteSpace(_testRunnerConfigPath))
+                args.Add($"\"{_testRunnerConfigPath}\"");
+            if (!string.IsNullOrEmpty(mode))
+                args.AddRange(new[] { "--mode", mode });
+
+            var psi = new ProcessStartInfo
+            {
+                FileName         = _testRunnerExePath,
+                Arguments        = string.Join(' ', args),
+                UseShellExecute  = true,
+                WorkingDirectory = Path.GetDirectoryName(_testRunnerExePath) ?? ""
+            };
+
+            try
+            {
+                var proc = Process.Start(psi);
+                if (proc is null)
+                {
+                    return new ApexResult
+                    {
+                        Success = false,
+                        Action  = "run-tests",
+                        Error   = "Process.Start returned null."
+                    };
+                }
+
+                OnLog?.Invoke($"TestRunner launched (PID {proc.Id}) mode={mode ?? "(default)"}");
+                return new ApexResult
+                {
+                    Success = true,
+                    Action  = "run-tests",
+                    Data = new Dictionary<string, string>
+                    {
+                        ["pid"]  = proc.Id.ToString(),
+                        ["exe"]  = _testRunnerExePath,
+                        ["mode"] = mode ?? ""
+                    }
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ApexResult
+                {
+                    Success = false,
+                    Action  = "run-tests",
+                    Error   = $"Failed to start TestRunner: {ex.Message}"
+                };
+            }
         }
 
         private static async Task ServeChatPage(HttpListenerResponse res, string? apiKey)
@@ -1932,6 +2022,13 @@ namespace ApexComputerUse
                   <span id="dot"></span>
                   <span id="statusTxt">connecting…</span>
                   <span class="spacer"></span>
+                  <label style="font-size:.75em;color:#9cdcfe;">API Key
+                    <input id="apiKeyBox" type="password" placeholder="paste key…" autocomplete="off"
+                           style="background:#3c3c3c;color:#d4d4d4;border:1px solid #555;border-radius:2px;
+                                  padding:.15em .3em;font:inherit;font-size:.76em;width:140px;margin-left:.3em;">
+                    <button type="button" id="apiKeyShow" title="Show / hide"
+                            style="background:none;border:none;color:#888;cursor:pointer;font-size:1em;padding:0 .2em;">👁</button>
+                  </label>
                   <span class="fmt-bar">
                     <label>Format</label>
                     <select id="fmtSel" onchange="onFmtChange()">
@@ -1945,6 +2042,15 @@ namespace ApexComputerUse
                     <a id="lnkWindows" href="/windows.json" target="_blank">windows</a>
                     <a href="/editor" target="_blank">scene editor</a>
                   </span>
+                  <select id="runModeSel" title="TestRunner mode"
+                          style="background:#3c3c3c;color:#d4d4d4;border:1px solid #555;border-radius:2px;
+                                 padding:.15em .3em;font:inherit;font-size:.76em;">
+                    <option value="demo" selected>demo</option>
+                    <option value="benchmark">benchmark</option>
+                  </select>
+                  <button type="button" id="runTestsBtn"
+                          style="background:#0e639c;color:#fff;border:none;border-radius:2px;
+                                 padding:.2em .7em;font:inherit;font-size:.76em;cursor:pointer;">Run Tests</button>
                   <span class="brand">ApexComputerUse</span>
                 </header>
 
@@ -2501,13 +2607,60 @@ namespace ApexComputerUse
                   return new Date().toLocaleTimeString();
                 }
 
+                // ── API key (persistent via localStorage) ──────────────────
+                const API_KEY_STORAGE = 'apex_api_key';
+                function getApiKey() { return localStorage.getItem(API_KEY_STORAGE) || ''; }
+                function withKey(url) {
+                  const k = getApiKey();
+                  if (!k) return url;
+                  return url + (url.includes('?') ? '&' : '?') + 'apiKey=' + encodeURIComponent(k);
+                }
+                (function initApiKey() {
+                  const box  = document.getElementById('apiKeyBox');
+                  const show = document.getElementById('apiKeyShow');
+                  if (!box) return;
+                  box.value = getApiKey();
+                  box.addEventListener('input', () => {
+                    localStorage.setItem(API_KEY_STORAGE, box.value.trim());
+                    onFmtChange();
+                  });
+                  show.addEventListener('click', () => {
+                    box.type = box.type === 'password' ? 'text' : 'password';
+                  });
+                  onFmtChange();
+                })();
+
+                (function initRunTests() {
+                  const btn = document.getElementById('runTestsBtn');
+                  const sel = document.getElementById('runModeSel');
+                  if (!btn) return;
+                  btn.addEventListener('click', async () => {
+                    btn.disabled = true;
+                    const mode = sel.value;
+                    try {
+                      const r = await call('POST', '/run-tests?mode=' + encodeURIComponent(mode));
+                      const status = document.getElementById('statusTxt');
+                      if (r && r.success) {
+                        const pid = r.data && r.data.pid ? r.data.pid : '?';
+                        status.textContent = `TestRunner PID ${pid} started (${mode}) — bridge will restart mid-run`;
+                      } else {
+                        status.textContent = 'Run failed: ' + (r && r.error ? r.error : 'unknown error');
+                      }
+                    } catch (e) {
+                      document.getElementById('statusTxt').textContent = 'Run failed: ' + e.message;
+                    } finally {
+                      btn.disabled = false;
+                    }
+                  });
+                })();
+
                 // ── Format bar ─────────────────────────────────────────────
                 function onFmtChange() {
                   const fmt = document.getElementById('fmtSel').value;
                   const ext = fmt === 'json' ? 'json' : fmt;
-                  document.getElementById('lnkHelp').href    = '/help.'    + ext;
-                  document.getElementById('lnkStatus').href  = '/status.'  + ext;
-                  document.getElementById('lnkWindows').href = '/windows.' + ext;
+                  document.getElementById('lnkHelp').href    = withKey('/help.'    + ext);
+                  document.getElementById('lnkStatus').href  = withKey('/status.'  + ext);
+                  document.getElementById('lnkWindows').href = withKey('/windows.' + ext);
                 }
 
                 // ── API ─────────────────────────────────────────────────────
@@ -2515,10 +2668,12 @@ namespace ApexComputerUse
                   const fmt  = document.getElementById('fmtSel')?.value ?? 'json';
                   const sep  = path.includes('?') ? '&' : '?';
                   const url  = path + sep + 'format=' + fmt;
-                  const opts = { method };
+                  const opts = { method, headers: {} };
+                  const key  = getApiKey();
+                  if (key) opts.headers['X-Api-Key'] = key;
                   if (body !== undefined && method !== 'GET') {
-                    opts.headers = { 'Content-Type': 'application/json' };
-                    opts.body    = JSON.stringify(body);
+                    opts.headers['Content-Type'] = 'application/json';
+                    opts.body = JSON.stringify(body);
                   }
                   const res = await fetch(url, opts);
                   if (fmt === 'pdf') {

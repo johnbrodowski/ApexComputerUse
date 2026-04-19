@@ -44,7 +44,9 @@ namespace ApexComputerUse
             _http = new HttpCommandServer(cfg.HttpPort, _processor, _store,
                         apiKey:        cfg.ApiKey,
                         enableShellRun: cfg.EnableShellRun,
-                        bindAll:        cfg.HttpBindAll);
+                        bindAll:        cfg.HttpBindAll,
+                        testRunnerExePath:    cfg.TestRunnerExePath,
+                        testRunnerConfigPath: cfg.TestRunnerConfigPath);
             _http.OnLog += AppLog.FromOnLog;
 
             _pipe = new PipeCommandServer(cfg.PipeName, _processor);

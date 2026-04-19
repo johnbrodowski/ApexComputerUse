@@ -54,7 +54,9 @@ namespace ApexComputerUse
                 string apiKey = _txtApiKey.Text.Trim();
                 var cfg = AppConfig.Current;
                 Http = new HttpCommandServer(port, _processor, _sceneStore, _chatService, apiKey,
-                           enableShellRun: cfg.EnableShellRun, bindAll: cfg.HttpBindAll);
+                           enableShellRun: cfg.EnableShellRun, bindAll: cfg.HttpBindAll,
+                           testRunnerExePath: cfg.TestRunnerExePath,
+                           testRunnerConfigPath: cfg.TestRunnerConfigPath);
                 Http.OnLog += _logHandler;
                 Http.Start();
                 _btnStartHttp.Text = "Stop HTTP";
