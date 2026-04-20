@@ -246,7 +246,7 @@ namespace WinFormsApplication
             tl.Controls.Add(new NumericUpDown { Minimum = 0, Maximum = 50, Value = 5, Dock = DockStyle.Fill }, 3, 6);
 
             tl.Controls.Add(Lbl("Access Level:"), 0, 7);
-            tl.Controls.Add(new TrackBar { Minimum = 1, Maximum = 5, Value = 3, TickFrequency = 1, Dock = DockStyle.Fill }, 1, 7);
+            tl.Controls.Add(new TrackBar { Name = "AccessLevelSlider", AccessibleName = "Access Level", Minimum = 1, Maximum = 5, Value = 3, TickFrequency = 1, Dock = DockStyle.Fill }, 1, 7);
             tl.Controls.Add(Lbl("Status:"), 2, 7);
             var status = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, Dock = DockStyle.Fill };
             status.Items.AddRange(new object[] { "Active", "On Leave", "Suspended", "Terminated" });
@@ -297,8 +297,8 @@ namespace WinFormsApplication
             var page = new TabPage("Network") { AutoScroll = true, Padding = new Padding(8) };
             var split = new SplitContainer { Dock = DockStyle.Fill, Orientation = Orientation.Vertical, SplitterDistance = 420 };
 
-            // Left
-            var leftFlow = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.TopDown, WrapContents = false, AutoScroll = true, Padding = new Padding(4) };
+            // Left — use Panel (not FlowLayoutPanel) so UIA exposes its children
+            var leftFlow = new Panel { Dock = DockStyle.Fill, AutoScroll = true, Padding = new Padding(4) };
 
             var connGroup = new GroupBox { Text = "Primary Connection", Dock = DockStyle.Top, Height = 220, Padding = new Padding(6) };
             var connTable = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2 };

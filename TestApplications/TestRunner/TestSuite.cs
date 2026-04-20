@@ -234,9 +234,9 @@ public sealed class TestSuite
                 ct => TextBoxEditRetypeAsync("TextBox edit → clear → retype (verified)",
                     WinFormsTitle, ControlTypeEdit, ct, tabName: "Identity")),
 
-            new("winforms-slider-setrange-verify", "POST /execute setrange 3 → WinForms Slider (verified)", "winforms",
-                ct => SliderSetAndVerifyAsync("POST /execute setrange 3 → WinForms Slider (verified)",
-                    WinFormsTitle, "3", ct, tabName: "Identity")),
+            new("winforms-slider-setrange-verify", "POST /execute setrange 50 → WinForms Slider (verified)", "winforms",
+                ct => SliderSetAndVerifyAsync("POST /execute setrange 50 → WinForms Slider (verified)",
+                    WinFormsTitle, "50", ct, tabName: "Identity", nameHint: "Access Level")),
 
             new("winforms-listbox-select", "POST /execute select → WinForms ListBox item", "winforms",
                 ct => ListBoxSelectFirstItemAsync("POST /execute select → WinForms ListBox item",
@@ -278,18 +278,20 @@ public sealed class TestSuite
 
             // HTML (browser) — skipped gracefully if no browser window is open ──
             new("html-torture-scan", "SCAN_WINDOW Web (Torture Test)", "html",
-                ct => ScanAsRootTestAsync("Torture Test", HtmlTortureTitle, ct)),
+                async ct => { await EnsureBrowserActiveAsync(HtmlTortureTitle, ct); return await ScanAsRootTestAsync("Torture Test", HtmlTortureTitle, ct); }),
 
             new("html-torture-textbox-type", "POST /execute type → HTML TextBox on Torture Test (verified)", "html",
-                ct => TextBoxEditRetypeAsync("POST /execute type → HTML TextBox on Torture Test (verified)",
-                    HtmlTortureTitle, ControlTypeEdit, ct, nameHint: "Normal text")),
+                async ct => { await EnsureBrowserActiveAsync(HtmlTortureTitle, ct);
+                    return await TextBoxEditRetypeAsync("POST /execute type → HTML TextBox on Torture Test (verified)",
+                        HtmlTortureTitle, ControlTypeEdit, ct, nameHint: "Normal text", focusBeforeType: true); }),
 
             new("html-ecommerce-scan", "SCAN_WINDOW Web (Ecommerce)", "html",
-                ct => ScanAsRootTestAsync("Ecommerce", HtmlEcommerceTitle, ct)),
+                async ct => { await EnsureBrowserActiveAsync(HtmlEcommerceTitle, ct); return await ScanAsRootTestAsync("Ecommerce", HtmlEcommerceTitle, ct); }),
 
             new("html-ecommerce-slider-setrange-verify", "POST /execute setrange 100 → HTML range slider on Ecommerce (verified)", "html",
-                ct => SliderSetAndVerifyAsync("POST /execute setrange 100 → HTML range slider on Ecommerce (verified)",
-                    HtmlEcommerceTitle, "100", ct)),
+                async ct => { await EnsureBrowserActiveAsync(HtmlEcommerceTitle, ct);
+                    return await SliderSetAndVerifyAsync("POST /execute setrange 100 → HTML range slider on Ecommerce (verified)",
+                        HtmlEcommerceTitle, "100", ct); }),
 
             // Meta
             new("meta-help", "GET /help — returns content", "meta",
@@ -305,7 +307,20 @@ public sealed class TestSuite
     // ── Higher-level reusable test bodies ─────────────────────────────────────
 
     /// <summary>Type a deterministic value into an Edit control, read it back, clear, retype, read back again.</summary>
-    private async Task<TestResult> TextBoxEditRetypeAsync(string name, string windowTitle, string controlType, CancellationToken ct, string? tabName = null, string? nameHint = null)
+    /// <summary>
+    /// Bring the browser window/tab whose document title contains <paramref name="windowTitle"/>
+    /// to the foreground before driving it. Browser tab titles only appear on the active tab,
+    /// so without this the next /find may match a different tab and inputs land on the wrong page
+    /// (or the address bar). Drops the scan cache so subsequent scans reflect the activated tab.
+    /// </summary>
+    private async Task EnsureBrowserActiveAsync(string windowTitle, CancellationToken ct)
+    {
+        _scanCache.Remove(windowTitle);
+        _ = await _client.FindWindowAsync(windowTitle, ct);
+        if (_uiSettleDelayMs > 0) await Task.Delay(_uiSettleDelayMs, ct);
+    }
+
+    private async Task<TestResult> TextBoxEditRetypeAsync(string name, string windowTitle, string controlType, CancellationToken ct, string? tabName = null, string? nameHint = null, bool focusBeforeType = false)
     {
         var (tree, error) = tabName == null
             ? (await GetScanAsync(windowTitle, ct), (string?)null)
@@ -320,6 +335,14 @@ public sealed class TestSuite
 
         string first  = $"first_{DateTime.Now:HHmmssfff}";
         string second = $"second_{DateTime.Now:HHmmssfff}";
+
+        if (focusBeforeType)
+        {
+            // Browsers accept text only when the element actually has keyboard focus —
+            // otherwise type/keys end up in the address bar or whichever element last had focus.
+            _ = await _client.ExecuteAsync(id, "focus", null, ct);
+            if (_actionDelayMs > 0) await Task.Delay(_actionDelayMs, ct);
+        }
 
         var r1 = await _client.ExecuteAsync(id, "type", first, ct);
         if (!r1.Success) return Fail(name, $"type #1 failed: {r1.Detail}");
@@ -350,16 +373,18 @@ public sealed class TestSuite
             Command: $"POST /execute type/gettext id={id}");
     }
 
-    /// <summary>Find the first Slider, setrange to <paramref name="value"/>, then getrange and assert.</summary>
-    private async Task<TestResult> SliderSetAndVerifyAsync(string name, string windowTitle, string value, CancellationToken ct, string? tabName = null)
+    /// <summary>Find the first Slider (optionally matching <paramref name="nameHint"/>), setrange to <paramref name="value"/>, then getrange and assert.</summary>
+    private async Task<TestResult> SliderSetAndVerifyAsync(string name, string windowTitle, string value, CancellationToken ct, string? tabName = null, string? nameHint = null)
     {
         var (tree, error) = tabName == null
             ? (await GetScanAsync(windowTitle, ct), (string?)null)
             : await SelectTabAndScanAsync(windowTitle, tabName, ct);
         if (tree == null) return Fail(name, error ?? $"scan of '{windowTitle}' failed (window not open?)");
 
-        var slider = FindNode(tree, n => ControlTypeIs(n, "Slider"));
-        if (slider == null) return Fail(name, "No Slider control found");
+        var slider = nameHint != null
+            ? FindNode(tree, n => ControlTypeIs(n, "Slider") && NameOrIdContains(n, nameHint))
+            : FindNode(tree, n => ControlTypeIs(n, "Slider"));
+        if (slider == null) return Fail(name, $"No Slider control found{(nameHint != null ? $" matching '{nameHint}'" : "")}");
         int id = slider["id"]!.GetValue<int>();
 
         var setr = await _client.ExecuteAsync(id, "setrange", value, ct);
@@ -390,20 +415,19 @@ public sealed class TestSuite
         if (tree == null) return Fail(name, error ?? $"scan of '{windowTitle}' failed (window not open?)");
 
         // Try AutomationId/name "ListBox" first, then fall back to controlType=List.
-        var list = listSelector == null ? null : FindNode(tree, listSelector)
+        // NOTE: the listSelector ternary must be parenthesised so the ?? fallbacks
+        // apply regardless of whether listSelector is null.
+        var list = (listSelector != null ? FindNode(tree, listSelector) : null)
                 ?? FindNode(tree, n => AutomationIdIs(n, "ListBox"))
                 ?? FindNode(tree, n => NameOrIdContains(n, "ListBox"))
                 ?? FindNode(tree, n => ControlTypeIs(n, "List"));
         if (list == null) return Fail(name, "No ListBox found");
 
-        var firstChild = (list["children"] as JsonArray)?.FirstOrDefault() as JsonObject;
-        if (firstChild == null) return Fail(name, "ListBox has no children");
-        int childId = firstChild["id"]!.GetValue<int>();
-
-        var r = await _client.ExecuteAsync(childId, "select", null, ct);
+        int listId = list["id"]!.GetValue<int>();
+        var r = await _client.ExecuteAsync(listId, "select-index", "0", ct);
         bool ok = r.Success;
-        return new TestResult(name, ok, ok ? $"selected item id={childId}" : r.Detail,
-            Command: $"POST /execute select id={childId}");
+        return new TestResult(name, ok, ok ? $"selected index 0 on list id={listId}" : r.Detail,
+            Command: $"POST /execute select-index 0 id={listId}");
     }
 
     /// <summary>Click RadioButton2 and assert the click succeeded.</summary>
@@ -420,7 +444,22 @@ public sealed class TestSuite
         if (tree == null) return Fail(name, error ?? $"scan of '{windowTitle}' failed (window not open?)");
 
         var rb = FindNode(tree, n => ControlTypeIs(n, "RadioButton") && NameOrIdContains(n, radioName));
-        if (rb == null) return Fail(name, $"{radioName} not found");
+        if (rb == null)
+        {
+            // Collect diagnostics: list all RadioButton nodes, and also any node whose name contains the target.
+            var allRadios = CollectNodes(tree, n => ControlTypeIs(n, "RadioButton")).Take(10).ToList();
+            var byName    = CollectNodes(tree, n => NameOrIdContains(n, radioName)).Take(5).ToList();
+            var ctypes    = CollectNodes(tree, _ => true).GroupBy(n => n["controlType"]?.GetValue<string>() ?? "?")
+                                .Select(g => $"{g.Key}×{g.Count()}").Take(15);
+            string radioInfo = allRadios.Count > 0
+                ? "RadioButtons: " + string.Join(", ", allRadios.Select(n => $"\"{n["name"]?.GetValue<string>()}\""))
+                : "No RadioButton nodes in tree";
+            string nameInfo = byName.Count > 0
+                ? $"; Nodes named '{radioName}': " + string.Join(", ", byName.Select(n => $"{n["controlType"]?.GetValue<string>()}:\"{n["name"]?.GetValue<string>()}\""))
+                : $"; No node named '{radioName}'";
+            string typeInfo = "; Types: " + string.Join(", ", ctypes);
+            return Fail(name, $"{radioName} not found. {radioInfo}{nameInfo}{typeInfo}");
+        }
         int id = rb["id"]!.GetValue<int>();
 
         var click = await _client.ExecuteAsync(id, "select", null, ct);
@@ -628,6 +667,19 @@ public sealed class TestSuite
     private static TestResult Fail(string name, string detail) => new(name, false, detail);
 
     // ── Tree-walking helpers ──────────────────────────────────────────────────
+
+    private static IEnumerable<JsonObject> CollectNodes(JsonNode root, Func<JsonObject, bool> pred)
+    {
+        if (root is JsonObject obj)
+        {
+            if (pred(obj)) yield return obj;
+            if (obj["children"] is JsonArray kids)
+                foreach (var child in kids)
+                    if (child != null)
+                        foreach (var hit in CollectNodes(child, pred))
+                            yield return hit;
+        }
+    }
 
     private static JsonNode? FindNode(JsonNode root, Func<JsonObject, bool> pred)
     {

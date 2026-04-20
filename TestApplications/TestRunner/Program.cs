@@ -197,16 +197,41 @@ if (!string.IsNullOrWhiteSpace(config.WebBaseUrl) && !string.IsNullOrWhiteSpace(
 if (!string.IsNullOrWhiteSpace(config.WebBaseUrl))
 {
     var pages = config.WebPagePaths.Length > 0 ? config.WebPagePaths : new[] { "/" };
+    // Resolve a Chromium-based browser so each page can be opened in its own
+    // window (--new-window). Without this, default-shell launches collapse all
+    // pages into tabs of the same browser window — meaning /find by tab title
+    // only ever activates whichever tab is foreground, and type/keys land on
+    // the wrong document (or the address bar).
+    var browserExe = ResolveBrowserExe(config.WebBrowserExe);
+    bool isChromium = browserExe != null && IsChromiumExe(browserExe);
     foreach (var page in pages)
     {
         var url = BuildWebUrl(config.WebBaseUrl, page);
         try
         {
-            var psi = string.IsNullOrWhiteSpace(config.WebBrowserExe)
-                ? new ProcessStartInfo { FileName = url, UseShellExecute = true }
-                : new ProcessStartInfo { FileName = config.WebBrowserExe, Arguments = url, UseShellExecute = false };
+            ProcessStartInfo psi;
+            if (isChromium)
+            {
+                psi = new ProcessStartInfo
+                {
+                    FileName = browserExe!,
+                    Arguments = $"--new-window \"{url}\"",
+                    UseShellExecute = false,
+                };
+            }
+            else if (browserExe != null)
+            {
+                psi = new ProcessStartInfo { FileName = browserExe, Arguments = url, UseShellExecute = false };
+            }
+            else
+            {
+                psi = new ProcessStartInfo { FileName = url, UseShellExecute = true };
+            }
             Process.Start(psi);
-            if (richConsole) Console.WriteLine($"[Runner] Opened browser → {url}");
+            if (richConsole) Console.WriteLine($"[Runner] Opened browser → {url}{(isChromium ? " (--new-window)" : "")}");
+            // Stagger window creation so the OS gives each one a distinct HWND
+            // and the browser doesn't merge them into a single window.
+            Thread.Sleep(800);
         }
         catch (Exception ex)
         {
@@ -727,6 +752,27 @@ static async Task<bool> WaitForWebTargetsAsync(RunnerConfig config, Cancellation
     }
 
     return false;
+}
+
+static string? ResolveBrowserExe(string configured)
+{
+    if (!string.IsNullOrWhiteSpace(configured) && File.Exists(configured)) return configured;
+    string[] candidates =
+    {
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "Microsoft", "Edge", "Application", "msedge.exe"),
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),    "Microsoft", "Edge", "Application", "msedge.exe"),
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),    "Google", "Chrome", "Application", "chrome.exe"),
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "Google", "Chrome", "Application", "chrome.exe"),
+    };
+    foreach (var c in candidates)
+        if (!string.IsNullOrEmpty(c) && File.Exists(c)) return c;
+    return null;
+}
+
+static bool IsChromiumExe(string path)
+{
+    var name = Path.GetFileName(path).ToLowerInvariant();
+    return name is "msedge.exe" or "chrome.exe" or "brave.exe" or "vivaldi.exe";
 }
 
 static string BuildWebUrl(string webBaseUrl, string pagePath)
