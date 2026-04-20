@@ -884,7 +884,7 @@ namespace WinFormsApplication
             simpleCombo.SelectedIndex = 0;
             miscTable.Controls.Add(simpleCombo, 1, 3);
             miscTable.Controls.Add(Lbl("Multi-select ListBox:"), 2, 3);
-            var multiList = new ListBox { SelectionMode = SelectionMode.MultiSimple, Dock = DockStyle.Fill };
+            var multiList = new ListBox { SelectionMode = SelectionMode.MultiSimple, Dock = DockStyle.Fill, Name = "ListBox" };
             multiList.Items.AddRange(new object[] { "Apple", "Banana", "Cherry", "Date", "Elderberry" });
             miscTable.Controls.Add(multiList, 3, 3);
 
