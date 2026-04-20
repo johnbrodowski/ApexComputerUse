@@ -2,6 +2,8 @@ using ApexUIBridge.TestRunner;
 using System.Diagnostics;
 using System.Text.Json;
 
+int _MaxCycles = 1;
+bool _ShowPassed = false;
 // ── Config ─────────────────────────────────────────────────────────────────────
 string? cliMode = null;
 string? cliConfigPath = null;
@@ -83,7 +85,7 @@ if (mode != "demo" && mode != "benchmark")
     return 1;
 }
 
-var maxCycles = mode == "benchmark" ? Math.Max(config.MaxCycles, 10) : Math.Min(config.MaxCycles, 3);
+var maxCycles = mode == "benchmark" ? Math.Max(config.MaxCycles, 10) : Math.Min(config.MaxCycles, _MaxCycles);
 var reportEveryN = mode == "benchmark"
     ? (config.ReportEveryN <= 0 ? 0 : Math.Max(config.ReportEveryN, 10))
     : (config.ReportEveryN <= 0 ? 1 : Math.Min(config.ReportEveryN, 1));
@@ -530,7 +532,8 @@ while (cycle < maxCycles && !ct.IsCancellationRequested)
             if (r.Skipped)
                 Console.WriteLine($"  SKIP {r.Name} (previously passed)");
             else if (r.Passed)
-                Console.WriteLine($"  PASS {r.Name}" + (r.ElapsedMs.HasValue ? $"  ({r.ElapsedMs}ms)" : ""));
+               // if(_ShowPassed) 
+                    Console.WriteLine($"  PASS {r.Name}" + (r.ElapsedMs.HasValue ? $"  ({r.ElapsedMs}ms)" : ""));
             else
             {
                 var cmd = string.IsNullOrEmpty(r.Command) ? "" : $"  cmd={r.Command}";
@@ -715,7 +718,8 @@ if (richConsole)
 {
     Console.WriteLine("[Runner] Done. Test-target apps will be closed.");
     Console.WriteLine("\nPress any key to close...");
-    Console.ReadKey(intercept: true);
+    if (!Console.IsInputRedirected)
+        Console.ReadKey(intercept: true);
 }
 return 0;
 

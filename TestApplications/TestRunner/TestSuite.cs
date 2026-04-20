@@ -293,6 +293,366 @@ public sealed class TestSuite
                     return await SliderSetAndVerifyAsync("POST /execute setrange 100 → HTML range slider on Ecommerce (verified)",
                         HtmlEcommerceTitle, "100", ct); }),
 
+            // WinForms — Identity tab (additional controls)
+            new("winforms-identity-combo-status", "WinForms Identity: StatusCombo → select Inactive", "winforms",
+                ct => ComboBoxSelectItemAsync("WinForms Identity: StatusCombo → select Inactive",
+                    WinFormsTitle, "StatusCombo", "Inactive", ct, tabName: "Identity")),
+
+            new("winforms-identity-numericupdown-salary", "WinForms Identity: SalaryInput → setvalue 75000", "winforms",
+                ct => NumericSetAndVerifyAsync("WinForms Identity: SalaryInput → setvalue 75000",
+                    WinFormsTitle, "SalaryInput", "75000", ct, tabName: "Identity")),
+
+            new("winforms-identity-richtext-notes", "WinForms Identity: NotesField → retype", "winforms",
+                ct => TextBoxEditRetypeAsync("WinForms Identity: NotesField → retype",
+                    WinFormsTitle, ControlTypeEdit, ct, tabName: "Identity", nameHint: "NotesField")),
+
+            // WinForms — Network tab
+            new("winforms-network-slider-upload", "WinForms Network: UploadSlider → setrange 200", "winforms",
+                ct => SliderSetAndVerifyAsync("WinForms Network: UploadSlider → setrange 200",
+                    WinFormsTitle, "200", ct, tabName: "Network", nameHint: "Upload")),
+
+            new("winforms-network-slider-download", "WinForms Network: DownloadSlider → setrange 300", "winforms",
+                ct => SliderSetAndVerifyAsync("WinForms Network: DownloadSlider → setrange 300",
+                    WinFormsTitle, "300", ct, tabName: "Network", nameHint: "Download")),
+
+            new("winforms-network-checkbox-tls", "WinForms Network: TlsVerify → toggle", "winforms",
+                ct => CheckBoxToggleAsync("WinForms Network: TlsVerify → toggle",
+                    WinFormsTitle, "TlsVerify", ct, tabName: "Network")),
+
+            new("winforms-network-checkedlistbox-toggle", "WinForms Network: FeaturesCheckedList → select-index 3", "winforms",
+                async ct =>
+                {
+                    const string n = "WinForms Network: FeaturesCheckedList → select-index 3";
+                    var (tree, error) = await SelectTabAndScanAsync(WinFormsTitle, "Network", ct);
+                    if (tree == null) return Fail(n, error ?? "scan failed");
+                    var list = FindNode(tree, n2 => AutomationIdIs(n2, "FeaturesCheckedList"))
+                            ?? FindNode(tree, n2 => ControlTypeIs(n2, "List") && NameOrIdContains(n2, "Feature"));
+                    if (list == null) return Fail(n, "FeaturesCheckedList not found");
+                    var r = await _client.ExecuteAsync(list["id"]!.GetValue<int>(), "select-index", "3", ct);
+                    return new TestResult(n, r.Success, r.Detail, Command: $"POST /execute select-index 3 id={list["id"]}");
+                }),
+
+            // WinForms — Scheduler tab
+            new("winforms-scheduler-textbox", "WinForms Scheduler: JobName → retype", "winforms",
+                ct => TextBoxEditRetypeAsync("WinForms Scheduler: JobName → retype",
+                    WinFormsTitle, ControlTypeEdit, ct, tabName: "Scheduler", nameHint: "JobName")),
+
+            new("winforms-scheduler-combo-type", "WinForms Scheduler: JobType → select Report", "winforms",
+                ct => ComboBoxSelectItemAsync("WinForms Scheduler: JobType → select Report",
+                    WinFormsTitle, "JobType", "Report", ct, tabName: "Scheduler")),
+
+            new("winforms-scheduler-slider-priority", "WinForms Scheduler: PrioritySlider → setrange 7", "winforms",
+                ct => SliderSetAndVerifyAsync("WinForms Scheduler: PrioritySlider → setrange 7",
+                    WinFormsTitle, "7", ct, tabName: "Scheduler", nameHint: "Priority")),
+
+            new("winforms-scheduler-checkbox-enabled", "WinForms Scheduler: JobEnabled → toggle", "winforms",
+                ct => CheckBoxToggleAsync("WinForms Scheduler: JobEnabled → toggle",
+                    WinFormsTitle, "JobEnabled", ct, tabName: "Scheduler")),
+
+            // WinForms — Layout tab
+            new("winforms-layout-button-apply", "WinForms Layout: Button Apply → click", "winforms",
+                ct => ButtonClickAsync("WinForms Layout: Button Apply → click",
+                    WinFormsTitle, "Apply", ct, tabName: "Layout")),
+
+            new("winforms-layout-button-reset", "WinForms Layout: Button Reset → click", "winforms",
+                ct => ButtonClickAsync("WinForms Layout: Button Reset → click",
+                    WinFormsTitle, "Reset", ct, tabName: "Layout")),
+
+            // WinForms — Logs tab
+            new("winforms-logs-combo-level", "WinForms Logs: LogLevelCombo → select ERROR", "winforms",
+                ct => ComboBoxSelectItemAsync("WinForms Logs: LogLevelCombo → select ERROR",
+                    WinFormsTitle, "LogLevelCombo", "ERROR", ct, tabName: "Logs")),
+
+            new("winforms-logs-textbox-filter", "WinForms Logs: LogFilter → retype", "winforms",
+                ct => TextBoxEditRetypeAsync("WinForms Logs: LogFilter → retype",
+                    WinFormsTitle, ControlTypeEdit, ct, tabName: "Logs", nameHint: "LogFilter")),
+
+            new("winforms-logs-checkbox-autoscroll", "WinForms Logs: LogAutoScroll → toggle", "winforms",
+                ct => CheckBoxToggleAsync("WinForms Logs: LogAutoScroll → toggle",
+                    WinFormsTitle, "LogAutoScroll", ct, tabName: "Logs")),
+
+            // WinForms — Dialogs tab
+            new("winforms-dialogs-domainupdown", "WinForms Dialogs: DomainSpinner → setvalue Beta", "winforms",
+                async ct =>
+                {
+                    const string n = "WinForms Dialogs: DomainSpinner → setvalue Beta";
+                    var (tree, error) = await SelectTabAndScanAsync(WinFormsTitle, "Dialogs", ct);
+                    if (tree == null) return Fail(n, error ?? "scan failed");
+                    var spin = FindNode(tree, n2 => AutomationIdIs(n2, "DomainSpinner"))
+                            ?? FindNode(tree, n2 => ControlTypeIs(n2, "Spinner") && NameOrIdContains(n2, "Domain"));
+                    if (spin == null) return Fail(n, "DomainSpinner not found");
+                    int id = spin["id"]!.GetValue<int>();
+                    var r = await _client.ExecuteAsync(id, "setvalue", "Beta", ct);
+                    return new TestResult(n, r.Success, r.Detail, Command: $"POST /execute setvalue Beta id={id}");
+                }),
+
+            new("winforms-dialogs-numericupdown", "WinForms Dialogs: DecimalSpinner → setvalue 42", "winforms",
+                ct => NumericSetAndVerifyAsync("WinForms Dialogs: DecimalSpinner → setvalue 42",
+                    WinFormsTitle, "DecimalSpinner", "42", ct, tabName: "Dialogs")),
+
+            // WPF — Identity tab
+            new("wpf-identity-slider", "WPF Identity: Slider AccessLevel → setrange 3", "wpf",
+                ct => SliderSetAndVerifyAsync("WPF Identity: Slider AccessLevel → setrange 3",
+                    WpfTitle, "3", ct, tabName: "Identity", nameHint: "AccessLevel")),
+
+            new("wpf-identity-radio-parttime", "WPF Identity: RadioButton EmpPartTime → select", "wpf",
+                ct => RadioSelectAsync("WPF Identity: RadioButton EmpPartTime → select",
+                    WpfTitle, "EmpPartTime", ct, tabName: "Identity")),
+
+            new("wpf-identity-checkbox-vpn", "WPF Identity: CheckBox FlagVpn → toggle", "wpf",
+                ct => CheckBoxToggleAsync("WPF Identity: CheckBox FlagVpn → toggle",
+                    WpfTitle, "FlagVpn", ct, tabName: "Identity")),
+
+            new("wpf-identity-combo-location", "WPF Identity: ComboBox Location → select Boston", "wpf",
+                ct => ComboBoxSelectItemAsync("WPF Identity: ComboBox Location → select Boston",
+                    WpfTitle, "Location", "Boston", ct, tabName: "Identity")),
+
+            new("wpf-identity-textbox-email", "WPF Identity: TextBox Email → retype", "wpf",
+                ct => TextBoxEditRetypeAsync("WPF Identity: TextBox Email → retype",
+                    WpfTitle, ControlTypeEdit, ct, tabName: "Identity", nameHint: "Email")),
+
+            // WPF — Network tab
+            new("wpf-network-slider-upload", "WPF Network: Slider UploadLimit → setrange 200", "wpf",
+                ct => SliderSetAndVerifyAsync("WPF Network: Slider UploadLimit → setrange 200",
+                    WpfTitle, "200", ct, tabName: "Network", nameHint: "UploadLimit")),
+
+            new("wpf-network-slider-download", "WPF Network: Slider DownloadLimit → setrange 300", "wpf",
+                ct => SliderSetAndVerifyAsync("WPF Network: Slider DownloadLimit → setrange 300",
+                    WpfTitle, "300", ct, tabName: "Network", nameHint: "DownloadLimit")),
+
+            new("wpf-network-checkbox-tls", "WPF Network: CheckBox TlsClientCert → toggle", "wpf",
+                ct => CheckBoxToggleAsync("WPF Network: CheckBox TlsClientCert → toggle",
+                    WpfTitle, "TlsClientCert", ct, tabName: "Network")),
+
+            new("wpf-network-radio-proxy", "WPF Network: RadioButton ConnProxy → select", "wpf",
+                ct => RadioSelectAsync("WPF Network: RadioButton ConnProxy → select",
+                    WpfTitle, "ConnProxy", ct, tabName: "Network")),
+
+            new("wpf-network-combo-protocol", "WPF Network: ComboBox Protocol → select HTTP", "wpf",
+                ct => ComboBoxSelectItemAsync("WPF Network: ComboBox Protocol → select HTTP",
+                    WpfTitle, "Protocol", "HTTP", ct, tabName: "Network")),
+
+            // WPF — Scheduler tab
+            new("wpf-scheduler-textbox", "WPF Scheduler: TextBox JobName → retype", "wpf",
+                ct => TextBoxEditRetypeAsync("WPF Scheduler: TextBox JobName → retype",
+                    WpfTitle, ControlTypeEdit, ct, tabName: "Scheduler", nameHint: "JobName")),
+
+            new("wpf-scheduler-combo-type", "WPF Scheduler: ComboBox JobType → select Report", "wpf",
+                ct => ComboBoxSelectItemAsync("WPF Scheduler: ComboBox JobType → select Report",
+                    WpfTitle, "JobType", "Report", ct, tabName: "Scheduler")),
+
+            new("wpf-scheduler-slider", "WPF Scheduler: Slider JobPriority → setrange 7", "wpf",
+                ct => SliderSetAndVerifyAsync("WPF Scheduler: Slider JobPriority → setrange 7",
+                    WpfTitle, "7", ct, tabName: "Scheduler", nameHint: "JobPriority")),
+
+            new("wpf-scheduler-checkbox", "WPF Scheduler: CheckBox JobEnabled → toggle", "wpf",
+                ct => CheckBoxToggleAsync("WPF Scheduler: CheckBox JobEnabled → toggle",
+                    WpfTitle, "JobEnabled", ct, tabName: "Scheduler")),
+
+            // WPF — Layout tab
+            new("wpf-layout-button-apply", "WPF Layout: Button BtnApply → click", "wpf",
+                ct => ButtonClickAsync("WPF Layout: Button BtnApply → click",
+                    WpfTitle, "BtnApply", ct, tabName: "Layout")),
+
+            new("wpf-layout-button-reset", "WPF Layout: Button BtnReset → click", "wpf",
+                ct => ButtonClickAsync("WPF Layout: Button BtnReset → click",
+                    WpfTitle, "BtnReset", ct, tabName: "Layout")),
+
+            // WPF — Logs tab
+            new("wpf-logs-combo-level", "WPF Logs: ComboBox LogLevel → select ERROR", "wpf",
+                ct => ComboBoxSelectItemAsync("WPF Logs: ComboBox LogLevel → select ERROR",
+                    WpfTitle, "LogLevel", "ERROR", ct, tabName: "Logs")),
+
+            new("wpf-logs-textbox-filter", "WPF Logs: TextBox LogFilter → retype", "wpf",
+                ct => TextBoxEditRetypeAsync("WPF Logs: TextBox LogFilter → retype",
+                    WpfTitle, ControlTypeEdit, ct, tabName: "Logs", nameHint: "LogFilter")),
+
+            new("wpf-logs-checkbox-autoscroll", "WPF Logs: CheckBox LogAutoScroll → toggle", "wpf",
+                ct => CheckBoxToggleAsync("WPF Logs: CheckBox LogAutoScroll → toggle",
+                    WpfTitle, "LogAutoScroll", ct, tabName: "Logs")),
+
+            new("wpf-logs-button-clear", "WPF Logs: Button LogClear → click", "wpf",
+                ct => ButtonClickAsync("WPF Logs: Button LogClear → click",
+                    WpfTitle, "LogClear", ct, tabName: "Logs")),
+
+            // WPF — WPF-specific tab
+            new("wpf-tab-togglebutton", "WPF WPF-tab: ToggleButton Toggle1 → click+restore", "wpf",
+                async ct =>
+                {
+                    const string n = "WPF WPF-tab: ToggleButton Toggle1 → click+restore";
+                    var (tree, error) = await SelectTabAndScanAsync(WpfTitle, "WPF", ct);
+                    if (tree == null) return Fail(n, error ?? "scan failed");
+                    var btn = FindNode(tree, n2 => AutomationIdIs(n2, "Toggle1"));
+                    if (btn == null) return Fail(n, "Toggle1 not found");
+                    int id = btn["id"]!.GetValue<int>();
+                    var r = await _client.ExecuteAsync(id, "click", null, ct);
+                    if (!r.Success) return Fail(n, $"click failed: {r.Detail}");
+                    if (_actionDelayMs > 0) await Task.Delay(_actionDelayMs, ct);
+                    _ = await _client.ExecuteAsync(id, "click", null, ct);
+                    return new TestResult(n, true, "clicked+restored Toggle1", Command: $"POST /execute click id={id}");
+                }),
+
+            new("wpf-tab-expander-logging", "WPF WPF-tab: Expander ExpanderLogging → expand/collapse", "wpf",
+                async ct =>
+                {
+                    const string n = "WPF WPF-tab: Expander ExpanderLogging → expand/collapse";
+                    var (tree, error) = await SelectTabAndScanAsync(WpfTitle, "WPF", ct);
+                    if (tree == null) return Fail(n, error ?? "scan failed");
+                    var exp = FindNode(tree, n2 => AutomationIdIs(n2, "ExpanderLogging"));
+                    if (exp == null) return Fail(n, "ExpanderLogging not found");
+                    int id = exp["id"]!.GetValue<int>();
+                    var r = await _client.ExecuteAsync(id, "expand", null, ct);
+                    if (!r.Success) return Fail(n, $"expand failed: {r.Detail}");
+                    if (_actionDelayMs > 0) await Task.Delay(_actionDelayMs, ct);
+                    _ = await _client.ExecuteAsync(id, "collapse", null, ct);
+                    return new TestResult(n, true, "expanded+collapsed ExpanderLogging", Command: $"POST /execute expand/collapse id={id}");
+                }),
+
+            // WPF — Dialogs tab
+            new("wpf-dialogs-slider", "WPF Dialogs: Slider MiscVertSlider → setrange 50", "wpf",
+                ct => SliderSetAndVerifyAsync("WPF Dialogs: Slider MiscVertSlider → setrange 50",
+                    WpfTitle, "50", ct, tabName: "Dialogs", nameHint: "MiscVertSlider")),
+
+            new("wpf-dialogs-radio", "WPF Dialogs: RadioButton MiscRadioB → select", "wpf",
+                ct => RadioSelectAsync("WPF Dialogs: RadioButton MiscRadioB → select",
+                    WpfTitle, "MiscRadioB", ct, tabName: "Dialogs")),
+
+            new("wpf-dialogs-listbox", "WPF Dialogs: ListBox MiscMultiListBox → select-index 0", "wpf",
+                ct => ListBoxSelectFirstItemAsync("WPF Dialogs: ListBox MiscMultiListBox → select-index 0",
+                    WpfTitle, ct, tabName: "Dialogs",
+                    listSelector: n2 => AutomationIdIs(n2, "MiscMultiListBox"))),
+
+            new("wpf-dialogs-combo", "WPF Dialogs: ComboBox MiscEditCombo → select Option A", "wpf",
+                ct => ComboBoxSelectItemAsync("WPF Dialogs: ComboBox MiscEditCombo → select Option A",
+                    WpfTitle, "MiscEditCombo", "Option A", ct, tabName: "Dialogs")),
+
+            new("wpf-dialogs-textbox", "WPF Dialogs: TextBox MiscMultilineTextBox → retype", "wpf",
+                ct => TextBoxEditRetypeAsync("WPF Dialogs: TextBox MiscMultilineTextBox → retype",
+                    WpfTitle, ControlTypeEdit, ct, tabName: "Dialogs", nameHint: "MiscMultilineTextBox")),
+
+            // HTML — TortureTest
+            new("html-torture-checkbox-toggle", "HTML Torture: checkbox check1 → toggle+restore", "html",
+                async ct =>
+                {
+                    const string n = "HTML Torture: checkbox check1 → toggle+restore";
+                    await EnsureBrowserActiveAsync(HtmlTortureTitle, ct);
+                    var tree = await GetScanAsync(HtmlTortureTitle, ct);
+                    if (tree == null) return Fail(n, "scan failed");
+                    var cb = FindNode(tree, n2 => AutomationIdIs(n2, "check1"))
+                          ?? FindNode(tree, n2 => ControlTypeIs(n2, "CheckBox") && NameOrIdContains(n2, "Required"));
+                    if (cb == null) return Fail(n, "check1 not found");
+                    int id = cb["id"]!.GetValue<int>();
+                    var r = await _client.ExecuteAsync(id, "toggle", null, ct);
+                    if (!r.Success) return Fail(n, $"toggle failed: {r.Detail}");
+                    if (_actionDelayMs > 0) await Task.Delay(_actionDelayMs, ct);
+                    _ = await _client.ExecuteAsync(id, "toggle", null, ct);
+                    return new TestResult(n, true, "toggled+restored check1", Command: $"POST /execute toggle id={id}");
+                }),
+
+            new("html-torture-radio-select", "HTML Torture: radio 'Radio 2' → click", "html",
+                async ct =>
+                {
+                    const string n = "HTML Torture: radio 'Radio 2' → click";
+                    await EnsureBrowserActiveAsync(HtmlTortureTitle, ct);
+                    var tree = await GetScanAsync(HtmlTortureTitle, ct);
+                    if (tree == null) return Fail(n, "scan failed");
+                    var rb = FindNode(tree, n2 => ControlTypeIs(n2, "RadioButton") && NameOrIdContains(n2, "Radio 2"));
+                    if (rb == null) return Fail(n, "Radio 2 not found");
+                    var r = await _client.ExecuteAsync(rb["id"]!.GetValue<int>(), "click", null, ct);
+                    return new TestResult(n, r.Success, r.Detail, Command: $"POST /execute click id={rb["id"]}");
+                }),
+
+            new("html-torture-select-single", "HTML Torture: select#single-select → select Option 2", "html",
+                async ct =>
+                {
+                    await EnsureBrowserActiveAsync(HtmlTortureTitle, ct);
+                    return await ComboBoxSelectItemAsync("HTML Torture: select#single-select → select Option 2",
+                        HtmlTortureTitle, "single-select", "Option 2", ct);
+                }),
+
+            new("html-torture-select-multi", "HTML Torture: select#multi-select → select-index 0", "html",
+                async ct =>
+                {
+                    const string n = "HTML Torture: select#multi-select → select-index 0";
+                    await EnsureBrowserActiveAsync(HtmlTortureTitle, ct);
+                    var tree = await GetScanAsync(HtmlTortureTitle, ct);
+                    if (tree == null) return Fail(n, "scan failed");
+                    var sel = FindNode(tree, n2 => AutomationIdIs(n2, "multi-select"))
+                           ?? FindNode(tree, n2 => ControlTypeIs(n2, "List") && NameOrIdContains(n2, "multi"));
+                    if (sel == null) return Fail(n, "multi-select not found");
+                    var r = await _client.ExecuteAsync(sel["id"]!.GetValue<int>(), "select-index", "0", ct);
+                    return new TestResult(n, r.Success, r.Detail, Command: $"POST /execute select-index 0 id={sel["id"]}");
+                }),
+
+            new("html-torture-textarea", "HTML Torture: textarea → retype", "html",
+                async ct =>
+                {
+                    await EnsureBrowserActiveAsync(HtmlTortureTitle, ct);
+                    return await TextBoxEditRetypeAsync("HTML Torture: textarea → retype",
+                        HtmlTortureTitle, ControlTypeEdit, ct, nameHint: "Textarea", focusBeforeType: true);
+                }),
+
+            new("html-torture-button-click", "HTML Torture: button 'Plain button' → click", "html",
+                async ct =>
+                {
+                    const string n = "HTML Torture: button 'Plain button' → click";
+                    await EnsureBrowserActiveAsync(HtmlTortureTitle, ct);
+                    var tree = await GetScanAsync(HtmlTortureTitle, ct);
+                    if (tree == null) return Fail(n, "scan failed");
+                    var btn = FindNode(tree, n2 => ControlTypeIs(n2, "Button") && NameOrIdContains(n2, "Plain"));
+                    if (btn == null) return Fail(n, "Plain button not found");
+                    var r = await _client.ExecuteAsync(btn["id"]!.GetValue<int>(), "click", null, ct);
+                    return new TestResult(n, r.Success, r.Detail, Command: $"POST /execute click id={btn["id"]}");
+                }),
+
+            // HTML — Ecommerce
+            new("html-ecommerce-search-type", "HTML Ecommerce: searchProducts → retype", "html",
+                async ct =>
+                {
+                    await EnsureBrowserActiveAsync(HtmlEcommerceTitle, ct);
+                    return await TextBoxEditRetypeAsync("HTML Ecommerce: searchProducts → retype",
+                        HtmlEcommerceTitle, ControlTypeEdit, ct, nameHint: "searchProducts", focusBeforeType: true);
+                }),
+
+            new("html-ecommerce-category-select", "HTML Ecommerce: categoryFilter → select Electronics", "html",
+                async ct =>
+                {
+                    await EnsureBrowserActiveAsync(HtmlEcommerceTitle, ct);
+                    return await ComboBoxSelectItemAsync("HTML Ecommerce: categoryFilter → select Electronics",
+                        HtmlEcommerceTitle, "categoryFilter", "Electronics", ct);
+                }),
+
+            new("html-ecommerce-checkbox-shipping", "HTML Ecommerce: shipFree → toggle+restore", "html",
+                async ct =>
+                {
+                    const string n = "HTML Ecommerce: shipFree → toggle+restore";
+                    await EnsureBrowserActiveAsync(HtmlEcommerceTitle, ct);
+                    var tree = await GetScanAsync(HtmlEcommerceTitle, ct);
+                    if (tree == null) return Fail(n, "scan failed");
+                    var cb = FindNode(tree, n2 => AutomationIdIs(n2, "shipFree"))
+                          ?? FindNode(tree, n2 => ControlTypeIs(n2, "CheckBox") && NameOrIdContains(n2, "ship"));
+                    if (cb == null) return Fail(n, "shipFree not found");
+                    int id = cb["id"]!.GetValue<int>();
+                    var r = await _client.ExecuteAsync(id, "toggle", null, ct);
+                    if (!r.Success) return Fail(n, $"toggle failed: {r.Detail}");
+                    if (_actionDelayMs > 0) await Task.Delay(_actionDelayMs, ct);
+                    _ = await _client.ExecuteAsync(id, "toggle", null, ct);
+                    return new TestResult(n, true, "toggled+restored shipFree", Command: $"POST /execute toggle id={id}");
+                }),
+
+            new("html-ecommerce-add-to-cart", "HTML Ecommerce: first 'Add to Cart' button → click", "html",
+                async ct =>
+                {
+                    const string n = "HTML Ecommerce: first 'Add to Cart' button → click";
+                    await EnsureBrowserActiveAsync(HtmlEcommerceTitle, ct);
+                    var tree = await GetScanAsync(HtmlEcommerceTitle, ct);
+                    if (tree == null) return Fail(n, "scan failed");
+                    var btn = FindNode(tree, n2 => ControlTypeIs(n2, "Button") && NameOrIdContains(n2, "Add to Cart"));
+                    if (btn == null) return Fail(n, "Add to Cart button not found");
+                    var r = await _client.ExecuteAsync(btn["id"]!.GetValue<int>(), "click", null, ct);
+                    return new TestResult(n, r.Success, r.Detail, Command: $"POST /execute click id={btn["id"]}");
+                }),
+
             // Meta
             new("meta-help", "GET /help — returns content", "meta",
                 ct => CheckAsync("GET /help — returns content", "GET /help",
@@ -497,6 +857,83 @@ public sealed class TestSuite
         }
         return new TestResult(name, true, "cycled ThreeStateCheckBox 3×",
             Command: $"POST /execute toggle (×3) id={id}");
+    }
+
+    private async Task<TestResult> CheckBoxToggleAsync(string name, string windowTitle, string controlId, CancellationToken ct, string? tabName = null)
+    {
+        var (tree, error) = tabName == null
+            ? (await GetScanAsync(windowTitle, ct), (string?)null)
+            : await SelectTabAndScanAsync(windowTitle, tabName, ct);
+        if (tree == null) return Fail(name, error ?? $"scan of '{windowTitle}' failed");
+
+        var cb = FindNode(tree, n => AutomationIdIs(n, controlId))
+              ?? FindNode(tree, n => ControlTypeIs(n, "CheckBox") && NameOrIdContains(n, controlId));
+        if (cb == null) return Fail(name, $"CheckBox '{controlId}' not found");
+        int id = cb["id"]!.GetValue<int>();
+
+        var r = await _client.ExecuteAsync(id, "toggle", null, ct);
+        if (!r.Success) return Fail(name, $"toggle failed: {r.Detail}");
+        if (_actionDelayMs > 0) await Task.Delay(_actionDelayMs, ct);
+        _ = await _client.ExecuteAsync(id, "toggle", null, ct);
+        return new TestResult(name, true, $"toggled+restored '{controlId}'",
+            Command: $"POST /execute toggle id={id}");
+    }
+
+    private async Task<TestResult> ComboBoxSelectItemAsync(string name, string windowTitle, string controlId, string itemText, CancellationToken ct, string? tabName = null)
+    {
+        var (tree, error) = tabName == null
+            ? (await GetScanAsync(windowTitle, ct), (string?)null)
+            : await SelectTabAndScanAsync(windowTitle, tabName, ct);
+        if (tree == null) return Fail(name, error ?? $"scan of '{windowTitle}' failed");
+
+        var combo = FindNode(tree, n => AutomationIdIs(n, controlId))
+                 ?? FindNode(tree, n => ControlTypeIs(n, "ComboBox") && NameOrIdContains(n, controlId));
+        if (combo == null) return Fail(name, $"ComboBox '{controlId}' not found");
+        int id = combo["id"]!.GetValue<int>();
+
+        _ = await _client.ExecuteAsync(id, "expand", null, ct);
+        if (_actionDelayMs > 0) await Task.Delay(_actionDelayMs, ct);
+
+        var sel = await _client.ExecuteAsync(id, "select", itemText, ct);
+        if (!sel.Success) return Fail(name, $"select '{itemText}' failed: {sel.Detail}");
+        return new TestResult(name, true, $"selected '{itemText}' in '{controlId}'",
+            Command: $"POST /execute select id={id} value={itemText}");
+    }
+
+    private async Task<TestResult> ButtonClickAsync(string name, string windowTitle, string controlId, CancellationToken ct, string? tabName = null)
+    {
+        var (tree, error) = tabName == null
+            ? (await GetScanAsync(windowTitle, ct), (string?)null)
+            : await SelectTabAndScanAsync(windowTitle, tabName, ct);
+        if (tree == null) return Fail(name, error ?? $"scan of '{windowTitle}' failed");
+
+        var btn = FindNode(tree, n => AutomationIdIs(n, controlId))
+               ?? FindNode(tree, n => ControlTypeIs(n, "Button") && NameOrIdContains(n, controlId));
+        if (btn == null) return Fail(name, $"Button '{controlId}' not found");
+        return await ExecAsync(name, btn, "click", null, ct);
+    }
+
+    private async Task<TestResult> NumericSetAndVerifyAsync(string name, string windowTitle, string controlId, string value, CancellationToken ct, string? tabName = null)
+    {
+        var (tree, error) = tabName == null
+            ? (await GetScanAsync(windowTitle, ct), (string?)null)
+            : await SelectTabAndScanAsync(windowTitle, tabName, ct);
+        if (tree == null) return Fail(name, error ?? $"scan of '{windowTitle}' failed");
+
+        var num = FindNode(tree, n => AutomationIdIs(n, controlId))
+               ?? FindNode(tree, n => ControlTypeIs(n, "Spinner") && NameOrIdContains(n, controlId));
+        if (num == null) return Fail(name, $"Spinner '{controlId}' not found");
+        int id = num["id"]!.GetValue<int>();
+
+        var setr = await _client.ExecuteAsync(id, "setvalue", value, ct);
+        if (!setr.Success) return Fail(name, $"setvalue failed: {setr.Detail}");
+        if (_actionDelayMs > 0) await Task.Delay(_actionDelayMs, ct);
+
+        var getr = await _client.ExecuteAsync(id, "getvalue", null, ct);
+        bool ok = getr.Success;
+        return new TestResult(name, ok,
+            ok ? $"setvalue→getvalue: {getr.Result}" : $"getvalue failed: {getr.Detail}",
+            Command: $"POST /execute setvalue/getvalue id={id} value={value}");
     }
 
     /// <summary>Click a top-level menu (e.g. "Edit") and optionally a leaf item inside it (e.g. "Plain").</summary>

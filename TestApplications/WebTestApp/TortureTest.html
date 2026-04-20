@@ -431,21 +431,21 @@
                             
                             <fieldset>
                                 <legend>Radio group</legend>
-                                <label><input type="radio" name="radio" value="1" checked> Option 1</label><br>
-                                <label><input type="radio" name="radio" value="2"> Option 2</label><br>
-                                <label><input type="radio" name="radio" value="3" disabled> Disabled option</label>
+                                <label><input type="radio" name="radio" value="1" checked> Radio 1</label><br>
+                                <label><input type="radio" name="radio" value="2"> Radio 2</label><br>
+                                <label><input type="radio" name="radio" value="3" disabled> Radio 3</label>
                             </fieldset>
-                            
-                            <label>Select single</label>
-                            <select name="single-select">
+
+                            <label for="single-select">Select single</label>
+                            <select id="single-select" name="single-select">
                                 <option value="">— Choose —</option>
                                 <option value="a">Apple</option>
                                 <option value="b" selected>Banana</option>
                                 <option value="c">Cherry</option>
                             </select>
-                            
-                            <label>Select multiple + optgroup</label>
-                            <select name="multi-select" multiple size="4">
+
+                            <label for="multi-select">Select multiple + optgroup</label>
+                            <select id="multi-select" name="multi-select" multiple size="4">
                                 <optgroup label="Fruits">
                                     <option value="apple">Apple</option>
                                     <option value="banana">Banana</option>
@@ -455,9 +455,9 @@
                                     <option value="broccoli">Broccoli</option>
                                 </optgroup>
                             </select>
-                            
-                            <label>Textarea (resize both)</label>
-                            <textarea rows="4" style="resize:both;" placeholder="Type a very long message here..."></textarea>
+
+                            <label for="torture-textarea">Textarea (resize both)</label>
+                            <textarea id="torture-textarea" aria-label="Textarea" rows="4" style="resize:both;" placeholder="Type a very long message here..."></textarea>
                         </div>
                         
                         <!-- Buttons &amp; advanced -->

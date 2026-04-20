@@ -1017,10 +1017,13 @@ namespace ApexComputerUse
                 return;
             }
 
-            // Handle plain List element (e.g. WinForms ListBox / multi-select ListBox)
+            // Handle plain List element (e.g. WinForms ListBox / multi-select ListBox).
+            // Use Descendants so <optgroup>-wrapped <option>s (which expose as Group > ListItem in UIA) are reachable.
             if (el.Properties.ControlType.ValueOrDefault == ControlType.List)
             {
                 var listItems = el.FindAllChildren(cf => cf.ByControlType(ControlType.ListItem));
+                if (listItems.Length == 0)
+                    listItems = el.FindAllDescendants(cf => cf.ByControlType(ControlType.ListItem));
                 if (index < listItems.Length)
                 {
                     if (listItems[index].Patterns.SelectionItem.TryGetPattern(out var sp)) sp.Select();

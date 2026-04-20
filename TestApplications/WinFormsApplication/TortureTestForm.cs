@@ -238,7 +238,7 @@ namespace WinFormsApplication
             tl.Controls.Add(Lbl("Hire Date:"), 0, 5);
             tl.Controls.Add(new DateTimePicker { Format = DateTimePickerFormat.Short, Dock = DockStyle.Fill }, 1, 5);
             tl.Controls.Add(Lbl("Annual Salary:"), 2, 5);
-            tl.Controls.Add(new NumericUpDown { Minimum = 0, Maximum = 999999, Value = 85000, DecimalPlaces = 2, ThousandsSeparator = true, Dock = DockStyle.Fill }, 3, 5);
+            tl.Controls.Add(new NumericUpDown { Name = "SalaryInput", Minimum = 0, Maximum = 999999, Value = 85000, DecimalPlaces = 2, ThousandsSeparator = true, Dock = DockStyle.Fill }, 3, 5);
 
             tl.Controls.Add(Lbl("Start Time:"), 0, 6);
             tl.Controls.Add(new DateTimePicker { Format = DateTimePickerFormat.Time, ShowUpDown = true, Dock = DockStyle.Fill }, 1, 6);
@@ -248,7 +248,7 @@ namespace WinFormsApplication
             tl.Controls.Add(Lbl("Access Level:"), 0, 7);
             tl.Controls.Add(new TrackBar { Name = "AccessLevelSlider", AccessibleName = "Access Level", Minimum = 1, Maximum = 5, Value = 3, TickFrequency = 1, Dock = DockStyle.Fill }, 1, 7);
             tl.Controls.Add(Lbl("Status:"), 2, 7);
-            var status = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, Dock = DockStyle.Fill };
+            var status = new ComboBox { Name = "StatusCombo", DropDownStyle = ComboBoxStyle.DropDownList, Dock = DockStyle.Fill };
             status.Items.AddRange(new object[] { "Active", "On Leave", "Suspended", "Terminated" });
             status.SelectedIndex = 0;
             tl.Controls.Add(status, 3, 7);
@@ -267,12 +267,12 @@ namespace WinFormsApplication
             tl.Controls.Add(flagPanel, 1, 8);
 
             tl.Controls.Add(Lbl("Notes:"), 0, 9);
-            var notes = new RichTextBox { Height = 80, Dock = DockStyle.Fill, Text = "Senior engineer. Approved for production deployments.\nLast reviewed: Q3 2025." };
+            var notes = new RichTextBox { Name = "NotesField", Height = 80, Dock = DockStyle.Fill, Text = "Senior engineer. Approved for production deployments.\nLast reviewed: Q3 2025." };
             tl.SetColumnSpan(notes, 3);
             tl.Controls.Add(notes, 1, 9);
 
             tl.Controls.Add(Lbl("Title:"), 0, 10);
-            var titleSpin = new DomainUpDown { Dock = DockStyle.Fill };
+            var titleSpin = new DomainUpDown { Name = "TitleSpinner", Dock = DockStyle.Fill };
             titleSpin.Items.AddRange(new object[] { "Mr.", "Ms.", "Mrs.", "Dr.", "Prof.", "Mx." });
             titleSpin.SelectedIndex = 0;
             tl.Controls.Add(titleSpin, 1, 10);
@@ -326,7 +326,7 @@ namespace WinFormsApplication
             var tlsFlow = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.TopDown };
             tlsFlow.Controls.AddRange(new Control[]
             {
-                new CheckBox { Text = "Verify Server Certificate", Checked = true, AutoSize = true },
+                new CheckBox { Name = "TlsVerify", Text = "Verify Server Certificate", Checked = true, AutoSize = true },
                 new CheckBox { Text = "Client Certificate Auth", AutoSize = true },
                 new CheckBox { Text = "Mutual TLS (mTLS)", AutoSize = true },
                 new CheckBox { Text = "Certificate Pinning", AutoSize = true },
@@ -356,9 +356,9 @@ namespace WinFormsApplication
             bwTable.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 120));
             bwTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
             bwTable.Controls.Add(Lbl("Upload (Mbps):"), 0, 0);
-            bwTable.Controls.Add(new TrackBar { Minimum = 0, Maximum = 1000, Value = 100, TickFrequency = 100, Dock = DockStyle.Fill }, 1, 0);
+            bwTable.Controls.Add(new TrackBar { Name = "UploadSlider", Minimum = 0, Maximum = 1000, Value = 100, TickFrequency = 100, Dock = DockStyle.Fill }, 1, 0);
             bwTable.Controls.Add(Lbl("Download (Mbps):"), 0, 1);
-            bwTable.Controls.Add(new TrackBar { Minimum = 0, Maximum = 1000, Value = 500, TickFrequency = 100, Dock = DockStyle.Fill }, 1, 1);
+            bwTable.Controls.Add(new TrackBar { Name = "DownloadSlider", Minimum = 0, Maximum = 1000, Value = 500, TickFrequency = 100, Dock = DockStyle.Fill }, 1, 1);
             bwGroup.Controls.Add(bwTable);
             rightFlow.Controls.Add(bwGroup);
 
@@ -377,7 +377,7 @@ namespace WinFormsApplication
             rightFlow.Controls.Add(prioGroup);
 
             var featGroup = new GroupBox { Text = "Enabled Features", Dock = DockStyle.Top, Height = 200, Padding = new Padding(6) };
-            var featList = new CheckedListBox { Dock = DockStyle.Fill };
+            var featList = new CheckedListBox { Name = "FeaturesCheckedList", Dock = DockStyle.Fill };
             featList.Items.Add("Auto-reconnect", true);
             featList.Items.Add("Compression (gzip)", true);
             featList.Items.Add("Keep-Alive", true);
@@ -407,9 +407,9 @@ namespace WinFormsApplication
             topTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
 
             topTable.Controls.Add(Lbl("Job Name:"), 0, 0);
-            topTable.Controls.Add(new TextBox { Text = "nightly-backup", Dock = DockStyle.Fill }, 1, 0);
+            topTable.Controls.Add(new TextBox { Name = "JobName", Text = "nightly-backup", Dock = DockStyle.Fill }, 1, 0);
             topTable.Controls.Add(Lbl("Job Type:"), 2, 0);
-            var jobType = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, Dock = DockStyle.Fill };
+            var jobType = new ComboBox { Name = "JobType", DropDownStyle = ComboBoxStyle.DropDownList, Dock = DockStyle.Fill };
             jobType.Items.AddRange(new object[] { "Backup", "Sync", "Report", "Cleanup", "Notification", "Health Check" });
             jobType.SelectedIndex = 0;
             topTable.Controls.Add(jobType, 3, 0);
@@ -430,7 +430,7 @@ namespace WinFormsApplication
             topTable.Controls.Add(Lbl("Max Runtime (min):"), 0, 3);
             topTable.Controls.Add(new NumericUpDown { Minimum = 1, Maximum = 1440, Value = 60, Dock = DockStyle.Fill }, 1, 3);
             topTable.Controls.Add(Lbl("Priority:"), 2, 3);
-            topTable.Controls.Add(new TrackBar { Minimum = 1, Maximum = 10, Value = 5, TickFrequency = 1, Dock = DockStyle.Fill }, 3, 3);
+            topTable.Controls.Add(new TrackBar { Name = "PrioritySlider", Minimum = 1, Maximum = 10, Value = 5, TickFrequency = 1, Dock = DockStyle.Fill }, 3, 3);
 
             topTable.Controls.Add(Lbl("Cron Expression:"), 0, 4);
             var cron = new MaskedTextBox { Text = "0 2 * * *", Dock = DockStyle.Fill };
@@ -440,7 +440,7 @@ namespace WinFormsApplication
             var optFlow = new FlowLayoutPanel { Dock = DockStyle.Fill, AutoSize = true };
             optFlow.Controls.AddRange(new Control[]
             {
-                new CheckBox { Text = "Enabled", Checked = true, AutoSize = true },
+                new CheckBox { Name = "JobEnabled", Text = "Enabled", Checked = true, AutoSize = true },
                 new CheckBox { Text = "Run on Missed Schedule", AutoSize = true },
                 new CheckBox { Text = "Notify on Success", Checked = true, AutoSize = true },
                 new CheckBox { Text = "Notify on Failure", Checked = true, AutoSize = true },
@@ -551,7 +551,7 @@ namespace WinFormsApplication
 
             var scrollGroup = new GroupBox { Text = "Scroll Bars", Width = 230, Height = 230 };
             var scPanel = new Panel { Dock = DockStyle.Fill };
-            scPanel.Controls.Add(new HScrollBar { Left = 8, Top = 20, Width = 200, Minimum = 0, Maximum = 100, Value = 25 });
+            scPanel.Controls.Add(new HScrollBar { Name = "HScroll1", Left = 8, Top = 20, Width = 200, Minimum = 0, Maximum = 100, Value = 25 });
             scPanel.Controls.Add(new HScrollBar { Left = 8, Top = 50, Width = 200, Minimum = 0, Maximum = 100, Value = 65 });
             scPanel.Controls.Add(new HScrollBar { Left = 8, Top = 80, Width = 200, Minimum = 0, Maximum = 200, Value = 100 });
             scPanel.Controls.Add(new VScrollBar { Left = 8, Top = 110, Width = 20, Height = 100, Minimum = 0, Maximum = 100, Value = 40 });
@@ -659,15 +659,15 @@ namespace WinFormsApplication
 
             var rightPanel = new Panel { Dock = DockStyle.Fill };
             var filterFlow = new FlowLayoutPanel { Dock = DockStyle.Top, Height = 36, Padding = new Padding(2) };
-            var levelCombo = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, Width = 90 };
+            var levelCombo = new ComboBox { Name = "LogLevelCombo", DropDownStyle = ComboBoxStyle.DropDownList, Width = 90 };
             levelCombo.Items.AddRange(new object[] { "All Levels", "DEBUG", "INFO", "WARN", "ERROR" });
             levelCombo.SelectedIndex = 0;
             var clearBtn = new Button { Text = "Clear", Width = 60, Height = 24 };
             filterFlow.Controls.AddRange(new Control[]
             {
                 levelCombo,
-                new TextBox { Width = 180, PlaceholderText = "Filter text..." },
-                new CheckBox { Text = "Auto-scroll", Checked = true, AutoSize = true },
+                new TextBox { Name = "LogFilter", Width = 180, PlaceholderText = "Filter text..." },
+                new CheckBox { Name = "LogAutoScroll", Text = "Auto-scroll", Checked = true, AutoSize = true },
                 new CheckBox { Text = "Word wrap", AutoSize = true },
                 clearBtn,
             });
@@ -809,7 +809,7 @@ namespace WinFormsApplication
             tl.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
             tl.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
 
-            tl.Controls.Add(Lbl("Short Date:"), 0, 0); tl.Controls.Add(new DateTimePicker { Format = DateTimePickerFormat.Short, Dock = DockStyle.Fill }, 1, 0);
+            tl.Controls.Add(Lbl("Short Date:"), 0, 0); tl.Controls.Add(new DateTimePicker { Name = "ShortDatePicker", Format = DateTimePickerFormat.Short, Dock = DockStyle.Fill }, 1, 0);
             tl.Controls.Add(Lbl("Long Date:"), 2, 0); tl.Controls.Add(new DateTimePicker { Format = DateTimePickerFormat.Long, Dock = DockStyle.Fill }, 3, 0);
             tl.Controls.Add(Lbl("Time (dropdown):"), 0, 1); tl.Controls.Add(new DateTimePicker { Format = DateTimePickerFormat.Time, Dock = DockStyle.Fill }, 1, 1);
             tl.Controls.Add(Lbl("Time (spinner):"), 2, 1); tl.Controls.Add(new DateTimePicker { Format = DateTimePickerFormat.Time, ShowUpDown = true, Dock = DockStyle.Fill }, 3, 1);
@@ -863,13 +863,13 @@ namespace WinFormsApplication
             _marqueeBar = new ProgressBar { Style = ProgressBarStyle.Marquee, MarqueeAnimationSpeed = 30, Dock = DockStyle.Fill };
             miscTable.Controls.Add(_marqueeBar, 1, 0);
             miscTable.Controls.Add(Lbl("Domain Spinner:"), 2, 0);
-            var domSpin = new DomainUpDown { Dock = DockStyle.Fill };
+            var domSpin = new DomainUpDown { Name = "DomainSpinner", Dock = DockStyle.Fill };
             domSpin.Items.AddRange(new object[] { "Alpha", "Beta", "Gamma", "Delta", "Epsilon", "Zeta" });
             domSpin.SelectedIndex = 0;
             miscTable.Controls.Add(domSpin, 3, 0);
 
             miscTable.Controls.Add(Lbl("Numeric (decimal):"), 0, 1);
-            miscTable.Controls.Add(new NumericUpDown { Minimum = -100, Maximum = 100, Value = 3.14m, DecimalPlaces = 4, Increment = 0.0001m, Dock = DockStyle.Fill }, 1, 1);
+            miscTable.Controls.Add(new NumericUpDown { Name = "DecimalSpinner", Minimum = -100, Maximum = 100, Value = 3.14m, DecimalPlaces = 4, Increment = 0.0001m, Dock = DockStyle.Fill }, 1, 1);
             miscTable.Controls.Add(Lbl("IP Address:"), 2, 1);
             miscTable.Controls.Add(new MaskedTextBox { Mask = "990.990.990.990", Dock = DockStyle.Fill }, 3, 1);
 
