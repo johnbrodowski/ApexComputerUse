@@ -15,9 +15,10 @@ using System.Text.Json.Nodes;
 /// </summary>
 public sealed class TestSuite
 {
-    private const string WinFormsTitle = "System Configuration Console";
-    private const string WpfTitle      = "ApexUIBridge Test Application - WPF";
-    private const string WebTitle      = "ApexUIBridge Test Application - Web";
+    private const string WinFormsTitle       = "System Configuration Console";
+    private const string WpfTitle            = "ApexUIBridge Test Application - WPF";
+    private const string HtmlTortureTitle    = "Browser Torture Test 2026";
+    private const string HtmlEcommerceTitle  = "AGPA E-Commerce Test App";
     private static readonly TimeSpan ScanCacheTtl = TimeSpan.FromSeconds(2);
 
     private readonly BridgeClient _client;
@@ -276,16 +277,19 @@ public sealed class TestSuite
                     parentMenu: "File", leafMenu: null, ct)),
 
             // HTML (browser) — skipped gracefully if no browser window is open ──
-            new("html-scan", "SCAN_WINDOW Web (browser)", "html",
-                ct => ScanAsRootTestAsync("Web", WebTitle, ct)),
+            new("html-torture-scan", "SCAN_WINDOW Web (Torture Test)", "html",
+                ct => ScanAsRootTestAsync("Torture Test", HtmlTortureTitle, ct)),
 
-            new("html-textbox-type", "POST /execute type → HTML TextBox (verified)", "html",
-                ct => TextBoxEditRetypeAsync("POST /execute type → HTML TextBox (verified)",
-                    WebTitle, ControlTypeEdit, ct)),
+            new("html-torture-textbox-type", "POST /execute type → HTML TextBox on Torture Test (verified)", "html",
+                ct => TextBoxEditRetypeAsync("POST /execute type → HTML TextBox on Torture Test (verified)",
+                    HtmlTortureTitle, ControlTypeEdit, ct, nameHint: "Normal text")),
 
-            new("html-slider-setrange-verify", "POST /execute setrange 4 → HTML range slider (verified)", "html",
-                ct => SliderSetAndVerifyAsync("POST /execute setrange 4 → HTML range slider (verified)",
-                    WebTitle, "4", ct)),
+            new("html-ecommerce-scan", "SCAN_WINDOW Web (Ecommerce)", "html",
+                ct => ScanAsRootTestAsync("Ecommerce", HtmlEcommerceTitle, ct)),
+
+            new("html-ecommerce-slider-setrange-verify", "POST /execute setrange 100 → HTML range slider on Ecommerce (verified)", "html",
+                ct => SliderSetAndVerifyAsync("POST /execute setrange 100 → HTML range slider on Ecommerce (verified)",
+                    HtmlEcommerceTitle, "100", ct)),
 
             // Meta
             new("meta-help", "GET /help — returns content", "meta",
@@ -301,15 +305,17 @@ public sealed class TestSuite
     // ── Higher-level reusable test bodies ─────────────────────────────────────
 
     /// <summary>Type a deterministic value into an Edit control, read it back, clear, retype, read back again.</summary>
-    private async Task<TestResult> TextBoxEditRetypeAsync(string name, string windowTitle, string controlType, CancellationToken ct, string? tabName = null)
+    private async Task<TestResult> TextBoxEditRetypeAsync(string name, string windowTitle, string controlType, CancellationToken ct, string? tabName = null, string? nameHint = null)
     {
         var (tree, error) = tabName == null
             ? (await GetScanAsync(windowTitle, ct), (string?)null)
             : await SelectTabAndScanAsync(windowTitle, tabName, ct);
         if (tree == null) return Fail(name, error ?? $"scan of '{windowTitle}' failed (window not open?)");
 
-        var tb = FindNode(tree, n => ControlTypeIs(n, controlType));
-        if (tb == null) return Fail(name, $"No {controlType} control found");
+        var tb = nameHint != null
+            ? FindNode(tree, n => ControlTypeIs(n, controlType) && NameOrIdContains(n, nameHint))
+            : FindNode(tree, n => ControlTypeIs(n, controlType));
+        if (tb == null) return Fail(name, $"No {controlType} control found{(nameHint != null ? $" matching '{nameHint}'" : "")}");
         int id = tb["id"]!.GetValue<int>();
 
         string first  = $"first_{DateTime.Now:HHmmssfff}";

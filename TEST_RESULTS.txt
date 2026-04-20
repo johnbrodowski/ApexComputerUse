@@ -2,10 +2,11 @@
 [Runner] Effective settings: MaxCycles=3, ReportEveryN=1, RunOnlyFailed=False
 [Runner] Speed profile: human (ActionDelayMs=350, UiSettleDelayMs=900)
 [Runner] Starting test-target applications...
-[WinForms Test App] Started (PID 13908)
-[WPF Test App] Started (PID 7240)
+[WinForms Test App] Started (PID 8964)
+[WPF Test App] Started (PID 18020)
 [WebServer] Serving C:\Users\johnb\source\repos\ApexComputerUse\TestApplications\WebTestApp at http://localhost:9080/
-[Runner] Opened browser → http://localhost:9080/index.html
+[Runner] Opened browser → http://localhost:9080/TortureTest.html
+[Runner] Opened browser → http://localhost:9080/Ecommerce.html
 [Telegram→stdout] ?? <b>TestRunner started</b>
 Mode: <b>demo</b>   Speed profile: <b>human</b>
 Cycles: <b>3</b>   Config: <b>Debug</b>
@@ -15,25 +16,25 @@ Send /stop-tests to cancel at any time.
 ────────────────────────────────────────────────────────────
 [Runner] Cycle 1/3
 ────────────────────────────────────────────────────────────
-[ApexComputerUse] Started (PID 15164)
+[ApexComputerUse] Started (PID 7548)
 [Runner] Waiting for Bridge API...
 [Runner] Bridge API ready.
 [Runner] Waiting for web target pages...
 [Runner] Web target pages ready.
-  PASS GET /windows - WinForms app visible  (150ms)
-  PASS GET /windows - WPF app visible  (59ms)
-  PASS SCAN_WINDOW WinForms  (762ms)
-  PASS POST /execute type → WinForms TextBox  (30ms)
-  PASS POST /execute gettext → typed value  (8ms)
-  PASS POST /execute toggle → WinForms SimpleCheckBox  (13ms)
-  PASS POST /execute click → WinForms ContextMenu button  (23ms)
-  PASS POST /execute gettext → WinForms ProgressBar  (4ms)
-  PASS POST /execute expand/collapse → WinForms EditableCombo  (11ms)
-  PASS SCAN_WINDOW WPF  (709ms)
+  PASS GET /windows - WinForms app visible  (314ms)
+  PASS GET /windows - WPF app visible  (111ms)
+  PASS SCAN_WINDOW WinForms  (1311ms)
+  PASS POST /execute type → WinForms TextBox  (22ms)
+  PASS POST /execute gettext → typed value  (17ms)
+  PASS POST /execute toggle → WinForms SimpleCheckBox  (16ms)
+  PASS POST /execute click → WinForms ContextMenu button  (42ms)
+  PASS POST /execute gettext → WinForms ProgressBar  (8ms)
+  PASS POST /execute expand/collapse → WinForms EditableCombo  (32ms)
+  PASS SCAN_WINDOW WPF  (1306ms)
   PASS POST /execute type → WPF TextBox  (50ms)
-  PASS POST /execute toggle → WPF SimpleCheckBox  (28ms)
-  PASS POST /execute click → WPF InvokableButton  (8ms)
-  PASS POST /execute expand/collapse → WPF NonEditableCombo  (63ms)
+  PASS POST /execute toggle → WPF SimpleCheckBox  (38ms)
+  PASS POST /execute click → WPF InvokableButton  (9ms)
+  PASS POST /execute expand/collapse → WPF NonEditableCombo  (72ms)
   PASS POST /execute setrange 4 → WPF Slider (verified)
   PASS TextBox edit → clear → retype (verified)
   FAIL POST /execute setrange 3 → WinForms Slider (verified)  cmd=POST /execute setrange/getrange id=1387626040 value=3
@@ -45,24 +46,28 @@ Send /stop-tests to cancel at any time.
   PASS Cycle ThreeStateCheckBox x3 (WinForms)
   PASS Click Edit → Copy Plain menu item (WinForms)
   PASS POST /execute select → WPF ListBox item
-  PASS POST /execute expand/collapse → WPF Expander  (20ms)
+  PASS POST /execute expand/collapse → WPF Expander  (18ms)
   PASS Click File menu (WPF)
-  PASS SCAN_WINDOW Web  (402ms)
-  PASS POST /execute type → HTML TextBox (verified)
-  PASS POST /execute setrange 4 → HTML range slider (verified)
+  PASS SCAN_WINDOW Torture Test  (440ms)
+  FAIL POST /execute type → HTML TextBox on Torture Test (verified)
+       No Edit control found matching 'Normal text'
+  PASS SCAN_WINDOW Ecommerce  (638ms)
+  PASS POST /execute setrange 100 → HTML range slider on Ecommerce (verified)
   PASS GET /help - returns content  (1ms)
 
-[Results] 25 passed, 3 failed
+[Results] 25 passed, 4 failed
   FAIL POST /execute setrange 3 → WinForms Slider (verified)  cmd=POST /execute setrange/getrange id=1387626040 value=3
        getrange did not contain '3'. Got: 0
   FAIL POST /execute select → WinForms ListBox item
        No ListBox found
   FAIL POST /execute click → WinForms RadioButton2 (mutex)
        Via Proxy not found
+  FAIL POST /execute type → HTML TextBox on Torture Test (verified)
+       No Edit control found matching 'Normal text'
 [ApexComputerUse] Stopped.
 [Telegram→stdout] ?? <b>Cycle 1/3</b>
-PASS:25  FAIL:3
- total 2341ms   avg 137.7ms   max 762ms
+PASS:25  FAIL:4
+ total 4445ms   avg 246.9ms   max 1311ms
   PASS GET /windows - WinForms app visible
   PASS GET /windows - WPF app visible
   PASS SCAN_WINDOW WinForms
@@ -90,33 +95,35 @@ PASS:25  FAIL:3
   PASS POST /execute select → WPF ListBox item
   PASS POST /execute expand/collapse → WPF Expander
   PASS Click File menu (WPF)
-  PASS SCAN_WINDOW Web
-  PASS POST /execute type → HTML TextBox (verified)
-  PASS POST /execute setrange 4 → HTML range slider (verified)
+  PASS SCAN_WINDOW Torture Test
+  FAIL POST /execute type → HTML TextBox on Torture Test (verified)
+       No Edit control found matching 'Normal text'
+  PASS SCAN_WINDOW Ecommerce
+  PASS POST /execute setrange 100 → HTML range slider on Ecommerce (verified)
   PASS GET /help - returns content
 
 ────────────────────────────────────────────────────────────
 [Runner] Cycle 2/3
 ────────────────────────────────────────────────────────────
-[ApexComputerUse] Started (PID 19412)
+[ApexComputerUse] Started (PID 20164)
 [Runner] Waiting for Bridge API...
 [Runner] Bridge API ready.
 [Runner] Waiting for web target pages...
 [Runner] Web target pages ready.
-  PASS GET /windows - WinForms app visible  (158ms)
-  PASS GET /windows - WPF app visible  (65ms)
-  PASS SCAN_WINDOW WinForms  (514ms)
-  PASS POST /execute type → WinForms TextBox  (15ms)
-  PASS POST /execute gettext → typed value  (6ms)
-  PASS POST /execute toggle → WinForms SimpleCheckBox  (11ms)
-  PASS POST /execute click → WinForms ContextMenu button  (22ms)
-  PASS POST /execute gettext → WinForms ProgressBar  (3ms)
-  PASS POST /execute expand/collapse → WinForms EditableCombo  (12ms)
-  PASS SCAN_WINDOW WPF  (635ms)
-  PASS POST /execute type → WPF TextBox  (16ms)
-  PASS POST /execute toggle → WPF SimpleCheckBox  (22ms)
+  PASS GET /windows - WinForms app visible  (276ms)
+  PASS GET /windows - WPF app visible  (107ms)
+  PASS SCAN_WINDOW WinForms  (645ms)
+  PASS POST /execute type → WinForms TextBox  (17ms)
+  PASS POST /execute gettext → typed value  (13ms)
+  PASS POST /execute toggle → WinForms SimpleCheckBox  (16ms)
+  PASS POST /execute click → WinForms ContextMenu button  (45ms)
+  PASS POST /execute gettext → WinForms ProgressBar  (6ms)
+  PASS POST /execute expand/collapse → WinForms EditableCombo  (25ms)
+  PASS SCAN_WINDOW WPF  (917ms)
+  PASS POST /execute type → WPF TextBox  (17ms)
+  PASS POST /execute toggle → WPF SimpleCheckBox  (27ms)
   PASS POST /execute click → WPF InvokableButton  (9ms)
-  PASS POST /execute expand/collapse → WPF NonEditableCombo  (56ms)
+  PASS POST /execute expand/collapse → WPF NonEditableCombo  (31ms)
   PASS POST /execute setrange 4 → WPF Slider (verified)
   PASS TextBox edit → clear → retype (verified)
   FAIL POST /execute setrange 3 → WinForms Slider (verified)  cmd=POST /execute setrange/getrange id=1387626040 value=3
@@ -128,14 +135,15 @@ PASS:25  FAIL:3
   PASS Cycle ThreeStateCheckBox x3 (WinForms)
   PASS Click Edit → Copy Plain menu item (WinForms)
   PASS POST /execute select → WPF ListBox item
-  PASS POST /execute expand/collapse → WPF Expander  (23ms)
+  PASS POST /execute expand/collapse → WPF Expander  (22ms)
   PASS Click File menu (WPF)
-  PASS SCAN_WINDOW Web  (363ms)
-  PASS POST /execute type → HTML TextBox (verified)
-  PASS POST /execute setrange 4 → HTML range slider (verified)
-  PASS GET /help - returns content  (0ms)
+  PASS SCAN_WINDOW Torture Test  (1055ms)
+  PASS POST /execute type → HTML TextBox on Torture Test (verified)
+  PASS SCAN_WINDOW Ecommerce  (613ms)
+  PASS POST /execute setrange 100 → HTML range slider on Ecommerce (verified)
+  PASS GET /help - returns content  (2ms)
 
-[Results] 25 passed, 3 failed
+[Results] 26 passed, 3 failed
   FAIL POST /execute setrange 3 → WinForms Slider (verified)  cmd=POST /execute setrange/getrange id=1387626040 value=3
        getrange did not contain '3'. Got: 0
   FAIL POST /execute select → WinForms ListBox item
@@ -144,8 +152,8 @@ PASS:25  FAIL:3
        Via Proxy not found
 [ApexComputerUse] Stopped.
 [Telegram→stdout] ?? <b>Cycle 2/3</b>
-PASS:25  FAIL:3
- total 1930ms   avg 113.5ms   max 635ms
+PASS:26  FAIL:3
+ total 3843ms   avg 213.5ms   max 1055ms
   PASS GET /windows - WinForms app visible
   PASS GET /windows - WPF app visible
   PASS SCAN_WINDOW WinForms
@@ -173,33 +181,34 @@ PASS:25  FAIL:3
   PASS POST /execute select → WPF ListBox item
   PASS POST /execute expand/collapse → WPF Expander
   PASS Click File menu (WPF)
-  PASS SCAN_WINDOW Web
-  PASS POST /execute type → HTML TextBox (verified)
-  PASS POST /execute setrange 4 → HTML range slider (verified)
+  PASS SCAN_WINDOW Torture Test
+  PASS POST /execute type → HTML TextBox on Torture Test (verified)
+  PASS SCAN_WINDOW Ecommerce
+  PASS POST /execute setrange 100 → HTML range slider on Ecommerce (verified)
   PASS GET /help - returns content
 
 ────────────────────────────────────────────────────────────
 [Runner] Cycle 3/3
 ────────────────────────────────────────────────────────────
-[ApexComputerUse] Started (PID 17100)
+[ApexComputerUse] Started (PID 1912)
 [Runner] Waiting for Bridge API...
 [Runner] Bridge API ready.
 [Runner] Waiting for web target pages...
 [Runner] Web target pages ready.
-  PASS GET /windows - WinForms app visible  (173ms)
-  PASS GET /windows - WPF app visible  (73ms)
-  PASS SCAN_WINDOW WinForms  (563ms)
-  PASS POST /execute type → WinForms TextBox  (15ms)
-  PASS POST /execute gettext → typed value  (6ms)
-  PASS POST /execute toggle → WinForms SimpleCheckBox  (10ms)
-  PASS POST /execute click → WinForms ContextMenu button  (25ms)
-  PASS POST /execute gettext → WinForms ProgressBar  (3ms)
-  PASS POST /execute expand/collapse → WinForms EditableCombo  (15ms)
-  PASS SCAN_WINDOW WPF  (619ms)
-  PASS POST /execute type → WPF TextBox  (17ms)
-  PASS POST /execute toggle → WPF SimpleCheckBox  (12ms)
-  PASS POST /execute click → WPF InvokableButton  (9ms)
-  PASS POST /execute expand/collapse → WPF NonEditableCombo  (25ms)
+  PASS GET /windows - WinForms app visible  (265ms)
+  PASS GET /windows - WPF app visible  (110ms)
+  PASS SCAN_WINDOW WinForms  (636ms)
+  PASS POST /execute type → WinForms TextBox  (21ms)
+  PASS POST /execute gettext → typed value  (13ms)
+  PASS POST /execute toggle → WinForms SimpleCheckBox  (17ms)
+  PASS POST /execute click → WinForms ContextMenu button  (27ms)
+  PASS POST /execute gettext → WinForms ProgressBar  (7ms)
+  PASS POST /execute expand/collapse → WinForms EditableCombo  (30ms)
+  PASS SCAN_WINDOW WPF  (843ms)
+  PASS POST /execute type → WPF TextBox  (18ms)
+  PASS POST /execute toggle → WPF SimpleCheckBox  (18ms)
+  PASS POST /execute click → WPF InvokableButton  (20ms)
+  PASS POST /execute expand/collapse → WPF NonEditableCombo  (31ms)
   PASS POST /execute setrange 4 → WPF Slider (verified)
   PASS TextBox edit → clear → retype (verified)
   FAIL POST /execute setrange 3 → WinForms Slider (verified)  cmd=POST /execute setrange/getrange id=1387626040 value=3
@@ -213,12 +222,13 @@ PASS:25  FAIL:3
   PASS POST /execute select → WPF ListBox item
   PASS POST /execute expand/collapse → WPF Expander  (23ms)
   PASS Click File menu (WPF)
-  PASS SCAN_WINDOW Web  (337ms)
-  PASS POST /execute type → HTML TextBox (verified)
-  PASS POST /execute setrange 4 → HTML range slider (verified)
-  PASS GET /help - returns content  (2ms)
+  PASS SCAN_WINDOW Torture Test  (1177ms)
+  PASS POST /execute type → HTML TextBox on Torture Test (verified)
+  PASS SCAN_WINDOW Ecommerce  (782ms)
+  PASS POST /execute setrange 100 → HTML range slider on Ecommerce (verified)
+  PASS GET /help - returns content  (1ms)
 
-[Results] 25 passed, 3 failed
+[Results] 26 passed, 3 failed
   FAIL POST /execute setrange 3 → WinForms Slider (verified)  cmd=POST /execute setrange/getrange id=1387626040 value=3
        getrange did not contain '3'. Got: 0
   FAIL POST /execute select → WinForms ListBox item
@@ -227,8 +237,8 @@ PASS:25  FAIL:3
        Via Proxy not found
 [ApexComputerUse] Stopped.
 [Telegram→stdout] ?? <b>Cycle 3/3</b>
-PASS:25  FAIL:3
- total 1927ms   avg 113.4ms   max 619ms
+PASS:26  FAIL:3
+ total 4039ms   avg 224.4ms   max 1177ms
   PASS GET /windows - WinForms app visible
   PASS GET /windows - WPF app visible
   PASS SCAN_WINDOW WinForms
@@ -256,28 +266,27 @@ PASS:25  FAIL:3
   PASS POST /execute select → WPF ListBox item
   PASS POST /execute expand/collapse → WPF Expander
   PASS Click File menu (WPF)
-  PASS SCAN_WINDOW Web
-  PASS POST /execute type → HTML TextBox (verified)
-  PASS POST /execute setrange 4 → HTML range slider (verified)
+  PASS SCAN_WINDOW Torture Test
+  PASS POST /execute type → HTML TextBox on Torture Test (verified)
+  PASS SCAN_WINDOW Ecommerce
+  PASS POST /execute setrange 100 → HTML range slider on Ecommerce (verified)
   PASS GET /help - returns content
 
 [FAIL] TestRunner Complete
 Mode: demo   Speed profile: human
 Cycles run: 3/3
-Total: PASS:75  FAIL:9
+Total: PASS:77  FAIL:10
 
-  Cycle 1: PASS:25 FAIL:3
-  Cycle 2: PASS:25 FAIL:3
-  Cycle 3: PASS:25 FAIL:3
+  Cycle 1: PASS:25 FAIL:4
+  Cycle 2: PASS:26 FAIL:3
+  Cycle 3: PASS:26 FAIL:3
 [Telegram→stdout] [FAIL] <b>TestRunner Complete</b>
 Mode: <b>demo</b>   Speed profile: <b>human</b>
 Cycles run: <b>3/3</b>
-Total: PASS:75  FAIL:9
+Total: PASS:77  FAIL:10
 
-  Cycle 1: PASS:25 FAIL:3
-  Cycle 2: PASS:25 FAIL:3
-  Cycle 3: PASS:25 FAIL:3
+  Cycle 1: PASS:25 FAIL:4
+  Cycle 2: PASS:26 FAIL:3
+  Cycle 3: PASS:26 FAIL:3
 [WebServer] Stopped.
 [Runner] Done. Test-target apps will be closed.
-
-Press any key to close...

@@ -4,7 +4,7 @@
         xmlns:local="clr-namespace:WpfApplication"
         Title="ApexUIBridge Test Application - WPF Torture Test"
         Height="860" Width="1160" MinHeight="700" MinWidth="900"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="Manual" Top="10" Left="80">
 
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolVis" />
