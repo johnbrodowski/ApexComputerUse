@@ -1,11 +1,3 @@
-I need you to test everything .
-No automated test that do multiple tasks uninterrupted one after another.
-If something does not work it should be fixed before moving on.
-Test app (forms, wpf and web) should remain open until testing has completed.
-
-Only modify or refactor code that is directly involved in implementing the requested behavior. Introduce only the smallest number of new variables, methods, or helper classes needed to complete the task. Do not alter unrelated systems, add new abstractions, or redesign existing patterns unnecessarily.
-
-
 
 # ApexComputerUse: Complete Usage & Control Guide
 

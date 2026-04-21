@@ -2,231 +2,227 @@
 [Runner] Effective settings: MaxCycles=1, ReportEveryN=1, RunOnlyFailed=False
 [Runner] Speed profile: human (ActionDelayMs=350, UiSettleDelayMs=900)
 [Runner] Starting test-target applications...
-[WinForms Test App] Started (PID 2896)
-[WPF Test App] Started (PID 11064)
+[WinForms Test App] Started (PID 1568)
+[WPF Test App] Started (PID 12044)
 [WebServer] Serving C:\Users\johnb\source\repos\ApexComputerUse\TestApplications\WebTestApp at http://localhost:9080/
-[Runner] Opened browser ¡÷ http://localhost:9080/TortureTest.html (--new-window)
-[Runner] Opened browser ¡÷ http://localhost:9080/Ecommerce.html (--new-window)
-[Telegram¡÷stdout] ?? <b>TestRunner started</b>
+[Runner] Opened browser â†’ http://localhost:9080/TortureTest.html (--new-window)
+[Runner] Opened browser â†’ http://localhost:9080/Ecommerce.html (--new-window)
+[Telegramâ†’stdout] ?? <b>TestRunner started</b>
 Mode: <b>demo</b>   Speed profile: <b>human</b>
 Cycles: <b>1</b>   Config: <b>Debug</b>
 Reports every: <b>1</b> cycle(s)
 Send /stop-tests to cancel at any time.
 
-¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 [Runner] Cycle 1/1
-¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w
-[ApexComputerUse] Started (PID 5168)
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+[ApexComputerUse] Started (PID 324)
 [Runner] Waiting for Bridge API...
 [Runner] Bridge API ready.
 [Runner] Waiting for web target pages...
 [Runner] Web target pages ready.
-  PASS GET /windows - WinForms app visible  (250ms)
-  PASS GET /windows - WPF app visible  (77ms)
-  PASS SCAN_WINDOW WinForms  (894ms)
-  PASS POST /execute type ¡÷ WinForms TextBox  (34ms)
-  PASS POST /execute gettext ¡÷ typed value  (10ms)
-  PASS POST /execute toggle ¡÷ WinForms SimpleCheckBox  (13ms)
-  PASS POST /execute click ¡÷ WinForms ContextMenu button  (28ms)
-  PASS POST /execute gettext ¡÷ WinForms ProgressBar  (5ms)
-  PASS POST /execute expand/collapse ¡÷ WinForms EditableCombo  (9ms)
-  PASS SCAN_WINDOW WPF  (703ms)
-  PASS POST /execute type ¡÷ WPF TextBox  (43ms)
-  PASS POST /execute toggle ¡÷ WPF SimpleCheckBox  (18ms)
-  PASS POST /execute click ¡÷ WPF InvokableButton  (8ms)
-  PASS POST /execute expand/collapse ¡÷ WPF NonEditableCombo  (62ms)
-  PASS POST /execute setrange 4 ¡÷ WPF Slider (verified)
-  PASS TextBox edit ¡÷ clear ¡÷ retype (verified)
-  PASS POST /execute setrange 50 ¡÷ WinForms Slider (verified)
-  PASS POST /execute select ¡÷ WinForms ListBox item
-  PASS POST /execute click ¡÷ WinForms RadioButton2 (mutex)
+  PASS GET /windows - WinForms app visible  (333ms)
+  PASS GET /windows - WPF app visible  (98ms)
+  PASS SCAN_WINDOW WinForms  (1001ms)
+  PASS POST /execute type â†’ WinForms TextBox  (38ms)
+  PASS POST /execute gettext â†’ typed value  (21ms)
+  PASS POST /execute toggle â†’ WinForms SimpleCheckBox  (17ms)
+  PASS POST /execute click â†’ WinForms ContextMenu button  (29ms)
+  PASS POST /execute gettext â†’ WinForms ProgressBar  (7ms)
+  PASS POST /execute expand/collapse â†’ WinForms EditableCombo  (25ms)
+  PASS SCAN_WINDOW WPF  (1798ms)
+  PASS POST /execute type â†’ WPF TextBox  (56ms)
+  PASS POST /execute toggle â†’ WPF SimpleCheckBox  (37ms)
+  PASS POST /execute click â†’ WPF InvokableButton  (13ms)
+  PASS POST /execute expand/collapse â†’ WPF NonEditableCombo  (69ms)
+  PASS POST /execute setrange 4 â†’ WPF Slider (verified)
+  PASS TextBox edit â†’ clear â†’ retype (verified)
+  PASS POST /execute setrange 50 â†’ WinForms Slider (verified)
+  PASS POST /execute select â†’ WinForms ListBox item
+  PASS POST /execute click â†’ WinForms RadioButton2 (mutex)
   PASS Cycle ThreeStateCheckBox x3 (WinForms)
-  PASS Click Edit ¡÷ Copy Plain menu item (WinForms)
-  PASS POST /execute select ¡÷ WPF ListBox item
-  PASS POST /execute expand/collapse ¡÷ WPF Expander  (21ms)
+  PASS Click Edit â†’ Copy Plain menu item (WinForms)
+  PASS POST /execute select â†’ WPF ListBox item
+  PASS POST /execute expand/collapse â†’ WPF Expander  (40ms)
   PASS Click File menu (WPF)
-  PASS SCAN_WINDOW Torture Test  (1087ms)
-  PASS POST /execute type ¡÷ HTML TextBox on Torture Test (verified)
-  PASS SCAN_WINDOW Ecommerce  (613ms)
-  PASS POST /execute setrange 100 ¡÷ HTML range slider on Ecommerce (verified)
-  PASS WinForms Identity: StatusCombo ¡÷ select Inactive
-  PASS WinForms Identity: SalaryInput ¡÷ setvalue 75000
-  FAIL WinForms Identity: NotesField ¡÷ retype
-       No Edit control found matching 'NotesField'
-  FAIL WinForms Network: UploadSlider ¡÷ setrange 200
-       No Slider control found matching 'Upload'
-  FAIL WinForms Network: DownloadSlider ¡÷ setrange 300
-       No Slider control found matching 'Download'
-  PASS WinForms Network: TlsVerify ¡÷ toggle
-  FAIL WinForms Network: FeaturesCheckedList ¡÷ select-index 3
-       FeaturesCheckedList not found
-  PASS WinForms Scheduler: JobName ¡÷ retype
-  PASS WinForms Scheduler: JobType ¡÷ select Report
-  FAIL WinForms Scheduler: PrioritySlider ¡÷ setrange 7  cmd=POST /execute setrange/getrange id=936020866 value=7
+  PASS SCAN_WINDOW Torture Test  (332ms)
+  PASS POST /execute type â†’ HTML TextBox on Torture Test (verified)
+  PASS SCAN_WINDOW Ecommerce  (509ms)
+  PASS POST /execute setrange 100 â†’ HTML range slider on Ecommerce (verified)
+  PASS WinForms Identity: StatusCombo â†’ select Inactive
+  PASS WinForms Identity: SalaryInput â†’ setvalue 75000
+  PASS WinForms Identity: NotesField â†’ retype
+  FAIL WinForms Network: UploadSlider â†’ setrange 200
+       setrange failed: Value does not fall within the expected range.
+  FAIL WinForms Network: DownloadSlider â†’ setrange 300
+       setrange failed: Value does not fall within the expected range.
+  PASS WinForms Network: TlsVerify â†’ toggle
+  FAIL WinForms Network: FeaturesCheckedList â†’ select-index 3  cmd=POST /execute select-index 3 id=341742500
+       Index 3 out of range
+  PASS WinForms Scheduler: JobName â†’ retype
+  PASS WinForms Scheduler: JobType â†’ select Report
+  FAIL WinForms Scheduler: PrioritySlider â†’ setrange 7  cmd=POST /execute setrange/getrange id=23558242 value=7
        getrange did not contain '7'. Got: 0
-  PASS WinForms Scheduler: JobEnabled ¡÷ toggle
-  PASS WinForms Layout: Button Apply ¡÷ click  (10ms)
-  PASS WinForms Layout: Button Reset ¡÷ click  (14ms)
-  PASS WinForms Logs: LogLevelCombo ¡÷ select ERROR
-  PASS WinForms Logs: LogFilter ¡÷ retype
-  PASS WinForms Logs: LogAutoScroll ¡÷ toggle
-  PASS WinForms Dialogs: DomainSpinner ¡÷ setvalue Beta
-  PASS WinForms Dialogs: DecimalSpinner ¡÷ setvalue 42
-  PASS WPF Identity: Slider AccessLevel ¡÷ setrange 3
-  PASS WPF Identity: RadioButton EmpPartTime ¡÷ select
-  PASS WPF Identity: CheckBox FlagVpn ¡÷ toggle
-  PASS WPF Identity: ComboBox Location ¡÷ select Boston
-  PASS WPF Identity: TextBox Email ¡÷ retype
-  PASS WPF Network: Slider UploadLimit ¡÷ setrange 200
-  PASS WPF Network: Slider DownloadLimit ¡÷ setrange 300
-  PASS WPF Network: CheckBox TlsClientCert ¡÷ toggle
-  PASS WPF Network: RadioButton ConnProxy ¡÷ select
-  PASS WPF Network: ComboBox Protocol ¡÷ select HTTP
-  PASS WPF Scheduler: TextBox JobName ¡÷ retype
-  PASS WPF Scheduler: ComboBox JobType ¡÷ select Report
-  PASS WPF Scheduler: Slider JobPriority ¡÷ setrange 7
-  PASS WPF Scheduler: CheckBox JobEnabled ¡÷ toggle
-  PASS WPF Layout: Button BtnApply ¡÷ click  (18ms)
-  PASS WPF Layout: Button BtnReset ¡÷ click  (17ms)
-  PASS WPF Logs: ComboBox LogLevel ¡÷ select ERROR
-  PASS WPF Logs: TextBox LogFilter ¡÷ retype
-  PASS WPF Logs: CheckBox LogAutoScroll ¡÷ toggle
-  PASS WPF Logs: Button LogClear ¡÷ click  (15ms)
-  PASS WPF WPF-tab: ToggleButton Toggle1 ¡÷ click+restore
-  PASS WPF WPF-tab: Expander ExpanderLogging ¡÷ expand/collapse
-  PASS WPF Dialogs: Slider MiscVertSlider ¡÷ setrange 50
-  PASS WPF Dialogs: RadioButton MiscRadioB ¡÷ select
-  PASS WPF Dialogs: ListBox MiscMultiListBox ¡÷ select-index 0
-  PASS WPF Dialogs: ComboBox MiscEditCombo ¡÷ select Option A
-  PASS WPF Dialogs: TextBox MiscMultilineTextBox ¡÷ retype
-  PASS HTML Torture: checkbox check1 ¡÷ toggle+restore
-  PASS HTML Torture: radio 'Radio 2' ¡÷ click
-  PASS HTML Torture: select#single-select ¡÷ select Option 2
-  PASS HTML Torture: select#multi-select ¡÷ select-index 0
-  PASS HTML Torture: textarea ¡÷ retype
-  PASS HTML Torture: button 'Plain button' ¡÷ click
-  PASS HTML Ecommerce: searchProducts ¡÷ retype
-  PASS HTML Ecommerce: categoryFilter ¡÷ select Electronics
-  PASS HTML Ecommerce: shipFree ¡÷ toggle+restore
-  PASS HTML Ecommerce: first 'Add to Cart' button ¡÷ click
-  PASS GET /help - returns content  (0ms)
+  PASS WinForms Scheduler: JobEnabled â†’ toggle
+  PASS WinForms Layout: Button Apply â†’ click  (26ms)
+  PASS WinForms Layout: Button Reset â†’ click  (5ms)
+  PASS WinForms Logs: LogLevelCombo â†’ select ERROR
+  PASS WinForms Logs: LogFilter â†’ retype
+  PASS WinForms Logs: LogAutoScroll â†’ toggle
+  PASS WinForms Dialogs: DomainSpinner â†’ setvalue Beta
+  PASS WinForms Dialogs: DecimalSpinner â†’ setvalue 42
+  PASS WPF Identity: Slider AccessLevel â†’ setrange 3
+  PASS WPF Identity: RadioButton EmpPartTime â†’ select
+  PASS WPF Identity: CheckBox FlagVpn â†’ toggle
+  PASS WPF Identity: ComboBox Location â†’ select Boston
+  PASS WPF Identity: TextBox Email â†’ retype
+  PASS WPF Network: Slider UploadLimit â†’ setrange 200
+  PASS WPF Network: Slider DownloadLimit â†’ setrange 300
+  PASS WPF Network: CheckBox TlsClientCert â†’ toggle
+  PASS WPF Network: RadioButton ConnProxy â†’ select
+  PASS WPF Network: ComboBox Protocol â†’ select HTTP
+  PASS WPF Scheduler: TextBox JobName â†’ retype
+  PASS WPF Scheduler: ComboBox JobType â†’ select Report
+  PASS WPF Scheduler: Slider JobPriority â†’ setrange 7
+  PASS WPF Scheduler: CheckBox JobEnabled â†’ toggle
+  PASS WPF Layout: Button BtnApply â†’ click  (13ms)
+  PASS WPF Layout: Button BtnReset â†’ click  (14ms)
+  PASS WPF Logs: ComboBox LogLevel â†’ select ERROR
+  PASS WPF Logs: TextBox LogFilter â†’ retype
+  PASS WPF Logs: CheckBox LogAutoScroll â†’ toggle
+  PASS WPF Logs: Button LogClear â†’ click  (17ms)
+  PASS WPF WPF-tab: ToggleButton Toggle1 â†’ click+restore
+  PASS WPF WPF-tab: Expander ExpanderLogging â†’ expand/collapse
+  PASS WPF Dialogs: Slider MiscVertSlider â†’ setrange 50
+  PASS WPF Dialogs: RadioButton MiscRadioB â†’ select
+  PASS WPF Dialogs: ListBox MiscMultiListBox â†’ select-index 0
+  PASS WPF Dialogs: ComboBox MiscEditCombo â†’ select Option A
+  PASS WPF Dialogs: TextBox MiscMultilineTextBox â†’ retype
+  PASS HTML Torture: checkbox check1 â†’ toggle+restore
+  PASS HTML Torture: radio 'Radio 2' â†’ click
+  PASS HTML Torture: select#single-select â†’ select Option 2
+  PASS HTML Torture: select#multi-select â†’ select-index 0
+  PASS HTML Torture: textarea â†’ retype
+  PASS HTML Torture: button 'Plain button' â†’ click
+  PASS HTML Ecommerce: searchProducts â†’ retype
+  PASS HTML Ecommerce: categoryFilter â†’ select Electronics
+  PASS HTML Ecommerce: shipFree â†’ toggle+restore
+  PASS HTML Ecommerce: first 'Add to Cart' button â†’ click
+  PASS GET /help - returns content  (3ms)
 
-[Results] 79 passed, 5 failed
-  FAIL WinForms Identity: NotesField ¡÷ retype
-       No Edit control found matching 'NotesField'
-  FAIL WinForms Network: UploadSlider ¡÷ setrange 200
-       No Slider control found matching 'Upload'
-  FAIL WinForms Network: DownloadSlider ¡÷ setrange 300
-       No Slider control found matching 'Download'
-  FAIL WinForms Network: FeaturesCheckedList ¡÷ select-index 3
-       FeaturesCheckedList not found
-  FAIL WinForms Scheduler: PrioritySlider ¡÷ setrange 7  cmd=POST /execute setrange/getrange id=936020866 value=7
+[Results] 80 passed, 4 failed
+  FAIL WinForms Network: UploadSlider â†’ setrange 200
+       setrange failed: Value does not fall within the expected range.
+  FAIL WinForms Network: DownloadSlider â†’ setrange 300
+       setrange failed: Value does not fall within the expected range.
+  FAIL WinForms Network: FeaturesCheckedList â†’ select-index 3  cmd=POST /execute select-index 3 id=341742500
+       Index 3 out of range
+  FAIL WinForms Scheduler: PrioritySlider â†’ setrange 7  cmd=POST /execute setrange/getrange id=23558242 value=7
        getrange did not contain '7'. Got: 0
 [ApexComputerUse] Stopped.
-[Telegram¡÷stdout] ?? <b>Cycle 1/1</b>
-PASS:79  FAIL:5
- total 3949ms   avg 171.7ms   max 1087ms
+[Telegramâ†’stdout] ?? <b>Cycle 1/1</b>
+PASS:80  FAIL:4
+ total 4501ms   avg 195.7ms   max 1798ms
   PASS GET /windows - WinForms app visible
   PASS GET /windows - WPF app visible
   PASS SCAN_WINDOW WinForms
-  PASS POST /execute type ¡÷ WinForms TextBox
-  PASS POST /execute gettext ¡÷ typed value
-  PASS POST /execute toggle ¡÷ WinForms SimpleCheckBox
-  PASS POST /execute click ¡÷ WinForms ContextMenu button
-  PASS POST /execute gettext ¡÷ WinForms ProgressBar
-  PASS POST /execute expand/collapse ¡÷ WinForms EditableCombo
+  PASS POST /execute type â†’ WinForms TextBox
+  PASS POST /execute gettext â†’ typed value
+  PASS POST /execute toggle â†’ WinForms SimpleCheckBox
+  PASS POST /execute click â†’ WinForms ContextMenu button
+  PASS POST /execute gettext â†’ WinForms ProgressBar
+  PASS POST /execute expand/collapse â†’ WinForms EditableCombo
   PASS SCAN_WINDOW WPF
-  PASS POST /execute type ¡÷ WPF TextBox
-  PASS POST /execute toggle ¡÷ WPF SimpleCheckBox
-  PASS POST /execute click ¡÷ WPF InvokableButton
-  PASS POST /execute expand/collapse ¡÷ WPF NonEditableCombo
-  PASS POST /execute setrange 4 ¡÷ WPF Slider (verified)
-  PASS TextBox edit ¡÷ clear ¡÷ retype (verified)
-  PASS POST /execute setrange 50 ¡÷ WinForms Slider (verified)
-  PASS POST /execute select ¡÷ WinForms ListBox item
-  PASS POST /execute click ¡÷ WinForms RadioButton2 (mutex)
+  PASS POST /execute type â†’ WPF TextBox
+  PASS POST /execute toggle â†’ WPF SimpleCheckBox
+  PASS POST /execute click â†’ WPF InvokableButton
+  PASS POST /execute expand/collapse â†’ WPF NonEditableCombo
+  PASS POST /execute setrange 4 â†’ WPF Slider (verified)
+  PASS TextBox edit â†’ clear â†’ retype (verified)
+  PASS POST /execute setrange 50 â†’ WinForms Slider (verified)
+  PASS POST /execute select â†’ WinForms ListBox item
+  PASS POST /execute click â†’ WinForms RadioButton2 (mutex)
   PASS Cycle ThreeStateCheckBox x3 (WinForms)
-  PASS Click Edit ¡÷ Copy Plain menu item (WinForms)
-  PASS POST /execute select ¡÷ WPF ListBox item
-  PASS POST /execute expand/collapse ¡÷ WPF Expander
+  PASS Click Edit â†’ Copy Plain menu item (WinForms)
+  PASS POST /execute select â†’ WPF ListBox item
+  PASS POST /execute expand/collapse â†’ WPF Expander
   PASS Click File menu (WPF)
   PASS SCAN_WINDOW Torture Test
-  PASS POST /execute type ¡÷ HTML TextBox on Torture Test (verified)
+  PASS POST /execute type â†’ HTML TextBox on Torture Test (verified)
   PASS SCAN_WINDOW Ecommerce
-  PASS POST /execute setrange 100 ¡÷ HTML range slider on Ecommerce (verified)
-  PASS WinForms Identity: StatusCombo ¡÷ select Inactive
-  PASS WinForms Identity: SalaryInput ¡÷ setvalue 75000
-  FAIL WinForms Identity: NotesField ¡÷ retype
-       No Edit control found matching 'NotesField'
-  FAIL WinForms Network: UploadSlider ¡÷ setrange 200
-       No Slider control found matching 'Upload'
-  FAIL WinForms Network: DownloadSlider ¡÷ setrange 300
-       No Slider control found matching 'Download'
-  PASS WinForms Network: TlsVerify ¡÷ toggle
-  FAIL WinForms Network: FeaturesCheckedList ¡÷ select-index 3
-       FeaturesCheckedList not found
-  PASS WinForms Scheduler: JobName ¡÷ retype
-  PASS WinForms Scheduler: JobType ¡÷ select Report
-  FAIL WinForms Scheduler: PrioritySlider ¡÷ setrange 7  cmd=POST /execute setrange/getrange id=936020866 value=7
+  PASS POST /execute setrange 100 â†’ HTML range slider on Ecommerce (verified)
+  PASS WinForms Identity: StatusCombo â†’ select Inactive
+  PASS WinForms Identity: SalaryInput â†’ setvalue 75000
+  PASS WinForms Identity: NotesField â†’ retype
+  FAIL WinForms Network: UploadSlider â†’ setrange 200
+       setrange failed: Value does not fall within the expected range.
+  FAIL WinForms Network: DownloadSlider â†’ setrange 300
+       setrange failed: Value does not fall within the expected range.
+  PASS WinForms Network: TlsVerify â†’ toggle
+  FAIL WinForms Network: FeaturesCheckedList â†’ select-index 3  cmd=POST /execute select-index 3 id=341742500
+       Index 3 out of range
+  PASS WinForms Scheduler: JobName â†’ retype
+  PASS WinForms Scheduler: JobType â†’ select Report
+  FAIL WinForms Scheduler: PrioritySlider â†’ setrange 7  cmd=POST /execute setrange/getrange id=23558242 value=7
        getrange did not contain '7'. Got: 0
-  PASS WinForms Scheduler: JobEnabled ¡÷ toggle
-  PASS WinForms Layout: Button Apply ¡÷ click
-  PASS WinForms Layout: Button Reset ¡÷ click
-  PASS WinForms Logs: LogLevelCombo ¡÷ select ERROR
-  PASS WinForms Logs: LogFilter ¡÷ retype
-  PASS WinForms Logs: LogAutoScroll ¡÷ toggle
-  PASS WinForms Dialogs: DomainSpinner ¡÷ setvalue Beta
-  PASS WinForms Dialogs: DecimalSpinner ¡÷ setvalue 42
-  PASS WPF Identity: Slider AccessLevel ¡÷ setrange 3
-  PASS WPF Identity: RadioButton EmpPartTime ¡÷ select
-  PASS WPF Identity: CheckBox FlagVpn ¡÷ toggle
-  PASS WPF Identity: ComboBox Location ¡÷ select Boston
-  PASS WPF Identity: TextBox Email ¡÷ retype
-  PASS WPF Network: Slider UploadLimit ¡÷ setrange 200
-  PASS WPF Network: Slider DownloadLimit ¡÷ setrange 300
-  PASS WPF Network: CheckBox TlsClientCert ¡÷ toggle
-  PASS WPF Network: RadioButton ConnProxy ¡÷ select
-  PASS WPF Network: ComboBox Protocol ¡÷ select HTTP
-  PASS WPF Scheduler: TextBox JobName ¡÷ retype
-  PASS WPF Scheduler: ComboBox JobType ¡÷ select Report
-  PASS WPF Scheduler: Slider JobPriority ¡÷ setrange 7
-  PASS WPF Scheduler: CheckBox JobEnabled ¡÷ toggle
-  PASS WPF Layout: Button BtnApply ¡÷ click
-  PASS WPF Layout: Button BtnReset ¡÷ click
-  PASS WPF Logs: ComboBox LogLevel ¡÷ select ERROR
-  PASS WPF Logs: TextBox LogFilter ¡÷ retype
-  PASS WPF Logs: CheckBox LogAutoScroll ¡÷ toggle
-  PASS WPF Logs: Button LogClear ¡÷ click
-  PASS WPF WPF-tab: ToggleButton Toggle1 ¡÷ click+restore
-  PASS WPF WPF-tab: Expander ExpanderLogging ¡÷ expand/collapse
-  PASS WPF Dialogs: Slider MiscVertSlider ¡÷ setrange 50
-  PASS WPF Dialogs: RadioButton MiscRadioB ¡÷ select
-  PASS WPF Dialogs: ListBox MiscMultiListBox ¡÷ select-index 0
-  PASS WPF Dialogs: ComboBox MiscEditCombo ¡÷ select Option A
-  PASS WPF Dialogs: TextBox MiscMultilineTextBox ¡÷ retype
-  PASS HTML Torture: checkbox check1 ¡÷ toggle+restore
-  PASS HTML Torture: radio 'Radio 2' ¡÷ click
-  PASS HTML Torture: select#single-select ¡÷ select Option 2
-  PASS HTML Torture: select#multi-select ¡÷ select-index 0
-  PASS HTML Torture: textarea ¡÷ retype
-  PASS HTML Torture: button 'Plain button' ¡÷ click
-  PASS HTML Ecommerce: searchProducts ¡÷ retype
-  PASS HTML Ecommerce: categoryFilter ¡÷ select Electronics
-  PASS HTML Ecommerce: shipFree ¡÷ toggle+restore
-  PASS HTML Ecommerce: first 'Add to Cart' button ¡÷ click
+  PASS WinForms Scheduler: JobEnabled â†’ toggle
+  PASS WinForms Layout: Button Apply â†’ click
+  PASS WinForms Layout: Button Reset â†’ click
+  PASS WinForms Logs: LogLevelCombo â†’ select ERROR
+  PASS WinForms Logs: LogFilter â†’ retype
+  PASS WinForms Logs: LogAutoScroll â†’ toggle
+  PASS WinForms Dialogs: DomainSpinner â†’ setvalue Beta
+  PASS WinForms Dialogs: DecimalSpinner â†’ setvalue 42
+  PASS WPF Identity: Slider AccessLevel â†’ setrange 3
+  PASS WPF Identity: RadioButton EmpPartTime â†’ select
+  PASS WPF Identity: CheckBox FlagVpn â†’ toggle
+  PASS WPF Identity: ComboBox Location â†’ select Boston
+  PASS WPF Identity: TextBox Email â†’ retype
+  PASS WPF Network: Slider UploadLimit â†’ setrange 200
+  PASS WPF Network: Slider DownloadLimit â†’ setrange 300
+  PASS WPF Network: CheckBox TlsClientCert â†’ toggle
+  PASS WPF Network: RadioButton ConnProxy â†’ select
+  PASS WPF Network: ComboBox Protocol â†’ select HTTP
+  PASS WPF Scheduler: TextBox JobName â†’ retype
+  PASS WPF Scheduler: ComboBox JobType â†’ select Report
+  PASS WPF Scheduler: Slider JobPriority â†’ setrange 7
+  PASS WPF Scheduler: CheckBox JobEnabled â†’ toggle
+  PASS WPF Layout: Button BtnApply â†’ click
+  PASS WPF Layout: Button BtnReset â†’ click
+  PASS WPF Logs: ComboBox LogLevel â†’ select ERROR
+  PASS WPF Logs: TextBox LogFilter â†’ retype
+  PASS WPF Logs: CheckBox LogAutoScroll â†’ toggle
+  PASS WPF Logs: Button LogClear â†’ click
+  PASS WPF WPF-tab: ToggleButton Toggle1 â†’ click+restore
+  PASS WPF WPF-tab: Expander ExpanderLogging â†’ expand/collapse
+  PASS WPF Dialogs: Slider MiscVertSlider â†’ setrange 50
+  PASS WPF Dialogs: RadioButton MiscRadioB â†’ select
+  PASS WPF Dialogs: ListBox MiscMultiListBox â†’ select-index 0
+  PASS WPF Dialogs: ComboBox MiscEditCombo â†’ select Option A
+  PASS WPF Dialogs: TextBox MiscMultilineTextBox â†’ retype
+  PASS HTML Torture: checkbox check1 â†’ toggle+restore
+  PASS HTML Torture: radio 'Radio 2' â†’ click
+  PASS HTML Torture: select#single-select â†’ select Option 2
+  PASS HTML Torture: select#multi-select â†’ select-index 0
+  PASS HTML Torture: textarea â†’ retype
+  PASS HTML Torture: button 'Plain button' â†’ click
+  PASS HTML Ecommerce: searchProducts â†’ retype
+  PASS HTML Ecommerce: categoryFilter â†’ select Electronics
+  PASS HTML Ecommerce: shipFree â†’ toggle+restore
+  PASS HTML Ecommerce: first 'Add to Cart' button â†’ click
   PASS GET /help - returns content
 
 [FAIL] TestRunner Complete
 Mode: demo   Speed profile: human
 Cycles run: 1/1
-Total: PASS:79  FAIL:5
+Total: PASS:80  FAIL:4
 
-  Cycle 1: PASS:79 FAIL:5
-[Telegram¡÷stdout] [FAIL] <b>TestRunner Complete</b>
+  Cycle 1: PASS:80 FAIL:4
+[Telegramâ†’stdout] [FAIL] <b>TestRunner Complete</b>
 Mode: <b>demo</b>   Speed profile: <b>human</b>
 Cycles run: <b>1/1</b>
-Total: PASS:79  FAIL:5
+Total: PASS:80  FAIL:4
 
-  Cycle 1: PASS:79 FAIL:5
+  Cycle 1: PASS:80 FAIL:4
 [WebServer] Stopped.
 [Runner] Done. Test-target apps will be closed.

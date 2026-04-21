@@ -267,7 +267,7 @@ namespace WinFormsApplication
             tl.Controls.Add(flagPanel, 1, 8);
 
             tl.Controls.Add(Lbl("Notes:"), 0, 9);
-            var notes = new RichTextBox { Name = "NotesField", Height = 80, Dock = DockStyle.Fill, Text = "Senior engineer. Approved for production deployments.\nLast reviewed: Q3 2025." };
+            var notes = new TextBox { Name = "NotesField", Multiline = true, ScrollBars = ScrollBars.Vertical, Height = 80, Dock = DockStyle.Fill, Text = "Senior engineer. Approved for production deployments.\r\nLast reviewed: Q3 2025." };
             tl.SetColumnSpan(notes, 3);
             tl.Controls.Add(notes, 1, 9);
 
@@ -349,7 +349,7 @@ namespace WinFormsApplication
             split.Panel1.Controls.Add(leftFlow);
 
             // Right
-            var rightFlow = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.TopDown, WrapContents = false, AutoScroll = true, Padding = new Padding(4) };
+            var rightFlow = new Panel { Dock = DockStyle.Fill, AutoScroll = true, Padding = new Padding(4) };
 
             var bwGroup = new GroupBox { Text = "Bandwidth Limits", Dock = DockStyle.Top, Height = 120, Padding = new Padding(6) };
             var bwTable = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2 };
@@ -430,7 +430,7 @@ namespace WinFormsApplication
             topTable.Controls.Add(Lbl("Max Runtime (min):"), 0, 3);
             topTable.Controls.Add(new NumericUpDown { Minimum = 1, Maximum = 1440, Value = 60, Dock = DockStyle.Fill }, 1, 3);
             topTable.Controls.Add(Lbl("Priority:"), 2, 3);
-            topTable.Controls.Add(new TrackBar { Name = "PrioritySlider", Minimum = 1, Maximum = 10, Value = 5, TickFrequency = 1, Dock = DockStyle.Fill }, 3, 3);
+            topTable.Controls.Add(new TrackBar { Name = "PrioritySlider", AccessibleName = "Priority", Minimum = 1, Maximum = 10, Value = 5, TickFrequency = 1, Dock = DockStyle.Fill }, 3, 3);
 
             topTable.Controls.Add(Lbl("Cron Expression:"), 0, 4);
             var cron = new MaskedTextBox { Text = "0 2 * * *", Dock = DockStyle.Fill };
