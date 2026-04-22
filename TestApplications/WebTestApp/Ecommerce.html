@@ -5,26 +5,81 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>AGPA E-Commerce Test App</title>
   <style>
-    :root { --brand:#2d6cdf; --bg:#f5f7fb; --card:#fff; --text:#1f2937; --muted:#6b7280; --ok:#0f9d58; }
+    :root { --brand:#2d6cdf; --bg:#f5f7fb; --card:#fff; --text:#1f2937; --muted:#6b7280; --ok:#0f9d58; --warn:#d97706; }
+    * { box-sizing: border-box; }
     body { margin:0; font-family:Segoe UI,Arial,sans-serif; background:var(--bg); color:var(--text); }
-    header { background:#111827; color:white; padding:16px 24px; display:flex; align-items:center; gap:16px; }
+    header { background:#111827; color:white; padding:12px 24px; display:flex; align-items:center; gap:16px; }
     .logo { font-weight:700; font-size:20px; }
     .search { flex:1; display:flex; gap:8px; }
-    input, select, button { border:1px solid #cbd5e1; border-radius:8px; padding:10px 12px; font-size:14px; }
-    input, select { background:white; }
+    input, select, button, textarea { border:1px solid #cbd5e1; border-radius:8px; padding:10px 12px; font-size:14px; font-family:inherit; }
+    input, select, textarea { background:white; }
     button { background:var(--brand); color:white; border:none; cursor:pointer; }
-    main { display:grid; grid-template-columns:280px 1fr 340px; gap:18px; padding:20px; }
+    button.secondary { background:#e5e7eb; color:var(--text); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .tabs { display:flex; gap:6px; background:#1f2937; padding:6px 24px; }
+    .tab { background:#374151; color:white; padding:6px 14px; border-radius:6px; cursor:pointer; font-size:13px; }
+    .tab.active { background:var(--brand); }
+
+    main { display:grid; grid-template-columns:260px 1fr 340px; gap:18px; padding:20px; }
     .panel { background:var(--card); border-radius:12px; padding:16px; box-shadow:0 1px 4px rgba(0,0,0,.08); }
+
+    .toolbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; gap:10px; flex-wrap:wrap; }
     .products { display:grid; grid-template-columns:repeat(2, minmax(240px, 1fr)); gap:14px; }
-    .product { border:1px solid #e5e7eb; border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:8px; }
+    .product { border:1px solid #e5e7eb; border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:6px; position:relative; }
+    .product .badge { position:absolute; top:8px; right:8px; background:var(--warn); color:white; font-size:11px; padding:2px 6px; border-radius:4px; }
+    .product .thumb { height:90px; border-radius:8px; background:linear-gradient(135deg,#dbeafe,#bfdbfe); display:flex; align-items:center; justify-content:center; font-size:32px; }
     .price { color:var(--ok); font-weight:600; }
+    .strike { text-decoration: line-through; color: var(--muted); font-size: 12px; margin-left: 6px; }
     .small { color:var(--muted); font-size:12px; }
     .row { display:flex; gap:10px; align-items:center; }
-    .spaced { display:flex; justify-content:space-between; margin:10px 0; }
+    .spaced { display:flex; justify-content:space-between; margin:8px 0; }
     .totals { border-top:1px solid #e5e7eb; margin-top:12px; padding-top:10px; }
     .muted { color:var(--muted); }
     .checkout { width:100%; margin-top:8px; font-weight:600; }
-    footer { margin-top:14px; }
+
+    .size-opt, .color-opt {
+      display:inline-block; border:1px solid #cbd5e1; border-radius:6px;
+      padding:4px 8px; margin:2px; cursor:pointer; font-size:12px; background:#f9fafb;
+    }
+    .size-opt.active, .color-opt.active { background: var(--brand); color: white; border-color: var(--brand); }
+
+    .cart-item { display:flex; align-items:center; gap:8px; padding:6px 0; border-bottom:1px dashed #e5e7eb; font-size:13px; }
+    .cart-item button { padding:2px 6px; font-size:11px; background:#ef4444; }
+    .qty-ctrl { display:inline-flex; align-items:center; gap:4px; }
+    .qty-ctrl button { padding:2px 8px; font-size:12px; background:#e5e7eb; color:var(--text); }
+
+    .star { cursor: pointer; font-size: 18px; color: #d1d5db; }
+    .star.on { color: #f59e0b; }
+
+    /* Modal / drawer */
+    .overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+      display: none; align-items: center; justify-content: center; z-index: 9999;
+    }
+    .overlay.open { display: flex; }
+    .modal {
+      background: white; border-radius: 12px; padding: 20px; max-width: 520px; width: 90%;
+      max-height: 85vh; overflow-y: auto;
+    }
+    .modal h2 { margin-top: 0; }
+
+    .toast {
+      position: fixed; bottom: 20px; right: 20px; background: #111827; color: white;
+      padding: 10px 16px; border-radius: 8px; display: none; z-index: 9998;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+    }
+    .toast.show { display: block; }
+
+    .empty { text-align:center; padding:20px; color: var(--muted); font-style: italic; }
+
+    footer.site {
+      margin-top: 20px; padding: 20px 24px; background: #111827; color: #94a3b8;
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; font-size: 13px;
+    }
+    footer.site h4 { color: white; margin: 0 0 8px 0; font-size: 14px; }
+    footer.site a { color: #94a3b8; text-decoration: none; display: block; padding: 2px 0; }
+    footer.site a:hover { color: white; }
   </style>
 </head>
 <body>
@@ -37,18 +92,29 @@
         <option>Shoes</option>
         <option>Apparel</option>
         <option>Accessories</option>
+        <option>Electronics</option>
       </select>
       <button id="searchButton">Search</button>
     </div>
+    <button id="wishlistButton" class="secondary" aria-label="Wishlist">♡ Wishlist (<span id="wishCount">0</span>)</button>
     <button id="headerCartButton" aria-label="Open cart">Cart ( <span id="cartCount">0</span> )</button>
   </header>
 
+  <div class="tabs" role="tablist" aria-label="Category tabs">
+    <div class="tab active" data-cat="All" onclick="selectTab(this)">All</div>
+    <div class="tab" data-cat="Shoes" onclick="selectTab(this)">Shoes</div>
+    <div class="tab" data-cat="Apparel" onclick="selectTab(this)">Apparel</div>
+    <div class="tab" data-cat="Accessories" onclick="selectTab(this)">Accessories</div>
+    <div class="tab" data-cat="Electronics" onclick="selectTab(this)">Electronics</div>
+    <div class="tab" data-cat="Sale" onclick="selectTab(this)">🔥 Sale</div>
+  </div>
+
   <main>
     <section class="panel" aria-label="Filters">
-      <h2>Filters</h2>
+      <h2 style="margin-top:0;">Filters</h2>
       <label for="priceRange">Price range</label>
-      <input id="priceRange" aria-label="Price range" type="range" min="20" max="250" value="140" />
-      <div class="small">Current max price: <strong id="priceText">140</strong></div>
+      <input id="priceRange" aria-label="Price range" type="range" min="20" max="250" value="250" />
+      <div class="small">Current max price: $<strong id="priceText">250</strong></div>
 
       <h3>Shipping</h3>
       <div><input id="shipFree" type="checkbox" /> <label for="shipFree">Free shipping</label></div>
@@ -60,96 +126,462 @@
         <option>AGPA Athletics</option>
         <option>North Trail</option>
         <option>Orbit Labs</option>
+        <option>Helix</option>
       </select>
+
+      <h3>Minimum rating</h3>
+      <select id="ratingFilter" aria-label="Minimum rating">
+        <option value="0">Any</option>
+        <option value="3">3★ & up</option>
+        <option value="4">4★ & up</option>
+        <option value="5">5★ only</option>
+      </select>
+
+      <h3>In stock only</h3>
+      <label><input id="inStockOnly" type="checkbox" checked /> Hide out of stock</label>
+
+      <button id="applyFilters" style="margin-top:14px; width:100%;">Apply filters</button>
+      <button id="resetFilters" class="secondary" style="margin-top:6px; width:100%;">Reset</button>
     </section>
 
     <section class="panel" aria-label="Product results">
-      <h2>Featured products</h2>
-      <div class="products">
-        <article class="product">
-          <h3>Velocity Runner 4</h3>
-          <div class="small">Men's Running Shoes</div>
-          <div class="price">$119.99</div>
-          <button class="addToCart">Add to Cart</button>
-          <button>Save for Later</button>
-        </article>
-        <article class="product">
-          <h3>Summit Trail GTX</h3>
-          <div class="small">Waterproof Hiking Shoes</div>
-          <div class="price">$159.00</div>
-          <button class="addToCart">Add to Cart</button>
-          <button>View Details</button>
-        </article>
-        <article class="product">
-          <h3>CoreFit Tee</h3>
-          <div class="small">Breathable training shirt</div>
-          <div class="price">$34.50</div>
-          <button class="addToCart">Add to Cart</button>
-          <button>View Details</button>
-        </article>
-        <article class="product">
-          <h3>Urban Commuter Pack</h3>
-          <div class="small">18L Laptop backpack</div>
-          <div class="price">$79.95</div>
-          <button class="addToCart">Add to Cart</button>
-          <button>Compare</button>
-        </article>
+      <div class="toolbar">
+        <h2 style="margin:0;">Featured products <span id="resultCount" class="small"></span></h2>
+        <div class="row">
+          <label for="sortBy" class="small">Sort</label>
+          <select id="sortBy">
+            <option value="featured">Featured</option>
+            <option value="priceAsc">Price ↑</option>
+            <option value="priceDesc">Price ↓</option>
+            <option value="ratingDesc">Rating ↓</option>
+            <option value="nameAsc">Name A–Z</option>
+          </select>
+        </div>
+      </div>
+      <div id="productGrid" class="products"></div>
+      <div id="noResults" class="empty" style="display:none;">No products match your filters.</div>
+
+      <div class="row" style="justify-content:center; margin-top:12px; gap:6px;">
+        <button id="prevPage" class="secondary">◀ Prev</button>
+        <span class="small">Page <span id="pageNum">1</span> of <span id="pageTotal">2</span></span>
+        <button id="nextPage" class="secondary">Next ▶</button>
       </div>
     </section>
 
     <aside class="panel" aria-label="Cart summary">
-      <h2>Cart summary</h2>
-      <div class="spaced"><span>Velocity Runner 4</span><span>$119.99</span></div>
-      <label for="cartQuantity">Quantity</label>
-      <input id="cartQuantity" aria-label="Quantity" type="number" min="1" max="5" value="1" />
+      <h2 style="margin-top:0;">Cart summary</h2>
+      <div id="cartList"><div class="empty" id="cartEmpty">Your cart is empty.</div></div>
 
       <div class="row" style="margin-top:10px;">
-        <input id="couponCode" aria-label="Coupon code" placeholder="Coupon code" />
-        <button id="applyCoupon">Apply Coupon</button>
+        <input id="couponCode" aria-label="Coupon code" placeholder="Coupon code (try SAVE10)" />
+        <button id="applyCoupon">Apply</button>
       </div>
+      <div id="couponMsg" class="small" aria-live="polite"></div>
 
       <div class="totals">
-        <div class="spaced"><span class="muted">Subtotal</span><span id="subtotal">$119.99</span></div>
-        <div class="spaced"><span class="muted">Shipping</span><span>$0.00</span></div>
-        <div class="spaced"><strong>Total</strong><strong id="total">$119.99</strong></div>
+        <div class="spaced"><span class="muted">Subtotal</span><span id="subtotal">$0.00</span></div>
+        <div class="spaced"><span class="muted">Discount</span><span id="discount">-$0.00</span></div>
+        <div class="spaced"><span class="muted">Shipping</span><span id="shipping">$0.00</span></div>
+        <div class="spaced"><span class="muted">Tax (8%)</span><span id="tax">$0.00</span></div>
+        <div class="spaced"><strong>Total</strong><strong id="total">$0.00</strong></div>
       </div>
 
-      <button id="checkoutButton" class="checkout">Checkout</button>
+      <label for="cartQuantity" class="small" style="margin-top:10px;">Default quantity (new items)</label>
+      <input id="cartQuantity" aria-label="Quantity" type="number" min="1" max="9" value="1" style="width:100%;" />
 
-      <footer>
-        <label for="newsletterEmail">Email address</label>
-        <input id="newsletterEmail" aria-label="Email address" placeholder="Email address" />
-        <button id="subscribeButton" style="margin-top:8px;">Subscribe</button>
+      <button id="checkoutButton" class="checkout">Proceed to checkout</button>
+      <button id="clearCartButton" class="secondary" style="width:100%; margin-top:6px;">Clear cart</button>
+
+      <footer style="margin-top:14px; border-top:1px solid #e5e7eb; padding-top:10px;">
+        <div class="small" style="margin-bottom:6px;">Get 10% off your first order</div>
+        <input id="newsletterEmail" aria-label="Email address" placeholder="Email address" style="width:100%;" />
+        <button id="subscribeButton" style="margin-top:6px; width:100%;">Subscribe</button>
+        <div id="subscribeMsg" class="small" aria-live="polite"></div>
       </footer>
     </aside>
   </main>
 
-  <script>
-    const cartCount = document.getElementById('cartCount');
-    const priceRange = document.getElementById('priceRange');
-    const priceText = document.getElementById('priceText');
-    const qty = document.getElementById('cartQuantity');
-    const total = document.getElementById('total');
-    const subtotal = document.getElementById('subtotal');
+  <footer class="site">
+    <div><h4>Shop</h4><a href="#">Men's</a><a href="#">Women's</a><a href="#">Kids</a><a href="#">Accessories</a></div>
+    <div><h4>Help</h4><a href="#">Shipping</a><a href="#">Returns</a><a href="#">Size guide</a><a href="#">Contact</a></div>
+    <div><h4>Account</h4><a href="#">Sign in</a><a href="#">Orders</a><a href="#">Wishlist</a><a href="#">Rewards</a></div>
+    <div><h4>Company</h4><a href="#">About</a><a href="#">Careers</a><a href="#">Press</a><a href="#">Privacy</a></div>
+  </footer>
 
-    function recalc() {
-      const unit = 119.99;
-      const q = Math.max(1, parseInt(qty.value || '1', 10));
-      const sum = (unit * q).toFixed(2);
-      subtotal.textContent = `$${sum}`;
-      total.textContent = `$${sum}`;
+  <!-- Product details modal -->
+  <div class="overlay" id="detailsOverlay" onclick="if(event.target.id==='detailsOverlay') closeDetails()">
+    <div class="modal" role="dialog" aria-labelledby="detailsTitle">
+      <h2 id="detailsTitle">Product</h2>
+      <p id="detailsDesc" class="small"></p>
+      <p><strong>Price:</strong> <span id="detailsPrice"></span></p>
+      <p><strong>Rating:</strong> <span id="detailsRating"></span></p>
+
+      <label>Size</label>
+      <div id="detailsSizes"></div>
+      <label>Color</label>
+      <div id="detailsColors"></div>
+
+      <label for="detailsQty">Quantity</label>
+      <input id="detailsQty" type="number" min="1" max="9" value="1" style="width:100px;" />
+
+      <div style="margin-top:14px; display:flex; gap:8px;">
+        <button id="detailsAdd">Add to Cart</button>
+        <button id="detailsWishlist" class="secondary">♡ Wishlist</button>
+        <button class="secondary" onclick="closeDetails()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Checkout modal -->
+  <div class="overlay" id="checkoutOverlay" onclick="if(event.target.id==='checkoutOverlay') closeCheckout()">
+    <div class="modal" role="dialog" aria-labelledby="checkoutTitle">
+      <h2 id="checkoutTitle">Checkout</h2>
+      <div id="checkoutStep1">
+        <h3>Shipping address</h3>
+        <label for="shipName">Full name</label>
+        <input id="shipName" style="width:100%;" />
+        <label for="shipAddress">Address</label>
+        <input id="shipAddress" style="width:100%;" />
+        <label for="shipCity">City</label>
+        <input id="shipCity" style="width:100%;" />
+        <label for="shipCountry">Country</label>
+        <select id="shipCountry" style="width:100%;">
+          <option>United States</option><option>Canada</option><option>United Kingdom</option><option>Germany</option>
+        </select>
+        <div style="margin-top:12px; display:flex; gap:8px; justify-content:flex-end;">
+          <button class="secondary" onclick="closeCheckout()">Cancel</button>
+          <button id="checkoutNext">Continue to payment</button>
+        </div>
+      </div>
+      <div id="checkoutStep2" style="display:none;">
+        <h3>Payment</h3>
+        <label for="cardName">Cardholder</label>
+        <input id="cardName" style="width:100%;" />
+        <label for="cardNumber">Card number</label>
+        <input id="cardNumber" placeholder="4242 4242 4242 4242" style="width:100%;" />
+        <div class="row">
+          <div style="flex:1;"><label for="cardExp">Exp</label><input id="cardExp" placeholder="MM/YY" style="width:100%;" /></div>
+          <div style="flex:1;"><label for="cardCvc">CVC</label><input id="cardCvc" placeholder="123" style="width:100%;" /></div>
+        </div>
+        <label style="margin-top:8px; display:block;">
+          <input type="checkbox" id="cardAgree" /> I agree to the terms of service
+        </label>
+        <div style="margin-top:12px; display:flex; gap:8px; justify-content:flex-end;">
+          <button class="secondary" onclick="checkoutBack()">← Back</button>
+          <button id="checkoutPlace">Place order</button>
+        </div>
+      </div>
+      <div id="checkoutStep3" style="display:none; text-align:center;">
+        <h3 style="color:var(--ok);">✓ Order placed</h3>
+        <p>Confirmation: <strong id="orderId"></strong></p>
+        <button onclick="closeCheckout()">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ========== Data ==========
+    const CATALOG = [
+      { id:1, name:"Velocity Runner 4", cat:"Shoes", brand:"AGPA Athletics", price:119.99, wasPrice:null, rating:4, stock:12, sizes:["7","8","9","10","11"], colors:["Black","Red","Blue"], badge:null, desc:"Lightweight road runner with responsive cushioning." },
+      { id:2, name:"Summit Trail GTX", cat:"Shoes", brand:"North Trail", price:159.00, wasPrice:189, rating:5, stock:4, sizes:["8","9","10","11"], colors:["Brown","Green"], badge:"Sale", desc:"Waterproof hiking shoe with Gore-Tex lining." },
+      { id:3, name:"CoreFit Tee", cat:"Apparel", brand:"AGPA Athletics", price:34.50, wasPrice:null, rating:4, stock:30, sizes:["S","M","L","XL"], colors:["Black","White","Gray"], badge:null, desc:"Breathable training shirt with moisture wicking." },
+      { id:4, name:"Urban Commuter Pack", cat:"Accessories", brand:"Orbit Labs", price:79.95, wasPrice:null, rating:4, stock:8, sizes:["18L"], colors:["Black","Navy"], badge:null, desc:"18L laptop backpack with padded sleeve." },
+      { id:5, name:"Helix Wireless Earbuds", cat:"Electronics", brand:"Helix", price:89.00, wasPrice:129, rating:5, stock:15, sizes:["One"], colors:["Black","White"], badge:"Sale", desc:"Noise-cancelling wireless earbuds with 24h battery." },
+      { id:6, name:"Trailhead Water Bottle", cat:"Accessories", brand:"North Trail", price:22.00, wasPrice:null, rating:3, stock:0, sizes:["24oz"], colors:["Silver","Blue"], badge:"Out of stock", desc:"Insulated steel bottle keeps drinks cold 24h." },
+      { id:7, name:"Apex Fit Watch", cat:"Electronics", brand:"Helix", price:199.00, wasPrice:null, rating:4, stock:6, sizes:["42mm"], colors:["Graphite","Silver"], badge:"New", desc:"GPS fitness watch with heart-rate tracking." },
+      { id:8, name:"Alpine Shell Jacket", cat:"Apparel", brand:"North Trail", price:149.99, wasPrice:null, rating:5, stock:3, sizes:["S","M","L","XL"], colors:["Olive","Black"], badge:null, desc:"3-layer waterproof shell for alpine climbing." },
+    ];
+    const PAGE_SIZE = 4;
+
+    // ========== State ==========
+    let cart = [];         // {id, name, price, qty}
+    let wish = new Set();
+    let currentPage = 1;
+    let activeCat = "All";
+    let coupon = null;     // {code, pct}
+    let detailsSelected = { id:null, size:null, color:null };
+
+    // ========== Elements ==========
+    const $ = id => document.getElementById(id);
+    const grid = $("productGrid");
+
+    function toast(msg) {
+      const t = $("toast"); t.textContent = msg; t.classList.add("show");
+      clearTimeout(toast._t); toast._t = setTimeout(()=> t.classList.remove("show"), 1800);
     }
 
-    document.querySelectorAll('.addToCart').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const count = parseInt(cartCount.textContent || '0', 10) + 1;
-        cartCount.textContent = count.toString();
+    // ========== Rendering ==========
+    function currentFilters() {
+      return {
+        q: $("searchProducts").value.trim().toLowerCase(),
+        cat: ($("categoryFilter").value === "All Categories") ? activeCat : $("categoryFilter").value,
+        maxPrice: parseInt($("priceRange").value, 10),
+        brand: $("brandFilter").value,
+        rating: parseInt($("ratingFilter").value, 10),
+        inStock: $("inStockOnly").checked,
+        shipFree: $("shipFree").checked,
+      };
+    }
+
+    function filtered() {
+      const f = currentFilters();
+      let items = CATALOG.filter(p => {
+        if (f.cat !== "All" && f.cat !== "All Categories" && f.cat !== "Sale" && p.cat !== f.cat) return false;
+        if (f.cat === "Sale" && !p.wasPrice) return false;
+        if (f.brand !== "Any Brand" && p.brand !== f.brand) return false;
+        if (p.price > f.maxPrice) return false;
+        if (p.rating < f.rating) return false;
+        if (f.inStock && p.stock <= 0) return false;
+        if (f.q && !(p.name.toLowerCase().includes(f.q) || p.desc.toLowerCase().includes(f.q))) return false;
+        return true;
       });
+      const sort = $("sortBy").value;
+      if (sort === "priceAsc") items.sort((a,b)=>a.price-b.price);
+      else if (sort === "priceDesc") items.sort((a,b)=>b.price-a.price);
+      else if (sort === "ratingDesc") items.sort((a,b)=>b.rating-a.rating);
+      else if (sort === "nameAsc") items.sort((a,b)=>a.name.localeCompare(b.name));
+      return items;
+    }
+
+    function renderGrid() {
+      const items = filtered();
+      const totalPages = Math.max(1, Math.ceil(items.length / PAGE_SIZE));
+      if (currentPage > totalPages) currentPage = totalPages;
+      $("pageTotal").textContent = totalPages;
+      $("pageNum").textContent = currentPage;
+      $("prevPage").disabled = (currentPage <= 1);
+      $("nextPage").disabled = (currentPage >= totalPages);
+      $("resultCount").textContent = `— ${items.length} item${items.length===1?'':'s'}`;
+
+      const slice = items.slice((currentPage-1)*PAGE_SIZE, currentPage*PAGE_SIZE);
+      grid.innerHTML = "";
+      $("noResults").style.display = items.length ? "none" : "block";
+
+      for (const p of slice) {
+        const card = document.createElement("article");
+        card.className = "product"; card.dataset.pid = p.id;
+        const wasHtml = p.wasPrice ? `<span class="strike">$${p.wasPrice.toFixed(2)}</span>` : "";
+        const badgeHtml = p.badge ? `<div class="badge">${p.badge}</div>` : "";
+        const starsHtml = '★'.repeat(p.rating) + '☆'.repeat(5-p.rating);
+        const oos = p.stock <= 0;
+        card.innerHTML = `
+          ${badgeHtml}
+          <div class="thumb">👟</div>
+          <h3 style="margin:4px 0;">${p.name}</h3>
+          <div class="small">${p.brand} · ${p.cat}</div>
+          <div class="small" style="color:#f59e0b;">${starsHtml}</div>
+          <div><span class="price">$${p.price.toFixed(2)}</span> ${wasHtml}</div>
+          <div class="small">${oos ? "<span style='color:#ef4444'>Out of stock</span>" : p.stock + " in stock"}</div>
+          <div class="row">
+            <button class="addToCart" data-pid="${p.id}" ${oos ? "disabled" : ""}>Add to Cart</button>
+            <button class="secondary" data-details="${p.id}">Details</button>
+          </div>
+        `;
+        grid.appendChild(card);
+      }
+
+      // Wire add-to-cart + details
+      grid.querySelectorAll(".addToCart").forEach(btn => {
+        btn.addEventListener("click", () => addToCart(parseInt(btn.dataset.pid,10)));
+      });
+      grid.querySelectorAll("[data-details]").forEach(btn => {
+        btn.addEventListener("click", () => openDetails(parseInt(btn.dataset.details,10)));
+      });
+    }
+
+    // ========== Cart ==========
+    function productById(id) { return CATALOG.find(p=>p.id===id); }
+
+    function addToCart(id, qty) {
+      const p = productById(id); if (!p) return;
+      qty = qty || Math.max(1, parseInt($("cartQuantity").value||"1",10));
+      const existing = cart.find(i=>i.id===id);
+      if (existing) existing.qty = Math.min(9, existing.qty + qty);
+      else cart.push({ id, name:p.name, price:p.price, qty });
+      renderCart();
+      toast(`Added ${p.name} to cart`);
+    }
+
+    function removeFromCart(id) {
+      cart = cart.filter(i=>i.id !== id);
+      renderCart();
+    }
+
+    function changeCartQty(id, delta) {
+      const i = cart.find(x=>x.id===id); if (!i) return;
+      i.qty = Math.max(1, Math.min(9, i.qty + delta));
+      renderCart();
+    }
+
+    function clearCart() { cart = []; coupon = null; $("couponMsg").textContent = ""; renderCart(); toast("Cart cleared"); }
+
+    function cartSubtotal() { return cart.reduce((s,i)=>s + i.price*i.qty, 0); }
+    function cartCountTotal() { return cart.reduce((s,i)=>s + i.qty, 0); }
+
+    function renderCart() {
+      $("cartCount").textContent = cartCountTotal();
+      const list = $("cartList"); list.innerHTML = "";
+      if (!cart.length) {
+        list.innerHTML = '<div class="empty" id="cartEmpty">Your cart is empty.</div>';
+      } else {
+        for (const i of cart) {
+          const row = document.createElement("div"); row.className = "cart-item";
+          row.innerHTML = `
+            <div style="flex:1;">${i.name}<br><span class="small">$${i.price.toFixed(2)}</span></div>
+            <span class="qty-ctrl">
+              <button data-dec="${i.id}">−</button>
+              <span>${i.qty}</span>
+              <button data-inc="${i.id}">+</button>
+            </span>
+            <button data-rm="${i.id}">✕</button>
+          `;
+          list.appendChild(row);
+        }
+        list.querySelectorAll("[data-inc]").forEach(b=>b.onclick=()=>changeCartQty(parseInt(b.dataset.inc,10),+1));
+        list.querySelectorAll("[data-dec]").forEach(b=>b.onclick=()=>changeCartQty(parseInt(b.dataset.dec,10),-1));
+        list.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>removeFromCart(parseInt(b.dataset.rm,10)));
+      }
+
+      const sub = cartSubtotal();
+      const disc = coupon ? sub * coupon.pct : 0;
+      const ship = (!cart.length) ? 0 : ($("shipFree").checked || sub >= 75 ? 0 : 5.99);
+      const taxable = Math.max(0, sub - disc) + ship;
+      const tax = taxable * 0.08;
+      const total = Math.max(0, sub - disc) + ship + tax;
+      $("subtotal").textContent = `$${sub.toFixed(2)}`;
+      $("discount").textContent = `-$${disc.toFixed(2)}`;
+      $("shipping").textContent = `$${ship.toFixed(2)}`;
+      $("tax").textContent = `$${tax.toFixed(2)}`;
+      $("total").textContent = `$${total.toFixed(2)}`;
+    }
+
+    // ========== Wishlist ==========
+    function toggleWish(id) {
+      if (wish.has(id)) wish.delete(id); else wish.add(id);
+      $("wishCount").textContent = wish.size;
+      toast(wish.has(id) ? "Added to wishlist" : "Removed from wishlist");
+    }
+
+    // ========== Details ==========
+    function openDetails(id) {
+      const p = productById(id); if (!p) return;
+      detailsSelected = { id, size: p.sizes[0], color: p.colors[0] };
+      $("detailsTitle").textContent = p.name;
+      $("detailsDesc").textContent = p.desc;
+      $("detailsPrice").textContent = `$${p.price.toFixed(2)}` + (p.wasPrice ? ` (was $${p.wasPrice.toFixed(2)})` : "");
+      $("detailsRating").textContent = '★'.repeat(p.rating) + '☆'.repeat(5-p.rating);
+      const sizes = $("detailsSizes"); sizes.innerHTML = "";
+      p.sizes.forEach((s,idx)=>{
+        const el = document.createElement("span"); el.className = "size-opt" + (idx===0?" active":""); el.textContent = s;
+        el.onclick = () => { sizes.querySelectorAll(".size-opt").forEach(x=>x.classList.remove("active")); el.classList.add("active"); detailsSelected.size = s; };
+        sizes.appendChild(el);
+      });
+      const colors = $("detailsColors"); colors.innerHTML = "";
+      p.colors.forEach((c,idx)=>{
+        const el = document.createElement("span"); el.className = "color-opt" + (idx===0?" active":""); el.textContent = c;
+        el.onclick = () => { colors.querySelectorAll(".color-opt").forEach(x=>x.classList.remove("active")); el.classList.add("active"); detailsSelected.color = c; };
+        colors.appendChild(el);
+      });
+      $("detailsQty").value = "1";
+      $("detailsOverlay").classList.add("open");
+    }
+    function closeDetails() { $("detailsOverlay").classList.remove("open"); }
+
+    // ========== Checkout ==========
+    function openCheckout() {
+      if (!cart.length) { toast("Cart is empty"); return; }
+      $("checkoutStep1").style.display = "block";
+      $("checkoutStep2").style.display = "none";
+      $("checkoutStep3").style.display = "none";
+      $("checkoutOverlay").classList.add("open");
+    }
+    function closeCheckout() { $("checkoutOverlay").classList.remove("open"); }
+    function checkoutBack() { $("checkoutStep2").style.display = "none"; $("checkoutStep1").style.display = "block"; }
+
+    // ========== Tabs ==========
+    function selectTab(el) {
+      document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+      el.classList.add("active");
+      activeCat = el.dataset.cat;
+      currentPage = 1;
+      renderGrid();
+    }
+
+    // ========== Wire up ==========
+    $("priceRange").addEventListener("input", () => { $("priceText").textContent = $("priceRange").value; });
+    $("priceRange").addEventListener("change", () => { currentPage = 1; renderGrid(); });
+    $("applyFilters").addEventListener("click", () => { currentPage = 1; renderGrid(); renderCart(); toast("Filters applied"); });
+    $("resetFilters").addEventListener("click", () => {
+      $("searchProducts").value = ""; $("categoryFilter").selectedIndex = 0;
+      $("priceRange").value = 250; $("priceText").textContent = "250";
+      $("brandFilter").selectedIndex = 0; $("ratingFilter").selectedIndex = 0;
+      $("inStockOnly").checked = true; $("shipFree").checked = false; $("shipExpress").checked = false;
+      activeCat = "All"; currentPage = 1;
+      document.querySelectorAll(".tab").forEach((t,i)=>t.classList.toggle("active", i===0));
+      renderGrid(); renderCart(); toast("Filters reset");
+    });
+    $("searchButton").addEventListener("click", () => { currentPage = 1; renderGrid(); });
+    $("searchProducts").addEventListener("keydown", e => { if (e.key === "Enter") { currentPage = 1; renderGrid(); } });
+    $("categoryFilter").addEventListener("change", () => { currentPage = 1; renderGrid(); });
+    $("brandFilter").addEventListener("change", () => { currentPage = 1; renderGrid(); });
+    $("ratingFilter").addEventListener("change", () => { currentPage = 1; renderGrid(); });
+    $("inStockOnly").addEventListener("change", () => { currentPage = 1; renderGrid(); });
+    $("shipFree").addEventListener("change", () => renderCart());
+    $("sortBy").addEventListener("change", () => renderGrid());
+    $("prevPage").addEventListener("click", () => { if (currentPage>1){currentPage--; renderGrid();} });
+    $("nextPage").addEventListener("click", () => { currentPage++; renderGrid(); });
+
+    $("headerCartButton").addEventListener("click", () => toast(`Cart has ${cartCountTotal()} item(s)`));
+    $("wishlistButton").addEventListener("click", () => toast(`Wishlist has ${wish.size} item(s)`));
+
+    $("applyCoupon").addEventListener("click", () => {
+      const code = ($("couponCode").value || "").trim().toUpperCase();
+      const msg = $("couponMsg");
+      const COUPONS = { "SAVE10": 0.10, "SUMMER20": 0.20, "FREESHIP": 0.0 };
+      if (!code) { coupon = null; msg.textContent = ""; renderCart(); return; }
+      if (code in COUPONS) {
+        if (code === "FREESHIP") { $("shipFree").checked = true; coupon = null; msg.style.color = "var(--ok)"; msg.textContent = "✓ Free shipping applied"; }
+        else { coupon = { code, pct: COUPONS[code] }; msg.style.color = "var(--ok)"; msg.textContent = `✓ ${Math.round(COUPONS[code]*100)}% discount applied`; }
+      } else {
+        coupon = null; msg.style.color = "#ef4444"; msg.textContent = "✕ Invalid coupon";
+      }
+      renderCart();
     });
 
-    priceRange.addEventListener('input', () => priceText.textContent = priceRange.value);
-    qty.addEventListener('input', recalc);
-    recalc();
+    $("clearCartButton").addEventListener("click", clearCart);
+    $("checkoutButton").addEventListener("click", openCheckout);
+
+    $("checkoutNext").addEventListener("click", () => {
+      if (!$("shipName").value || !$("shipAddress").value || !$("shipCity").value) { toast("Please fill all shipping fields"); return; }
+      $("checkoutStep1").style.display = "none"; $("checkoutStep2").style.display = "block";
+    });
+    $("checkoutPlace").addEventListener("click", () => {
+      if (!$("cardName").value || !$("cardNumber").value || !$("cardExp").value || !$("cardCvc").value) { toast("Enter payment details"); return; }
+      if (!$("cardAgree").checked) { toast("You must accept the terms"); return; }
+      $("orderId").textContent = "ORD-" + Math.floor(Math.random()*90000 + 10000);
+      $("checkoutStep2").style.display = "none"; $("checkoutStep3").style.display = "block";
+      cart = []; coupon = null; $("couponMsg").textContent = ""; renderCart();
+    });
+
+    $("detailsAdd").addEventListener("click", () => {
+      const qty = Math.max(1, parseInt($("detailsQty").value||"1",10));
+      addToCart(detailsSelected.id, qty);
+      closeDetails();
+    });
+    $("detailsWishlist").addEventListener("click", () => { toggleWish(detailsSelected.id); });
+
+    $("subscribeButton").addEventListener("click", () => {
+      const email = ($("newsletterEmail").value || "").trim();
+      const msg = $("subscribeMsg");
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { msg.style.color = "#ef4444"; msg.textContent = "Please enter a valid email"; return; }
+      msg.style.color = "var(--ok)"; msg.textContent = "✓ Subscribed — check your inbox";
+      $("newsletterEmail").value = "";
+    });
+
+    renderGrid();
+    renderCart();
   </script>
 </body>
 </html>

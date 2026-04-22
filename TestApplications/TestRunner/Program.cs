@@ -202,7 +202,8 @@ var effectiveSpeedProfile = speedProfile;
 var (defaultActionDelayMs, defaultUiSettleDelayMs) = effectiveSpeedProfile.ToLowerInvariant() switch
 {
     "fast" => (50, 120),
-    "human" => (350, 900),
+    //"human" => (350, 900),
+    "human" => (20, 50),
     _ => (120, 300)
 };
 var actionDelayMs = config.ActionDelayMs > 0 ? config.ActionDelayMs : defaultActionDelayMs;

@@ -22,29 +22,32 @@
         header {
             background: #111827;
             color: white;
-            padding: 2rem;
-            text-align: center;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            padding: 0.6rem 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.25);
         }
-        
-        h1 { margin: 0; font-size: 2.8rem; }
-        .subtitle { opacity: 0.8; margin-top: 0.5rem; font-size: 1.2rem; }
-        
+
+        header .brand { display: flex; align-items: baseline; gap: 0.75rem; }
+        h1 { margin: 0; font-size: 1.4rem; letter-spacing: 0.3px; }
+        .subtitle { opacity: 0.75; font-size: 0.85rem; }
+
         nav {
             background: white;
-            padding: 1rem;
-            position: sticky;
-            top: 80px;
-            z-index: 999;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 0.5rem 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 6px;
             justify-content: center;
-            border-bottom: 3px solid var(--primary);
+            border-bottom: 2px solid var(--primary);
+        }
+
+        nav a {
+            padding: 4px 10px !important;
+            font-size: 0.85rem;
         }
         
         nav a {
@@ -233,6 +236,15 @@
             color: white;
         }
         
+        /* Wizard + dashboard */
+        .wiz-step {
+            flex: 1; padding: 8px 10px; text-align: center; background: #f1f5f9;
+            border-radius: 999px; font-size: 0.85rem; font-weight: 600; color: #64748b;
+        }
+        .wiz-step.active { background: var(--primary); color: white; }
+        .side-nav { border: none; cursor: pointer; border-radius: 8px; font-weight: 600; }
+        .side-nav:hover { background: #e2e8f0 !important; }
+
         .log {
             background: #111827;
             color: #22c55e;
@@ -247,12 +259,11 @@
 </head>
 <body>
     <header>
-        <h1>🧪 Browser Torture Test 2026</h1>
-        <p class="subtitle">Single-file HTML torture chamber for AI agents &amp; computer-use programs.<br>
-        Every HTML element, every variation, every interaction pattern — all in ONE file.</p>
-        <p style="margin-top: 1rem; font-size: 1.1rem; opacity: 0.9;">
-            ✅ Test mouse, keyboard, focus, drag-drop, canvas, modals, native dialogs, CSS stress, JS events &amp; more
-        </p>
+        <div class="brand">
+            <h1>🧪 Browser Torture Test 2026</h1>
+            <span class="subtitle">single-file UI chamber for AI agents</span>
+        </div>
+        <div style="font-size:0.8rem; opacity:0.7;">v2026.04</div>
     </header>
 
     <nav>
@@ -265,6 +276,7 @@
         <a href="#css-stress">CSS Torture</a>
         <a href="#canvas">Canvas &amp; Drawing</a>
         <a href="#dragdrop">Drag &amp; Drop</a>
+        <a href="#account">Account Dashboard</a>
         <a href="#log">Live Action Log</a>
     </nav>
 
@@ -598,6 +610,159 @@
             </div>
         </section>
 
+        <!-- ====================== ACCOUNT DASHBOARD (real-site feel) ====================== -->
+        <section id="account">
+            <div class="section-header">10. Account Dashboard — Realistic Workflow</div>
+            <div class="content">
+                <div style="display:grid; grid-template-columns:240px 1fr; gap:24px;">
+                    <aside style="background:#f8fafc; border-radius:10px; padding:16px; height:fit-content;">
+                        <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px;">
+                            <div style="width:40px; height:40px; border-radius:50%; background:var(--primary); color:white; display:flex; align-items:center; justify-content:center; font-weight:700;">AJ</div>
+                            <div>
+                                <div style="font-weight:700;" id="profileName">Alex Johnson</div>
+                                <div style="font-size:0.75rem; opacity:0.6;" id="profilePlan">Pro Plan</div>
+                            </div>
+                        </div>
+                        <nav style="display:flex; flex-direction:column; gap:4px; padding:0; background:none; box-shadow:none; border:none;">
+                            <button type="button" class="side-nav active" data-pane="profile" onclick="showPane('profile', this)" style="text-align:left; background:#e0e7ff; color:#1e293b; padding:8px 12px;">👤 Profile</button>
+                            <button type="button" class="side-nav" data-pane="signup" onclick="showPane('signup', this)" style="text-align:left; background:transparent; color:#1e293b; padding:8px 12px;">🧭 Sign-up wizard</button>
+                            <button type="button" class="side-nav" data-pane="billing" onclick="showPane('billing', this)" style="text-align:left; background:transparent; color:#1e293b; padding:8px 12px;">💳 Billing</button>
+                            <button type="button" class="side-nav" data-pane="notifications" onclick="showPane('notifications', this)" style="text-align:left; background:transparent; color:#1e293b; padding:8px 12px;">🔔 Notifications</button>
+                            <button type="button" class="side-nav" data-pane="reviews" onclick="showPane('reviews', this)" style="text-align:left; background:transparent; color:#1e293b; padding:8px 12px;">⭐ Reviews</button>
+                        </nav>
+                    </aside>
+
+                    <div>
+                        <!-- PROFILE PANE -->
+                        <div class="pane" id="pane-profile">
+                            <h3 style="margin-top:0;">Profile settings</h3>
+                            <div class="form-grid">
+                                <div>
+                                    <label for="profile-first">First name</label>
+                                    <input type="text" id="profile-first" value="Alex">
+                                    <label for="profile-last">Last name</label>
+                                    <input type="text" id="profile-last" value="Johnson">
+                                    <label for="profile-email">Email</label>
+                                    <input type="email" id="profile-email" value="alex@example.com">
+                                </div>
+                                <div>
+                                    <label for="profile-bio">Bio</label>
+                                    <textarea id="profile-bio" rows="4" placeholder="Tell us about yourself">Systems engineer. Loves keyboards.</textarea>
+                                    <label style="display:flex; align-items:center; gap:8px; margin-top:8px;">
+                                        <input type="checkbox" id="profile-public" checked style="width:auto;"> Make profile public
+                                    </label>
+                                    <label style="display:flex; align-items:center; gap:8px;">
+                                        <input type="checkbox" id="profile-2fa" style="width:auto;"> Enable two-factor auth
+                                    </label>
+                                </div>
+                            </div>
+                            <div style="margin-top:16px; display:flex; gap:8px;">
+                                <button type="button" id="profile-save" onclick="saveProfile()">💾 Save changes</button>
+                                <button type="button" onclick="log('Profile edit cancelled')">Cancel</button>
+                                <span id="profile-status" aria-live="polite" style="align-self:center; color:#16a34a; font-weight:600;"></span>
+                            </div>
+                        </div>
+
+                        <!-- SIGN-UP WIZARD -->
+                        <div class="pane" id="pane-signup" style="display:none;">
+                            <h3 style="margin-top:0;">3-step sign-up wizard</h3>
+                            <ol id="wizardSteps" style="display:flex; gap:8px; list-style:none; padding:0; margin:0 0 16px 0;">
+                                <li class="wiz-step active" data-step="1">1. Account</li>
+                                <li class="wiz-step" data-step="2">2. Plan</li>
+                                <li class="wiz-step" data-step="3">3. Confirm</li>
+                            </ol>
+                            <div class="wiz-pane" data-step="1">
+                                <label for="wiz-username">Username</label>
+                                <input type="text" id="wiz-username" placeholder="pick a username">
+                                <label for="wiz-password">Password</label>
+                                <input type="password" id="wiz-password">
+                            </div>
+                            <div class="wiz-pane" data-step="2" style="display:none;">
+                                <label>Choose a plan</label>
+                                <label><input type="radio" name="wiz-plan" value="free" checked style="width:auto;"> Free</label><br>
+                                <label><input type="radio" name="wiz-plan" value="pro" style="width:auto;"> Pro — $9/mo</label><br>
+                                <label><input type="radio" name="wiz-plan" value="team" style="width:auto;"> Team — $29/mo</label>
+                            </div>
+                            <div class="wiz-pane" data-step="3" style="display:none;">
+                                <p>Review: <strong id="wiz-summary">—</strong></p>
+                                <label><input type="checkbox" id="wiz-terms" style="width:auto;"> I accept the terms</label>
+                            </div>
+                            <div style="display:flex; gap:8px; margin-top:12px;">
+                                <button type="button" id="wiz-prev" onclick="wizardStep(-1)" disabled>← Back</button>
+                                <button type="button" id="wiz-next" onclick="wizardStep(1)">Next →</button>
+                                <button type="button" id="wiz-finish" onclick="wizardFinish()" style="display:none;">Finish</button>
+                            </div>
+                            <p id="wiz-done" style="color:#16a34a; font-weight:600;"></p>
+                        </div>
+
+                        <!-- BILLING -->
+                        <div class="pane" id="pane-billing" style="display:none;">
+                            <h3 style="margin-top:0;">Billing & invoices</h3>
+                            <p>Current plan: <strong id="currentPlan">Pro</strong> — $9/month</p>
+                            <label for="planSelector">Change plan</label>
+                            <select id="planSelector" onchange="updatePlan(this.value)">
+                                <option value="Free">Free</option>
+                                <option value="Pro" selected>Pro — $9/mo</option>
+                                <option value="Team">Team — $29/mo</option>
+                                <option value="Enterprise">Enterprise — contact sales</option>
+                            </select>
+                            <table style="margin-top:16px;">
+                                <thead><tr><th>Invoice</th><th>Date</th><th>Amount</th><th>Status</th><th></th></tr></thead>
+                                <tbody id="invoiceBody">
+                                    <tr><td>INV-1042</td><td>2026-04-01</td><td>$9.00</td><td>Paid</td><td><button onclick="log('Download INV-1042')">Download</button></td></tr>
+                                    <tr><td>INV-1031</td><td>2026-03-01</td><td>$9.00</td><td>Paid</td><td><button onclick="log('Download INV-1031')">Download</button></td></tr>
+                                    <tr><td>INV-1020</td><td>2026-02-01</td><td>$9.00</td><td>Paid</td><td><button onclick="log('Download INV-1020')">Download</button></td></tr>
+                                </tbody>
+                            </table>
+                            <div style="margin-top:12px; display:flex; gap:8px; align-items:center;">
+                                <button onclick="changeInvoicePage(-1)" id="prevPage">◀ Prev</button>
+                                <span>Page <span id="pageNum">1</span> of 4</span>
+                                <button onclick="changeInvoicePage(1)" id="nextPage">Next ▶</button>
+                            </div>
+                        </div>
+
+                        <!-- NOTIFICATIONS -->
+                        <div class="pane" id="pane-notifications" style="display:none;">
+                            <h3 style="margin-top:0;">Notification preferences</h3>
+                            <label style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #e5e7eb;">
+                                Product updates <input type="checkbox" id="notif-product" checked style="width:auto;">
+                            </label>
+                            <label style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #e5e7eb;">
+                                Weekly digest <input type="checkbox" id="notif-digest" style="width:auto;">
+                            </label>
+                            <label style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #e5e7eb;">
+                                Security alerts <input type="checkbox" id="notif-security" checked style="width:auto;">
+                            </label>
+                            <label style="display:flex; justify-content:space-between; padding:8px 0;">
+                                Marketing emails <input type="checkbox" id="notif-marketing" style="width:auto;">
+                            </label>
+                            <label for="notif-frequency" style="margin-top:12px;">Delivery frequency</label>
+                            <select id="notif-frequency"><option>Immediately</option><option selected>Daily digest</option><option>Weekly</option></select>
+                            <button type="button" id="notif-save" onclick="log('Notification preferences saved')" style="margin-top:12px;">Save preferences</button>
+                        </div>
+
+                        <!-- REVIEWS -->
+                        <div class="pane" id="pane-reviews" style="display:none;">
+                            <h3 style="margin-top:0;">Leave a review</h3>
+                            <label>Your rating</label>
+                            <div id="ratingStars" style="font-size:2rem; cursor:pointer;">
+                                <span data-v="1" onclick="setRating(1)">☆</span>
+                                <span data-v="2" onclick="setRating(2)">☆</span>
+                                <span data-v="3" onclick="setRating(3)">☆</span>
+                                <span data-v="4" onclick="setRating(4)">☆</span>
+                                <span data-v="5" onclick="setRating(5)">☆</span>
+                                <span id="ratingValue" style="font-size:1rem; margin-left:10px; opacity:0.6;">(no rating)</span>
+                            </div>
+                            <label for="reviewText" style="margin-top:12px;">Review</label>
+                            <textarea id="reviewText" rows="3" placeholder="Share your experience"></textarea>
+                            <button type="button" id="submitReview" onclick="submitReview()" style="margin-top:8px;">Submit review</button>
+                            <ul id="reviewList" style="margin-top:16px; padding-left:20px;"></ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- ====================== LIVE LOG ====================== -->
         <section id="log">
             <div class="section-header">10. Live Action Log — Watch every interaction</div>
@@ -770,6 +935,86 @@
             rows.forEach(row => table.tBodies[0].appendChild(row))
             table.dataset.sortDir = isAscending ? 'asc' : 'desc'
             log(`Table sorted by column ${n} (${isAscending ? '↑' : '↓'})`)
+        }
+
+        // ====================== ACCOUNT DASHBOARD ======================
+        function showPane(name, btn) {
+            document.querySelectorAll('.pane').forEach(p => p.style.display = 'none')
+            const target = document.getElementById('pane-' + name)
+            if (target) target.style.display = 'block'
+            document.querySelectorAll('.side-nav').forEach(b => { b.classList.remove('active'); b.style.background = 'transparent' })
+            if (btn) { btn.classList.add('active'); btn.style.background = '#e0e7ff' }
+            log(`Switched to "${name}" pane`)
+        }
+
+        function saveProfile() {
+            const first = document.getElementById('profile-first').value
+            const last = document.getElementById('profile-last').value
+            document.getElementById('profileName').textContent = `${first} ${last}`
+            const status = document.getElementById('profile-status')
+            status.textContent = '✓ Saved'
+            setTimeout(() => { status.textContent = '' }, 3000)
+            log(`Profile saved: ${first} ${last}`)
+        }
+
+        // Wizard
+        let wizardCurrent = 1
+        function wizardStep(delta) {
+            const next = Math.max(1, Math.min(3, wizardCurrent + delta))
+            if (next === wizardCurrent) return
+            wizardCurrent = next
+            document.querySelectorAll('.wiz-pane').forEach(p => p.style.display = (p.dataset.step == next ? 'block' : 'none'))
+            document.querySelectorAll('.wiz-step').forEach(s => s.classList.toggle('active', s.dataset.step == next))
+            document.getElementById('wiz-prev').disabled = (next === 1)
+            document.getElementById('wiz-next').style.display = (next === 3 ? 'none' : '')
+            document.getElementById('wiz-finish').style.display = (next === 3 ? '' : 'none')
+            if (next === 3) {
+                const user = document.getElementById('wiz-username').value || '(unset)'
+                const plan = (document.querySelector('input[name="wiz-plan"]:checked')||{}).value || 'free'
+                document.getElementById('wiz-summary').textContent = `${user} — ${plan} plan`
+            }
+            log(`Wizard step → ${next}`)
+        }
+        function wizardFinish() {
+            if (!document.getElementById('wiz-terms').checked) { alert('Please accept the terms.'); return }
+            document.getElementById('wiz-done').textContent = '✓ Sign-up complete'
+            log('Sign-up wizard finished')
+        }
+
+        // Billing
+        function updatePlan(v) {
+            document.getElementById('currentPlan').textContent = v
+            document.getElementById('profilePlan').textContent = v + ' Plan'
+            log(`Plan changed to ${v}`)
+        }
+        let invoicePage = 1
+        function changeInvoicePage(delta) {
+            invoicePage = Math.max(1, Math.min(4, invoicePage + delta))
+            document.getElementById('pageNum').textContent = invoicePage
+            document.getElementById('prevPage').disabled = (invoicePage === 1)
+            document.getElementById('nextPage').disabled = (invoicePage === 4)
+            log(`Invoice page ${invoicePage}`)
+        }
+
+        // Reviews
+        let currentRating = 0
+        function setRating(v) {
+            currentRating = v
+            const stars = document.querySelectorAll('#ratingStars span[data-v]')
+            stars.forEach(s => { s.textContent = (parseInt(s.dataset.v) <= v ? '★' : '☆'); s.style.color = (parseInt(s.dataset.v) <= v ? '#eab308' : '#9ca3af') })
+            document.getElementById('ratingValue').textContent = `${v} of 5`
+            log(`Rating set to ${v}`)
+        }
+        function submitReview() {
+            const text = document.getElementById('reviewText').value.trim()
+            if (!currentRating) { alert('Please choose a rating first'); return }
+            if (!text) { alert('Please write a review'); return }
+            const li = document.createElement('li')
+            li.textContent = `★${currentRating}: ${text}`
+            document.getElementById('reviewList').appendChild(li)
+            document.getElementById('reviewText').value = ''
+            setRating(0)
+            log('Review submitted')
         }
 
         // ====================== BOOTSTRAP EVERYTHING ======================
