@@ -359,6 +359,28 @@ curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/ai/file \
 
 ---
 
+## AI Chat (`/chat/*`)
+
+Streaming chat over HTTP — same 8 providers as the desktop AI Chat window (OpenAI, Anthropic, DeepSeek, Grok, Groq, Duck, LM Studio, LlamaSharp). Configure keys in `ai-settings.json` next to the executable.
+
+```bash
+# Browser chat UI
+curl -H "X-Api-Key: <key>" http://localhost:8081/chat
+
+# Provider + session status
+curl -H "X-Api-Key: <key>" http://localhost:8081/chat/status
+
+# Send a message (response streams back)
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/chat/send \
+  -H "Content-Type: application/json" \
+  -d '{"message":"Hello"}'
+
+# Clear the conversation
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/chat/reset
+```
+
+---
+
 ## AI Drawing (`/draw`)
 
 Renders GDI+ shapes to a base64 PNG on demand.
@@ -471,17 +493,27 @@ Scenes are persisted to `<exe>/scenes/{id}.json`.
 ## System Routes
 
 ```bash
-curl -H "X-Api-Key: <key>" http://localhost:8081/ping        # health check
+curl http://localhost:8081/health                            # unauthenticated liveness (no API key required)
+curl -H "X-Api-Key: <key>" http://localhost:8081/ping        # authenticated health check
+curl -H "X-Api-Key: <key>" http://localhost:8081/metrics     # per-route request counters
 curl -H "X-Api-Key: <key>" http://localhost:8081/sysinfo     # OS, machine, user, CPU, CLR
 curl -H "X-Api-Key: <key>" http://localhost:8081/env         # all environment variables
 curl -H "X-Api-Key: <key>" http://localhost:8081/ls          # directory listing (cwd)
 curl -H "X-Api-Key: <key>" "http://localhost:8081/ls?path=C:\\Users"
 curl -H "X-Api-Key: <key>" http://localhost:8081/help        # full endpoint reference
 
+# Trigger the integration test runner (TestApplications/TestRunner)
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/run-tests
+
+# Graceful server shutdown
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/shutdown
+
 # Shell execution — disabled by default
 # Enable: set EnableShellRun=true in appsettings.json or APEX_ENABLE_SHELL_RUN=true
 curl -H "X-Api-Key: <key>" "http://localhost:8081/run?cmd=whoami"
 ```
+
+`/health` is the only route that does not require the API key — safe to use from external monitoring.
 
 ---
 

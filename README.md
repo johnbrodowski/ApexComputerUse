@@ -261,7 +261,8 @@ Truncated nodes (ones whose children were cut off by `depth`) now also emit `des
 - **Layered Scene Editor** — persistent, structured drawing canvas with stable shape IDs so AI can generate a composition and the user can refine it; full REST API at `/scenes/*`; interactive WinForms editor (Tools → Scene Editor) and browser editor (`GET /editor`)
 - **UI Map Renderer** — renders the element tree as a colour-coded overlay drawn directly on screen, and optionally exports a PNG image; accessible via Tools → Render UI Map or `GET /uimap`
 - **Format-adaptive responses** — every endpoint serves HTML, plain text, JSON, or **PDF** via URL extension (`.json`, `.html`, `.txt`, `.pdf`), `?format=` parameter, or `Accept` header; default is an HTML page with embedded JSON readable by any AI that can fetch a URL
-- **System utility routes** — `/ping`, `/sysinfo`, `/env`, `/ls`, `/run` for AI agents that need OS-level context without a separate tool
+- **System utility routes** — `/health` (unauthenticated), `/ping`, `/metrics`, `/sysinfo`, `/env`, `/ls`, `/run`, `/run-tests`, `/shutdown` for AI agents that need OS-level context without a separate tool
+- **AI Chat over HTTP** — streaming chat UI at `GET /chat` backed by `/chat/send`, `/chat/status`, `/chat/reset`; same 8 providers as the desktop AI Chat window
 - **Auto-download setup** — Model tab "Download All" button fetches the LFM2.5-VL model, projector, and Tesseract data to fixed local paths on first launch
 
 ---
@@ -605,8 +606,14 @@ HTTP status: **200** on success, **400** on error.
 ### System / utility routes
 
 ```bash
-# Health check
-curl http://localhost:8081/ping
+# Unauthenticated liveness probe — safe for external monitoring (the only route that doesn't require the API key)
+curl http://localhost:8081/health
+
+# Authenticated health check
+curl -H "X-Api-Key: <key>" http://localhost:8081/ping
+
+# Per-route request counters
+curl -H "X-Api-Key: <key>" http://localhost:8081/metrics
 
 # System information (OS, machine, user, CPU, CLR)
 curl http://localhost:8081/sysinfo
@@ -617,6 +624,12 @@ curl http://localhost:8081/env
 # Directory listing (defaults to current working directory)
 curl http://localhost:8081/ls
 curl "http://localhost:8081/ls?path=C:\Users"
+
+# Trigger the bundled integration test runner (TestApplications/TestRunner)
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/run-tests
+
+# Gracefully stop the HTTP server
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/shutdown
 
 # Run a shell command (cmd.exe /c); 30-second timeout
 # Requires EnableShellRun = true in appsettings.json or APEX_ENABLE_SHELL_RUN=true
@@ -1398,3 +1411,23 @@ The test suite covers the pure-logic and data-model layers — everything that c
 | `OcrHelperTests.cs` | `CropBitmap` region logic, `OcrResult.ToString` |
 
 Components that require an active Windows session (FlaUI UIA, Tesseract, LLamaSharp, WinForms UI) are covered by the existing integration script `Scripts/test_controls.py` and manual testing.
+
+### Integration Test Runner
+
+`TestApplications/TestRunner/` is a cycle-based orchestrator that launches the WinForms, WPF, and web test apps, runs the full suite against the live HTTP API, and reports results. Use it whenever changes touch `CommandProcessor`, `FlaUIHelper`, or `HttpCommandServer`.
+
+```bash
+# Demo mode — human-readable output, 3 cycles
+dotnet run --project TestApplications/TestRunner -- --mode demo
+
+# Benchmark mode — JSON-line output, 25 cycles
+dotnet run --project TestApplications/TestRunner -- --mode benchmark
+```
+
+Test apps:
+
+- **WinForms** — `TortureTestForm.cs`: textbox, button, checkbox, radio, combo, listbox, slider, menu, grid
+- **WPF** — `TortureTestWindow.xaml`: same controls plus Expander, ViewModel-driven state
+- **Web** — `index.html`: menu, tabs, form controls, scrollable regions
+
+The runner interacts exclusively through the HTTP API, so a failed assertion is reported as the exact curl call that failed. The same suite can also be triggered remotely via `POST /run-tests`.

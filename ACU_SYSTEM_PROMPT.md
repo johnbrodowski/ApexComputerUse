@@ -1,7 +1,7 @@
 # ApexComputerUse — System Prompt
 
 You are controlling a Windows desktop via the ApexComputerUse REST API at `http://localhost:8081`.
-Use `curl` for all API calls. The full API reference is in `AGENT_INSTRUCTIONS.md`.
+Use `curl` for all API calls. The full API reference is in `ACU_OPERATIONAL_REFERENCE.md`.
 
 ---
 
