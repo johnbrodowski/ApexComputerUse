@@ -1,5 +1,6 @@
 using ApexComputerUse;
 using Xunit;
+using System.Reflection;
 
 namespace ApexComputerUse.Tests;
 
@@ -126,5 +127,34 @@ public class PipeCommandServerTests
     {
         var req = CommandRequestJsonMapper.FromJsonSelfDescribing("");
         Assert.Equal("help", req.Command);
+    }
+
+    [Fact]
+    public void Stop_WhenClientTaskFaulted_DoesNotThrow()
+    {
+        using var processor = new CommandProcessor();
+        using var server = new PipeCommandServer($"ApexPipeTest_{Guid.NewGuid():N}", processor);
+        server.Start();
+
+        var tasksField = typeof(PipeCommandServer).GetField("_clientTasks", BindingFlags.NonPublic | BindingFlags.Instance);
+        var lockField = typeof(PipeCommandServer).GetField("_clientTasksLock", BindingFlags.NonPublic | BindingFlags.Instance);
+        Assert.NotNull(tasksField);
+        Assert.NotNull(lockField);
+
+        var tasks = tasksField!.GetValue(server) as List<Task>;
+        var gate = lockField!.GetValue(server);
+        Assert.NotNull(tasks);
+        Assert.NotNull(gate);
+
+        var tcs = new TaskCompletionSource();
+        tcs.SetException(new InvalidOperationException("boom"));
+
+        lock (gate!)
+        {
+            tasks!.Add(tcs.Task);
+        }
+
+        var ex = Record.Exception(() => server.Stop());
+        Assert.Null(ex);
     }
 }

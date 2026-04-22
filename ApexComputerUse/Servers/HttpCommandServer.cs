@@ -32,6 +32,7 @@ namespace ApexComputerUse
         private long _errorRequests;
         private readonly ConcurrentDictionary<string, long>   _routeCounts       = new();
         private readonly ConcurrentDictionary<string, double> _routeLastLatencyMs = new();
+        private const int MaxRequestBodyBytes = 1 * 1024 * 1024; // 1 MiB request-body cap
 
         public int    Port      { get; }
         public bool   IsRunning { get; private set; }
@@ -216,9 +217,62 @@ namespace ApexComputerUse
 
             try
             {
-                string body = req.HasEntityBody
-                    ? await new StreamReader(req.InputStream, req.ContentEncoding).ReadToEndAsync()
-                    : "";
+                if (req.HasEntityBody && req.ContentLength64 > MaxRequestBodyBytes)
+                {
+                    result = new ApexResult
+                    {
+                        Success = false,
+                        Action = $"{method} {path}",
+                        Error = $"Request body too large. Limit is {MaxRequestBodyBytes} bytes."
+                    };
+                    statusCode = 413;
+                    var buf = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new
+                    {
+                        success = false,
+                        action = result.Action,
+                        data = (object?)null,
+                        error = result.Error
+                    }, new JsonSerializerOptions { WriteIndented = true }));
+                    res.ContentType = "application/json; charset=utf-8";
+                    res.ContentLength64 = buf.Length;
+                    res.StatusCode = statusCode;
+                    try { await res.OutputStream.WriteAsync(buf); }
+                    finally { res.Close(); }
+                    Interlocked.Increment(ref _errorRequests);
+                    return;
+                }
+
+                string body = "";
+                try
+                {
+                    body = req.HasEntityBody
+                        ? await ReadBodyWithLimitAsync(req, MaxRequestBodyBytes)
+                        : "";
+                }
+                catch (PayloadTooLargeException ex)
+                {
+                    result = new ApexResult
+                    {
+                        Success = false,
+                        Action = $"{method} {path}",
+                        Error = ex.Message
+                    };
+                    statusCode = 413;
+                    var buf = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new
+                    {
+                        success = false,
+                        action = result.Action,
+                        data = (object?)null,
+                        error = result.Error
+                    }, new JsonSerializerOptions { WriteIndented = true }));
+                    res.ContentType = "application/json; charset=utf-8";
+                    res.ContentLength64 = buf.Length;
+                    res.StatusCode = statusCode;
+                    try { await res.OutputStream.WriteAsync(buf); }
+                    finally { res.Close(); }
+                    Interlocked.Increment(ref _errorRequests);
+                    return;
+                }
 
                 // Test page — served directly, bypasses format adapter
                 if (method == "GET" && (path == "" || path == "/"))
@@ -1857,7 +1911,12 @@ namespace ApexComputerUse
         {
             var data = new Dictionary<string, string>();
             foreach (System.Collections.DictionaryEntry entry in Environment.GetEnvironmentVariables())
-                data[entry.Key?.ToString() ?? ""] = entry.Value?.ToString() ?? "";
+            {
+                string key = entry.Key?.ToString() ?? "";
+                if (!key.StartsWith("APEX_", StringComparison.OrdinalIgnoreCase)) continue;
+                string value = entry.Value?.ToString() ?? "";
+                data[key] = IsSensitiveEnvKey(key) ? "(redacted)" : value;
+            }
             return new ApexResult { Success = true, Action = "env", Data = data };
         }
 
@@ -1917,16 +1976,23 @@ namespace ApexComputerUse
             using var proc = new Process { StartInfo = psi };
             proc.Start();
 
-            string stdout = await proc.StandardOutput.ReadToEndAsync();
-            string stderr = await proc.StandardError.ReadToEndAsync();
-            try   { await proc.WaitForExitAsync(cts.Token); }
+            // Read both streams concurrently to avoid deadlock when one fills its OS pipe buffer.
+            Task<string> stdoutTask = proc.StandardOutput.ReadToEndAsync();
+            Task<string> stderrTask = proc.StandardError.ReadToEndAsync();
+            try
+            {
+                await proc.WaitForExitAsync(cts.Token);
+                await Task.WhenAll(stdoutTask, stderrTask);
+            }
             catch (OperationCanceledException)
             {
-                proc.Kill();
+                try { if (!proc.HasExited) proc.Kill(entireProcessTree: true); } catch { }
                 return new ApexResult { Success = false, Action = "run",
                     Error = "Process timed out after 30 seconds" };
             }
 
+            string stdout = await stdoutTask;
+            string stderr = await stderrTask;
             int exit = proc.ExitCode;
             return new ApexResult
             {
@@ -1941,6 +2007,35 @@ namespace ApexComputerUse
                 },
                 Error = exit == 0 ? null : $"Process exited with code {exit}"
             };
+        }
+
+        private static bool IsSensitiveEnvKey(string key)
+        {
+            return key.Contains("KEY", StringComparison.OrdinalIgnoreCase)
+                || key.Contains("TOKEN", StringComparison.OrdinalIgnoreCase)
+                || key.Contains("SECRET", StringComparison.OrdinalIgnoreCase)
+                || key.Contains("PASSWORD", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private sealed class PayloadTooLargeException : Exception
+        {
+            public PayloadTooLargeException(string message) : base(message) { }
+        }
+
+        private static async Task<string> ReadBodyWithLimitAsync(HttpListenerRequest req, int maxBytes)
+        {
+            using var ms = new MemoryStream();
+            var buffer = new byte[8192];
+            while (true)
+            {
+                int read = await req.InputStream.ReadAsync(buffer.AsMemory(0, buffer.Length));
+                if (read <= 0) break;
+                if (ms.Length + read > maxBytes)
+                    throw new PayloadTooLargeException($"Request body too large. Limit is {maxBytes} bytes.");
+                ms.Write(buffer, 0, read);
+            }
+            var encoding = req.ContentEncoding ?? Encoding.UTF8;
+            return encoding.GetString(ms.ToArray());
         }
 
         // ── Test page ─────────────────────────────────────────────────────

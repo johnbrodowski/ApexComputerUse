@@ -12,6 +12,7 @@ namespace ApexComputerUse
     /// Environment variable names:
     ///   APEX_HTTP_PORT         int    HTTP listen port (default 8081)
     ///   APEX_HTTP_BIND_ALL     bool   Bind to all interfaces instead of localhost (default false)
+    ///   APEX_HTTP_AUTOSTART    bool   Auto-start HTTP server in GUI mode (default false)
     ///   APEX_PIPE_NAME         string Named-pipe name (default ApexComputerUse)
     ///   APEX_LOG_LEVEL         string Serilog minimum level: Debug/Information/Warning/Error
     ///   APEX_ENABLE_SHELL_RUN  bool   Enable the /run shell-execution endpoint (default false)
@@ -28,6 +29,7 @@ namespace ApexComputerUse
     {
         public int    HttpPort        { get; init; } = 8081;
         public bool   HttpBindAll     { get; init; } = false;
+        public bool   HttpAutoStart   { get; init; } = false;
         public string PipeName        { get; init; } = "ApexComputerUse";
         public string LogLevel        { get; init; } = "Information";
         public bool   EnableShellRun  { get; init; } = false;
@@ -91,6 +93,7 @@ namespace ApexComputerUse
             {
                 HttpPort       = Int(root,  "HttpPort")       ?? cfg.HttpPort,
                 HttpBindAll    = Bool(root, "HttpBindAll")    ?? cfg.HttpBindAll,
+                HttpAutoStart  = Bool(root, "HttpAutoStart")  ?? cfg.HttpAutoStart,
                 PipeName       = Str(root,  "PipeName")       ?? cfg.PipeName,
                 LogLevel       = Str(root,  "LogLevel")       ?? cfg.LogLevel,
                 EnableShellRun = Bool(root, "EnableShellRun") ?? cfg.EnableShellRun,
@@ -118,6 +121,7 @@ namespace ApexComputerUse
             {
                 HttpPort       = E("HTTP_PORT") is { } p  && int.TryParse(p, out int port) ? port : cfg.HttpPort,
                 HttpBindAll    = E("HTTP_BIND_ALL")     is { } b ? ParseBool(b)             : cfg.HttpBindAll,
+                HttpAutoStart  = E("HTTP_AUTOSTART")    is { } a ? ParseBool(a)             : cfg.HttpAutoStart,
                 PipeName       = E("PIPE_NAME")         ?? cfg.PipeName,
                 LogLevel       = E("LOG_LEVEL")         ?? cfg.LogLevel,
                 EnableShellRun = E("ENABLE_SHELL_RUN")  is { } s ? ParseBool(s)             : cfg.EnableShellRun,

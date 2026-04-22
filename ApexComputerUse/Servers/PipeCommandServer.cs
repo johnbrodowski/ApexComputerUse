@@ -69,7 +69,13 @@ namespace ApexComputerUse
             Task[] pending;
             lock (_clientTasksLock) pending = _clientTasks.ToArray();
             if (pending.Length > 0)
-                Task.WaitAll(pending, TimeSpan.FromSeconds(3));
+            {
+                try { Task.WaitAll(pending, TimeSpan.FromSeconds(3)); }
+                catch (AggregateException ex)
+                {
+                    OnLog?.Invoke($"[Pipe] Ignored {ex.Flatten().InnerExceptions.Count} client handler fault(s) during stop.");
+                }
+            }
 
             OnLog?.Invoke("Pipe server stopped.");
         }

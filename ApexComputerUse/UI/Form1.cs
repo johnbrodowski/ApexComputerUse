@@ -199,7 +199,11 @@ namespace ApexComputerUse
             _chat.Init();
 
             this.Load += (_, _) => { _model.WireDownloader(); _model.CheckFirstLaunch(); };
-            this.Load += (_, _) => _servers.ToggleHttp();
+            this.Load += (_, _) =>
+            {
+                if (AppConfig.Current.HttpAutoStart)
+                    _servers.ToggleHttp();
+            };
         }
 
         private void LoadSettings()
@@ -407,9 +411,12 @@ namespace ApexComputerUse
 
         private void btnBrowseModel_Click(object sender, EventArgs e)    => _model.BrowseModel();
         private void btnBrowseProj_Click(object sender, EventArgs e)     => _model.BrowseProj();
-        private async void btnDownloadAll_Click(object sender, EventArgs e) => await _model.DownloadAll();
-        private async void btnLoadModel_Click(object sender, EventArgs e)   => await _model.LoadModel();
-        private async void btnDownload_Click(object sender, EventArgs e)    => await _model.Download();
+        private async void btnDownloadAll_Click(object sender, EventArgs e) =>
+            await SafeRun(() => _model.DownloadAll(), "DownloadAll");
+        private async void btnLoadModel_Click(object sender, EventArgs e)   =>
+            await SafeRun(() => _model.LoadModel(), "LoadModel");
+        private async void btnDownload_Click(object sender, EventArgs e)    =>
+            await SafeRun(() => _model.Download(), "Download");
 
         // ── Misc ──────────────────────────────────────────────────────────
 

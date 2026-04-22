@@ -203,7 +203,7 @@ var (defaultActionDelayMs, defaultUiSettleDelayMs) = effectiveSpeedProfile.ToLow
 {
     "fast" => (50, 120),
     //"human" => (350, 900),
-    "human" => (10, 25),
+    "human" => (150, 350),
     _ => (120, 300)
 };
 var actionDelayMs = config.ActionDelayMs > 0 ? config.ActionDelayMs : defaultActionDelayMs;
