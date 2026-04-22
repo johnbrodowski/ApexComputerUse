@@ -462,23 +462,51 @@ namespace ApexComputerUse
         }
 
         // ── RangeValue pattern ────────────────────────────────────────────
+        // NOTE: WinForms TrackBar always exposes UIA RangeValue in the range 0–100,
+        // regardless of the control's actual Minimum/Maximum. Callers must use UIA-scaled
+        // values (e.g. UIA=20 ≈ actual 200 for a slider with actual max=1000).
+        // Valid snap points for non-unit TickFrequency are multiples of (100÷(max-min)).
 
         public void SetRangeValue(AutomationElement el, double value)
         {
-            if (el.Patterns.RangeValue.TryGetPattern(out var p)) { p.SetValue(value); return; }
+            if (el.Patterns.RangeValue.TryGetPattern(out var p))
+            {
+                // WinForms TrackBar: SetValue throws for large ranges, or silently no-ops — verify.
+                try
+                {
+                    p.SetValue(value);
+                    Thread.Sleep(50);
+                    if (Math.Abs(p.Value.ValueOrDefault - value) < 0.5) return;
+                }
+                catch { /* fall through to Value / keyboard fallback */ }
+            }
             // Fallback: write via Value pattern (e.g. WinForms TrackBar exposes Value not RangeValue)
             if (el.Patterns.Value.TryGetPattern(out var vp) && !vp.IsReadOnly.ValueOrDefault)
             {
-                vp.SetValue(value.ToString("G"));
-                return;
+                try
+                {
+                    vp.SetValue(value.ToString("G"));
+                    Thread.Sleep(50);
+                    // WinForms TrackBar's Value setter silently no-ops for arbitrary numbers;
+                    // verify the read-back before declaring success.
+                    if (double.TryParse(vp.Value.ValueOrDefault, out var v2) &&
+                        Math.Abs(v2 - value) < 0.5) return;
+                }
+                catch { /* fall through */ }
             }
             // Fallback: WinForms NumericUpDown — set value via child Edit element
             var childEdit = el.FindAllChildren()
                 .FirstOrDefault(c => c.Properties.ControlType.ValueOrDefault == FlaUI.Core.Definitions.ControlType.Edit);
             if (childEdit != null && childEdit.Patterns.Value.TryGetPattern(out var cvp) && !cvp.IsReadOnly.ValueOrDefault)
             {
-                cvp.SetValue(value.ToString("G"));
-                return;
+                try
+                {
+                    cvp.SetValue(value.ToString("G"));
+                    Thread.Sleep(50);
+                    if (double.TryParse(cvp.Value.ValueOrDefault, out var v3) &&
+                        Math.Abs(v3 - value) < 0.5) return;
+                }
+                catch { /* fall through to keyboard */ }
             }
             // Keyboard fallback for controls like WinForms TrackBar whose Value pattern is
             // present but read-only (pattern writes are silently ignored). Press Home to reach
@@ -1024,6 +1052,8 @@ namespace ApexComputerUse
                 var listItems = el.FindAllChildren(cf => cf.ByControlType(ControlType.ListItem));
                 if (listItems.Length == 0)
                     listItems = el.FindAllDescendants(cf => cf.ByControlType(ControlType.ListItem));
+                if (listItems.Length == 0)
+                    listItems = el.FindAllChildren(cf => cf.ByControlType(ControlType.CheckBox));
                 if (index < listItems.Length)
                 {
                     if (listItems[index].Patterns.SelectionItem.TryGetPattern(out var sp)) sp.Select();

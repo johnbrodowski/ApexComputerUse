@@ -69,6 +69,60 @@ public sealed class TestSuite
         return new CycleResult(results);
     }
 
+    /// <summary>
+    /// Run a subset of the catalog in catalog order. Each entry in <paramref name="idsOrNames"/>
+    /// is matched case-insensitively against <see cref="TestCase.Id"/> first, then
+    /// <see cref="TestCase.Name"/>. Unknown entries are reported as failures so callers
+    /// don't silently run nothing. Duplicates are de-duplicated.
+    /// </summary>
+    public async Task<CycleResult> RunSelectedAsync(IEnumerable<string> idsOrNames, CancellationToken ct)
+    {
+        _scanCache.Clear();
+        var wanted = new HashSet<string>(idsOrNames, StringComparer.OrdinalIgnoreCase);
+        var results = new List<TestResult>();
+        var matched = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var tc in Catalog)
+        {
+            if (ct.IsCancellationRequested) break;
+            if (wanted.Contains(tc.Id) || wanted.Contains(tc.Name))
+            {
+                matched.Add(tc.Id);
+                matched.Add(tc.Name);
+                results.Add(await RunOneInternalAsync(tc, ct));
+            }
+        }
+
+        foreach (var w in wanted.Where(w => !matched.Contains(w)))
+        {
+            var miss = new TestResult(w, false, $"No test matched id/name '{w}'");
+            _onResult?.Invoke(miss);
+            results.Add(miss);
+        }
+
+        return new CycleResult(results);
+    }
+
+    /// <summary>
+    /// Run every test whose <see cref="TestCase.Id"/> or <see cref="TestCase.Name"/> contains
+    /// <paramref name="substring"/> (case-insensitive).
+    /// </summary>
+    public async Task<CycleResult> RunFilteredAsync(string substring, CancellationToken ct)
+    {
+        _scanCache.Clear();
+        var results = new List<TestResult>();
+        foreach (var tc in Catalog)
+        {
+            if (ct.IsCancellationRequested) break;
+            if (tc.Id.Contains(substring, StringComparison.OrdinalIgnoreCase) ||
+                tc.Name.Contains(substring, StringComparison.OrdinalIgnoreCase))
+            {
+                results.Add(await RunOneInternalAsync(tc, ct));
+            }
+        }
+        return new CycleResult(results);
+    }
+
     /// <summary>Run a single test by its stable id. Throws <see cref="KeyNotFoundException"/> if unknown.</summary>
     public async Task<TestResult> RunOneAsync(string id, CancellationToken ct)
     {
@@ -307,13 +361,15 @@ public sealed class TestSuite
                     WinFormsTitle, ControlTypeEdit, ct, tabName: "Identity", nameHint: "NotesField")),
 
             // WinForms — Network tab
-            new("winforms-network-slider-upload", "WinForms Network: UploadSlider → setrange 200", "winforms",
-                ct => SliderSetAndVerifyAsync("WinForms Network: UploadSlider → setrange 200",
-                    WinFormsTitle, "200", ct, tabName: "Network", nameHint: "Upload")),
+            // WinForms TrackBar exposes UIA range 0-100 regardless of actual Minimum/Maximum.
+            // Use UIA-scaled values: actual÷(actualMax/100). UploadSlider max=1000 → scale=10.
+            new("winforms-network-slider-upload", "WinForms Network: UploadSlider → setrange 20 (UIA=actual 200)", "winforms",
+                ct => SliderSetAndVerifyAsync("WinForms Network: UploadSlider → setrange 20 (UIA=actual 200)",
+                    WinFormsTitle, "20", ct, tabName: "Network", nameHint: "Upload")),
 
-            new("winforms-network-slider-download", "WinForms Network: DownloadSlider → setrange 300", "winforms",
-                ct => SliderSetAndVerifyAsync("WinForms Network: DownloadSlider → setrange 300",
-                    WinFormsTitle, "300", ct, tabName: "Network", nameHint: "Download")),
+            new("winforms-network-slider-download", "WinForms Network: DownloadSlider → setrange 30 (UIA=actual 300)", "winforms",
+                ct => SliderSetAndVerifyAsync("WinForms Network: DownloadSlider → setrange 30 (UIA=actual 300)",
+                    WinFormsTitle, "30", ct, tabName: "Network", nameHint: "Download")),
 
             new("winforms-network-checkbox-tls", "WinForms Network: TlsVerify → toggle", "winforms",
                 ct => CheckBoxToggleAsync("WinForms Network: TlsVerify → toggle",
@@ -341,9 +397,11 @@ public sealed class TestSuite
                 ct => ComboBoxSelectItemAsync("WinForms Scheduler: JobType → select Report",
                     WinFormsTitle, "JobType", "Report", ct, tabName: "Scheduler")),
 
-            new("winforms-scheduler-slider-priority", "WinForms Scheduler: PrioritySlider → setrange 7", "winforms",
-                ct => SliderSetAndVerifyAsync("WinForms Scheduler: PrioritySlider → setrange 7",
-                    WinFormsTitle, "7", ct, tabName: "Scheduler", nameHint: "Priority")),
+            // PrioritySlider min=1 max=10: valid UIA snap points are multiples of 11 (=100/9 per tick).
+            // UIA pos 66 = actual 7 (formula: (actual-1)*100÷(max-min) integer = (7-1)*100÷9 = 66).
+            new("winforms-scheduler-slider-priority", "WinForms Scheduler: PrioritySlider → setrange 66 (UIA=actual 7)", "winforms",
+                ct => SliderSetAndVerifyAsync("WinForms Scheduler: PrioritySlider → setrange 66 (UIA=actual 7)",
+                    WinFormsTitle, "66", ct, tabName: "Scheduler", nameHint: "Priority")),
 
             new("winforms-scheduler-checkbox-enabled", "WinForms Scheduler: JobEnabled → toggle", "winforms",
                 ct => CheckBoxToggleAsync("WinForms Scheduler: JobEnabled → toggle",
@@ -736,16 +794,22 @@ public sealed class TestSuite
     /// <summary>Find the first Slider (optionally matching <paramref name="nameHint"/>), setrange to <paramref name="value"/>, then getrange and assert.</summary>
     private async Task<TestResult> SliderSetAndVerifyAsync(string name, string windowTitle, string value, CancellationToken ct, string? tabName = null, string? nameHint = null)
     {
+        _client.Logger?.Invoke($"[Slider] begin '{name}' window='{windowTitle}' tab='{tabName ?? "<none>"}' nameHint='{nameHint ?? "<none>"}' target={value}");
         var (tree, error) = tabName == null
             ? (await GetScanAsync(windowTitle, ct), (string?)null)
             : await SelectTabAndScanAsync(windowTitle, tabName, ct);
         if (tree == null) return Fail(name, error ?? $"scan of '{windowTitle}' failed (window not open?)");
+
+        var allSliders = CollectNodes(tree, n => ControlTypeIs(n, "Slider")).ToList();
+        _client.Logger?.Invoke($"[Slider] found {allSliders.Count} Slider control(s): "
+            + string.Join(", ", allSliders.Take(10).Select(s => $"id={s["id"]} name=\"{s["name"]?.GetValue<string>()}\" autoId=\"{s["automationId"]?.GetValue<string>()}\"")));
 
         var slider = nameHint != null
             ? FindNode(tree, n => ControlTypeIs(n, "Slider") && NameOrIdContains(n, nameHint))
             : FindNode(tree, n => ControlTypeIs(n, "Slider"));
         if (slider == null) return Fail(name, $"No Slider control found{(nameHint != null ? $" matching '{nameHint}'" : "")}");
         int id = slider["id"]!.GetValue<int>();
+        _client.Logger?.Invoke($"[Slider] selected id={id} name=\"{slider["name"]?.GetValue<string>()}\" autoId=\"{slider["automationId"]?.GetValue<string>()}\"");
 
         var setr = await _client.ExecuteAsync(id, "setrange", value, ct);
         if (!setr.Success) return Fail(name, $"setrange failed: {setr.Detail}");

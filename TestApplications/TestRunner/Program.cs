@@ -10,6 +10,9 @@ string? cliConfigPath = null;
 bool    cliServe = false;
 int     cliServePort = 8765;
 string  cliServeHost = "127.0.0.1";
+bool    cliList   = false;
+string? cliOnly   = null;
+string? cliFilter = null;
 for (var i = 0; i < args.Length; i++)
 {
     var arg = args[i];
@@ -59,6 +62,36 @@ for (var i = 0; i < args.Length; i++)
         continue;
     }
 
+    if (string.Equals(arg, "--list", StringComparison.OrdinalIgnoreCase))
+    {
+        cliList = true;
+        continue;
+    }
+
+    if (arg.StartsWith("--only=", StringComparison.OrdinalIgnoreCase) ||
+        arg.StartsWith("--tests=", StringComparison.OrdinalIgnoreCase))
+    {
+        cliOnly = arg[(arg.IndexOf('=') + 1)..];
+        continue;
+    }
+    if ((string.Equals(arg, "--only", StringComparison.OrdinalIgnoreCase) ||
+         string.Equals(arg, "--tests", StringComparison.OrdinalIgnoreCase)) && i + 1 < args.Length)
+    {
+        cliOnly = args[++i];
+        continue;
+    }
+
+    if (arg.StartsWith("--filter=", StringComparison.OrdinalIgnoreCase))
+    {
+        cliFilter = arg[("--filter=".Length)..];
+        continue;
+    }
+    if (string.Equals(arg, "--filter", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
+    {
+        cliFilter = args[++i];
+        continue;
+    }
+
     if (!arg.StartsWith("-"))
     {
         cliConfigPath = arg;
@@ -78,6 +111,20 @@ var config = JsonSerializer.Deserialize<RunnerConfig>(
     File.ReadAllText(configPath),
     new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
 
+// --list: print catalog and exit. No bridge, no test apps, no web server.
+if (cliList)
+{
+    using var listClient = new BridgeClient(config.BridgeBaseUrl, config.BridgeApiKey);
+    var listSuite = new TestSuite(listClient);
+    Console.WriteLine($"{"ID",-55} {"GROUP",-18} NAME");
+    Console.WriteLine(new string('─', 120));
+    foreach (var tc in listSuite.Catalog)
+        Console.WriteLine($"{tc.Id,-55} {tc.Group,-18} {tc.Name}");
+    return 0;
+}
+
+bool filtered = !string.IsNullOrWhiteSpace(cliOnly) || !string.IsNullOrWhiteSpace(cliFilter);
+
 var mode = (cliMode ?? config.Mode ?? "demo").Trim().ToLowerInvariant();
 if (mode != "demo" && mode != "benchmark")
 {
@@ -90,6 +137,14 @@ var reportEveryN = mode == "benchmark"
     ? (config.ReportEveryN <= 0 ? 0 : Math.Max(config.ReportEveryN, 10))
     : (config.ReportEveryN <= 0 ? 1 : Math.Min(config.ReportEveryN, 1));
 var runOnlyFailed = mode == "benchmark" ? true : config.RunOnlyFailed;
+if (filtered)
+{
+    // Targeted runs: always execute the selected tests, exactly once, regardless
+    // of mode/config. The "previously passed" skip logic would otherwise silently
+    // skip the very tests the user asked for.
+    maxCycles     = 1;
+    runOnlyFailed = false;
+}
 var speedProfile = mode == "benchmark" ? "fast" : "human";
 var richConsole = mode == "demo";
 
@@ -282,7 +337,7 @@ if (cliServe)
 
     // Initial bridge + client + suite
     currentBridge = await StartBridge(ct);
-    currentClient = new BridgeClient(config.BridgeBaseUrl, config.BridgeApiKey);
+    currentClient = new BridgeClient(config.BridgeBaseUrl, config.BridgeApiKey, Console.WriteLine);
     Console.WriteLine("[Runner] Waiting for Bridge API...");
     var servedReady = await currentClient.WaitForReadyAsync(config.ApiReadyTimeoutSec, ct);
     if (!servedReady)
@@ -444,7 +499,8 @@ while (cycle < maxCycles && !ct.IsCancellationRequested)
         : new Dictionary<string, string> { ["APEX_API_KEY"] = config.BridgeApiKey };
     await bridge.StartAsync(ct, bridgeEnv);
 
-    using var client = new BridgeClient(config.BridgeBaseUrl, config.BridgeApiKey);
+    using var client = new BridgeClient(config.BridgeBaseUrl, config.BridgeApiKey,
+        logger: richConsole ? Console.WriteLine : null);
     if (richConsole) Console.WriteLine("[Runner] Waiting for Bridge API...");
 
     var readyTimer = Stopwatch.StartNew();
@@ -556,15 +612,31 @@ while (cycle < maxCycles && !ct.IsCancellationRequested)
             }));
         };
 
-    var result = await new TestSuite(
+    var suite = new TestSuite(
         client,
         actionDelayMs,
         uiSettleDelayMs,
         runOnlyFailed ? previouslyPassed : null,
         config.WebBaseUrl,
         config.WebPagePaths,
-        onResult
-    ).RunAsync(ct);
+        onResult);
+
+    CycleResult result;
+    if (!string.IsNullOrWhiteSpace(cliOnly))
+    {
+        var ids = cliOnly.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        if (richConsole) Console.WriteLine($"[Runner] --only: running {ids.Length} test(s)");
+        result = await suite.RunSelectedAsync(ids, ct);
+    }
+    else if (!string.IsNullOrWhiteSpace(cliFilter))
+    {
+        if (richConsole) Console.WriteLine($"[Runner] --filter: '{cliFilter}'");
+        result = await suite.RunFilteredAsync(cliFilter!, ct);
+    }
+    else
+    {
+        result = await suite.RunAsync(ct);
+    }
     suiteTimer.Stop();
     suiteMs = suiteTimer.ElapsedMilliseconds;
     history.Add((cycle, result));

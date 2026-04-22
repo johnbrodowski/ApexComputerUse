@@ -103,6 +103,9 @@ namespace ApexComputerUse
             lblStatModel = new ToolStripStatusLabel();
             lblStatNet = new ToolStripStatusLabel();
             menuStrip1.SuspendLayout();
+            tabPageChat.SuspendLayout();
+            grpAiSettings.SuspendLayout();
+            grpAiSession.SuspendLayout();
             tabMain.SuspendLayout();
             tabPageConsole.SuspendLayout();
             tabPageFind.SuspendLayout();
@@ -111,9 +114,6 @@ namespace ApexComputerUse
             tabPageModel.SuspendLayout();
             grpModelPaths.SuspendLayout();
             grpDownload.SuspendLayout();
-            tabPageChat.SuspendLayout();
-            grpAiSettings.SuspendLayout();
-            grpAiSession.SuspendLayout();
             statusStrip1.SuspendLayout();
             SuspendLayout();
             // 
@@ -122,7 +122,7 @@ namespace ApexComputerUse
             menuStrip1.Items.AddRange(new ToolStripItem[] { toolsToolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
-            menuStrip1.Size = new Size(576, 24);
+            menuStrip1.Size = new Size(576, 25);
             menuStrip1.TabIndex = 0;
             menuStrip1.Text = "menuStrip1";
             // 
@@ -130,37 +130,199 @@ namespace ApexComputerUse
             // 
             toolsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { runAIComputerUseToolStripMenuItem, outputUiMapToolStripMenuItem, renderTestToolStripMenuItem, sceneEditorToolStripMenuItem });
             toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
-            toolsToolStripMenuItem.Size = new Size(47, 20);
+            toolsToolStripMenuItem.Size = new Size(51, 21);
             toolsToolStripMenuItem.Text = "Tools";
             // 
             // runAIComputerUseToolStripMenuItem
             // 
             runAIComputerUseToolStripMenuItem.Name = "runAIComputerUseToolStripMenuItem";
-            runAIComputerUseToolStripMenuItem.Size = new Size(222, 22);
+            runAIComputerUseToolStripMenuItem.Size = new Size(240, 22);
             runAIComputerUseToolStripMenuItem.Text = "Run AI Computer Use Mode";
             runAIComputerUseToolStripMenuItem.Click += runAIComputerUseToolStripMenuItem_Click;
             // 
             // outputUiMapToolStripMenuItem
             // 
             outputUiMapToolStripMenuItem.Name = "outputUiMapToolStripMenuItem";
-            outputUiMapToolStripMenuItem.Size = new Size(222, 22);
+            outputUiMapToolStripMenuItem.Size = new Size(240, 22);
             outputUiMapToolStripMenuItem.Text = "Output UI Map";
             outputUiMapToolStripMenuItem.Click += outputUiMapToolStripMenuItem_Click;
             // 
             // renderTestToolStripMenuItem
             // 
             renderTestToolStripMenuItem.Name = "renderTestToolStripMenuItem";
-            renderTestToolStripMenuItem.Size = new Size(222, 22);
+            renderTestToolStripMenuItem.Size = new Size(240, 22);
             renderTestToolStripMenuItem.Text = "RenderTest";
             renderTestToolStripMenuItem.Click += renderTestToolStripMenuItem_Click;
             // 
             // sceneEditorToolStripMenuItem
             // 
             sceneEditorToolStripMenuItem.Name = "sceneEditorToolStripMenuItem";
-            sceneEditorToolStripMenuItem.Size = new Size(222, 22);
+            sceneEditorToolStripMenuItem.Size = new Size(240, 22);
             sceneEditorToolStripMenuItem.Text = "Scene Editor";
             sceneEditorToolStripMenuItem.Click += sceneEditorToolStripMenuItem_Click;
-            //
+            // 
+            // tabPageChat
+            // 
+            tabPageChat.Controls.Add(grpAiSettings);
+            tabPageChat.Controls.Add(grpAiSession);
+            tabPageChat.Location = new Point(4, 26);
+            tabPageChat.Name = "tabPageChat";
+            tabPageChat.Padding = new Padding(3);
+            tabPageChat.Size = new Size(540, 342);
+            tabPageChat.TabIndex = 4;
+            tabPageChat.Text = "Chat";
+            tabPageChat.UseVisualStyleBackColor = true;
+            // 
+            // grpAiSettings
+            // 
+            grpAiSettings.Controls.Add(lblAiProvider);
+            grpAiSettings.Controls.Add(cboAiProvider);
+            grpAiSettings.Controls.Add(lblAiModel);
+            grpAiSettings.Controls.Add(txtAiModel);
+            grpAiSettings.Controls.Add(lblAiApiKey);
+            grpAiSettings.Controls.Add(txtAiApiKey);
+            grpAiSettings.Controls.Add(lblAiSysPrompt);
+            grpAiSettings.Controls.Add(txtAiSystemPrompt);
+            grpAiSettings.Controls.Add(btnAiSaveSettings);
+            grpAiSettings.Controls.Add(lblAiSettingsPath);
+            grpAiSettings.Location = new Point(8, 7);
+            grpAiSettings.Name = "grpAiSettings";
+            grpAiSettings.Size = new Size(520, 236);
+            grpAiSettings.TabIndex = 0;
+            grpAiSettings.TabStop = false;
+            grpAiSettings.Text = "Provider Settings";
+            // 
+            // lblAiProvider
+            // 
+            lblAiProvider.AutoSize = true;
+            lblAiProvider.Location = new Point(8, 29);
+            lblAiProvider.Name = "lblAiProvider";
+            lblAiProvider.Size = new Size(60, 17);
+            lblAiProvider.TabIndex = 0;
+            lblAiProvider.Text = "Provider:";
+            // 
+            // cboAiProvider
+            // 
+            cboAiProvider.DropDownStyle = ComboBoxStyle.DropDownList;
+            cboAiProvider.FormattingEnabled = true;
+            cboAiProvider.Location = new Point(90, 25);
+            cboAiProvider.Name = "cboAiProvider";
+            cboAiProvider.Size = new Size(160, 25);
+            cboAiProvider.TabIndex = 1;
+            cboAiProvider.SelectedIndexChanged += cboAiProvider_SelectedIndexChanged;
+            // 
+            // lblAiModel
+            // 
+            lblAiModel.AutoSize = true;
+            lblAiModel.Location = new Point(8, 66);
+            lblAiModel.Name = "lblAiModel";
+            lblAiModel.Size = new Size(49, 17);
+            lblAiModel.TabIndex = 2;
+            lblAiModel.Text = "Model:";
+            // 
+            // txtAiModel
+            // 
+            txtAiModel.Location = new Point(90, 61);
+            txtAiModel.Name = "txtAiModel";
+            txtAiModel.Size = new Size(360, 25);
+            txtAiModel.TabIndex = 3;
+            // 
+            // lblAiApiKey
+            // 
+            lblAiApiKey.AutoSize = true;
+            lblAiApiKey.Location = new Point(8, 104);
+            lblAiApiKey.Name = "lblAiApiKey";
+            lblAiApiKey.Size = new Size(54, 17);
+            lblAiApiKey.TabIndex = 4;
+            lblAiApiKey.Text = "API Key:";
+            // 
+            // txtAiApiKey
+            // 
+            txtAiApiKey.Location = new Point(90, 100);
+            txtAiApiKey.Name = "txtAiApiKey";
+            txtAiApiKey.PasswordChar = '●';
+            txtAiApiKey.Size = new Size(360, 25);
+            txtAiApiKey.TabIndex = 5;
+            // 
+            // lblAiSysPrompt
+            // 
+            lblAiSysPrompt.AutoSize = true;
+            lblAiSysPrompt.Location = new Point(8, 143);
+            lblAiSysPrompt.Name = "lblAiSysPrompt";
+            lblAiSysPrompt.Size = new Size(52, 17);
+            lblAiSysPrompt.TabIndex = 6;
+            lblAiSysPrompt.Text = "System:";
+            // 
+            // txtAiSystemPrompt
+            // 
+            txtAiSystemPrompt.Location = new Point(90, 138);
+            txtAiSystemPrompt.Multiline = true;
+            txtAiSystemPrompt.Name = "txtAiSystemPrompt";
+            txtAiSystemPrompt.Size = new Size(360, 52);
+            txtAiSystemPrompt.TabIndex = 7;
+            // 
+            // btnAiSaveSettings
+            // 
+            btnAiSaveSettings.Location = new Point(456, 25);
+            btnAiSaveSettings.Name = "btnAiSaveSettings";
+            btnAiSaveSettings.Size = new Size(56, 29);
+            btnAiSaveSettings.TabIndex = 8;
+            btnAiSaveSettings.Text = "Save";
+            btnAiSaveSettings.UseVisualStyleBackColor = true;
+            btnAiSaveSettings.Click += btnAiSaveSettings_Click;
+            // 
+            // lblAiSettingsPath
+            // 
+            lblAiSettingsPath.AutoSize = true;
+            lblAiSettingsPath.ForeColor = Color.Gray;
+            lblAiSettingsPath.Location = new Point(8, 209);
+            lblAiSettingsPath.Name = "lblAiSettingsPath";
+            lblAiSettingsPath.Size = new Size(95, 17);
+            lblAiSettingsPath.TabIndex = 9;
+            lblAiSettingsPath.Text = "ai-settings.json";
+            // 
+            // grpAiSession
+            // 
+            grpAiSession.Controls.Add(lblAiSessionStatus);
+            grpAiSession.Controls.Add(btnAiOpenChat);
+            grpAiSession.Controls.Add(btnAiResetChat);
+            grpAiSession.Location = new Point(8, 252);
+            grpAiSession.Name = "grpAiSession";
+            grpAiSession.Size = new Size(520, 75);
+            grpAiSession.TabIndex = 1;
+            grpAiSession.TabStop = false;
+            grpAiSession.Text = "Chat";
+            // 
+            // lblAiSessionStatus
+            // 
+            lblAiSessionStatus.AutoSize = true;
+            lblAiSessionStatus.ForeColor = Color.Gray;
+            lblAiSessionStatus.Location = new Point(8, 27);
+            lblAiSessionStatus.Name = "lblAiSessionStatus";
+            lblAiSessionStatus.Size = new Size(110, 17);
+            lblAiSessionStatus.TabIndex = 0;
+            lblAiSessionStatus.Text = "No active session";
+            // 
+            // btnAiOpenChat
+            // 
+            btnAiOpenChat.Location = new Point(276, 23);
+            btnAiOpenChat.Name = "btnAiOpenChat";
+            btnAiOpenChat.Size = new Size(120, 29);
+            btnAiOpenChat.TabIndex = 1;
+            btnAiOpenChat.Text = "Open in Browser";
+            btnAiOpenChat.UseVisualStyleBackColor = true;
+            btnAiOpenChat.Click += btnAiOpenChat_Click;
+            // 
+            // btnAiResetChat
+            // 
+            btnAiResetChat.Location = new Point(402, 23);
+            btnAiResetChat.Name = "btnAiResetChat";
+            btnAiResetChat.Size = new Size(110, 29);
+            btnAiResetChat.TabIndex = 2;
+            btnAiResetChat.Text = "Reset Conversation";
+            btnAiResetChat.UseVisualStyleBackColor = true;
+            btnAiResetChat.Click += btnAiResetChat_Click;
+            // 
             // tabMain
             // 
             tabMain.Controls.Add(tabPageConsole);
@@ -168,10 +330,10 @@ namespace ApexComputerUse
             tabMain.Controls.Add(tabPageRemote);
             tabMain.Controls.Add(tabPageModel);
             tabMain.Controls.Add(tabPageChat);
-            tabMain.Location = new Point(0, 24);
+            tabMain.Location = new Point(0, 27);
             tabMain.Name = "tabMain";
             tabMain.SelectedIndex = 0;
-            tabMain.Size = new Size(548, 328);
+            tabMain.Size = new Size(573, 239);
             tabMain.TabIndex = 1;
             // 
             // tabPageConsole
@@ -181,37 +343,37 @@ namespace ApexComputerUse
             tabPageConsole.Controls.Add(btnClear);
             tabPageConsole.Controls.Add(lblStatus);
             tabPageConsole.Controls.Add(txtStatus);
-            tabPageConsole.Location = new Point(4, 24);
+            tabPageConsole.Location = new Point(4, 26);
             tabPageConsole.Name = "tabPageConsole";
             tabPageConsole.Padding = new Padding(3);
-            tabPageConsole.Size = new Size(540, 300);
+            tabPageConsole.Size = new Size(565, 209);
             tabPageConsole.TabIndex = 0;
             tabPageConsole.Text = "Console";
             tabPageConsole.UseVisualStyleBackColor = true;
             // 
             // txtCommand
             // 
-            txtCommand.Location = new Point(8, 8);
+            txtCommand.Location = new Point(8, 9);
             txtCommand.Name = "txtCommand";
             txtCommand.PlaceholderText = "find window=… | exec action=… | ocr | ai … | status | windows | help";
-            txtCommand.Size = new Size(447, 23);
+            txtCommand.Size = new Size(447, 25);
             txtCommand.TabIndex = 0;
             txtCommand.KeyDown += txtCommand_KeyDown;
             // 
             // btnRun
             // 
-            btnRun.Location = new Point(463, 7);
+            btnRun.Location = new Point(463, 8);
             btnRun.Name = "btnRun";
-            btnRun.Size = new Size(30, 25);
+            btnRun.Size = new Size(30, 28);
             btnRun.TabIndex = 1;
             btnRun.Text = "▶";
             btnRun.Click += btnRun_Click;
             // 
             // btnClear
             // 
-            btnClear.Location = new Point(501, 7);
+            btnClear.Location = new Point(501, 8);
             btnClear.Name = "btnClear";
-            btnClear.Size = new Size(26, 25);
+            btnClear.Size = new Size(26, 28);
             btnClear.TabIndex = 2;
             btnClear.Text = "×";
             btnClear.Click += btnClear_Click;
@@ -219,21 +381,21 @@ namespace ApexComputerUse
             // lblStatus
             // 
             lblStatus.AutoSize = true;
-            lblStatus.Location = new Point(8, 42);
+            lblStatus.Location = new Point(8, 38);
             lblStatus.Name = "lblStatus";
-            lblStatus.Size = new Size(48, 15);
+            lblStatus.Size = new Size(51, 17);
             lblStatus.TabIndex = 3;
             lblStatus.Text = "Output:";
             // 
             // txtStatus
             // 
             txtStatus.BackColor = Color.WhiteSmoke;
-            txtStatus.Location = new Point(8, 60);
+            txtStatus.Location = new Point(8, 62);
             txtStatus.Multiline = true;
             txtStatus.Name = "txtStatus";
             txtStatus.ReadOnly = true;
             txtStatus.ScrollBars = ScrollBars.Vertical;
-            txtStatus.Size = new Size(519, 209);
+            txtStatus.Size = new Size(549, 138);
             txtStatus.TabIndex = 4;
             // 
             // tabPageFind
@@ -254,10 +416,10 @@ namespace ApexComputerUse
             tabPageFind.Controls.Add(txtInput);
             tabPageFind.Controls.Add(btnFind);
             tabPageFind.Controls.Add(btnExecute);
-            tabPageFind.Location = new Point(4, 24);
+            tabPageFind.Location = new Point(4, 26);
             tabPageFind.Name = "tabPageFind";
             tabPageFind.Padding = new Padding(3);
-            tabPageFind.Size = new Size(540, 300);
+            tabPageFind.Size = new Size(540, 342);
             tabPageFind.TabIndex = 1;
             tabPageFind.Text = "Find & Execute";
             tabPageFind.UseVisualStyleBackColor = true;
@@ -265,133 +427,133 @@ namespace ApexComputerUse
             // lblWindowName
             // 
             lblWindowName.AutoSize = true;
-            lblWindowName.Location = new Point(8, 16);
+            lblWindowName.Location = new Point(8, 18);
             lblWindowName.Name = "lblWindowName";
-            lblWindowName.Size = new Size(89, 15);
+            lblWindowName.Size = new Size(97, 17);
             lblWindowName.TabIndex = 0;
             lblWindowName.Text = "Window Name:";
             // 
             // txtWindowName
             // 
-            txtWindowName.Location = new Point(130, 13);
+            txtWindowName.Location = new Point(130, 15);
             txtWindowName.Name = "txtWindowName";
-            txtWindowName.Size = new Size(393, 23);
+            txtWindowName.Size = new Size(393, 25);
             txtWindowName.TabIndex = 0;
             // 
             // lblElementId
             // 
             lblElementId.AutoSize = true;
-            lblElementId.Location = new Point(8, 50);
+            lblElementId.Location = new Point(8, 57);
             lblElementId.Name = "lblElementId";
-            lblElementId.Size = new Size(84, 15);
+            lblElementId.Size = new Size(89, 17);
             lblElementId.TabIndex = 1;
             lblElementId.Text = "AutomationId:";
             // 
             // txtElementId
             // 
-            txtElementId.Location = new Point(130, 47);
+            txtElementId.Location = new Point(130, 53);
             txtElementId.Name = "txtElementId";
-            txtElementId.Size = new Size(155, 23);
+            txtElementId.Size = new Size(155, 25);
             txtElementId.TabIndex = 1;
             // 
             // lblSearchType
             // 
             lblSearchType.AutoSize = true;
-            lblSearchType.Location = new Point(295, 50);
+            lblSearchType.Location = new Point(295, 57);
             lblSearchType.Name = "lblSearchType";
-            lblSearchType.Size = new Size(73, 15);
+            lblSearchType.Size = new Size(81, 17);
             lblSearchType.TabIndex = 2;
             lblSearchType.Text = "Search Type:";
             // 
             // cmbSearchType
             // 
             cmbSearchType.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbSearchType.Location = new Point(378, 47);
+            cmbSearchType.Location = new Point(378, 53);
             cmbSearchType.Name = "cmbSearchType";
-            cmbSearchType.Size = new Size(145, 23);
+            cmbSearchType.Size = new Size(145, 25);
             cmbSearchType.TabIndex = 2;
             // 
             // lblElementName
             // 
             lblElementName.AutoSize = true;
-            lblElementName.Location = new Point(8, 84);
+            lblElementName.Location = new Point(8, 95);
             lblElementName.Name = "lblElementName";
-            lblElementName.Size = new Size(88, 15);
+            lblElementName.Size = new Size(96, 17);
             lblElementName.TabIndex = 3;
             lblElementName.Text = "Element Name:";
             // 
             // txtElementName
             // 
-            txtElementName.Location = new Point(130, 81);
+            txtElementName.Location = new Point(130, 92);
             txtElementName.Name = "txtElementName";
-            txtElementName.Size = new Size(393, 23);
+            txtElementName.Size = new Size(393, 25);
             txtElementName.TabIndex = 3;
             // 
             // lblControlType
             // 
             lblControlType.AutoSize = true;
-            lblControlType.Location = new Point(8, 118);
+            lblControlType.Location = new Point(8, 134);
             lblControlType.Name = "lblControlType";
-            lblControlType.Size = new Size(78, 15);
+            lblControlType.Size = new Size(85, 17);
             lblControlType.TabIndex = 4;
             lblControlType.Text = "Control Type:";
             // 
             // cmbControlType
             // 
             cmbControlType.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbControlType.Location = new Point(130, 115);
+            cmbControlType.Location = new Point(130, 130);
             cmbControlType.Name = "cmbControlType";
-            cmbControlType.Size = new Size(155, 23);
+            cmbControlType.Size = new Size(155, 25);
             cmbControlType.TabIndex = 4;
             cmbControlType.SelectedIndexChanged += cmbControlType_SelectedIndexChanged;
             // 
             // lblAction
             // 
             lblAction.AutoSize = true;
-            lblAction.Location = new Point(295, 118);
+            lblAction.Location = new Point(295, 134);
             lblAction.Name = "lblAction";
-            lblAction.Size = new Size(45, 15);
+            lblAction.Size = new Size(47, 17);
             lblAction.TabIndex = 5;
             lblAction.Text = "Action:";
             // 
             // cmbAction
             // 
             cmbAction.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbAction.Location = new Point(348, 115);
+            cmbAction.Location = new Point(348, 130);
             cmbAction.Name = "cmbAction";
-            cmbAction.Size = new Size(175, 23);
+            cmbAction.Size = new Size(175, 25);
             cmbAction.TabIndex = 5;
             // 
             // lblInput
             // 
             lblInput.AutoSize = true;
-            lblInput.Location = new Point(8, 152);
+            lblInput.Location = new Point(8, 172);
             lblInput.Name = "lblInput";
-            lblInput.Size = new Size(77, 15);
+            lblInput.Size = new Size(86, 17);
             lblInput.TabIndex = 6;
             lblInput.Text = "Value / Index:";
             // 
             // txtInput
             // 
-            txtInput.Location = new Point(130, 149);
+            txtInput.Location = new Point(130, 169);
             txtInput.Name = "txtInput";
-            txtInput.Size = new Size(393, 23);
+            txtInput.Size = new Size(393, 25);
             txtInput.TabIndex = 6;
             // 
             // btnFind
             // 
-            btnFind.Location = new Point(130, 186);
+            btnFind.Location = new Point(130, 211);
             btnFind.Name = "btnFind";
-            btnFind.Size = new Size(110, 28);
+            btnFind.Size = new Size(110, 32);
             btnFind.TabIndex = 7;
             btnFind.Text = "Find Element";
             btnFind.Click += btnFind_Click;
             // 
             // btnExecute
             // 
-            btnExecute.Location = new Point(248, 186);
+            btnExecute.Location = new Point(248, 211);
             btnExecute.Name = "btnExecute";
-            btnExecute.Size = new Size(120, 28);
+            btnExecute.Size = new Size(120, 32);
             btnExecute.TabIndex = 8;
             btnExecute.Text = "Execute Action";
             btnExecute.Click += btnExecute_Click;
@@ -399,10 +561,10 @@ namespace ApexComputerUse
             // tabPageRemote
             // 
             tabPageRemote.Controls.Add(grpRemote);
-            tabPageRemote.Location = new Point(4, 24);
+            tabPageRemote.Location = new Point(4, 26);
             tabPageRemote.Name = "tabPageRemote";
             tabPageRemote.Padding = new Padding(3);
-            tabPageRemote.Size = new Size(540, 300);
+            tabPageRemote.Size = new Size(540, 342);
             tabPageRemote.TabIndex = 2;
             tabPageRemote.Text = "Remote Control";
             tabPageRemote.UseVisualStyleBackColor = true;
@@ -426,9 +588,9 @@ namespace ApexComputerUse
             grpRemote.Controls.Add(txtPipeName);
             grpRemote.Controls.Add(btnStartPipe);
             grpRemote.Controls.Add(lblPipeStatus);
-            grpRemote.Location = new Point(8, 8);
+            grpRemote.Location = new Point(8, 9);
             grpRemote.Name = "grpRemote";
-            grpRemote.Size = new Size(519, 228);
+            grpRemote.Size = new Size(519, 258);
             grpRemote.TabIndex = 0;
             grpRemote.TabStop = false;
             grpRemote.Text = "Remote Control";
@@ -436,25 +598,25 @@ namespace ApexComputerUse
             // lblHttpPort
             // 
             lblHttpPort.AutoSize = true;
-            lblHttpPort.Location = new Point(8, 26);
+            lblHttpPort.Location = new Point(8, 29);
             lblHttpPort.Name = "lblHttpPort";
-            lblHttpPort.Size = new Size(65, 15);
+            lblHttpPort.Size = new Size(69, 17);
             lblHttpPort.TabIndex = 0;
             lblHttpPort.Text = "HTTP Port:";
             // 
             // txtHttpPort
             // 
-            txtHttpPort.Location = new Point(82, 23);
+            txtHttpPort.Location = new Point(82, 26);
             txtHttpPort.Name = "txtHttpPort";
-            txtHttpPort.Size = new Size(55, 23);
+            txtHttpPort.Size = new Size(55, 25);
             txtHttpPort.TabIndex = 1;
             txtHttpPort.Text = "8081";
             // 
             // btnStartHttp
             // 
-            btnStartHttp.Location = new Point(146, 22);
+            btnStartHttp.Location = new Point(146, 25);
             btnStartHttp.Name = "btnStartHttp";
-            btnStartHttp.Size = new Size(90, 26);
+            btnStartHttp.Size = new Size(90, 29);
             btnStartHttp.TabIndex = 2;
             btnStartHttp.Text = "Start HTTP";
             btnStartHttp.Click += btnStartHttp_Click;
@@ -463,34 +625,34 @@ namespace ApexComputerUse
             // 
             lblHttpStatus.AutoSize = true;
             lblHttpStatus.ForeColor = Color.Gray;
-            lblHttpStatus.Location = new Point(246, 26);
+            lblHttpStatus.Location = new Point(246, 29);
             lblHttpStatus.Name = "lblHttpStatus";
-            lblHttpStatus.Size = new Size(51, 15);
+            lblHttpStatus.Size = new Size(58, 17);
             lblHttpStatus.TabIndex = 3;
             lblHttpStatus.Text = "Stopped";
             // 
             // lblApiKey
             // 
             lblApiKey.AutoSize = true;
-            lblApiKey.Location = new Point(8, 58);
+            lblApiKey.Location = new Point(8, 66);
             lblApiKey.Name = "lblApiKey";
-            lblApiKey.Size = new Size(50, 15);
+            lblApiKey.Size = new Size(54, 17);
             lblApiKey.TabIndex = 12;
             lblApiKey.Text = "API Key:";
             // 
             // txtApiKey
             // 
-            txtApiKey.Location = new Point(82, 55);
+            txtApiKey.Location = new Point(82, 62);
             txtApiKey.Name = "txtApiKey";
             txtApiKey.PlaceholderText = "(leave blank to disable auth)";
-            txtApiKey.Size = new Size(349, 23);
+            txtApiKey.Size = new Size(349, 25);
             txtApiKey.TabIndex = 13;
             // 
             // btnCopyApiKey
             // 
-            btnCopyApiKey.Location = new Point(439, 54);
+            btnCopyApiKey.Location = new Point(439, 61);
             btnCopyApiKey.Name = "btnCopyApiKey";
-            btnCopyApiKey.Size = new Size(52, 26);
+            btnCopyApiKey.Size = new Size(52, 29);
             btnCopyApiKey.TabIndex = 14;
             btnCopyApiKey.Text = "Copy";
             btnCopyApiKey.Click += btnCopyApiKey_Click;
@@ -498,25 +660,25 @@ namespace ApexComputerUse
             // lblBotToken
             // 
             lblBotToken.AutoSize = true;
-            lblBotToken.Location = new Point(8, 98);
+            lblBotToken.Location = new Point(8, 111);
             lblBotToken.Name = "lblBotToken";
-            lblBotToken.Size = new Size(63, 15);
+            lblBotToken.Size = new Size(68, 17);
             lblBotToken.TabIndex = 4;
             lblBotToken.Text = "Bot Token:";
             // 
             // txtBotToken
             // 
-            txtBotToken.Location = new Point(82, 95);
+            txtBotToken.Location = new Point(82, 108);
             txtBotToken.Name = "txtBotToken";
             txtBotToken.PlaceholderText = "123456:ABC-DEF...";
-            txtBotToken.Size = new Size(265, 23);
+            txtBotToken.Size = new Size(265, 25);
             txtBotToken.TabIndex = 5;
             // 
             // btnStartTelegram
             // 
-            btnStartTelegram.Location = new Point(357, 94);
+            btnStartTelegram.Location = new Point(357, 107);
             btnStartTelegram.Name = "btnStartTelegram";
-            btnStartTelegram.Size = new Size(120, 26);
+            btnStartTelegram.Size = new Size(120, 29);
             btnStartTelegram.TabIndex = 6;
             btnStartTelegram.Text = "Start Telegram";
             btnStartTelegram.Click += btnStartTelegram_Click;
@@ -525,51 +687,51 @@ namespace ApexComputerUse
             // 
             lblTelegramStatus.AutoSize = true;
             lblTelegramStatus.ForeColor = Color.Gray;
-            lblTelegramStatus.Location = new Point(8, 155);
+            lblTelegramStatus.Location = new Point(8, 176);
             lblTelegramStatus.Name = "lblTelegramStatus";
-            lblTelegramStatus.Size = new Size(106, 15);
+            lblTelegramStatus.Size = new Size(119, 17);
             lblTelegramStatus.TabIndex = 7;
             lblTelegramStatus.Text = "Telegram: Stopped";
             // 
             // lblAllowedChatIds
             // 
             lblAllowedChatIds.AutoSize = true;
-            lblAllowedChatIds.Location = new Point(8, 128);
+            lblAllowedChatIds.Location = new Point(8, 145);
             lblAllowedChatIds.Name = "lblAllowedChatIds";
-            lblAllowedChatIds.Size = new Size(54, 15);
+            lblAllowedChatIds.Size = new Size(59, 17);
             lblAllowedChatIds.TabIndex = 15;
             lblAllowedChatIds.Text = "Chat IDs:";
             // 
             // txtAllowedChatIds
             // 
-            txtAllowedChatIds.Location = new Point(82, 125);
+            txtAllowedChatIds.Location = new Point(82, 142);
             txtAllowedChatIds.Name = "txtAllowedChatIds";
             txtAllowedChatIds.PlaceholderText = "123456789,987654321 (leave blank to allow all)";
-            txtAllowedChatIds.Size = new Size(395, 23);
+            txtAllowedChatIds.Size = new Size(395, 25);
             txtAllowedChatIds.TabIndex = 16;
             // 
             // lblPipeName
             // 
             lblPipeName.AutoSize = true;
-            lblPipeName.Location = new Point(8, 195);
+            lblPipeName.Location = new Point(8, 221);
             lblPipeName.Name = "lblPipeName";
-            lblPipeName.Size = new Size(68, 15);
+            lblPipeName.Size = new Size(75, 17);
             lblPipeName.TabIndex = 8;
             lblPipeName.Text = "Pipe Name:";
             // 
             // txtPipeName
             // 
-            txtPipeName.Location = new Point(82, 192);
+            txtPipeName.Location = new Point(82, 218);
             txtPipeName.Name = "txtPipeName";
-            txtPipeName.Size = new Size(120, 23);
+            txtPipeName.Size = new Size(120, 25);
             txtPipeName.TabIndex = 9;
             txtPipeName.Text = "ApexComputerUse";
             // 
             // btnStartPipe
             // 
-            btnStartPipe.Location = new Point(211, 191);
+            btnStartPipe.Location = new Point(211, 216);
             btnStartPipe.Name = "btnStartPipe";
-            btnStartPipe.Size = new Size(90, 26);
+            btnStartPipe.Size = new Size(90, 29);
             btnStartPipe.TabIndex = 10;
             btnStartPipe.Text = "Start Pipe";
             btnStartPipe.Click += btnStartPipe_Click;
@@ -578,9 +740,9 @@ namespace ApexComputerUse
             // 
             lblPipeStatus.AutoSize = true;
             lblPipeStatus.ForeColor = Color.Gray;
-            lblPipeStatus.Location = new Point(311, 195);
+            lblPipeStatus.Location = new Point(311, 221);
             lblPipeStatus.Name = "lblPipeStatus";
-            lblPipeStatus.Size = new Size(51, 15);
+            lblPipeStatus.Size = new Size(58, 17);
             lblPipeStatus.TabIndex = 11;
             lblPipeStatus.Text = "Stopped";
             // 
@@ -588,170 +750,14 @@ namespace ApexComputerUse
             // 
             tabPageModel.Controls.Add(grpModelPaths);
             tabPageModel.Controls.Add(grpDownload);
-            tabPageModel.Location = new Point(4, 24);
+            tabPageModel.Location = new Point(4, 26);
             tabPageModel.Name = "tabPageModel";
             tabPageModel.Padding = new Padding(3);
-            tabPageModel.Size = new Size(540, 300);
+            tabPageModel.Size = new Size(540, 342);
             tabPageModel.TabIndex = 3;
             tabPageModel.Text = "Model";
             tabPageModel.UseVisualStyleBackColor = true;
-            //
-            // tabPageChat
-            //
-            tabPageChat.Controls.Add(grpAiSettings);
-            tabPageChat.Controls.Add(grpAiSession);
-            tabPageChat.Location = new Point(4, 24);
-            tabPageChat.Name = "tabPageChat";
-            tabPageChat.Padding = new Padding(3);
-            tabPageChat.Size = new Size(540, 300);
-            tabPageChat.TabIndex = 4;
-            tabPageChat.Text = "Chat";
-            tabPageChat.UseVisualStyleBackColor = true;
-            //
-            // grpAiSettings
-            //
-            grpAiSettings.Controls.Add(lblAiProvider);
-            grpAiSettings.Controls.Add(cboAiProvider);
-            grpAiSettings.Controls.Add(lblAiModel);
-            grpAiSettings.Controls.Add(txtAiModel);
-            grpAiSettings.Controls.Add(lblAiApiKey);
-            grpAiSettings.Controls.Add(txtAiApiKey);
-            grpAiSettings.Controls.Add(lblAiSysPrompt);
-            grpAiSettings.Controls.Add(txtAiSystemPrompt);
-            grpAiSettings.Controls.Add(btnAiSaveSettings);
-            grpAiSettings.Controls.Add(lblAiSettingsPath);
-            grpAiSettings.Location = new Point(8, 6);
-            grpAiSettings.Name = "grpAiSettings";
-            grpAiSettings.Size = new Size(520, 208);
-            grpAiSettings.TabIndex = 0;
-            grpAiSettings.TabStop = false;
-            grpAiSettings.Text = "Provider Settings";
-            //
-            // lblAiProvider
-            //
-            lblAiProvider.AutoSize = true;
-            lblAiProvider.Location = new Point(8, 26);
-            lblAiProvider.Name = "lblAiProvider";
-            lblAiProvider.TabIndex = 0;
-            lblAiProvider.Text = "Provider:";
-            //
-            // cboAiProvider
-            //
-            cboAiProvider.DropDownStyle = ComboBoxStyle.DropDownList;
-            cboAiProvider.FormattingEnabled = true;
-            cboAiProvider.Location = new Point(90, 22);
-            cboAiProvider.Name = "cboAiProvider";
-            cboAiProvider.Size = new Size(160, 24);
-            cboAiProvider.TabIndex = 1;
-            cboAiProvider.SelectedIndexChanged += cboAiProvider_SelectedIndexChanged;
-            //
-            // lblAiModel
-            //
-            lblAiModel.AutoSize = true;
-            lblAiModel.Location = new Point(8, 58);
-            lblAiModel.Name = "lblAiModel";
-            lblAiModel.TabIndex = 2;
-            lblAiModel.Text = "Model:";
-            //
-            // txtAiModel
-            //
-            txtAiModel.Location = new Point(90, 54);
-            txtAiModel.Name = "txtAiModel";
-            txtAiModel.Size = new Size(360, 24);
-            txtAiModel.TabIndex = 3;
-            //
-            // lblAiApiKey
-            //
-            lblAiApiKey.AutoSize = true;
-            lblAiApiKey.Location = new Point(8, 92);
-            lblAiApiKey.Name = "lblAiApiKey";
-            lblAiApiKey.TabIndex = 4;
-            lblAiApiKey.Text = "API Key:";
-            //
-            // txtAiApiKey
-            //
-            txtAiApiKey.Location = new Point(90, 88);
-            txtAiApiKey.Name = "txtAiApiKey";
-            txtAiApiKey.PasswordChar = '●';
-            txtAiApiKey.Size = new Size(360, 24);
-            txtAiApiKey.TabIndex = 5;
-            //
-            // lblAiSysPrompt
-            //
-            lblAiSysPrompt.AutoSize = true;
-            lblAiSysPrompt.Location = new Point(8, 126);
-            lblAiSysPrompt.Name = "lblAiSysPrompt";
-            lblAiSysPrompt.TabIndex = 6;
-            lblAiSysPrompt.Text = "System:";
-            //
-            // txtAiSystemPrompt
-            //
-            txtAiSystemPrompt.Location = new Point(90, 122);
-            txtAiSystemPrompt.Multiline = true;
-            txtAiSystemPrompt.Name = "txtAiSystemPrompt";
-            txtAiSystemPrompt.Size = new Size(360, 46);
-            txtAiSystemPrompt.TabIndex = 7;
-            //
-            // btnAiSaveSettings
-            //
-            btnAiSaveSettings.Location = new Point(456, 22);
-            btnAiSaveSettings.Name = "btnAiSaveSettings";
-            btnAiSaveSettings.Size = new Size(56, 26);
-            btnAiSaveSettings.TabIndex = 8;
-            btnAiSaveSettings.Text = "Save";
-            btnAiSaveSettings.UseVisualStyleBackColor = true;
-            btnAiSaveSettings.Click += btnAiSaveSettings_Click;
-            //
-            // lblAiSettingsPath
-            //
-            lblAiSettingsPath.AutoSize = true;
-            lblAiSettingsPath.ForeColor = System.Drawing.Color.Gray;
-            lblAiSettingsPath.Location = new Point(8, 184);
-            lblAiSettingsPath.Name = "lblAiSettingsPath";
-            lblAiSettingsPath.TabIndex = 9;
-            lblAiSettingsPath.Text = "ai-settings.json";
-            //
-            // grpAiSession
-            //
-            grpAiSession.Controls.Add(lblAiSessionStatus);
-            grpAiSession.Controls.Add(btnAiOpenChat);
-            grpAiSession.Controls.Add(btnAiResetChat);
-            grpAiSession.Location = new Point(8, 222);
-            grpAiSession.Name = "grpAiSession";
-            grpAiSession.Size = new Size(520, 66);
-            grpAiSession.TabIndex = 1;
-            grpAiSession.TabStop = false;
-            grpAiSession.Text = "Chat";
-            //
-            // lblAiSessionStatus
-            //
-            lblAiSessionStatus.AutoSize = true;
-            lblAiSessionStatus.ForeColor = System.Drawing.Color.Gray;
-            lblAiSessionStatus.Location = new Point(8, 24);
-            lblAiSessionStatus.Name = "lblAiSessionStatus";
-            lblAiSessionStatus.TabIndex = 0;
-            lblAiSessionStatus.Text = "No active session";
-            //
-            // btnAiOpenChat
-            //
-            btnAiOpenChat.Location = new Point(276, 20);
-            btnAiOpenChat.Name = "btnAiOpenChat";
-            btnAiOpenChat.Size = new Size(120, 26);
-            btnAiOpenChat.TabIndex = 1;
-            btnAiOpenChat.Text = "Open in Browser";
-            btnAiOpenChat.UseVisualStyleBackColor = true;
-            btnAiOpenChat.Click += btnAiOpenChat_Click;
-            //
-            // btnAiResetChat
-            //
-            btnAiResetChat.Location = new Point(402, 20);
-            btnAiResetChat.Name = "btnAiResetChat";
-            btnAiResetChat.Size = new Size(110, 26);
-            btnAiResetChat.TabIndex = 2;
-            btnAiResetChat.Text = "Reset Conversation";
-            btnAiResetChat.UseVisualStyleBackColor = true;
-            btnAiResetChat.Click += btnAiResetChat_Click;
-            //
+            // 
             // grpModelPaths
             // 
             grpModelPaths.Controls.Add(lblModelPath);
@@ -762,9 +768,9 @@ namespace ApexComputerUse
             grpModelPaths.Controls.Add(btnBrowseProj);
             grpModelPaths.Controls.Add(btnLoadModel);
             grpModelPaths.Controls.Add(lblModelStatus);
-            grpModelPaths.Location = new Point(8, 8);
+            grpModelPaths.Location = new Point(8, 9);
             grpModelPaths.Name = "grpModelPaths";
-            grpModelPaths.Size = new Size(519, 124);
+            grpModelPaths.Size = new Size(519, 141);
             grpModelPaths.TabIndex = 0;
             grpModelPaths.TabStop = false;
             grpModelPaths.Text = "LLM Model";
@@ -772,25 +778,25 @@ namespace ApexComputerUse
             // lblModelPath
             // 
             lblModelPath.AutoSize = true;
-            lblModelPath.Location = new Point(8, 26);
+            lblModelPath.Location = new Point(8, 29);
             lblModelPath.Name = "lblModelPath";
-            lblModelPath.Size = new Size(44, 15);
+            lblModelPath.Size = new Size(49, 17);
             lblModelPath.TabIndex = 0;
             lblModelPath.Text = "Model:";
             // 
             // txtModelPath
             // 
-            txtModelPath.Location = new Point(70, 23);
+            txtModelPath.Location = new Point(70, 26);
             txtModelPath.Name = "txtModelPath";
             txtModelPath.PlaceholderText = "Path to LLM .gguf file";
-            txtModelPath.Size = new Size(367, 23);
+            txtModelPath.Size = new Size(367, 25);
             txtModelPath.TabIndex = 1;
             // 
             // btnBrowseModel
             // 
-            btnBrowseModel.Location = new Point(442, 22);
+            btnBrowseModel.Location = new Point(442, 25);
             btnBrowseModel.Name = "btnBrowseModel";
-            btnBrowseModel.Size = new Size(70, 25);
+            btnBrowseModel.Size = new Size(70, 28);
             btnBrowseModel.TabIndex = 2;
             btnBrowseModel.Text = "Browse...";
             btnBrowseModel.Click += btnBrowseModel_Click;
@@ -798,34 +804,34 @@ namespace ApexComputerUse
             // lblProjPath
             // 
             lblProjPath.AutoSize = true;
-            lblProjPath.Location = new Point(8, 60);
+            lblProjPath.Location = new Point(8, 68);
             lblProjPath.Name = "lblProjPath";
-            lblProjPath.Size = new Size(58, 15);
+            lblProjPath.Size = new Size(64, 17);
             lblProjPath.TabIndex = 3;
             lblProjPath.Text = "Projector:";
             // 
             // txtProjPath
             // 
-            txtProjPath.Location = new Point(70, 57);
+            txtProjPath.Location = new Point(70, 65);
             txtProjPath.Name = "txtProjPath";
             txtProjPath.PlaceholderText = "Path to mmproj .gguf file (vision)";
-            txtProjPath.Size = new Size(367, 23);
+            txtProjPath.Size = new Size(367, 25);
             txtProjPath.TabIndex = 4;
             // 
             // btnBrowseProj
             // 
-            btnBrowseProj.Location = new Point(442, 56);
+            btnBrowseProj.Location = new Point(442, 63);
             btnBrowseProj.Name = "btnBrowseProj";
-            btnBrowseProj.Size = new Size(70, 25);
+            btnBrowseProj.Size = new Size(70, 28);
             btnBrowseProj.TabIndex = 5;
             btnBrowseProj.Text = "Browse...";
             btnBrowseProj.Click += btnBrowseProj_Click;
             // 
             // btnLoadModel
             // 
-            btnLoadModel.Location = new Point(65, 90);
+            btnLoadModel.Location = new Point(65, 102);
             btnLoadModel.Name = "btnLoadModel";
-            btnLoadModel.Size = new Size(100, 26);
+            btnLoadModel.Size = new Size(100, 29);
             btnLoadModel.TabIndex = 6;
             btnLoadModel.Text = "Load Model";
             btnLoadModel.Click += btnLoadModel_Click;
@@ -834,9 +840,9 @@ namespace ApexComputerUse
             // 
             lblModelStatus.AutoSize = true;
             lblModelStatus.ForeColor = Color.Gray;
-            lblModelStatus.Location = new Point(175, 95);
+            lblModelStatus.Location = new Point(175, 108);
             lblModelStatus.Name = "lblModelStatus";
-            lblModelStatus.Size = new Size(66, 15);
+            lblModelStatus.Size = new Size(75, 17);
             lblModelStatus.TabIndex = 7;
             lblModelStatus.Text = "Not loaded";
             // 
@@ -848,9 +854,9 @@ namespace ApexComputerUse
             grpDownload.Controls.Add(lblDownloadStatus);
             grpDownload.Controls.Add(btnDownload);
             grpDownload.Controls.Add(btnDownloadAll);
-            grpDownload.Location = new Point(8, 142);
+            grpDownload.Location = new Point(8, 161);
             grpDownload.Name = "grpDownload";
-            grpDownload.Size = new Size(519, 150);
+            grpDownload.Size = new Size(519, 170);
             grpDownload.TabIndex = 1;
             grpDownload.TabStop = false;
             grpDownload.Text = "Vision Model Download";
@@ -858,51 +864,51 @@ namespace ApexComputerUse
             // lblDownloadUrl
             // 
             lblDownloadUrl.AutoSize = true;
-            lblDownloadUrl.Location = new Point(8, 26);
+            lblDownloadUrl.Location = new Point(8, 29);
             lblDownloadUrl.Name = "lblDownloadUrl";
-            lblDownloadUrl.Size = new Size(31, 15);
+            lblDownloadUrl.Size = new Size(34, 17);
             lblDownloadUrl.TabIndex = 0;
             lblDownloadUrl.Text = "URL:";
             // 
             // txtDownloadUrl
             // 
-            txtDownloadUrl.Location = new Point(42, 23);
+            txtDownloadUrl.Location = new Point(42, 26);
             txtDownloadUrl.Name = "txtDownloadUrl";
             txtDownloadUrl.PlaceholderText = "https://huggingface.co/.../mmproj-model.gguf";
-            txtDownloadUrl.Size = new Size(469, 23);
+            txtDownloadUrl.Size = new Size(469, 25);
             txtDownloadUrl.TabIndex = 1;
             // 
             // pbarDownload
             // 
-            pbarDownload.Location = new Point(8, 58);
+            pbarDownload.Location = new Point(8, 66);
             pbarDownload.Name = "pbarDownload";
-            pbarDownload.Size = new Size(503, 20);
+            pbarDownload.Size = new Size(503, 23);
             pbarDownload.TabIndex = 2;
             // 
             // lblDownloadStatus
             // 
             lblDownloadStatus.AutoSize = true;
             lblDownloadStatus.ForeColor = Color.Gray;
-            lblDownloadStatus.Location = new Point(8, 88);
+            lblDownloadStatus.Location = new Point(8, 100);
             lblDownloadStatus.Name = "lblDownloadStatus";
-            lblDownloadStatus.Size = new Size(42, 15);
+            lblDownloadStatus.Size = new Size(47, 17);
             lblDownloadStatus.TabIndex = 3;
             lblDownloadStatus.Text = "Ready.";
             // 
             // btnDownload
             // 
-            btnDownload.Location = new Point(430, 84);
+            btnDownload.Location = new Point(430, 95);
             btnDownload.Name = "btnDownload";
-            btnDownload.Size = new Size(80, 26);
+            btnDownload.Size = new Size(80, 29);
             btnDownload.TabIndex = 4;
             btnDownload.Text = "Download";
             btnDownload.Click += btnDownload_Click;
             // 
             // btnDownloadAll
             // 
-            btnDownloadAll.Location = new Point(8, 116);
+            btnDownloadAll.Location = new Point(8, 131);
             btnDownloadAll.Name = "btnDownloadAll";
-            btnDownloadAll.Size = new Size(503, 26);
+            btnDownloadAll.Size = new Size(503, 29);
             btnDownloadAll.TabIndex = 5;
             btnDownloadAll.Text = "Download All  (LFM2.5-VL model + projector + tessdata)";
             btnDownloadAll.Click += btnDownloadAll_Click;
@@ -910,9 +916,9 @@ namespace ApexComputerUse
             // statusStrip1
             // 
             statusStrip1.Items.AddRange(new ToolStripItem[] { lblStatCpu, lblStatRam, lblStatModel, lblStatNet });
-            statusStrip1.Location = new Point(0, 362);
+            statusStrip1.Location = new Point(0, 265);
             statusStrip1.Name = "statusStrip1";
-            statusStrip1.Size = new Size(576, 24);
+            statusStrip1.Size = new Size(576, 26);
             statusStrip1.TabIndex = 2;
             statusStrip1.Text = "statusStrip1";
             // 
@@ -920,36 +926,36 @@ namespace ApexComputerUse
             // 
             lblStatCpu.BorderSides = ToolStripStatusLabelBorderSides.Right;
             lblStatCpu.Name = "lblStatCpu";
-            lblStatCpu.Size = new Size(60, 19);
+            lblStatCpu.Size = new Size(64, 21);
             lblStatCpu.Text = "CPU: --%";
             // 
             // lblStatRam
             // 
             lblStatRam.BorderSides = ToolStripStatusLabelBorderSides.Right;
             lblStatRam.Name = "lblStatRam";
-            lblStatRam.Size = new Size(74, 19);
+            lblStatRam.Size = new Size(80, 21);
             lblStatRam.Text = "RAM: -- MB";
             // 
             // lblStatModel
             // 
             lblStatModel.BorderSides = ToolStripStatusLabelBorderSides.Right;
             lblStatModel.Name = "lblStatModel";
-            lblStatModel.Size = new Size(61, 19);
+            lblStatModel.Size = new Size(67, 21);
             lblStatModel.Text = "Model: --";
             // 
             // lblStatNet
             // 
             lblStatNet.Name = "lblStatNet";
-            lblStatNet.Size = new Size(366, 19);
+            lblStatNet.Size = new Size(350, 21);
             lblStatNet.Spring = true;
             lblStatNet.Text = "Net: --";
             lblStatNet.TextAlign = ContentAlignment.MiddleRight;
             // 
             // Form1
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleDimensions = new SizeF(7F, 17F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(576, 386);
+            ClientSize = new Size(576, 291);
             Controls.Add(tabMain);
             Controls.Add(statusStrip1);
             Controls.Add(menuStrip1);
@@ -962,6 +968,11 @@ namespace ApexComputerUse
             Load += Form1_Load;
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
+            tabPageChat.ResumeLayout(false);
+            grpAiSettings.ResumeLayout(false);
+            grpAiSettings.PerformLayout();
+            grpAiSession.ResumeLayout(false);
+            grpAiSession.PerformLayout();
             tabMain.ResumeLayout(false);
             tabPageConsole.ResumeLayout(false);
             tabPageConsole.PerformLayout();
@@ -975,11 +986,6 @@ namespace ApexComputerUse
             grpModelPaths.PerformLayout();
             grpDownload.ResumeLayout(false);
             grpDownload.PerformLayout();
-            tabPageChat.ResumeLayout(false);
-            grpAiSettings.ResumeLayout(false);
-            grpAiSettings.PerformLayout();
-            grpAiSession.ResumeLayout(false);
-            grpAiSession.PerformLayout();
             statusStrip1.ResumeLayout(false);
             statusStrip1.PerformLayout();
             ResumeLayout(false);
