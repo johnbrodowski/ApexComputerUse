@@ -122,7 +122,7 @@ namespace ApexComputerUse
             menuStrip1.Items.AddRange(new ToolStripItem[] { toolsToolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
-            menuStrip1.Size = new Size(576, 25);
+            menuStrip1.Size = new Size(577, 25);
             menuStrip1.TabIndex = 0;
             menuStrip1.Text = "menuStrip1";
             // 
@@ -168,7 +168,7 @@ namespace ApexComputerUse
             tabPageChat.Location = new Point(4, 26);
             tabPageChat.Name = "tabPageChat";
             tabPageChat.Padding = new Padding(3);
-            tabPageChat.Size = new Size(540, 342);
+            tabPageChat.Size = new Size(565, 337);
             tabPageChat.TabIndex = 4;
             tabPageChat.Text = "Chat";
             tabPageChat.UseVisualStyleBackColor = true;
@@ -333,7 +333,7 @@ namespace ApexComputerUse
             tabMain.Location = new Point(0, 27);
             tabMain.Name = "tabMain";
             tabMain.SelectedIndex = 0;
-            tabMain.Size = new Size(573, 239);
+            tabMain.Size = new Size(573, 367);
             tabMain.TabIndex = 1;
             // 
             // tabPageConsole
@@ -346,7 +346,7 @@ namespace ApexComputerUse
             tabPageConsole.Location = new Point(4, 26);
             tabPageConsole.Name = "tabPageConsole";
             tabPageConsole.Padding = new Padding(3);
-            tabPageConsole.Size = new Size(565, 209);
+            tabPageConsole.Size = new Size(565, 337);
             tabPageConsole.TabIndex = 0;
             tabPageConsole.Text = "Console";
             tabPageConsole.UseVisualStyleBackColor = true;
@@ -395,7 +395,7 @@ namespace ApexComputerUse
             txtStatus.Name = "txtStatus";
             txtStatus.ReadOnly = true;
             txtStatus.ScrollBars = ScrollBars.Vertical;
-            txtStatus.Size = new Size(549, 138);
+            txtStatus.Size = new Size(549, 269);
             txtStatus.TabIndex = 4;
             // 
             // tabPageFind
@@ -419,7 +419,7 @@ namespace ApexComputerUse
             tabPageFind.Location = new Point(4, 26);
             tabPageFind.Name = "tabPageFind";
             tabPageFind.Padding = new Padding(3);
-            tabPageFind.Size = new Size(540, 342);
+            tabPageFind.Size = new Size(565, 337);
             tabPageFind.TabIndex = 1;
             tabPageFind.Text = "Find & Execute";
             tabPageFind.UseVisualStyleBackColor = true;
@@ -564,7 +564,7 @@ namespace ApexComputerUse
             tabPageRemote.Location = new Point(4, 26);
             tabPageRemote.Name = "tabPageRemote";
             tabPageRemote.Padding = new Padding(3);
-            tabPageRemote.Size = new Size(540, 342);
+            tabPageRemote.Size = new Size(565, 337);
             tabPageRemote.TabIndex = 2;
             tabPageRemote.Text = "Remote Control";
             tabPageRemote.UseVisualStyleBackColor = true;
@@ -590,7 +590,7 @@ namespace ApexComputerUse
             grpRemote.Controls.Add(lblPipeStatus);
             grpRemote.Location = new Point(8, 9);
             grpRemote.Name = "grpRemote";
-            grpRemote.Size = new Size(519, 258);
+            grpRemote.Size = new Size(519, 262);
             grpRemote.TabIndex = 0;
             grpRemote.TabStop = false;
             grpRemote.Text = "Remote Control";
@@ -753,7 +753,7 @@ namespace ApexComputerUse
             tabPageModel.Location = new Point(4, 26);
             tabPageModel.Name = "tabPageModel";
             tabPageModel.Padding = new Padding(3);
-            tabPageModel.Size = new Size(540, 342);
+            tabPageModel.Size = new Size(565, 337);
             tabPageModel.TabIndex = 3;
             tabPageModel.Text = "Model";
             tabPageModel.UseVisualStyleBackColor = true;
@@ -916,9 +916,9 @@ namespace ApexComputerUse
             // statusStrip1
             // 
             statusStrip1.Items.AddRange(new ToolStripItem[] { lblStatCpu, lblStatRam, lblStatModel, lblStatNet });
-            statusStrip1.Location = new Point(0, 265);
+            statusStrip1.Location = new Point(0, 397);
             statusStrip1.Name = "statusStrip1";
-            statusStrip1.Size = new Size(576, 26);
+            statusStrip1.Size = new Size(577, 26);
             statusStrip1.TabIndex = 2;
             statusStrip1.Text = "statusStrip1";
             // 
@@ -946,7 +946,7 @@ namespace ApexComputerUse
             // lblStatNet
             // 
             lblStatNet.Name = "lblStatNet";
-            lblStatNet.Size = new Size(350, 21);
+            lblStatNet.Size = new Size(351, 21);
             lblStatNet.Spring = true;
             lblStatNet.Text = "Net: --";
             lblStatNet.TextAlign = ContentAlignment.MiddleRight;
@@ -955,7 +955,7 @@ namespace ApexComputerUse
             // 
             AutoScaleDimensions = new SizeF(7F, 17F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(576, 291);
+            ClientSize = new Size(577, 423);
             Controls.Add(tabMain);
             Controls.Add(statusStrip1);
             Controls.Add(menuStrip1);

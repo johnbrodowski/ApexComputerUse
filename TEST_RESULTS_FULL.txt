@@ -1,0 +1,1477 @@
+[Runner] Mode: demo (speed profile: human)
+[Runner] Effective settings: MaxCycles=1, ReportEveryN=1, RunOnlyFailed=False
+[Runner] Speed profile: human (ActionDelayMs=350, UiSettleDelayMs=900)
+[Runner] Starting test-target applications...
+[WinForms Test App] Started (PID 10008)
+[WPF Test App] Started (PID 4292)
+[WebServer] Serving C:\Users\johnb\source\repos\ApexComputerUse\TestApplications\WebTestApp at http://localhost:9080/
+[Runner] Opened browser → http://localhost:9080/TortureTest.html (--new-window)
+[Runner] Opened browser → http://localhost:9080/Ecommerce.html (--new-window)
+[Telegram→stdout] ?? <b>TestRunner started</b>
+Mode: <b>demo</b>   Speed profile: <b>human</b>
+Cycles: <b>1</b>   Config: <b>Debug</b>
+Reports every: <b>1</b> cycle(s)
+Send /stop-tests to cancel at any time.
+
+────────────────────────────────────────────────────────────
+[Runner] Cycle 1/1
+────────────────────────────────────────────────────────────
+[ApexComputerUse] Started (PID 9736)
+[Runner] Waiting for Bridge API...
+[Runner] Bridge API ready.
+[Runner] Waiting for web target pages...
+[Runner] Web target pages ready.
+[API] GET /windows → OK 11 open window(s) | [
+  {
+    "id": 207126180,
+    "title": "Taskbar"
+  },
+  {
+    "id": 9778244,
+    "title": "ApexUIBridge Test Application - WPF Torture Test"
+  },
+. (168ms)
+  PASS GET /windows - WinForms app visible  (170ms)
+[API] GET /windows → OK 11 open window(s) | [
+  {
+    "id": 207126180,
+    "title": "Taskbar"
+  },
+  {
+    "id": 9778244,
+    "title": "ApexUIBridge Test Application - WPF Torture Test"
+  },
+. (85ms)
+  PASS GET /windows - WPF app visible  (87ms)
+[API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
+  "controlType": "Window",
+  "name": "System Configuration Console \u2014 UI Torture Test",
+  "automationId": "",
+  "className": "WindowsForms10.Window.8.. (145ms)
+[API] GET /elements → OK 129 element(s) | {
+  "treeHash": "03e4eab109703295ae852d3fce7397a5ce7bed41101009010dbb1126bd57ab86",
+  "root": {
+    "id": 1405076185,
+    "controlType": "Window",
+    "nam. (582ms)
+  PASS SCAN_WINDOW WinForms  (735ms)
+[API] POST /execute {"id":"1706579215","action":"select","value":"Identity"} → OK 'select' executed. (35ms)
+[API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
+  "controlType": "Window",
+  "name": "System Configuration Console \u2014 UI Torture Test",
+  "automationId": "",
+  "className": "WindowsForms10.Window.8.. (120ms)
+[API] GET /elements → OK 129 element(s) | {
+  "treeHash": "03e4eab109703295ae852d3fce7397a5ce7bed41101009010dbb1126bd57ab86",
+  "root": {
+    "id": 1405076185,
+    "controlType": "Window",
+    "nam. (401ms)
+[API] POST /execute {"id":"1208562470","action":"type","value":"autotest_222021"} → OK 'type' executed. (26ms)
+  PASS POST /execute type → WinForms TextBox  (28ms)
+[API] POST /execute {"id":"1706579215","action":"select","value":"Identity"} → OK 'select' executed. (14ms)
+[API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
+  "controlType": "Window",
+  "name": "System Configuration Console \u2014 UI Torture Test",
+  "automationId": "",
+  "className": "WindowsForms10.Window.8.. (121ms)
+[API] GET /elements → OK 129 element(s) | {
+  "treeHash": "03e4eab109703295ae852d3fce7397a5ce7bed41101009010dbb1126bd57ab86",
+  "root": {
+    "id": 1405076185,
+    "controlType": "Window",
+    "nam. (377ms)
+[API] POST /execute {"id":"1208562470","action":"type","value":"autotest_222023"} → OK 'type' executed. (6ms)
+[API] POST /execute {"id":"1208562470","action":"gettext","value":""} → OK 'gettext' executed. | autotest_222023 (9ms)
+  PASS POST /execute gettext → typed value  (9ms)
+[API] POST /execute {"id":"1706579215","action":"select","value":"Identity"} → OK 'select' executed. (22ms)
+[API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
+  "controlType": "Window",
+  "name": "System Configuration Console \u2014 UI Torture Test",
+  "automationId": "",
+  "className": "WindowsForms10.Window.8.. (149ms)
+[API] GET /elements → OK 129 element(s) | {
+  "treeHash": "bf7f5cefa1e21660bebf1ad19a0bf82dcd712465b58f1b2f5ddacb1bf7fbb2ea",
+  "root": {
+    "id": 1405076185,
+    "controlType": "Window",
+    "nam. (397ms)
+[API] POST /execute {"id":"1140036691","action":"toggle","value":""} → OK 'toggle' executed. (13ms)
+[API] POST /execute {"id":"1140036691","action":"toggle","value":""} → OK 'toggle' executed. (9ms)
+  PASS POST /execute toggle → WinForms SimpleCheckBox  (15ms)
+[API] POST /execute {"id":"301994531","action":"click","value":""} → OK 'click' executed. (32ms)
+  PASS POST /execute click → WinForms ContextMenu button  (34ms)
+[API] POST /execute {"id":"1675279737","action":"gettext","value":""} → OK 'gettext' executed. | 65% (5ms)
+  PASS POST /execute gettext → WinForms ProgressBar  (5ms)
+[API] POST /execute {"id":"1706579215","action":"select","value":"Identity"} → OK 'select' executed. (24ms)
+[API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
+  "controlType": "Window",
+  "name": "System Configuration Console \u2014 UI Torture Test",
+  "automationId": "",
+  "className": "WindowsForms10.Window.8.. (121ms)
+[API] GET /elements → OK 129 element(s) | {
+  "treeHash": "bf7f5cefa1e21660bebf1ad19a0bf82dcd712465b58f1b2f5ddacb1bf7fbb2ea",
+  "root": {
+    "id": 1405076185,
+    "controlType": "Window",
+    "nam. (389ms)
+[API] POST /execute {"id":"1444797099","action":"expand","value":""} → OK 'expand' executed. (199ms)
+[API] POST /execute {"id":"1444797099","action":"collapse","value":""} → OK 'collapse' executed. (15ms)
+  PASS POST /execute expand/collapse → WinForms EditableCombo  (15ms)
+[API] POST /find {"window":"ApexUIBridge Test Application - WPF"} → OK Window: ApexUIBridge Test Application - WPF Torture Test (fuzzy for 'ApexUIBridge Test Application - WPF') | {
+  "controlType": "Window",
+  "name": "ApexUIBridge Test Application - WPF Torture Test",
+  "automationId": "",
+  "className": "Window",
+  "frameworkId": . (115ms)
+[API] GET /elements → OK 146 element(s) | {
+  "treeHash": "1130c4e0f7d089bceaa3b4f8f6e9a1892834ac6e73dca7aa9a3ecf07d3994112",
+  "root": {
+    "id": 9778244,
+    "controlType": "Window",
+    "name":. (647ms)
+  PASS SCAN_WINDOW WPF  (766ms)
+[API] POST /execute {"id":"895335779","action":"select","value":"Identity"} → OK 'select' executed. (45ms)
+[API] POST /find {"window":"ApexUIBridge Test Application - WPF"} → OK Window: ApexUIBridge Test Application - WPF Torture Test (fuzzy for 'ApexUIBridge Test Application - WPF') | {
+  "controlType": "Window",
+  "name": "ApexUIBridge Test Application - WPF Torture Test",
+  "automationId": "",
+  "className": "Window",
+  "frameworkId": . (117ms)
+[API] GET /elements → OK 146 element(s) | {
+  "treeHash": "1130c4e0f7d089bceaa3b4f8f6e9a1892834ac6e73dca7aa9a3ecf07d3994112",
+  "root": {
+    "id": 9778244,
+    "controlType": "Window",
+    "name":. (624ms)
+[API] POST /execute {"id":"2081471380","action":"type","value":"wpf_auto_222031"} → OK 'type' executed. (39ms)
+  PASS POST /execute type → WPF TextBox  (39ms)
+[API] POST /execute {"id":"895335779","action":"select","value":"Identity"} → OK 'select' executed. (25ms)
+[API] POST /find {"window":"ApexUIBridge Test Application - WPF"} → OK Window: ApexUIBridge Test Application - WPF Torture Test (fuzzy for 'ApexUIBridge Test Application - WPF') | {
+  "controlType": "Window",
+  "name": "ApexUIBridge Test Application - WPF Torture Test",
+  "automationId": "",
+  "className": "Window",
+  "frameworkId": . (102ms)
+[API] GET /elements → OK 146 element(s) | {
+  "treeHash": "1130c4e0f7d089bceaa3b4f8f6e9a1892834ac6e73dca7aa9a3ecf07d3994112",
+  "root": {
+    "id": 9778244,
+    "controlType": "Window",
+    "name":. (611ms)
+[API] POST /execute {"id":"1996108274","action":"toggle","value":""} → OK 'toggle' executed. (15ms)
+[API] POST /execute {"id":"1996108274","action":"toggle","value":""} → OK 'toggle' executed. (19ms)
+  PASS POST /execute toggle → WPF SimpleCheckBox  (16ms)
+[API] POST /execute {"id":"1364210659","action":"click","value":""} → OK 'click' executed. (15ms)
+  PASS POST /execute click → WPF InvokableButton  (16ms)
+[API] POST /execute {"id":"895335779","action":"select","value":"Identity"} → OK 'select' executed. (19ms)
+[API] POST /find {"window":"ApexUIBridge Test Application - WPF"} → OK Window: ApexUIBridge Test Application - WPF Torture Test (fuzzy for 'ApexUIBridge Test Application - WPF') | {
+  "controlType": "Window",
+  "name": "ApexUIBridge Test Application - WPF Torture Test",
+  "automationId": "",
+  "className": "Window",
+  "frameworkId": . (162ms)
+[API] GET /elements → OK 149 element(s) | {
+  "treeHash": "a068c8ae5f7e1d2e1d4470ae197f5fd109606c66d24a859b265618f99d95dbd8",
+  "root": {
+    "id": 9778244,
+    "controlType": "Window",
+    "name":. (640ms)
+[API] POST /execute {"id":"255477295","action":"expand","value":""} → OK 'expand' executed. (41ms)
+[API] POST /execute {"id":"255477295","action":"collapse","value":""} → OK 'collapse' executed. (57ms)
+  PASS POST /execute expand/collapse → WPF NonEditableCombo  (59ms)
+[Slider] begin 'POST /execute setrange 4 → WPF Slider (verified)' window='ApexUIBridge Test Application - WPF' tab='Identity' nameHint='<none>' target=4
+[API] POST /execute {"id":"2051408635","action":"select","value":"Identity"} → OK 'select' executed. (76ms)
+[API] POST /find {"window":"ApexUIBridge Test Application - WPF"} → OK Window: ApexUIBridge Test Application - WPF Torture Test (fuzzy for 'ApexUIBridge Test Application - WPF') | {
+  "controlType": "Window",
+  "name": "ApexUIBridge Test Application - WPF Torture Test",
+  "automationId": "",
+  "className": "Window",
+  "frameworkId": . (118ms)
+[API] GET /elements → OK 146 element(s) | {
+  "treeHash": "1130c4e0f7d089bceaa3b4f8f6e9a1892834ac6e73dca7aa9a3ecf07d3994112",
+  "root": {
+    "id": 9778244,
+    "controlType": "Window",
+    "name":. (630ms)
+[Slider] found 1 Slider control(s): id=1600069537 name="" autoId="AccessLevel"
+[Slider] selected id=1600069537 name="" autoId="AccessLevel"
+[API] POST /execute {"id":"1600069537","action":"setrange","value":"4"} → OK 'setrange' executed. (87ms)
+[API] POST /execute {"id":"1600069537","action":"getrange","value":""} → OK 'getrange' executed. | 4 (4ms)
+  PASS POST /execute setrange 4 → WPF Slider (verified)
+[API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
+  "controlType": "Window",
+  "name": "System Configuration Console \u2014 UI Torture Test",
+  "automationId": "",
+  "className": "WindowsForms10.Window.8.. (114ms)
+[API] GET /elements → OK 129 element(s) | {
+  "treeHash": "bf7f5cefa1e21660bebf1ad19a0bf82dcd712465b58f1b2f5ddacb1bf7fbb2ea",
+  "root": {
+    "id": 1405076185,
+    "controlType": "Window",
+    "nam. (429ms)
+[API] POST /execute {"id":"1706579215","action":"select","value":"Identity"} → OK 'select' executed. (12ms)
+[API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
+  "controlType": "Window",
+  "name": "System Configuration Console \u2014 UI Torture Test",
+  "automationId": "",
+  "className": "WindowsForms10.Window.8.. (119ms)
+[API] GET /elements → OK 129 element(s) | {
+  "treeHash": "bf7f5cefa1e21660bebf1ad19a0bf82dcd712465b58f1b2f5ddacb1bf7fbb2ea",
+  "root": {
+    "id": 1405076185,
+    "controlType": "Window",
+    "nam. (386ms)
+[API] POST /execute {"id":"1208562470","action":"type","value":"first_222041604"} → OK 'type' executed. (8ms)
+[API] POST /execute {"id":"1208562470","action":"gettext","value":""} → OK 'gettext' executed. | first_222041604 (4ms)
+[API] POST /execute {"id":"1208562470","action":"clear","value":""} → OK 'clear' executed. (109ms)
+[API] POST /execute {"id":"1208562470","action":"type","value":"second_222041605"} → OK 'type' executed. (4ms)
+[API] POST /execute {"id":"1208562470","action":"gettext","value":""} → OK 'gettext' executed. | second_222041605 (3ms)
+  PASS TextBox edit → clear → retype (verified)
+[Slider] begin 'POST /execute setrange 50 → WinForms Slider (verified)' window='System Configuration Console' tab='Identity' nameHint='Access Level' target=50
+[API] POST /execute {"id":"1706579215","action":"select","value":"Identity"} → OK 'select' executed. (27ms)
+[API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
+  "controlType": "Window",
+  "name": "System Configuration Console \u2014 UI Torture Test",
+  "automationId": "",
+  "className": "WindowsForms10.Window.8.. (164ms)
+[API] GET /elements → OK 129 element(s) | {
+  "treeHash": "bf7f5cefa1e21660bebf1ad19a0bf82dcd712465b58f1b2f5ddacb1bf7fbb2ea",
+  "root": {
+    "id": 1405076185,
+    "controlType": "Window",
+    "nam. (392ms)
+[Slider] found 1 Slider control(s): id=810858520 name="Access Level" autoId="AccessLevelSlider"
+[Slider] selected id=810858520 name="Access Level" autoId="AccessLevelSlider"
+[API] POST /execute {"id":"810858520","action":"setrange","value":"50"} → OK 'setrange' executed. (72ms)
+[API] POST /execute {"id":"810858520","action":"getrange","value":""} → OK 'getrange' executed. | 50 (2ms)
+  PASS POST /execute setrange 50 → WinForms Slider (verified)
+[API] POST /execute {"id":"1706579215","action":"select","value":"Dialogs"} → OK 'select' executed. (81ms)
+[API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
+  "controlType": "Window",
+  "name": "System Configuration Console \u2014 UI Torture Test",
+  "automationId": "",
+  "className": "WindowsForms10.Window.8.. (118ms)
+[API] GET /elements → OK 104 element(s) | {
+  "treeHash": "58e940c8f31c3d42c34427bfe9435f274b0ea098157b6f2fbc52afa2ee5ca68b",
+  "root": {
+    "id": 1405076185,
+    "controlType": "Window",
+    "nam. (295ms)
+[API] POST /execute {"id":"658485568","action":"select-index","value":"0"} → OK 'select-index' executed. (13ms)
+  PASS POST /execute select → WinForms ListBox item
+[API] POST /execute {"id":"1706579215","action":"select","value":"Network"} → OK 'select' executed. (100ms)
+[API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
+  "controlType": "Window",
+  "name": "System Configuration Console \u2014 UI Torture Test",
+  "automationId": "",
+  "className": "WindowsForms10.Window.8.. (120ms)
+[API] GET /elements → OK 129 element(s) | {
+  "treeHash": "c70469a8a3909ebb01b57d7a9ffb54ed78e144c0a37fa50227b5ef81ff658115",
+  "root": {
+    "id": 1405076185,
+    "controlType": "Window",
+    "nam. (409ms)
+[API] POST /execute {"id":"486786957","action":"select","value":""} → FAIL Object reference not set to an instance of an object. (18ms)
+[API] POST /execute {"id":"486786957","action":"click","value":""} → OK 'click' executed. (5ms)
+  PASS POST /execute click → WinForms RadioButton2 (mutex)
+[API] POST /execute {"id":"1706579215","action":"select","value":"Dialogs"} → OK 'select' executed. (39ms)
+[API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
+  "controlType": "Window",
+  "name": "System Configuration Console \u2014 UI Torture Test",
+  "automationId": "",
+  "className": "WindowsForms10.Window.8.. (105ms)
+[API] GET /elements → OK 104 element(s) | {
+  "treeHash": "58e940c8f31c3d42c34427bfe9435f274b0ea098157b6f2fbc52afa2ee5ca68b",
+  "root": {
+    "id": 1405076185,
+    "controlType": "Window",
+    "nam. (298ms)
+[API] POST /execute {"id":"784093757","action":"toggle","value":""} → OK 'toggle' executed. (9ms)
+[API] POST /execute {"id":"784093757","action":"toggle","value":""} → OK 'toggle' executed. (4ms)
+[API] POST /execute {"id":"784093757","action":"toggle","value":""} → OK 'toggle' executed. (4ms)
+  PASS Cycle ThreeStateCheckBox x3 (WinForms)
+[API] POST /execute {"id":"1055040310","action":"click","value":""} → OK 'click' executed. (36ms)
+[API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
+  "controlType": "Window",
+  "name": "System Configuration Console \u2014 UI Torture Test",
+  "automationId": "",
+  "className": "WindowsForms10.Window.8.. (104ms)
+[API] GET /elements → OK 113 element(s) | {
+  "treeHash": "23a9452c955f50cd8962d928eb9cbafd904b93f21c34c2c20e37e1af61cae6f5",
+  "root": {
+    "id": 1405076185,
+    "controlType": "Window",
+    "nam. (322ms)
+  PASS Click Edit → Copy Plain menu item (WinForms)
+[API] POST /find {"window":"ApexUIBridge Test Application - WPF"} → OK Window: ApexUIBridge Test Application - WPF Torture Test (fuzzy for 'ApexUIBridge Test Application - WPF') | {
+  "controlType": "Window",
+  "name": "ApexUIBridge Test Application - WPF Torture Test",
+  "automationId": "",
+  "className": "Window",
+  "frameworkId": . (131ms)
+[API] GET /elements → OK 146 element(s) | {
+  "treeHash": "29c352d9de3ff9e6ae870476c79b62c42b4b549e7bcc56095601061ef04d16ad",
+  "root": {
+    "id": 9778244,
+    "controlType": "Window",
+    "name":. (621ms)
+[API] POST /execute {"id":"895335779","action":"select","value":"Network"} → OK 'select' executed. (74ms)
+[API] POST /find {"window":"ApexUIBridge Test Application - WPF"} → OK Window: ApexUIBridge Test Application - WPF Torture Test (fuzzy for 'ApexUIBridge Test Application - WPF') | {
+  "controlType": "Window",
+  "name": "ApexUIBridge Test Application - WPF Torture Test",
+  "automationId": "",
+  "className": "Window",
+  "frameworkId": . (183ms)
+[API] GET /elements → OK 156 element(s) | {
+  "treeHash": "ec35bcf96ec31e9680ba8a3bbe5ffc3cd184b29d59464ff1407de51677be5440",
+  "root": {
+    "id": 9778244,
+    "controlType": "Window",
+    "name":. (620ms)
+[API] POST /execute {"id":"674152644","action":"select-index","value":"0"} → OK 'select-index' executed. (16ms)
+  PASS POST /execute select → WPF ListBox item
+[API] POST /execute {"id":"895335779","action":"select","value":"WPF"} → OK 'select' executed. (73ms)
+[API] POST /find {"window":"ApexUIBridge Test Application - WPF"} → OK Window: ApexUIBridge Test Application - WPF Torture Test (fuzzy for 'ApexUIBridge Test Application - WPF') | {
+  "controlType": "Window",
+  "name": "ApexUIBridge Test Application - WPF Torture Test",
+  "automationId": "",
+  "className": "Window",
+  "frameworkId": . (119ms)
+[API] GET /elements → OK 135 element(s) | {
+  "treeHash": "2ec6e51ff3e6d9848aa2506bac3e3b6f18a9de3ef73befbe1aae38a6904e65e1",
+  "root": {
+    "id": 9778244,
+    "controlType": "Window",
+    "name":. (524ms)
+[API] POST /execute {"id":"431546181","action":"expand","value":""} → OK 'expand' executed. (13ms)
+[API] POST /execute {"id":"431546181","action":"collapse","value":""} → OK 'collapse' executed. (21ms)
+  PASS POST /execute expand/collapse → WPF Expander  (22ms)
+[API] POST /execute {"id":"2077211690","action":"click","value":""} → OK 'click' executed. (157ms)
+  PASS Click File menu (WPF)
+[API] POST /find {"window":"Browser Torture Test 2026"} → OK Window: Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft? Edge (fuzzy for 'Browser Torture Test 2026') | {
+  "controlType": "Window",
+  "name": "Browser Torture Test 2026 \u2014 Single-File HTML UI Torture Chamber - Personal - Microsoft\u200B Edge",
+  "automatio. (120ms)
+[API] POST /find {"window":"Browser Torture Test 2026"} → OK Window: Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft? Edge (fuzzy for 'Browser Torture Test 2026') | {
+  "controlType": "Window",
+  "name": "Browser Torture Test 2026 \u2014 Single-File HTML UI Torture Chamber - Personal - Microsoft\u200B Edge",
+  "automatio. (109ms)
+[API] GET /elements → OK 53 element(s) | {
+  "treeHash": "715795f1bf4932b2f197e8e9ec5dc3ff14ead310b65c694bc38c07e12d7b9c97",
+  "root": {
+    "id": 1306926730,
+    "controlType": "Window",
+    "nam. (153ms)
+  PASS SCAN_WINDOW Torture Test  (268ms)
+[API] POST /find {"window":"Browser Torture Test 2026"} → OK Window: Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft? Edge (fuzzy for 'Browser Torture Test 2026') | {
+  "controlType": "Window",
+  "name": "Browser Torture Test 2026 \u2014 Single-File HTML UI Torture Chamber - Personal - Microsoft\u200B Edge",
+  "automatio. (100ms)
+[API] POST /find {"window":"Browser Torture Test 2026"} → OK Window: Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft? Edge (fuzzy for 'Browser Torture Test 2026') | {
+  "controlType": "Window",
+  "name": "Browser Torture Test 2026 \u2014 Single-File HTML UI Torture Chamber - Personal - Microsoft\u200B Edge",
+  "automatio. (109ms)
+[API] GET /elements → OK 325 element(s) | {
+  "treeHash": "410bf048942f314e69a3c25a4d88a298d1fd8eb8cbaf3d148aa06af9174a73bd",
+  "root": {
+    "id": 1306926730,
+    "controlType": "Window",
+    "nam. (709ms)
+[API] POST /execute {"id":"1331770889","action":"focus","value":""} → OK 'focus' executed. (8ms)
+[API] POST /execute {"id":"1331770889","action":"type","value":"first_222103101"} → OK 'type' executed. (13ms)
+[API] POST /execute {"id":"1331770889","action":"gettext","value":""} → OK 'gettext' executed. | first_222103101 (3ms)
+[API] POST /execute {"id":"1331770889","action":"clear","value":""} → OK 'clear' executed. (63ms)
+[API] POST /execute {"id":"1331770889","action":"type","value":"second_222103101"} → OK 'type' executed. (11ms)
+[API] POST /execute {"id":"1331770889","action":"gettext","value":""} → OK 'gettext' executed. | second_222103101 (2ms)
+  PASS POST /execute type → HTML TextBox on Torture Test (verified)
+[API] POST /find {"window":"AGPA E-Commerce Test App"} → OK Window: AGPA E-Commerce Test App - Personal - Microsoft? Edge (fuzzy for 'AGPA E-Commerce Test App') | {
+  "controlType": "Window",
+  "name": "AGPA E-Commerce Test App - Personal - Microsoft\u200B Edge",
+  "automationId": "",
+  "className": "Chrome_WidgetWin_. (132ms)
+[API] POST /find {"window":"AGPA E-Commerce Test App"} → OK Window: AGPA E-Commerce Test App - Personal - Microsoft? Edge (fuzzy for 'AGPA E-Commerce Test App') | {
+  "controlType": "Window",
+  "name": "AGPA E-Commerce Test App - Personal - Microsoft\u200B Edge",
+  "automationId": "",
+  "className": "Chrome_WidgetWin_. (119ms)
+[API] GET /elements → OK 116 element(s) | {
+  "treeHash": "4f459aca960440dd51cbfa5ce17e8f54ed5499332cb6cb3a7166baeef794b3a1",
+  "root": {
+    "id": 1306926730,
+    "controlType": "Window",
+    "nam. (251ms)
+  PASS SCAN_WINDOW Ecommerce  (377ms)
+[API] POST /find {"window":"AGPA E-Commerce Test App"} → OK Window: AGPA E-Commerce Test App - Personal - Microsoft? Edge (fuzzy for 'AGPA E-Commerce Test App') | {
+  "controlType": "Window",
+  "name": "AGPA E-Commerce Test App - Personal - Microsoft\u200B Edge",
+  "automationId": "",
+  "className": "Chrome_WidgetWin_. (118ms)
+[Slider] begin 'POST /execute setrange 100 → HTML range slider on Ecommerce (verified)' window='AGPA E-Commerce Test App' tab='<none>' nameHint='<none>' target=100
+[API] POST /find {"window":"AGPA E-Commerce Test App"} → OK Window: AGPA E-Commerce Test App - Personal - Microsoft? Edge (fuzzy for 'AGPA E-Commerce Test App') | {
+  "controlType": "Window",
+  "name": "AGPA E-Commerce Test App - Personal - Microsoft\u200B Edge",
+  "automationId": "",
+  "className": "Chrome_WidgetWin_. (116ms)
+[API] GET /elements → OK 129 element(s) | {
+  "treeHash": "b28f37bea823d2f1b1bfe997beb99b944e4a7097968fc112caff37a4e1a0c2de",
+  "root": {
+    "id": 1306926730,
+    "controlType": "Window",
+    "nam. (307ms)
+[Slider] found 1 Slider control(s): id=1153737497 name="Price range" autoId="priceRange"
+[Slider] selected id=1153737497 name="Price range" autoId="priceRange"
+[API] POST /execute {"id":"1153737497","action":"setrange","value":"100"} → OK 'setrange' executed. (67ms)
+[API] POST /execute {"id":"1153737497","action":"getrange","value":""} → OK 'getrange' executed. | 100 (3ms)
+  PASS POST /execute setrange 100 → HTML range slider on Ecommerce (verified)
+[API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
+  "controlType": "Window",
+  "name": "System Configuration Console \u2014 UI Torture Test",
+  "automationId": "",
+  "className": "WindowsForms10.Window.8.. (114ms)
+[API] GET /elements → OK 104 element(s) | {
+  "treeHash": "58e940c8f31c3d42c34427bfe9435f274b0ea098157b6f2fbc52afa2ee5ca68b",
+  "root": {
+    "id": 1405076185,
+    "controlType": "Window",
+    "nam. (445ms)
+[API] POST /execute {"id":"1706579215","action":"select","value":"Identity"} → OK 'select' executed. (58ms)
+[API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
+  "controlType": "Window",
+  "name": "System Configuration Console \u2014 UI Torture Test",
+  "automationId": "",
+  "className": "WindowsForms10.Window.8.. (106ms)
+[API] GET /elements → OK 129 element(s) | {
+  "treeHash": "bf7f5cefa1e21660bebf1ad19a0bf82dcd712465b58f1b2f5ddacb1bf7fbb2ea",
+  "root": {
+    "id": 1405076185,
+    "controlType": "Window",
+    "nam. (385ms)
+[API] POST /execute {"id":"1188144310","action":"expand","value":""} → OK 'expand' executed. (202ms)
+[API] POST /execute {"id":"1188144310","action":"select","value":"Inactive"} → OK 'select' executed. (31ms)
+  PASS WinForms Identity: StatusCombo → select Inactive
+[API] POST /execute {"id":"1706579215","action":"select","value":"Identity"} → OK 'select' executed. (15ms)
+[API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
+  "controlType": "Window",
+  "name": "System Configuration Console \u2014 UI Torture Test",
+  "automationId": "",
+  "className": "WindowsForms10.Window.8.. (121ms)
+[API] GET /elements → OK 134 element(s) | {
+  "treeHash": "d596385e4ba8d1edd1c117722f9d2748f218cc69295e49d6b49a87a564658d5e",
+  "root": {
+    "id": 1405076185,
+    "controlType": "Window",
+    "nam. (402ms)
+[API] POST /execute {"id":"2107477732","action":"setvalue","value":"75000"} → OK 'setvalue' executed. (181ms)
+[API] POST /execute {"id":"2107477732","action":"getvalue","value":""} → OK 'getvalue' executed. | Annual Salary: (6ms)
+  PASS WinForms Identity: SalaryInput → setvalue 75000
+[API] POST /execute {"id":"1706579215","action":"select","value":"Identity"} → OK 'select' executed. (20ms)
+[API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
+  "controlType": "Window",
+  "name": "System Configuration Console \u2014 UI Torture Test",
+  "automationId": "",
+  "className": "WindowsForms10.Window.8.. (121ms)
+[API] GET /elements → OK 129 element(s) | {
+  "treeHash": "bf7f5cefa1e21660bebf1ad19a0bf82dcd712465b58f1b2f5ddacb1bf7fbb2ea",
+  "root": {
+    "id": 1405076185,
+    "controlType": "Window",
+    "nam. (377ms)
+[API] POST /execute {"id":"1589139165","action":"type","value":"first_222116261"} → OK 'type' executed. (15ms)
+[API] POST /execute {"id":"1589139165","action":"gettext","value":""} → OK 'gettext' executed. | first_222116261 (3ms)
+[API] POST /execute {"id":"1589139165","action":"clear","value":""} → OK 'clear' executed. (108ms)
+[API] POST /execute {"id":"1589139165","action":"type","value":"second_222116261"} → OK 'type' executed. (7ms)
+[API] POST /execute {"id":"1589139165","action":"gettext","value":""} → OK 'gettext' executed. | second_222116261 (2ms)
+  PASS WinForms Identity: NotesField → retype
+[Slider] begin 'WinForms Network: UploadSlider → setrange 20 (UIA=actual 200)' window='System Configuration Console' tab='Network' nameHint='Upload' target=20
+[API] POST /execute {"id":"1706579215","action":"select","value":"Network"} → OK 'select' executed. (44ms)
+[API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
+  "controlType": "Window",
+  "name": "System Configuration Console \u2014 UI Torture Test",
+  "automationId": "",
+  "className": "WindowsForms10.Window.8.. (119ms)
+[API] GET /elements → OK 129 element(s) | {
+  "treeHash": "c70469a8a3909ebb01b57d7a9ffb54ed78e144c0a37fa50227b5ef81ff658115",
+  "root": {
+    "id": 1405076185,
+    "controlType": "Window",
+    "nam. (368ms)
+[Slider] found 2 Slider control(s): id=1667821051 name="Upload (Mbps):" autoId="UploadSlider", id=2141059792 name="Download (Mbps):" autoId="DownloadSlider"
+[Slider] selected id=1667821051 name="Upload (Mbps):" autoId="UploadSlider"
+[API] POST /execute {"id":"1667821051","action":"setrange","value":"20"} → OK 'setrange' executed. (73ms)
+[API] POST /execute {"id":"1667821051","action":"getrange","value":""} → OK 'getrange' executed. | 20 (3ms)
+  PASS WinForms Network: UploadSlider → setrange 20 (UIA=actual 200)
+[Slider] begin 'WinForms Network: DownloadSlider → setrange 30 (UIA=actual 300)' window='System Configuration Console' tab='Network' nameHint='Download' target=30
+[API] POST /execute {"id":"1706579215","action":"select","value":"Network"} → OK 'select' executed. (20ms)
+[API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
+  "controlType": "Window",
+  "name": "System Configuration Console \u2014 UI Torture Test",
+  "automationId": "",
+  "className": "WindowsForms10.Window.8.. (105ms)
+[API] GET /elements → OK 129 element(s) | {
+  "treeHash": "d1740f2baf63a5b2819edc95b4751857cb876b71d91ed82839ff3679811a3c17",
+  "root": {
+    "id": 1405076185,
+    "controlType": "Window",
+    "nam. (369ms)
+[Slider] found 2 Slider control(s): id=1667821051 name="Upload (Mbps):" autoId="UploadSlider", id=2141059792 name="Download (Mbps):" autoId="DownloadSlider"
+[Slider] selected id=2141059792 name="Download (Mbps):" autoId="DownloadSlider"
+[API] POST /execute {"id":"2141059792","action":"setrange","value":"30"} → OK 'setrange' executed. (68ms)
+[API] POST /execute {"id":"2141059792","action":"getrange","value":""} → OK 'getrange' executed. | 30 (3ms)
+  PASS WinForms Network: DownloadSlider → setrange 30 (UIA=actual 300)
+[API] POST /execute {"id":"1706579215","action":"select","value":"Network"} → OK 'select' executed. (20ms)
+[API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
+  "controlType": "Window",
+  "name": "System Configuration Console \u2014 UI Torture Test",
+  "automationId": "",
+  "className": "WindowsForms10.Window.8.. (105ms)
+[API] GET /elements → OK 129 element(s) | {
+  "treeHash": "36f7f6d719be338332caa98eab0c56cb0ffd3763cd8ce5e3ad88a358c71174e7",
+  "root": {
+    "id": 1405076185,
+    "controlType": "Window",
+    "nam. (401ms)
+[API] POST /execute {"id":"480321463","action":"toggle","value":""} → OK 'toggle' executed. (12ms)
+[API] POST /execute {"id":"480321463","action":"toggle","value":""} → OK 'toggle' executed. (4ms)
+  PASS WinForms Network: TlsVerify → toggle
+[API] POST /execute {"id":"1706579215","action":"select","value":"Network"} → OK 'select' executed. (20ms)
+[API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
+  "controlType": "Window",
+  "name": "System Configuration Console \u2014 UI Torture Test",
+  "automationId": "",
+  "className": "WindowsForms10.Window.8.. (121ms)
+[API] GET /elements → OK 129 element(s) | {
+  "treeHash": "36f7f6d719be338332caa98eab0c56cb0ffd3763cd8ce5e3ad88a358c71174e7",
+  "root": {
+    "id": 1405076185,
+    "controlType": "Window",
+    "nam. (347ms)
+[API] POST /execute {"id":"341742500","action":"select-index","value":"3"} → OK 'select-index' executed. (23ms)
+  PASS WinForms Network: FeaturesCheckedList → select-index 3
+[API] POST /execute {"id":"1706579215","action":"select","value":"Scheduler"} → OK 'select' executed. (141ms)
+[API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
+  "controlType": "Window",
+  "name": "System Configuration Console \u2014 UI Torture Test",
+  "automationId": "",
+  "className": "WindowsForms10.Window.8.. (104ms)
+[API] GET /elements → OK 222 element(s) | {
+  "treeHash": "3cd8f819dc46c1f92635f6846a885195232ff1923502e7568269b82b7de322a0",
+  "root": {
+    "id": 1405076185,
+    "controlType": "Window",
+    "nam. (577ms)
+[API] POST /execute {"id":"260898746","action":"type","value":"first_222128995"} → OK 'type' executed. (3ms)
+[API] POST /execute {"id":"260898746","action":"gettext","value":""} → OK 'gettext' executed. | first_222128995 (3ms)
+[API] POST /execute {"id":"260898746","action":"clear","value":""} → OK 'clear' executed. (109ms)
+[API] POST /execute {"id":"260898746","action":"type","value":"second_222128995"} → OK 'type' executed. (5ms)
+[API] POST /execute {"id":"260898746","action":"gettext","value":""} → OK 'gettext' executed. | second_222128995 (3ms)
+  PASS WinForms Scheduler: JobName → retype
+[API] POST /execute {"id":"1706579215","action":"select","value":"Scheduler"} → OK 'select' executed. (20ms)
+[API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
+  "controlType": "Window",
+  "name": "System Configuration Console \u2014 UI Torture Test",
+  "automationId": "",
+  "className": "WindowsForms10.Window.8.. (104ms)
+[API] GET /elements → OK 222 element(s) | {
+  "treeHash": "3cd8f819dc46c1f92635f6846a885195232ff1923502e7568269b82b7de322a0",
+  "root": {
+    "id": 1405076185,
+    "controlType": "Window",
+    "nam. (495ms)
+[API] POST /execute {"id":"1740315599","action":"expand","value":""} → OK 'expand' executed. (190ms)
+[API] POST /execute {"id":"1740315599","action":"select","value":"Report"} → OK 'select' executed. (446ms)
+  PASS WinForms Scheduler: JobType → select Report
+[Slider] begin 'WinForms Scheduler: PrioritySlider → setrange 66 (UIA=actual 7)' window='System Configuration Console' tab='Scheduler' nameHint='Priority' target=66
+[API] POST /execute {"id":"1706579215","action":"select","value":"Scheduler"} → OK 'select' executed. (20ms)
+[API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
+  "controlType": "Window",
+  "name": "System Configuration Console \u2014 UI Torture Test",
+  "automationId": "",
+  "className": "WindowsForms10.Window.8.. (106ms)
+[API] GET /elements → OK 222 element(s) | {
+  "treeHash": "3cd8f819dc46c1f92635f6846a885195232ff1923502e7568269b82b7de322a0",
+  "root": {
+    "id": 1405076185,
+    "controlType": "Window",
+    "nam. (499ms)
+[Slider] found 1 Slider control(s): id=23558242 name="Priority" autoId="PrioritySlider"
+[Slider] selected id=23558242 name="Priority" autoId="PrioritySlider"
+[API] POST /execute {"id":"23558242","action":"setrange","value":"66"} → OK 'setrange' executed. (431ms)
+[API] POST /execute {"id":"23558242","action":"getrange","value":""} → OK 'getrange' executed. | 66 (3ms)
+  PASS WinForms Scheduler: PrioritySlider → setrange 66 (UIA=actual 7)
+[API] POST /execute {"id":"1706579215","action":"select","value":"Scheduler"} → OK 'select' executed. (23ms)
+[API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
+  "controlType": "Window",
+  "name": "System Configuration Console \u2014 UI Torture Test",
+  "automationId": "",
+  "className": "WindowsForms10.Window.8.. (104ms)
+[API] GET /elements → OK 222 element(s) | {
+  "treeHash": "efa6eb3d1eeeec626704e05200194994cc0b7023ab340fde16dc6171b81eb27a",
+  "root": {
+    "id": 1405076185,
+    "controlType": "Window",
+    "nam. (495ms)
+[API] POST /execute {"id":"1194967220","action":"toggle","value":""} → OK 'toggle' executed. (10ms)
+[API] POST /execute {"id":"1194967220","action":"toggle","value":""} → OK 'toggle' executed. (4ms)
+  PASS WinForms Scheduler: JobEnabled → toggle
+[API] POST /execute {"id":"1706579215","action":"select","value":"Layout"} → OK 'select' executed. (164ms)
+[API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
+  "controlType": "Window",
+  "name": "System Configuration Console \u2014 UI Torture Test",
+  "automationId": "",
+  "className": "WindowsForms10.Window.8.. (120ms)
+[API] GET /elements → OK 178 element(s) | {
+  "treeHash": "3b2456f41cbea773248f29c9fc167f54562e0a137f48b9fac2830904ede44484",
+  "root": {
+    "id": 1405076185,
+    "controlType": "Window",
+    "nam. (517ms)
+[API] POST /execute {"id":"316950721","action":"click","value":""} → OK 'click' executed. (8ms)
+  PASS WinForms Layout: Button Apply → click  (9ms)
+[API] POST /execute {"id":"1706579215","action":"select","value":"Layout"} → OK 'select' executed. (21ms)
+[API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
+  "controlType": "Window",
+  "name": "System Configuration Console \u2014 UI Torture Test",
+  "automationId": "",
+  "className": "WindowsForms10.Window.8.. (121ms)
+[API] GET /elements → OK 178 element(s) | {
+  "treeHash": "3b2456f41cbea773248f29c9fc167f54562e0a137f48b9fac2830904ede44484",
+  "root": {
+    "id": 1405076185,
+    "controlType": "Window",
+    "nam. (475ms)
+[API] POST /execute {"id":"1949933428","action":"click","value":""} → OK 'click' executed. (6ms)
+  PASS WinForms Layout: Button Reset → click  (8ms)
+[API] POST /execute {"id":"1706579215","action":"select","value":"Logs"} → OK 'select' executed. (102ms)
+[API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
+  "controlType": "Window",
+  "name": "System Configuration Console \u2014 UI Torture Test",
+  "automationId": "",
+  "className": "WindowsForms10.Window.8.. (105ms)
+[API] GET /elements → OK 91 element(s) | {
+  "treeHash": "9c3d380a917651b29368869434177d6283894b82d42c6c974a1f922a7029d0cf",
+  "root": {
+    "id": 1405076185,
+    "controlType": "Window",
+    "nam. (205ms)
+[API] POST /execute {"id":"485623066","action":"expand","value":""} → OK 'expand' executed. (178ms)
+[API] POST /execute {"id":"485623066","action":"select","value":"ERROR"} → OK 'select' executed. (447ms)
+  PASS WinForms Logs: LogLevelCombo → select ERROR
+[API] POST /execute {"id":"1706579215","action":"select","value":"Logs"} → OK 'select' executed. (24ms)
+[API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
+  "controlType": "Window",
+  "name": "System Configuration Console \u2014 UI Torture Test",
+  "automationId": "",
+  "className": "WindowsForms10.Window.8.. (122ms)
+[API] GET /elements → OK 91 element(s) | {
+  "treeHash": "14f2ed5c7e8ea9aec0dc69bec80901eaff13737e383c2bdfc0717df112b9d578",
+  "root": {
+    "id": 1405076185,
+    "controlType": "Window",
+    "nam. (213ms)
+[API] POST /execute {"id":"1318002927","action":"type","value":"first_222146756"} → OK 'type' executed. (10ms)
+[API] POST /execute {"id":"1318002927","action":"gettext","value":""} → OK 'gettext' executed. | first_222146756 (3ms)
+[API] POST /execute {"id":"1318002927","action":"clear","value":""} → OK 'clear' executed. (110ms)
+[API] POST /execute {"id":"1318002927","action":"type","value":"second_222146756"} → OK 'type' executed. (4ms)
+[API] POST /execute {"id":"1318002927","action":"gettext","value":""} → OK 'gettext' executed. | second_222146756 (4ms)
+  PASS WinForms Logs: LogFilter → retype
+[API] POST /execute {"id":"1706579215","action":"select","value":"Logs"} → OK 'select' executed. (27ms)
+[API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
+  "controlType": "Window",
+  "name": "System Configuration Console \u2014 UI Torture Test",
+  "automationId": "",
+  "className": "WindowsForms10.Window.8.. (104ms)
+[API] GET /elements → OK 91 element(s) | {
+  "treeHash": "14f2ed5c7e8ea9aec0dc69bec80901eaff13737e383c2bdfc0717df112b9d578",
+  "root": {
+    "id": 1405076185,
+    "controlType": "Window",
+    "nam. (248ms)
+[API] POST /execute {"id":"1902447809","action":"toggle","value":""} → OK 'toggle' executed. (9ms)
+[API] POST /execute {"id":"1902447809","action":"toggle","value":""} → OK 'toggle' executed. (3ms)
+  PASS WinForms Logs: LogAutoScroll → toggle
+[API] POST /execute {"id":"1706579215","action":"select","value":"Dialogs"} → OK 'select' executed. (41ms)
+[API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
+  "controlType": "Window",
+  "name": "System Configuration Console \u2014 UI Torture Test",
+  "automationId": "",
+  "className": "WindowsForms10.Window.8.. (120ms)
+[API] GET /elements → OK 104 element(s) | {
+  "treeHash": "58e940c8f31c3d42c34427bfe9435f274b0ea098157b6f2fbc52afa2ee5ca68b",
+  "root": {
+    "id": 1405076185,
+    "controlType": "Window",
+    "nam. (308ms)
+[API] POST /execute {"id":"2055908227","action":"setvalue","value":"Beta"} → OK 'setvalue' executed. (277ms)
+  PASS WinForms Dialogs: DomainSpinner → setvalue Beta
+[API] POST /execute {"id":"1706579215","action":"select","value":"Dialogs"} → OK 'select' executed. (25ms)
+[API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
+  "controlType": "Window",
+  "name": "System Configuration Console \u2014 UI Torture Test",
+  "automationId": "",
+  "className": "WindowsForms10.Window.8.. (103ms)
+[API] GET /elements → OK 104 element(s) | {
+  "treeHash": "58e940c8f31c3d42c34427bfe9435f274b0ea098157b6f2fbc52afa2ee5ca68b",
+  "root": {
+    "id": 1405076185,
+    "controlType": "Window",
+    "nam. (299ms)
+[API] POST /execute {"id":"877084187","action":"setvalue","value":"42"} → OK 'setvalue' executed. (193ms)
+[API] POST /execute {"id":"877084187","action":"getvalue","value":""} → OK 'getvalue' executed. | Numeric (decimal): (5ms)
+  PASS WinForms Dialogs: DecimalSpinner → setvalue 42
+[Slider] begin 'WPF Identity: Slider AccessLevel → setrange 3' window='ApexUIBridge Test Application - WPF' tab='Identity' nameHint='AccessLevel' target=3
+[API] POST /find {"window":"ApexUIBridge Test Application - WPF"} → OK Window: ApexUIBridge Test Application - WPF Torture Test (fuzzy for 'ApexUIBridge Test Application - WPF') | {
+  "controlType": "Window",
+  "name": "ApexUIBridge Test Application - WPF Torture Test",
+  "automationId": "",
+  "className": "Window",
+  "frameworkId": . (132ms)
+[API] GET /elements → OK 129 element(s) | {
+  "treeHash": "68e296e8a9c4cfd4a5fa122916dd5adb7d1ac641807921b316c7e87c90a69b18",
+  "root": {
+    "id": 9778244,
+    "controlType": "Window",
+    "name":. (541ms)
+[API] POST /execute {"id":"895335779","action":"select","value":"Identity"} → OK 'select' executed. (40ms)
+[API] POST /find {"window":"ApexUIBridge Test Application - WPF"} → OK Window: ApexUIBridge Test Application - WPF Torture Test (fuzzy for 'ApexUIBridge Test Application - WPF') | {
+  "controlType": "Window",
+  "name": "ApexUIBridge Test Application - WPF Torture Test",
+  "automationId": "",
+  "className": "Window",
+  "frameworkId": . (100ms)
+[API] GET /elements → OK 146 element(s) | {
+  "treeHash": "29c352d9de3ff9e6ae870476c79b62c42b4b549e7bcc56095601061ef04d16ad",
+  "root": {
+    "id": 9778244,
+    "controlType": "Window",
+    "name":. (635ms)
+[Slider] found 1 Slider control(s): id=1600069537 name="" autoId="AccessLevel"
+[Slider] selected id=1600069537 name="" autoId="AccessLevel"
+[API] POST /execute {"id":"1600069537","action":"setrange","value":"3"} → OK 'setrange' executed. (80ms)
+[API] POST /execute {"id":"1600069537","action":"getrange","value":""} → OK 'getrange' executed. | 3 (3ms)
+  PASS WPF Identity: Slider AccessLevel → setrange 3
+[API] POST /execute {"id":"895335779","action":"select","value":"Identity"} → OK 'select' executed. (27ms)
+[API] POST /find {"window":"ApexUIBridge Test Application - WPF"} → OK Window: ApexUIBridge Test Application - WPF Torture Test (fuzzy for 'ApexUIBridge Test Application - WPF') | {
+  "controlType": "Window",
+  "name": "ApexUIBridge Test Application - WPF Torture Test",
+  "automationId": "",
+  "className": "Window",
+  "frameworkId": . (123ms)
+[API] GET /elements → OK 146 element(s) | {
+  "treeHash": "1130c4e0f7d089bceaa3b4f8f6e9a1892834ac6e73dca7aa9a3ecf07d3994112",
+  "root": {
+    "id": 9778244,
+    "controlType": "Window",
+    "name":. (638ms)
+[API] POST /execute {"id":"1986858359","action":"select","value":""} → OK 'select' executed. (9ms)
+  PASS WPF Identity: RadioButton EmpPartTime → select
+[API] POST /execute {"id":"895335779","action":"select","value":"Identity"} → OK 'select' executed. (20ms)
+[API] POST /find {"window":"ApexUIBridge Test Application - WPF"} → OK Window: ApexUIBridge Test Application - WPF Torture Test (fuzzy for 'ApexUIBridge Test Application - WPF') | {
+  "controlType": "Window",
+  "name": "ApexUIBridge Test Application - WPF Torture Test",
+  "automationId": "",
+  "className": "Window",
+  "frameworkId": . (120ms)
+[API] GET /elements → OK 146 element(s) | {
+  "treeHash": "1130c4e0f7d089bceaa3b4f8f6e9a1892834ac6e73dca7aa9a3ecf07d3994112",
+  "root": {
+    "id": 9778244,
+    "controlType": "Window",
+    "name":. (607ms)
+[API] POST /execute {"id":"748110766","action":"toggle","value":""} → OK 'toggle' executed. (11ms)
+[API] POST /execute {"id":"748110766","action":"toggle","value":""} → OK 'toggle' executed. (15ms)
+  PASS WPF Identity: CheckBox FlagVpn → toggle
+[API] POST /execute {"id":"895335779","action":"select","value":"Identity"} → OK 'select' executed. (22ms)
+[API] POST /find {"window":"ApexUIBridge Test Application - WPF"} → OK Window: ApexUIBridge Test Application - WPF Torture Test (fuzzy for 'ApexUIBridge Test Application - WPF') | {
+  "controlType": "Window",
+  "name": "ApexUIBridge Test Application - WPF Torture Test",
+  "automationId": "",
+  "className": "Window",
+  "frameworkId": . (120ms)
+[API] GET /elements → OK 146 element(s) | {
+  "treeHash": "1130c4e0f7d089bceaa3b4f8f6e9a1892834ac6e73dca7aa9a3ecf07d3994112",
+  "root": {
+    "id": 9778244,
+    "controlType": "Window",
+    "name":. (601ms)
+[API] POST /execute {"id":"379002538","action":"expand","value":""} → OK 'expand' executed. (32ms)
+[API] POST /execute {"id":"379002538","action":"select","value":"Boston"} → OK 'select' executed. (55ms)
+  PASS WPF Identity: ComboBox Location → select Boston
+[API] POST /execute {"id":"895335779","action":"select","value":"Identity"} → OK 'select' executed. (19ms)
+[API] POST /find {"window":"ApexUIBridge Test Application - WPF"} → OK Window: ApexUIBridge Test Application - WPF Torture Test (fuzzy for 'ApexUIBridge Test Application - WPF') | {
+  "controlType": "Window",
+  "name": "ApexUIBridge Test Application - WPF Torture Test",
+  "automationId": "",
+  "className": "Window",
+  "frameworkId": . (100ms)
+[API] GET /elements → OK 171 element(s) | {
+  "treeHash": "ee5e3ac10de8aa11f7ded99b30f08482a8d3d819f822feac882bbd29eb29f866",
+  "root": {
+    "id": 9778244,
+    "controlType": "Window",
+    "name":. (784ms)
+[API] POST /execute {"id":"1631865224","action":"type","value":"first_222206973"} → OK 'type' executed. (21ms)
+[API] POST /execute {"id":"1631865224","action":"gettext","value":""} → OK 'gettext' executed. | first_222206973 (8ms)
+[API] POST /execute {"id":"1631865224","action":"clear","value":""} → OK 'clear' executed. (69ms)
+[API] POST /execute {"id":"1631865224","action":"type","value":"second_222206973"} → OK 'type' executed. (15ms)
+[API] POST /execute {"id":"1631865224","action":"gettext","value":""} → OK 'gettext' executed. | second_222206973 (5ms)
+  PASS WPF Identity: TextBox Email → retype
+[Slider] begin 'WPF Network: Slider UploadLimit → setrange 200' window='ApexUIBridge Test Application - WPF' tab='Network' nameHint='UploadLimit' target=200
+[API] POST /execute {"id":"2051408635","action":"select","value":"Network"} → OK 'select' executed. (37ms)
+[API] POST /find {"window":"ApexUIBridge Test Application - WPF"} → OK Window: ApexUIBridge Test Application - WPF Torture Test (fuzzy for 'ApexUIBridge Test Application - WPF') | {
+  "controlType": "Window",
+  "name": "ApexUIBridge Test Application - WPF Torture Test",
+  "automationId": "",
+  "className": "Window",
+  "frameworkId": . (124ms)
+[API] GET /elements → OK 156 element(s) | {
+  "treeHash": "ec35bcf96ec31e9680ba8a3bbe5ffc3cd184b29d59464ff1407de51677be5440",
+  "root": {
+    "id": 9778244,
+    "controlType": "Window",
+    "name":. (646ms)
+[Slider] found 4 Slider control(s): id=1222199350 name="" autoId="Timeout", id=604642182 name="" autoId="Retries", id=2122745553 name="" autoId="UploadLimit", id=384668312 name="" autoId="DownloadLimit"
+[Slider] selected id=2122745553 name="" autoId="UploadLimit"
+[API] POST /execute {"id":"2122745553","action":"setrange","value":"200"} → OK 'setrange' executed. (78ms)
+[API] POST /execute {"id":"2122745553","action":"getrange","value":""} → OK 'getrange' executed. | 200 (3ms)
+  PASS WPF Network: Slider UploadLimit → setrange 200
+[Slider] begin 'WPF Network: Slider DownloadLimit → setrange 300' window='ApexUIBridge Test Application - WPF' tab='Network' nameHint='DownloadLimit' target=300
+[API] POST /execute {"id":"895335779","action":"select","value":"Network"} → OK 'select' executed. (26ms)
+[API] POST /find {"window":"ApexUIBridge Test Application - WPF"} → OK Window: ApexUIBridge Test Application - WPF Torture Test (fuzzy for 'ApexUIBridge Test Application - WPF') | {
+  "controlType": "Window",
+  "name": "ApexUIBridge Test Application - WPF Torture Test",
+  "automationId": "",
+  "className": "Window",
+  "frameworkId": . (102ms)
+[API] GET /elements → OK 156 element(s) | {
+  "treeHash": "92d4c70b5ec3022ebb3d648d9a33b2957358134dcd0a692df7112930850b6fec",
+  "root": {
+    "id": 9778244,
+    "controlType": "Window",
+    "name":. (613ms)
+[Slider] found 4 Slider control(s): id=1222199350 name="" autoId="Timeout", id=604642182 name="" autoId="Retries", id=2122745553 name="" autoId="UploadLimit", id=384668312 name="" autoId="DownloadLimit"
+[Slider] selected id=384668312 name="" autoId="DownloadLimit"
+[API] POST /execute {"id":"384668312","action":"setrange","value":"300"} → OK 'setrange' executed. (67ms)
+[API] POST /execute {"id":"384668312","action":"getrange","value":""} → OK 'getrange' executed. | 300 (4ms)
+  PASS WPF Network: Slider DownloadLimit → setrange 300
+[API] POST /execute {"id":"895335779","action":"select","value":"Network"} → OK 'select' executed. (19ms)
+[API] POST /find {"window":"ApexUIBridge Test Application - WPF"} → OK Window: ApexUIBridge Test Application - WPF Torture Test (fuzzy for 'ApexUIBridge Test Application - WPF') | {
+  "controlType": "Window",
+  "name": "ApexUIBridge Test Application - WPF Torture Test",
+  "automationId": "",
+  "className": "Window",
+  "frameworkId": . (117ms)
+[API] GET /elements → OK 156 element(s) | {
+  "treeHash": "5bfad41c8b9606e31c8329d87be21462f1de0e7f7d0a00c5a39ecbe0f2273575",
+  "root": {
+    "id": 9778244,
+    "controlType": "Window",
+    "name":. (604ms)
+[API] POST /execute {"id":"1162797830","action":"toggle","value":""} → OK 'toggle' executed. (12ms)
+[API] POST /execute {"id":"1162797830","action":"toggle","value":""} → OK 'toggle' executed. (13ms)
+  PASS WPF Network: CheckBox TlsClientCert → toggle
+[API] POST /execute {"id":"895335779","action":"select","value":"Network"} → OK 'select' executed. (30ms)
+[API] POST /find {"window":"ApexUIBridge Test Application - WPF"} → OK Window: ApexUIBridge Test Application - WPF Torture Test (fuzzy for 'ApexUIBridge Test Application - WPF') | {
+  "controlType": "Window",
+  "name": "ApexUIBridge Test Application - WPF Torture Test",
+  "automationId": "",
+  "className": "Window",
+  "frameworkId": . (120ms)
+[API] GET /elements → OK 156 element(s) | {
+  "treeHash": "5bfad41c8b9606e31c8329d87be21462f1de0e7f7d0a00c5a39ecbe0f2273575",
+  "root": {
+    "id": 9778244,
+    "controlType": "Window",
+    "name":. (659ms)
+[API] POST /execute {"id":"536259069","action":"select","value":""} → OK 'select' executed. (10ms)
+  PASS WPF Network: RadioButton ConnProxy → select
+[API] POST /execute {"id":"895335779","action":"select","value":"Network"} → OK 'select' executed. (22ms)
+[API] POST /find {"window":"ApexUIBridge Test Application - WPF"} → OK Window: ApexUIBridge Test Application - WPF Torture Test (fuzzy for 'ApexUIBridge Test Application - WPF') | {
+  "controlType": "Window",
+  "name": "ApexUIBridge Test Application - WPF Torture Test",
+  "automationId": "",
+  "className": "Window",
+  "frameworkId": . (125ms)
+[API] GET /elements → OK 156 element(s) | {
+  "treeHash": "5bfad41c8b9606e31c8329d87be21462f1de0e7f7d0a00c5a39ecbe0f2273575",
+  "root": {
+    "id": 9778244,
+    "controlType": "Window",
+    "name":. (639ms)
+[API] POST /execute {"id":"1497652748","action":"expand","value":""} → OK 'expand' executed. (30ms)
+[API] POST /execute {"id":"1497652748","action":"select","value":"HTTP"} → OK 'select' executed. (40ms)
+  PASS WPF Network: ComboBox Protocol → select HTTP
+[API] POST /execute {"id":"895335779","action":"select","value":"Scheduler"} → OK 'select' executed. (184ms)
+[API] POST /find {"window":"ApexUIBridge Test Application - WPF"} → OK Window: ApexUIBridge Test Application - WPF Torture Test (fuzzy for 'ApexUIBridge Test Application - WPF') | {
+  "controlType": "Window",
+  "name": "ApexUIBridge Test Application - WPF Torture Test",
+  "automationId": "",
+  "className": "Window",
+  "frameworkId": . (132ms)
+[API] GET /elements → OK 286 element(s) | {
+  "treeHash": "8c35e8e2202c94efe9ab44f4f3bd0ff56cbeed765ed2fd9f176268e6463f7182",
+  "root": {
+    "id": 9778244,
+    "controlType": "Window",
+    "name":. (1183ms)
+[API] POST /execute {"id":"919663757","action":"type","value":"first_222223936"} → OK 'type' executed. (10ms)
+[API] POST /execute {"id":"919663757","action":"gettext","value":""} → OK 'gettext' executed. | first_222223936 (5ms)
+[API] POST /execute {"id":"919663757","action":"clear","value":""} → OK 'clear' executed. (72ms)
+[API] POST /execute {"id":"919663757","action":"type","value":"second_222223937"} → OK 'type' executed. (23ms)
+[API] POST /execute {"id":"919663757","action":"gettext","value":""} → OK 'gettext' executed. | second_222223937 (3ms)
+  PASS WPF Scheduler: TextBox JobName → retype
+[API] POST /execute {"id":"895335779","action":"select","value":"Scheduler"} → OK 'select' executed. (26ms)
+[API] POST /find {"window":"ApexUIBridge Test Application - WPF"} → OK Window: ApexUIBridge Test Application - WPF Torture Test (fuzzy for 'ApexUIBridge Test Application - WPF') | {
+  "controlType": "Window",
+  "name": "ApexUIBridge Test Application - WPF Torture Test",
+  "automationId": "",
+  "className": "Window",
+  "frameworkId": . (106ms)
+[API] GET /elements → OK 286 element(s) | {
+  "treeHash": "8c35e8e2202c94efe9ab44f4f3bd0ff56cbeed765ed2fd9f176268e6463f7182",
+  "root": {
+    "id": 9778244,
+    "controlType": "Window",
+    "name":. (1179ms)
+[API] POST /execute {"id":"1317369361","action":"expand","value":""} → OK 'expand' executed. (34ms)
+[API] POST /execute {"id":"1317369361","action":"select","value":"Report"} → OK 'select' executed. (43ms)
+  PASS WPF Scheduler: ComboBox JobType → select Report
+[Slider] begin 'WPF Scheduler: Slider JobPriority → setrange 7' window='ApexUIBridge Test Application - WPF' tab='Scheduler' nameHint='JobPriority' target=7
+[API] POST /execute {"id":"895335779","action":"select","value":"Scheduler"} → OK 'select' executed. (32ms)
+[API] POST /find {"window":"ApexUIBridge Test Application - WPF"} → OK Window: ApexUIBridge Test Application - WPF Torture Test (fuzzy for 'ApexUIBridge Test Application - WPF') | {
+  "controlType": "Window",
+  "name": "ApexUIBridge Test Application - WPF Torture Test",
+  "automationId": "",
+  "className": "Window",
+  "frameworkId": . (118ms)
+[API] GET /elements → OK 311 element(s) | {
+  "treeHash": "7d5817fdfff819061da8109b9319b40243313968cbf7c49943fc81541397a9e3",
+  "root": {
+    "id": 9778244,
+    "controlType": "Window",
+    "name":. (1293ms)
+[Slider] found 1 Slider control(s): id=373628202 name="" autoId="JobPriority"
+[Slider] selected id=373628202 name="" autoId="JobPriority"
+[API] POST /execute {"id":"373628202","action":"setrange","value":"7"} → OK 'setrange' executed. (79ms)
+[API] POST /execute {"id":"373628202","action":"getrange","value":""} → OK 'getrange' executed. | 7 (4ms)
+  PASS WPF Scheduler: Slider JobPriority → setrange 7
+[API] POST /execute {"id":"2051408635","action":"select","value":"Scheduler"} → OK 'select' executed. (27ms)
+[API] POST /find {"window":"ApexUIBridge Test Application - WPF"} → OK Window: ApexUIBridge Test Application - WPF Torture Test (fuzzy for 'ApexUIBridge Test Application - WPF') | {
+  "controlType": "Window",
+  "name": "ApexUIBridge Test Application - WPF Torture Test",
+  "automationId": "",
+  "className": "Window",
+  "frameworkId": . (121ms)
+[API] GET /elements → OK 286 element(s) | {
+  "treeHash": "91ee88765b4f2da0dba3d74abada45e5806b97704204c48b5835d38b0af65810",
+  "root": {
+    "id": 9778244,
+    "controlType": "Window",
+    "name":. (1176ms)
+[API] POST /execute {"id":"910138638","action":"toggle","value":""} → OK 'toggle' executed. (9ms)
+[API] POST /execute {"id":"910138638","action":"toggle","value":""} → OK 'toggle' executed. (18ms)
+  PASS WPF Scheduler: CheckBox JobEnabled → toggle
+[API] POST /execute {"id":"895335779","action":"select","value":"Layout"} → OK 'select' executed. (72ms)
+[API] POST /find {"window":"ApexUIBridge Test Application - WPF"} → OK Window: ApexUIBridge Test Application - WPF Torture Test (fuzzy for 'ApexUIBridge Test Application - WPF') | {
+  "controlType": "Window",
+  "name": "ApexUIBridge Test Application - WPF Torture Test",
+  "automationId": "",
+  "className": "Window",
+  "frameworkId": . (123ms)
+[API] GET /elements → OK 170 element(s) | {
+  "treeHash": "5a431fad2519fb74cec6047859f543e40cc014572ea5c6e0eef8cc786653efb5",
+  "root": {
+    "id": 9778244,
+    "controlType": "Window",
+    "name":. (663ms)
+[API] POST /execute {"id":"2011717675","action":"click","value":""} → OK 'click' executed. (10ms)
+  PASS WPF Layout: Button BtnApply → click  (11ms)
+[API] POST /execute {"id":"895335779","action":"select","value":"Layout"} → OK 'select' executed. (25ms)
+[API] POST /find {"window":"ApexUIBridge Test Application - WPF"} → OK Window: ApexUIBridge Test Application - WPF Torture Test (fuzzy for 'ApexUIBridge Test Application - WPF') | {
+  "controlType": "Window",
+  "name": "ApexUIBridge Test Application - WPF Torture Test",
+  "automationId": "",
+  "className": "Window",
+  "frameworkId": . (102ms)
+[API] GET /elements → OK 170 element(s) | {
+  "treeHash": "5a431fad2519fb74cec6047859f543e40cc014572ea5c6e0eef8cc786653efb5",
+  "root": {
+    "id": 9778244,
+    "controlType": "Window",
+    "name":. (684ms)
+[API] POST /execute {"id":"1621069114","action":"click","value":""} → OK 'click' executed. (11ms)
+  PASS WPF Layout: Button BtnReset → click  (12ms)
+[API] POST /execute {"id":"895335779","action":"select","value":"Logs"} → OK 'select' executed. (70ms)
+[API] POST /find {"window":"ApexUIBridge Test Application - WPF"} → OK Window: ApexUIBridge Test Application - WPF Torture Test (fuzzy for 'ApexUIBridge Test Application - WPF') | {
+  "controlType": "Window",
+  "name": "ApexUIBridge Test Application - WPF Torture Test",
+  "automationId": "",
+  "className": "Window",
+  "frameworkId": . (104ms)
+[API] GET /elements → OK 100 element(s) | {
+  "treeHash": "6f9cf9d31d15e1a1aeafa98ab485df0f92164ecaeb3c0e3661d3b7d6eddaa679",
+  "root": {
+    "id": 9778244,
+    "controlType": "Window",
+    "name":. (401ms)
+[API] POST /execute {"id":"2064505832","action":"expand","value":""} → OK 'expand' executed. (27ms)
+[API] POST /execute {"id":"2064505832","action":"select","value":"ERROR"} → OK 'select' executed. (42ms)
+  PASS WPF Logs: ComboBox LogLevel → select ERROR
+[API] POST /execute {"id":"895335779","action":"select","value":"Logs"} → OK 'select' executed. (28ms)
+[API] POST /find {"window":"ApexUIBridge Test Application - WPF"} → OK Window: ApexUIBridge Test Application - WPF Torture Test (fuzzy for 'ApexUIBridge Test Application - WPF') | {
+  "controlType": "Window",
+  "name": "ApexUIBridge Test Application - WPF Torture Test",
+  "automationId": "",
+  "className": "Window",
+  "frameworkId": . (124ms)
+[API] GET /elements → OK 121 element(s) | {
+  "treeHash": "8f2d8a33874204039a389ac5af1645e9ab22c0e99975467437aed4b518c71625",
+  "root": {
+    "id": 9778244,
+    "controlType": "Window",
+    "name":. (495ms)
+[API] POST /execute {"id":"1288181453","action":"type","value":"first_222243237"} → OK 'type' executed. (20ms)
+[API] POST /execute {"id":"1288181453","action":"gettext","value":""} → OK 'gettext' executed. | first_222243237 (4ms)
+[API] POST /execute {"id":"1288181453","action":"clear","value":""} → OK 'clear' executed. (72ms)
+[API] POST /execute {"id":"1288181453","action":"type","value":"second_222243237"} → OK 'type' executed. (16ms)
+[API] POST /execute {"id":"1288181453","action":"gettext","value":""} → OK 'gettext' executed. | second_222243237 (4ms)
+  PASS WPF Logs: TextBox LogFilter → retype
+[API] POST /execute {"id":"2051408635","action":"select","value":"Logs"} → OK 'select' executed. (28ms)
+[API] POST /find {"window":"ApexUIBridge Test Application - WPF"} → OK Window: ApexUIBridge Test Application - WPF Torture Test (fuzzy for 'ApexUIBridge Test Application - WPF') | {
+  "controlType": "Window",
+  "name": "ApexUIBridge Test Application - WPF Torture Test",
+  "automationId": "",
+  "className": "Window",
+  "frameworkId": . (106ms)
+[API] GET /elements → OK 100 element(s) | {
+  "treeHash": "6f9cf9d31d15e1a1aeafa98ab485df0f92164ecaeb3c0e3661d3b7d6eddaa679",
+  "root": {
+    "id": 9778244,
+    "controlType": "Window",
+    "name":. (400ms)
+[API] POST /execute {"id":"199813083","action":"toggle","value":""} → OK 'toggle' executed. (13ms)
+[API] POST /execute {"id":"199813083","action":"toggle","value":""} → OK 'toggle' executed. (13ms)
+  PASS WPF Logs: CheckBox LogAutoScroll → toggle
+[API] POST /execute {"id":"895335779","action":"select","value":"Logs"} → OK 'select' executed. (33ms)
+[API] POST /find {"window":"ApexUIBridge Test Application - WPF"} → OK Window: ApexUIBridge Test Application - WPF Torture Test (fuzzy for 'ApexUIBridge Test Application - WPF') | {
+  "controlType": "Window",
+  "name": "ApexUIBridge Test Application - WPF Torture Test",
+  "automationId": "",
+  "className": "Window",
+  "frameworkId": . (119ms)
+[API] GET /elements → OK 100 element(s) | {
+  "treeHash": "6f9cf9d31d15e1a1aeafa98ab485df0f92164ecaeb3c0e3661d3b7d6eddaa679",
+  "root": {
+    "id": 9778244,
+    "controlType": "Window",
+    "name":. (408ms)
+[API] POST /execute {"id":"1470040609","action":"click","value":""} → OK 'click' executed. (12ms)
+  PASS WPF Logs: Button LogClear → click  (13ms)
+[API] POST /execute {"id":"895335779","action":"select","value":"WPF"} → OK 'select' executed. (38ms)
+[API] POST /find {"window":"ApexUIBridge Test Application - WPF"} → OK Window: ApexUIBridge Test Application - WPF Torture Test (fuzzy for 'ApexUIBridge Test Application - WPF') | {
+  "controlType": "Window",
+  "name": "ApexUIBridge Test Application - WPF Torture Test",
+  "automationId": "",
+  "className": "Window",
+  "frameworkId": . (119ms)
+[API] GET /elements → OK 129 element(s) | {
+  "treeHash": "68e296e8a9c4cfd4a5fa122916dd5adb7d1ac641807921b316c7e87c90a69b18",
+  "root": {
+    "id": 9778244,
+    "controlType": "Window",
+    "name":. (536ms)
+[API] POST /execute {"id":"283561388","action":"click","value":""} → OK 'click' executed. (12ms)
+[API] POST /execute {"id":"283561388","action":"click","value":""} → OK 'click' executed. (14ms)
+  PASS WPF WPF-tab: ToggleButton Toggle1 → click+restore
+[API] POST /execute {"id":"895335779","action":"select","value":"WPF"} → OK 'select' executed. (37ms)
+[API] POST /find {"window":"ApexUIBridge Test Application - WPF"} → OK Window: ApexUIBridge Test Application - WPF Torture Test (fuzzy for 'ApexUIBridge Test Application - WPF') | {
+  "controlType": "Window",
+  "name": "ApexUIBridge Test Application - WPF Torture Test",
+  "automationId": "",
+  "className": "Window",
+  "frameworkId": . (122ms)
+[API] GET /elements → OK 129 element(s) | {
+  "treeHash": "68e296e8a9c4cfd4a5fa122916dd5adb7d1ac641807921b316c7e87c90a69b18",
+  "root": {
+    "id": 9778244,
+    "controlType": "Window",
+    "name":. (528ms)
+[API] POST /execute {"id":"2081765396","action":"expand","value":""} → OK 'expand' executed. (14ms)
+[API] POST /execute {"id":"2081765396","action":"collapse","value":""} → OK 'collapse' executed. (19ms)
+  PASS WPF WPF-tab: Expander ExpanderLogging → expand/collapse
+[Slider] begin 'WPF Dialogs: Slider MiscVertSlider → setrange 50' window='ApexUIBridge Test Application - WPF' tab='Dialogs' nameHint='MiscVertSlider' target=50
+[API] POST /execute {"id":"895335779","action":"select","value":"Dialogs"} → OK 'select' executed. (130ms)
+[API] POST /find {"window":"ApexUIBridge Test Application - WPF"} → OK Window: ApexUIBridge Test Application - WPF Torture Test (fuzzy for 'ApexUIBridge Test Application - WPF') | {
+  "controlType": "Window",
+  "name": "ApexUIBridge Test Application - WPF Torture Test",
+  "automationId": "",
+  "className": "Window",
+  "frameworkId": . (103ms)
+[API] GET /elements → OK 240 element(s) | {
+  "treeHash": "da34570275e89453cab48b01e2d2700894d5eed05cfc71921905074994477424",
+  "root": {
+    "id": 9778244,
+    "controlType": "Window",
+    "name":. (1029ms)
+[Slider] found 1 Slider control(s): id=1697954797 name="" autoId="MiscVertSlider"
+[Slider] selected id=1697954797 name="" autoId="MiscVertSlider"
+[API] POST /execute {"id":"1697954797","action":"setrange","value":"50"} → OK 'setrange' executed. (74ms)
+[API] POST /execute {"id":"1697954797","action":"getrange","value":""} → OK 'getrange' executed. | 50 (4ms)
+  PASS WPF Dialogs: Slider MiscVertSlider → setrange 50
+[API] POST /execute {"id":"895335779","action":"select","value":"Dialogs"} → OK 'select' executed. (34ms)
+[API] POST /find {"window":"ApexUIBridge Test Application - WPF"} → OK Window: ApexUIBridge Test Application - WPF Torture Test (fuzzy for 'ApexUIBridge Test Application - WPF') | {
+  "controlType": "Window",
+  "name": "ApexUIBridge Test Application - WPF Torture Test",
+  "automationId": "",
+  "className": "Window",
+  "frameworkId": . (116ms)
+[API] GET /elements → OK 240 element(s) | {
+  "treeHash": "61035de2512fd258eeb41021d967e4928e3b8e91c41de0ee8dbc33fda763d362",
+  "root": {
+    "id": 9778244,
+    "controlType": "Window",
+    "name":. (966ms)
+[API] POST /execute {"id":"1492453326","action":"select","value":""} → OK 'select' executed. (9ms)
+  PASS WPF Dialogs: RadioButton MiscRadioB → select
+[API] POST /execute {"id":"895335779","action":"select","value":"Dialogs"} → OK 'select' executed. (29ms)
+[API] POST /find {"window":"ApexUIBridge Test Application - WPF"} → OK Window: ApexUIBridge Test Application - WPF Torture Test (fuzzy for 'ApexUIBridge Test Application - WPF') | {
+  "controlType": "Window",
+  "name": "ApexUIBridge Test Application - WPF Torture Test",
+  "automationId": "",
+  "className": "Window",
+  "frameworkId": . (120ms)
+[API] GET /elements → OK 240 element(s) | {
+  "treeHash": "61035de2512fd258eeb41021d967e4928e3b8e91c41de0ee8dbc33fda763d362",
+  "root": {
+    "id": 9778244,
+    "controlType": "Window",
+    "name":. (1003ms)
+[API] POST /execute {"id":"896407938","action":"select-index","value":"0"} → OK 'select-index' executed. (17ms)
+  PASS WPF Dialogs: ListBox MiscMultiListBox → select-index 0
+[API] POST /execute {"id":"895335779","action":"select","value":"Dialogs"} → OK 'select' executed. (32ms)
+[API] POST /find {"window":"ApexUIBridge Test Application - WPF"} → OK Window: ApexUIBridge Test Application - WPF Torture Test (fuzzy for 'ApexUIBridge Test Application - WPF') | {
+  "controlType": "Window",
+  "name": "ApexUIBridge Test Application - WPF Torture Test",
+  "automationId": "",
+  "className": "Window",
+  "frameworkId": . (118ms)
+[API] GET /elements → OK 240 element(s) | {
+  "treeHash": "61035de2512fd258eeb41021d967e4928e3b8e91c41de0ee8dbc33fda763d362",
+  "root": {
+    "id": 9778244,
+    "controlType": "Window",
+    "name":. (991ms)
+[API] POST /execute {"id":"1616092942","action":"expand","value":""} → OK 'expand' executed. (33ms)
+[API] POST /execute {"id":"1616092942","action":"select","value":"Option A"} → OK 'select' executed. (38ms)
+  PASS WPF Dialogs: ComboBox MiscEditCombo → select Option A
+[API] POST /execute {"id":"895335779","action":"select","value":"Dialogs"} → OK 'select' executed. (29ms)
+[API] POST /find {"window":"ApexUIBridge Test Application - WPF"} → OK Window: ApexUIBridge Test Application - WPF Torture Test (fuzzy for 'ApexUIBridge Test Application - WPF') | {
+  "controlType": "Window",
+  "name": "ApexUIBridge Test Application - WPF Torture Test",
+  "automationId": "",
+  "className": "Window",
+  "frameworkId": . (121ms)
+[API] GET /elements → OK 253 element(s) | {
+  "treeHash": "bfa3ad29aaf3da98fd704785016d26f4e8b3c1bbc0c236e27bf917ef7afe6d85",
+  "root": {
+    "id": 9778244,
+    "controlType": "Window",
+    "name":. (1086ms)
+[API] POST /execute {"id":"2011263992","action":"type","value":"first_222306768"} → OK 'type' executed. (21ms)
+[API] POST /execute {"id":"2011263992","action":"gettext","value":""} → OK 'gettext' executed. | first_222306768 (4ms)
+[API] POST /execute {"id":"2011263992","action":"clear","value":""} → OK 'clear' executed. (75ms)
+[API] POST /execute {"id":"2011263992","action":"type","value":"second_222306768"} → OK 'type' executed. (20ms)
+[API] POST /execute {"id":"2011263992","action":"gettext","value":""} → OK 'gettext' executed. | second_222306768 (4ms)
+  PASS WPF Dialogs: TextBox MiscMultilineTextBox → retype
+[API] POST /find {"window":"Browser Torture Test 2026"} → OK Window: Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft? Edge (fuzzy for 'Browser Torture Test 2026') | {
+  "controlType": "Window",
+  "name": "Browser Torture Test 2026 \u2014 Single-File HTML UI Torture Chamber - Personal - Microsoft\u200B Edge",
+  "automatio. (132ms)
+[API] POST /find {"window":"Browser Torture Test 2026"} → OK Window: Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft? Edge (fuzzy for 'Browser Torture Test 2026') | {
+  "controlType": "Window",
+  "name": "Browser Torture Test 2026 \u2014 Single-File HTML UI Torture Chamber - Personal - Microsoft\u200B Edge",
+  "automatio. (115ms)
+[API] GET /elements → OK 312 element(s) | {
+  "treeHash": "196de3968833cd7e890f5b9c2d8cae19f2d9cfe0c95e3a29cfb327a434db5d21",
+  "root": {
+    "id": 1306926730,
+    "controlType": "Window",
+    "nam. (614ms)
+[API] POST /execute {"id":"1520528927","action":"toggle","value":""} → OK 'toggle' executed. (14ms)
+[API] POST /execute {"id":"1520528927","action":"toggle","value":""} → OK 'toggle' executed. (11ms)
+  PASS HTML Torture: checkbox check1 → toggle+restore
+[API] POST /find {"window":"Browser Torture Test 2026"} → OK Window: Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft? Edge (fuzzy for 'Browser Torture Test 2026') | {
+  "controlType": "Window",
+  "name": "Browser Torture Test 2026 \u2014 Single-File HTML UI Torture Chamber - Personal - Microsoft\u200B Edge",
+  "automatio. (108ms)
+[API] POST /find {"window":"Browser Torture Test 2026"} → OK Window: Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft? Edge (fuzzy for 'Browser Torture Test 2026') | {
+  "controlType": "Window",
+  "name": "Browser Torture Test 2026 \u2014 Single-File HTML UI Torture Chamber - Personal - Microsoft\u200B Edge",
+  "automatio. (109ms)
+[API] GET /elements → OK 312 element(s) | {
+  "treeHash": "ee8513560ca5a571f5af293cf3ad6b579077df6197d60d73e30b9d167de34738",
+  "root": {
+    "id": 1306926730,
+    "controlType": "Window",
+    "nam. (604ms)
+[API] POST /execute {"id":"1794018329","action":"click","value":""} → OK 'click' executed. (4ms)
+  PASS HTML Torture: radio 'Radio 2' → click
+[API] POST /find {"window":"Browser Torture Test 2026"} → OK Window: Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft? Edge (fuzzy for 'Browser Torture Test 2026') | {
+  "controlType": "Window",
+  "name": "Browser Torture Test 2026 \u2014 Single-File HTML UI Torture Chamber - Personal - Microsoft\u200B Edge",
+  "automatio. (108ms)
+[API] POST /find {"window":"Browser Torture Test 2026"} → OK Window: Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft? Edge (fuzzy for 'Browser Torture Test 2026') | {
+  "controlType": "Window",
+  "name": "Browser Torture Test 2026 \u2014 Single-File HTML UI Torture Chamber - Personal - Microsoft\u200B Edge",
+  "automatio. (110ms)
+[API] GET /elements → OK 312 element(s) | {
+  "treeHash": "9170d6b02a4be727776497ae65d24c6c0919121ebb8e912af36cf84809f0bdea",
+  "root": {
+    "id": 1306926730,
+    "controlType": "Window",
+    "nam. (608ms)
+[API] POST /execute {"id":"1003702728","action":"expand","value":""} → OK 'expand' executed. (4ms)
+[API] POST /execute {"id":"1003702728","action":"select","value":"Option 2"} → OK 'select' executed. (11ms)
+  PASS HTML Torture: select#single-select → select Option 2
+[API] POST /find {"window":"Browser Torture Test 2026"} → OK Window: Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft? Edge (fuzzy for 'Browser Torture Test 2026') | {
+  "controlType": "Window",
+  "name": "Browser Torture Test 2026 \u2014 Single-File HTML UI Torture Chamber - Personal - Microsoft\u200B Edge",
+  "automatio. (127ms)
+[API] POST /find {"window":"Browser Torture Test 2026"} → OK Window: Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft? Edge (fuzzy for 'Browser Torture Test 2026') | {
+  "controlType": "Window",
+  "name": "Browser Torture Test 2026 \u2014 Single-File HTML UI Torture Chamber - Personal - Microsoft\u200B Edge",
+  "automatio. (127ms)
+[API] GET /elements → OK 316 element(s) | {
+  "treeHash": "5a3fd77720c9ccc12c9bad7d6c180378f95c1564780c926dc985bfc4560f2c73",
+  "root": {
+    "id": 1306926730,
+    "controlType": "Window",
+    "nam. (716ms)
+[API] POST /execute {"id":"125218317","action":"select-index","value":"0"} → OK 'select-index' executed. (9ms)
+  PASS HTML Torture: select#multi-select → select-index 0
+[API] POST /find {"window":"Browser Torture Test 2026"} → OK Window: Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft? Edge (fuzzy for 'Browser Torture Test 2026') | {
+  "controlType": "Window",
+  "name": "Browser Torture Test 2026 \u2014 Single-File HTML UI Torture Chamber - Personal - Microsoft\u200B Edge",
+  "automatio. (119ms)
+[API] POST /find {"window":"Browser Torture Test 2026"} → OK Window: Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft? Edge (fuzzy for 'Browser Torture Test 2026') | {
+  "controlType": "Window",
+  "name": "Browser Torture Test 2026 \u2014 Single-File HTML UI Torture Chamber - Personal - Microsoft\u200B Edge",
+  "automatio. (128ms)
+[API] GET /elements → OK 312 element(s) | {
+  "treeHash": "2c944343298e4a39e7c15e47c494861fb3de23d456bd10bea09f32e55eed0ba7",
+  "root": {
+    "id": 1306926730,
+    "controlType": "Window",
+    "nam. (717ms)
+[API] POST /execute {"id":"785695231","action":"focus","value":""} → OK 'focus' executed. (4ms)
+[API] POST /execute {"id":"785695231","action":"type","value":"first_222319522"} → OK 'type' executed. (11ms)
+[API] POST /execute {"id":"785695231","action":"gettext","value":""} → OK 'gettext' executed. | first_222319522 (3ms)
+[API] POST /execute {"id":"785695231","action":"clear","value":""} → OK 'clear' executed. (63ms)
+[API] POST /execute {"id":"785695231","action":"type","value":"second_222319522"} → OK 'type' executed. (11ms)
+[API] POST /execute {"id":"785695231","action":"gettext","value":""} → OK 'gettext' executed. | second_222319522 (3ms)
+  PASS HTML Torture: textarea → retype
+[API] POST /find {"window":"Browser Torture Test 2026"} → OK Window: Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft? Edge (fuzzy for 'Browser Torture Test 2026') | {
+  "controlType": "Window",
+  "name": "Browser Torture Test 2026 \u2014 Single-File HTML UI Torture Chamber - Personal - Microsoft\u200B Edge",
+  "automatio. (108ms)
+[API] POST /find {"window":"Browser Torture Test 2026"} → OK Window: Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft? Edge (fuzzy for 'Browser Torture Test 2026') | {
+  "controlType": "Window",
+  "name": "Browser Torture Test 2026 \u2014 Single-File HTML UI Torture Chamber - Personal - Microsoft\u200B Edge",
+  "automatio. (106ms)
+[API] GET /elements → OK 312 element(s) | {
+  "treeHash": "fb3260b0274156a76406746dc25552465fb9a49956380e42f2bfac71d48892b5",
+  "root": {
+    "id": 1306926730,
+    "controlType": "Window",
+    "nam. (648ms)
+[API] POST /execute {"id":"752483980","action":"click","value":""} → OK 'click' executed. (5ms)
+  PASS HTML Torture: button 'Plain button' → click
+[API] POST /find {"window":"AGPA E-Commerce Test App"} → OK Window: AGPA E-Commerce Test App - Personal - Microsoft? Edge (fuzzy for 'AGPA E-Commerce Test App') | {
+  "controlType": "Window",
+  "name": "AGPA E-Commerce Test App - Personal - Microsoft\u200B Edge",
+  "automationId": "",
+  "className": "Chrome_WidgetWin_. (142ms)
+[API] POST /find {"window":"AGPA E-Commerce Test App"} → OK Window: AGPA E-Commerce Test App - Personal - Microsoft? Edge (fuzzy for 'AGPA E-Commerce Test App') | {
+  "controlType": "Window",
+  "name": "AGPA E-Commerce Test App - Personal - Microsoft\u200B Edge",
+  "automationId": "",
+  "className": "Chrome_WidgetWin_. (122ms)
+[API] GET /elements → OK 116 element(s) | {
+  "treeHash": "9e1cd147b428a75a41d629d89249794cf34a2a5017f376ad4bf1511d3578fe2a",
+  "root": {
+    "id": 1306926730,
+    "controlType": "Window",
+    "nam. (266ms)
+[API] POST /execute {"id":"603773538","action":"focus","value":""} → OK 'focus' executed. (3ms)
+[API] POST /execute {"id":"603773538","action":"type","value":"first_222324974"} → OK 'type' executed. (12ms)
+[API] POST /execute {"id":"603773538","action":"gettext","value":""} → OK 'gettext' executed. | first_222324974 (3ms)
+[API] POST /execute {"id":"603773538","action":"clear","value":""} → OK 'clear' executed. (68ms)
+[API] POST /execute {"id":"603773538","action":"type","value":"second_222324974"} → OK 'type' executed. (10ms)
+[API] POST /execute {"id":"603773538","action":"gettext","value":""} → OK 'gettext' executed. | second_222324974 (3ms)
+  PASS HTML Ecommerce: searchProducts → retype
+[API] POST /find {"window":"AGPA E-Commerce Test App"} → OK Window: AGPA E-Commerce Test App - Personal - Microsoft? Edge (fuzzy for 'AGPA E-Commerce Test App') | {
+  "controlType": "Window",
+  "name": "AGPA E-Commerce Test App - Personal - Microsoft\u200B Edge",
+  "automationId": "",
+  "className": "Chrome_WidgetWin_. (123ms)
+[API] POST /find {"window":"AGPA E-Commerce Test App"} → OK Window: AGPA E-Commerce Test App - Personal - Microsoft? Edge (fuzzy for 'AGPA E-Commerce Test App') | {
+  "controlType": "Window",
+  "name": "AGPA E-Commerce Test App - Personal - Microsoft\u200B Edge",
+  "automationId": "",
+  "className": "Chrome_WidgetWin_. (104ms)
+[API] GET /elements → OK 116 element(s) | {
+  "treeHash": "9e1cd147b428a75a41d629d89249794cf34a2a5017f376ad4bf1511d3578fe2a",
+  "root": {
+    "id": 1306926730,
+    "controlType": "Window",
+    "nam. (246ms)
+[API] POST /execute {"id":"2046551302","action":"expand","value":""} → OK 'expand' executed. (6ms)
+[API] POST /execute {"id":"2046551302","action":"select","value":"Electronics"} → OK 'select' executed. (15ms)
+  PASS HTML Ecommerce: categoryFilter → select Electronics
+[API] POST /find {"window":"AGPA E-Commerce Test App"} → OK Window: AGPA E-Commerce Test App - Personal - Microsoft? Edge (fuzzy for 'AGPA E-Commerce Test App') | {
+  "controlType": "Window",
+  "name": "AGPA E-Commerce Test App - Personal - Microsoft\u200B Edge",
+  "automationId": "",
+  "className": "Chrome_WidgetWin_. (115ms)
+[API] POST /find {"window":"AGPA E-Commerce Test App"} → OK Window: AGPA E-Commerce Test App - Personal - Microsoft? Edge (fuzzy for 'AGPA E-Commerce Test App') | {
+  "controlType": "Window",
+  "name": "AGPA E-Commerce Test App - Personal - Microsoft\u200B Edge",
+  "automationId": "",
+  "className": "Chrome_WidgetWin_. (120ms)
+[API] GET /elements → OK 120 element(s) | {
+  "treeHash": "d1f6f1928f8160a03f05ad40bb94d952f11f4d3504eb805f25f3ea07abb596e9",
+  "root": {
+    "id": 1306926730,
+    "controlType": "Window",
+    "nam. (270ms)
+[API] POST /execute {"id":"1823184491","action":"toggle","value":""} → OK 'toggle' executed. (4ms)
+[API] POST /execute {"id":"1823184491","action":"toggle","value":""} → OK 'toggle' executed. (14ms)
+  PASS HTML Ecommerce: shipFree → toggle+restore
+[API] POST /find {"window":"AGPA E-Commerce Test App"} → OK Window: AGPA E-Commerce Test App - Personal - Microsoft? Edge (fuzzy for 'AGPA E-Commerce Test App') | {
+  "controlType": "Window",
+  "name": "AGPA E-Commerce Test App - Personal - Microsoft\u200B Edge",
+  "automationId": "",
+  "className": "Chrome_WidgetWin_. (106ms)
+[API] POST /find {"window":"AGPA E-Commerce Test App"} → OK Window: AGPA E-Commerce Test App - Personal - Microsoft? Edge (fuzzy for 'AGPA E-Commerce Test App') | {
+  "controlType": "Window",
+  "name": "AGPA E-Commerce Test App - Personal - Microsoft\u200B Edge",
+  "automationId": "",
+  "className": "Chrome_WidgetWin_. (124ms)
+[API] GET /elements → OK 116 element(s) | {
+  "treeHash": "9e1cd147b428a75a41d629d89249794cf34a2a5017f376ad4bf1511d3578fe2a",
+  "root": {
+    "id": 1306926730,
+    "controlType": "Window",
+    "nam. (231ms)
+[API] POST /execute {"id":"1825518262","action":"click","value":""} → OK 'click' executed. (5ms)
+  PASS HTML Ecommerce: first 'Add to Cart' button → click
+[API] GET /help → OK Commands | find     window=<title|id> [id=<automationId|mapId>] [name=<name>] [type=<ControlType>]
+exec     action=<action> [value=<input>]
+ocr      [value=x,y,w,h]
+cap. (1ms)
+  PASS GET /help - returns content  (4ms)
+
+[Results] 84 passed, 0 failed
+[ApexComputerUse] Stopped.
+[Telegram→stdout] ?? <b>Cycle 1/1</b>
+PASS:84  FAIL:0
+ total 2718ms   avg 118.2ms   max 766ms
+  PASS GET /windows - WinForms app visible
+  PASS GET /windows - WPF app visible
+  PASS SCAN_WINDOW WinForms
+  PASS POST /execute type → WinForms TextBox
+  PASS POST /execute gettext → typed value
+  PASS POST /execute toggle → WinForms SimpleCheckBox
+  PASS POST /execute click → WinForms ContextMenu button
+  PASS POST /execute gettext → WinForms ProgressBar
+  PASS POST /execute expand/collapse → WinForms EditableCombo
+  PASS SCAN_WINDOW WPF
+  PASS POST /execute type → WPF TextBox
+  PASS POST /execute toggle → WPF SimpleCheckBox
+  PASS POST /execute click → WPF InvokableButton
+  PASS POST /execute expand/collapse → WPF NonEditableCombo
+  PASS POST /execute setrange 4 → WPF Slider (verified)
+  PASS TextBox edit → clear → retype (verified)
+  PASS POST /execute setrange 50 → WinForms Slider (verified)
+  PASS POST /execute select → WinForms ListBox item
+  PASS POST /execute click → WinForms RadioButton2 (mutex)
+  PASS Cycle ThreeStateCheckBox x3 (WinForms)
+  PASS Click Edit → Copy Plain menu item (WinForms)
+  PASS POST /execute select → WPF ListBox item
+  PASS POST /execute expand/collapse → WPF Expander
+  PASS Click File menu (WPF)
+  PASS SCAN_WINDOW Torture Test
+  PASS POST /execute type → HTML TextBox on Torture Test (verified)
+  PASS SCAN_WINDOW Ecommerce
+  PASS POST /execute setrange 100 → HTML range slider on Ecommerce (verified)
+  PASS WinForms Identity: StatusCombo → select Inactive
+  PASS WinForms Identity: SalaryInput → setvalue 75000
+  PASS WinForms Identity: NotesField → retype
+  PASS WinForms Network: UploadSlider → setrange 20 (UIA=actual 200)
+  PASS WinForms Network: DownloadSlider → setrange 30 (UIA=actual 300)
+  PASS WinForms Network: TlsVerify → toggle
+  PASS WinForms Network: FeaturesCheckedList → select-index 3
+  PASS WinForms Scheduler: JobName → retype
+  PASS WinForms Scheduler: JobType → select Report
+  PASS WinForms Scheduler: PrioritySlider → setrange 66 (UIA=actual 7)
+  PASS WinForms Scheduler: JobEnabled → toggle
+  PASS WinForms Layout: Button Apply → click
+  PASS WinForms Layout: Button Reset → click
+  PASS WinForms Logs: LogLevelCombo → select ERROR
+  PASS WinForms Logs: LogFilter → retype
+  PASS WinForms Logs: LogAutoScroll → toggle
+  PASS WinForms Dialogs: DomainSpinner → setvalue Beta
+  PASS WinForms Dialogs: DecimalSpinner → setvalue 42
+  PASS WPF Identity: Slider AccessLevel → setrange 3
+  PASS WPF Identity: RadioButton EmpPartTime → select
+  PASS WPF Identity: CheckBox FlagVpn → toggle
+  PASS WPF Identity: ComboBox Location → select Boston
+  PASS WPF Identity: TextBox Email → retype
+  PASS WPF Network: Slider UploadLimit → setrange 200
+  PASS WPF Network: Slider DownloadLimit → setrange 300
+  PASS WPF Network: CheckBox TlsClientCert → toggle
+  PASS WPF Network: RadioButton ConnProxy → select
+  PASS WPF Network: ComboBox Protocol → select HTTP
+  PASS WPF Scheduler: TextBox JobName → retype
+  PASS WPF Scheduler: ComboBox JobType → select Report
+  PASS WPF Scheduler: Slider JobPriority → setrange 7
+  PASS WPF Scheduler: CheckBox JobEnabled → toggle
+  PASS WPF Layout: Button BtnApply → click
+  PASS WPF Layout: Button BtnReset → click
+  PASS WPF Logs: ComboBox LogLevel → select ERROR
+  PASS WPF Logs: TextBox LogFilter → retype
+  PASS WPF Logs: CheckBox LogAutoScroll → toggle
+  PASS WPF Logs: Button LogClear → click
+  PASS WPF WPF-tab: ToggleButton Toggle1 → click+restore
+  PASS WPF WPF-tab: Expander ExpanderLogging → expand/collapse
+  PASS WPF Dialogs: Slider MiscVertSlider → setrange 50
+  PASS WPF Dialogs: RadioButton MiscRadioB → select
+  PASS WPF Dialogs: ListBox MiscMultiListBox → select-index 0
+  PASS WPF Dialogs: ComboBox MiscEditCombo → select Option A
+  PASS WPF Dialogs: TextBox MiscMultilineTextBox → retype
+  PASS HTML Torture: checkbox check1 → toggle+restore
+  PASS HTML Torture: radio 'Radio 2' → click
+  PASS HTML Torture: select#single-select → select Option 2
+  PASS HTML Torture: select#multi-select → select-index 0
+  PASS HTML Torture: textarea → retype
+  PASS HTML Torture: button 'Plain button' → click
+  PASS HTML Ecommerce: searchProducts → retype
+  PASS HTML Ecommerce: categoryFilter → select Electronics
+  PASS HTML Ecommerce: shipFree → toggle+restore
+  PASS HTML Ecommerce: first 'Add to Cart' button → click
+  PASS GET /help - returns content
+
+[PASS] TestRunner Complete
+Mode: demo   Speed profile: human
+Cycles run: 1/1
+Total: PASS:84  FAIL:0
+
+  Cycle 1: PASS:84 FAIL:0
+[Telegram→stdout] [PASS] <b>TestRunner Complete</b>
+Mode: <b>demo</b>   Speed profile: <b>human</b>
+Cycles run: <b>1/1</b>
+Total: PASS:84  FAIL:0
+
+  Cycle 1: PASS:84 FAIL:0
+[WebServer] Stopped.
+[Runner] Done. Test-target apps will be closed.
