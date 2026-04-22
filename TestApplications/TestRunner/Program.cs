@@ -325,9 +325,13 @@ if (cliServe)
     BridgeClient?   currentClient = null;
     TestSuite?      currentSuite  = null;
 
-    var bridgeEnvServe = string.IsNullOrWhiteSpace(config.BridgeApiKey)
-        ? null
-        : new Dictionary<string, string> { ["APEX_API_KEY"] = config.BridgeApiKey };
+var bridgeEnvServe = string.IsNullOrWhiteSpace(config.BridgeApiKey)
+    ? new Dictionary<string, string> { ["APEX_HTTP_AUTOSTART"] = "true" }
+    : new Dictionary<string, string>
+      {
+          ["APEX_API_KEY"] = config.BridgeApiKey,
+          ["APEX_HTTP_AUTOSTART"] = "true"
+      };
 
     async Task<ProcessManager> StartBridge(CancellationToken innerCt)
     {
@@ -496,8 +500,12 @@ while (cycle < maxCycles && !ct.IsCancellationRequested)
     // 2. Launch ApexComputerUse ───────────────────────────────────────────────────
     await using var bridge = new ProcessManager("ApexComputerUse", config.BridgeExePath, isGui: true);
     var bridgeEnv = string.IsNullOrWhiteSpace(config.BridgeApiKey)
-        ? null
-        : new Dictionary<string, string> { ["APEX_API_KEY"] = config.BridgeApiKey };
+        ? new Dictionary<string, string> { ["APEX_HTTP_AUTOSTART"] = "true" }
+        : new Dictionary<string, string>
+          {
+              ["APEX_API_KEY"] = config.BridgeApiKey,
+              ["APEX_HTTP_AUTOSTART"] = "true"
+          };
     await bridge.StartAsync(ct, bridgeEnv);
 
     using var client = new BridgeClient(config.BridgeBaseUrl, config.BridgeApiKey,

@@ -785,9 +785,19 @@ public sealed class TestSuite
 
         var g2 = await _client.ExecuteAsync(id, "gettext", null, ct);
         bool ok = g2.Success && (g2.Result?.Contains(second) ?? false);
+        string detail = ok
+            ? $"typed+verified '{first}' then '{second}'"
+            : $"final gettext did not contain '{second}'. Got: {g2.Result}";
+
+        // Restore to a neutral state so this helper doesn't alter downstream tests.
+        try
+        {
+            _ = await _client.ExecuteAsync(id, "clear", null, ct);
+        }
+        catch { /* restoration is best-effort only */ }
+
         return new TestResult(name, ok,
-            ok ? $"typed+verified '{first}' then '{second}'"
-               : $"final gettext did not contain '{second}'. Got: {g2.Result}",
+            detail,
             Command: $"POST /execute type/gettext id={id}");
     }
 
@@ -810,6 +820,13 @@ public sealed class TestSuite
         if (slider == null) return Fail(name, $"No Slider control found{(nameHint != null ? $" matching '{nameHint}'" : "")}");
         int id = slider["id"]!.GetValue<int>();
         _client.Logger?.Invoke($"[Slider] selected id={id} name=\"{slider["name"]?.GetValue<string>()}\" autoId=\"{slider["automationId"]?.GetValue<string>()}\"");
+        string? originalRange = null;
+        try
+        {
+            var before = await _client.ExecuteAsync(id, "getrange", null, ct);
+            if (before.Success) originalRange = before.Result?.Trim();
+        }
+        catch { /* best-effort snapshot */ }
 
         var setr = await _client.ExecuteAsync(id, "setrange", value, ct);
         if (!setr.Success) return Fail(name, $"setrange failed: {setr.Detail}");
@@ -819,6 +836,12 @@ public sealed class TestSuite
         if (!getr.Success) return Fail(name, $"getrange failed: {getr.Detail}");
         // getrange reports "value min-max" or similar — just check the numeric target is present.
         bool ok = getr.Result != null && getr.Result.Contains(value);
+        try
+        {
+            if (!string.IsNullOrWhiteSpace(originalRange))
+                _ = await _client.ExecuteAsync(id, "setrange", originalRange, ct);
+        }
+        catch { /* restoration is best-effort only */ }
         return new TestResult(name, ok,
             ok ? $"setrange→getrange round-trip: {getr.Result}"
                : $"getrange did not contain '{value}'. Got: {getr.Result}",
@@ -1206,10 +1229,24 @@ public sealed class TestSuite
 
     private static bool NameOrIdContains(JsonObject n, string text)
     {
+        static string Normalize(string? s)
+        {
+            if (string.IsNullOrWhiteSpace(s)) return "";
+            var chars = s.Where(char.IsLetterOrDigit).ToArray();
+            return new string(chars).ToLowerInvariant();
+        }
+
         var name = n["name"]?.GetValue<string>();
         var aid  = n["automationId"]?.GetValue<string>();
-        return (name?.Contains(text, StringComparison.OrdinalIgnoreCase) ?? false)
-            || (aid ?.Contains(text, StringComparison.OrdinalIgnoreCase) ?? false);
+        if ((name?.Contains(text, StringComparison.OrdinalIgnoreCase) ?? false)
+            || (aid?.Contains(text, StringComparison.OrdinalIgnoreCase) ?? false))
+            return true;
+
+        // Browser accessibility trees sometimes collapse spaces/punctuation (e.g. "AddToCart").
+        var needle = Normalize(text);
+        if (needle.Length == 0) return false;
+        return Normalize(name).Contains(needle, StringComparison.Ordinal)
+            || Normalize(aid).Contains(needle, StringComparison.Ordinal);
     }
 }
 
