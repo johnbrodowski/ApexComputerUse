@@ -1,5 +1,7 @@
 # ApexComputerUse — Operational Reference
 
+> **Auto-start:** the HTTP server starts automatically when the app launches (`HttpAutoStart = true`, `HttpBindAll = true`). No manual click required. On first launch a UAC prompt configures the URL ACL and firewall rule once.
+
 ## Authentication
 
 API key: d4x7kiS8XeeWxJ0XFNdrs7k_upavnAOS

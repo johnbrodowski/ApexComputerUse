@@ -30,6 +30,7 @@ namespace ApexComputerUse
         private static readonly string SettingsDir =
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ApexComputerUse");
         private static readonly string SettingsFile = Path.Combine(SettingsDir, "settings.json");
+        private bool _netshConfigured;
 
         private static readonly Dictionary<string, string[]> ControlActions = new()
         {
@@ -201,8 +202,10 @@ namespace ApexComputerUse
             this.Load += (_, _) => { _model.WireDownloader(); _model.CheckFirstLaunch(); };
             this.Load += (_, _) =>
             {
+                SetupNetshIfNeeded();
                 if (AppConfig.Current.HttpAutoStart)
                     _servers.ToggleHttp();
+                AutoLoadModelIfConfigured();
             };
         }
 
@@ -220,6 +223,7 @@ namespace ApexComputerUse
                         if (!string.IsNullOrWhiteSpace(s.ProjPath)) txtProjPath.Text = s.ProjPath;
                         if (!string.IsNullOrWhiteSpace(s.ApiKey)) txtApiKey.Text = s.ApiKey;
                         if (!string.IsNullOrWhiteSpace(s.AllowedChatIds)) txtAllowedChatIds.Text = s.AllowedChatIds;
+                        _netshConfigured = s.NetshConfigured;
                     }
                 }
             }
@@ -246,10 +250,11 @@ namespace ApexComputerUse
                 Directory.CreateDirectory(SettingsDir);
                 var s = new AppSettings
                 {
-                    ModelPath      = txtModelPath.Text,
-                    ProjPath       = txtProjPath.Text,
-                    ApiKey         = txtApiKey.Text,
-                    AllowedChatIds = txtAllowedChatIds.Text
+                    ModelPath        = txtModelPath.Text,
+                    ProjPath         = txtProjPath.Text,
+                    ApiKey           = txtApiKey.Text,
+                    AllowedChatIds   = txtAllowedChatIds.Text,
+                    NetshConfigured  = _netshConfigured
                 };
                 File.WriteAllText(SettingsFile,
                     JsonSerializer.Serialize(s, new JsonSerializerOptions { WriteIndented = true }));
@@ -269,6 +274,85 @@ namespace ApexComputerUse
             var bytes = new byte[24];
             System.Security.Cryptography.RandomNumberGenerator.Fill(bytes);
             return Convert.ToBase64String(bytes).Replace('+', '-').Replace('/', '_').TrimEnd('=');
+        }
+
+        // ── First-run netsh setup ─────────────────────────────────────────
+
+        private void SetupNetshIfNeeded()
+        {
+            if (_netshConfigured) return;
+
+            int port = AppConfig.Current.HttpPort;
+            bool urlAclOk = IsNetshUrlAclSet(port);
+            bool firewallOk = IsFirewallRuleSet("ApexComputerUse");
+
+            if (urlAclOk && firewallOk)
+            {
+                _netshConfigured = true;
+                SaveSettings();
+                return;
+            }
+
+            try
+            {
+                // Combine both commands in one elevated cmd session; & continues on error
+                string cmds = $"netsh http add urlacl url=http://+:{port}/ user=Everyone & " +
+                              $"netsh advfirewall firewall add rule name=\"ApexComputerUse\" " +
+                              $"dir=in action=allow protocol=TCP localport={port}";
+                var psi = new System.Diagnostics.ProcessStartInfo("cmd", $"/c {cmds}")
+                {
+                    Verb = "runas",
+                    UseShellExecute = true,
+                    CreateNoWindow = false
+                };
+                var proc = System.Diagnostics.Process.Start(psi);
+                proc?.WaitForExit();
+                _netshConfigured = true;
+                SaveSettings();
+            }
+            catch (Exception ex)
+            {
+                Log($"Netsh setup skipped: {ex.Message}");
+            }
+        }
+
+        private static bool IsNetshUrlAclSet(int port)
+        {
+            try
+            {
+                var psi = new System.Diagnostics.ProcessStartInfo(
+                    "netsh", $"http show urlacl url=http://+:{port}/")
+                { UseShellExecute = false, RedirectStandardOutput = true, CreateNoWindow = true };
+                using var proc = System.Diagnostics.Process.Start(psi);
+                var output = proc?.StandardOutput.ReadToEnd() ?? "";
+                proc?.WaitForExit();
+                return output.Contains($"+:{port}/", StringComparison.OrdinalIgnoreCase);
+            }
+            catch { return false; }
+        }
+
+        private static bool IsFirewallRuleSet(string ruleName)
+        {
+            try
+            {
+                var psi = new System.Diagnostics.ProcessStartInfo(
+                    "netsh", $"advfirewall firewall show rule name=\"{ruleName}\"")
+                { UseShellExecute = false, RedirectStandardOutput = true, CreateNoWindow = true };
+                using var proc = System.Diagnostics.Process.Start(psi);
+                var output = proc?.StandardOutput.ReadToEnd() ?? "";
+                proc?.WaitForExit();
+                return output.Contains("Rule Name:", StringComparison.OrdinalIgnoreCase);
+            }
+            catch { return false; }
+        }
+
+        // ── Model auto-load ───────────────────────────────────────────────
+
+        private void AutoLoadModelIfConfigured()
+        {
+            if (!string.IsNullOrWhiteSpace(txtModelPath.Text) &&
+                !string.IsNullOrWhiteSpace(txtProjPath.Text))
+                _ = _model.LoadModel();
         }
 
         // ── Control-type picker ───────────────────────────────────────────

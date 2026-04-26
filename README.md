@@ -64,11 +64,13 @@ dotnet build
 dotnet run --project ApexComputerUse
 ```
 
-1. The app opens. In the **Remote Control** tab, click **Start HTTP**.
-2. An API key is generated automatically and shown in the **API Key** field — copy it.
+1. The app opens. The HTTP server starts automatically and binds to all interfaces. On first launch, a UAC prompt appears once to configure the URL ACL and Windows Firewall rule — approve it.
+2. The API key is shown in the **Remote Control** tab → **API Key** field — copy it.
 3. Open `http://localhost:8081/` in a browser — the interactive console appears (the browser console pre-fills the key).
 4. Pick any open window from the **Windows** panel on the left.
 5. Browse its element tree, click an action button, see the result.
+
+> **Chat tab:** switch to the **Chat** tab and click **Load Chat** to open the streaming AI chat UI directly inside the app. Configure provider and API key in the settings group above, then chat away.
 
 Or go straight to curl (replace `<key>` with the API key from the Remote Control tab):
 
@@ -262,7 +264,9 @@ Truncated nodes (ones whose children were cut off by `depth`) now also emit `des
 - **UI Map Renderer** — renders the element tree as a colour-coded overlay drawn directly on screen, and optionally exports a PNG image; accessible via Tools → Render UI Map or `GET /uimap`
 - **Format-adaptive responses** — every endpoint serves HTML, plain text, JSON, or **PDF** via URL extension (`.json`, `.html`, `.txt`, `.pdf`), `?format=` parameter, or `Accept` header; default is an HTML page with embedded JSON readable by any AI that can fetch a URL
 - **System utility routes** — `/health` (unauthenticated), `/ping`, `/metrics`, `/sysinfo`, `/env`, `/ls`, `/run`, `/run-tests`, `/shutdown` for AI agents that need OS-level context without a separate tool
-- **AI Chat over HTTP** — streaming chat UI at `GET /chat` backed by `/chat/send`, `/chat/status`, `/chat/reset`; same 8 providers as the desktop AI Chat window
+- **Embedded AI chat in the Chat tab** — the Chat tab hosts the streaming HTML chat UI (`/chat`) directly in an embedded WebView2 control; click **Load Chat** to connect. The HTML page handles streaming, provider/model display, and session reset natively.
+- **AI Chat over HTTP** — streaming chat UI at `GET /chat` backed by `/chat/send`, `/chat/status`, `/chat/reset`; same 8 providers as the desktop AI Chat window; also accessible from any browser
+- **Auto-start on launch** — HTTP server starts and binds to all interfaces automatically; local vision model is loaded automatically if paths are saved; first-run netsh setup (URL ACL + Firewall rule) runs once with a single UAC prompt
 - **Auto-download setup** — Model tab "Download All" button fetches the LFM2.5-VL model, projector, and Tesseract data to fixed local paths on first launch
 
 ---
@@ -277,7 +281,18 @@ cd ApexComputerUse
 dotnet run --project ApexComputerUse
 ```
 
-### 2. Models and OCR data (optional — auto-download available)
+### 2. First-run network setup (automatic)
+
+On first launch, ApexComputerUse checks whether the HTTP URL ACL and Windows Firewall inbound rule for port 8081 exist. If either is missing, a single elevated `cmd` window opens (one UAC prompt) and runs:
+
+```
+netsh http add urlacl url=http://+:8081/ user=Everyone
+netsh advfirewall firewall add rule name="ApexComputerUse" dir=in action=allow protocol=TCP localport=8081
+```
+
+This happens once — the result is saved to `%APPDATA%\ApexComputerUse\settings.json`. On every subsequent launch the check is skipped.
+
+### 3. Models and OCR data (optional — auto-download available)
 
 Open the **Model** tab and click **Download All** to automatically fetch:
 
@@ -289,7 +304,7 @@ Files are saved to `models\` and `tessdata\` next to the executable. On first la
 
 To download manually: copy `eng.traineddata` from [github.com/tesseract-ocr/tessdata](https://github.com/tesseract-ocr/tessdata) into `tessdata\`, and place both `.gguf` files in `models\`.
 
-### 3. Telegram Bot (optional)
+### 4. Telegram Bot (optional)
 
 1. Message [@BotFather](https://t.me/BotFather) on Telegram and create a bot with `/newbot`.
 2. Copy the token (format: `123456789:ABC-DEF...`).
@@ -338,15 +353,16 @@ The `POST /run` and `GET /run` endpoints execute arbitrary `cmd.exe` commands. T
 
 All settings can be layered via three sources (highest priority last wins for env vars):
 
-**`appsettings.json`** (next to the executable):
+**`appsettings.json`** (next to the executable — shipped defaults shown):
 
 ```json
 {
   "HttpPort":       8081,
-  "HttpBindAll":    false,
+  "HttpBindAll":    true,
+  "HttpAutoStart":  true,
   "PipeName":       "ApexComputerUse",
   "LogLevel":       "Information",
-  "EnableShellRun": false,
+  "EnableShellRun": true,
   "ApiKey":         "",
   "AllowedChatIds": "",
   "TelegramToken":  "",
@@ -354,6 +370,8 @@ All settings can be layered via three sources (highest priority last wins for en
   "MmProjPath":     ""
 }
 ```
+
+> `HttpBindAll` and `HttpAutoStart` default to `true` — the server starts automatically and is accessible from other machines on the network. Set both to `false` for localhost-only / manual-start mode.
 
 **Environment variables** (prefix `APEX_`, override `appsettings.json`):
 
@@ -415,7 +433,7 @@ Configure via `appsettings.json` or `APEX_*` environment variables before starti
 | **Output UI Map** | Scans the current window's element tree and logs it as nested JSON to the console tab. |
 | **Render UI Map** | Scans the current window's element tree, draws a colour-coded bounding-box overlay on screen for 5 seconds, and offers to save the overlay as a PNG image. |
 | **Scene Editor** | Opens the layered scene editor — create scenes, add shapes to layers, drag to reposition, use AI to generate and refine compositions. |
-| **AI Chat** | Opens a streaming chat window with support for 8 AI providers (OpenAI, Anthropic, DeepSeek, Grok, Groq, Duck, LM Studio, LlamaSharp). Configure API keys in `ai-settings.json` next to the executable. |
+| **AI Chat** | Opens a standalone streaming chat window with support for 8 AI providers (OpenAI, Anthropic, DeepSeek, Grok, Groq, Duck, LM Studio, LlamaSharp). Configure API keys in `ai-settings.json` next to the executable. The **Chat tab** also embeds the same chat UI directly inside the app via WebView2 — click **Load Chat** after the HTTP server starts. |
 
 ---
 
@@ -1366,6 +1384,8 @@ ApexComputerUse/
 └── Scripts/
     ├── ApexComputerUse.psm1             — PowerShell module (pipe-based)
     └── apex.cmd                         — cmd.exe helper (HTTP-based)
+
+restart-apex.bat / restart-apex.ps1     — Kill all running instances and relaunch (Release → Debug → dotnet run)
 
 AIClients/                               — AI messaging projects (also in ApexComputerUse.sln)
 ├── AiMessagingCore/                     — Provider-neutral .NET 10 library; 8 providers; streaming via events

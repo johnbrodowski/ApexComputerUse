@@ -5,6 +5,21 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.12.0] — 2026-04-26
+
+### Added
+- **Embedded HTML chat in the Chat tab** — the Chat tab's RichTextBox, input field, and Send button have been replaced by an embedded `Microsoft.Web.WebView2` control hosting the existing `/chat` streaming page directly inside the app. Click **Load Chat** to navigate the WebView2 to `http://localhost:{port}/chat?apiKey=...`. The HTML page handles streaming, the "New chat" reset, and provider/model status display natively.
+- **HTTP server auto-start on launch** — `HttpAutoStart` and `HttpBindAll` are now `true` by default in `appsettings.json`. The HTTP server starts and binds to all interfaces automatically when the app opens; no manual click on the Remote Control tab is required.
+- **Model auto-load on launch** — if model and projector paths are saved in `settings.json`, the local vision model is loaded automatically at startup without opening the Model tab.
+- **First-run netsh setup** — on the very first launch, the app checks whether the HTTP URL ACL (`http://+:8081/`) and the Windows Firewall inbound rule (`ApexComputerUse`) exist. If either is missing, a single elevated `cmd` session (one UAC prompt) runs both `netsh` commands. The result is persisted to `settings.json` (`NetshConfigured = true`) so the check never repeats.
+- **Restart scripts** — `restart-apex.bat` and `restart-apex.ps1` at the repo root kill all running instances (`taskkill /F /IM ApexComputerUse.exe`) and relaunch the app. Both prefer the Release build, fall back to Debug, and fall back to `dotnet run` if no built exe is found.
+
+### Changed
+- `ChatTabController` — removed `_rtbChatHistory`, `_txtChatInput`, `_btnChatSend`, `AppendToChat`, `AppendColoredText`, `SendOrCancelAsync`, `ExecuteCommandsFromResponse`, and `CurlRx`. Constructor now accepts a `WebView2` instead. `OpenChat()` navigates the embedded WebView2; `ResetChat()` calls `Reload()`.
+- `AppSettings` — added `NetshConfigured` bool field (persisted to `%APPDATA%\ApexComputerUse\settings.json`) for first-run netsh tracking.
+
+---
+
 ## [0.11.0] — 2026-04-16
 
 ### Added

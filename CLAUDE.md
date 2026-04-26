@@ -123,7 +123,8 @@ dotnet test ApexComputerUse.Tests/ApexComputerUse.Tests.csproj
 
 ```
 ApexComputerUse/
-├── Form1.cs / Form1.Designer.cs         — Main UI (tabs: Console, Find & Execute, Remote Control, Model)
+├── Form1.cs / Form1.Designer.cs         — Main UI (tabs: Console, Find & Execute, Remote Control, Model, Chat)
+├── UI/ChatTabController.cs              — Chat tab; WebView2 navigates to /chat; auto-starts server, model, and netsh on first run
 ├── AiChatForm.cs / AiChatForm.Designer.cs — AI Chat window (Tools → AI Chat)
 ├── AiChatService.cs                     — Thread-safe service layer; provider config, session lifecycle, streaming
 ├── FlaUIHelper.cs                       — All FlaUI/UIA3 automation wrappers
@@ -261,7 +262,7 @@ Components requiring a live Windows session (FlaUI UIA, Tesseract, LLamaSharp, W
 
 ## Verifying Behaviour with curl
 
-The HTTP server must be running before any curl verification. Start it from the Remote Control tab or via `dotnet run`. Include the API key from the Remote Control tab on every request.
+The HTTP server starts automatically on launch (`HttpAutoStart = true`). Include the API key from the Remote Control tab on every request.
 
 ```bash
 # Confirm server is up

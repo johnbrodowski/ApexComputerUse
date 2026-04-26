@@ -14,5 +14,6 @@ namespace ApexComputerUse
         /// Leave empty to disable the whitelist (any user who discovers the bot token can connect).
         /// </summary>
         public string AllowedChatIds { get; set; } = "";
+        public bool NetshConfigured { get; set; } = false;
     }
 }
