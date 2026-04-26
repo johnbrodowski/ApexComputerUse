@@ -3,7 +3,7 @@ using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Definitions;
 
 namespace ApexComputerUse
-{
+{//?apiKey=
     public partial class Form1 : Form
     {
         private readonly ApexHelper _helper = new();
@@ -171,9 +171,9 @@ namespace ApexComputerUse
                 lblHttpStatus, lblPipeStatus, lblTelegramStatus);
 
             _chat = new ChatTabController(
-                _chatService, () => _servers.Http, () => txtApiKey.Text, Log,
+                _chatService, _processor, () => _servers.Http, () => txtApiKey.Text, Log,
                 cboAiProvider, txtAiModel, txtAiSystemPrompt, txtAiApiKey,
-                lblAiSettingsPath, lblAiSessionStatus);
+                lblAiSettingsPath, webViewChat);
 
             _model = new ModelTabController(
                 _processor, _downloader, SaveSettings, Log,
@@ -405,7 +405,6 @@ namespace ApexComputerUse
         private void cboAiProvider_SelectedIndexChanged(object sender, EventArgs e) => _chat.ProviderChanged();
         private void btnAiSaveSettings_Click(object sender, EventArgs e) => _chat.SaveSettings();
         private void btnAiOpenChat_Click(object sender, EventArgs e)     => _chat.OpenChat();
-        private void btnAiResetChat_Click(object sender, EventArgs e)    => _chat.ResetChat();
 
         // ── Model tab ─────────────────────────────────────────────────────
 

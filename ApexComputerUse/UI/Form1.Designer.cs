@@ -34,9 +34,8 @@ namespace ApexComputerUse
             btnAiSaveSettings = new Button();
             lblAiSettingsPath = new Label();
             grpAiSession = new GroupBox();
-            lblAiSessionStatus = new Label();
+            webViewChat = new Microsoft.Web.WebView2.WinForms.WebView2();
             btnAiOpenChat = new Button();
-            btnAiResetChat = new Button();
             tabMain = new TabControl();
             tabPageConsole = new TabPage();
             txtCommand = new TextBox();
@@ -106,6 +105,7 @@ namespace ApexComputerUse
             tabPageChat.SuspendLayout();
             grpAiSettings.SuspendLayout();
             grpAiSession.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)webViewChat).BeginInit();
             tabMain.SuspendLayout();
             tabPageConsole.SuspendLayout();
             tabPageFind.SuspendLayout();
@@ -122,7 +122,7 @@ namespace ApexComputerUse
             menuStrip1.Items.AddRange(new ToolStripItem[] { toolsToolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
-            menuStrip1.Size = new Size(577, 25);
+            menuStrip1.Size = new Size(615, 25);
             menuStrip1.TabIndex = 0;
             menuStrip1.Text = "menuStrip1";
             // 
@@ -168,7 +168,7 @@ namespace ApexComputerUse
             tabPageChat.Location = new Point(4, 26);
             tabPageChat.Name = "tabPageChat";
             tabPageChat.Padding = new Padding(3);
-            tabPageChat.Size = new Size(565, 337);
+            tabPageChat.Size = new Size(607, 341);
             tabPageChat.TabIndex = 4;
             tabPageChat.Text = "Chat";
             tabPageChat.UseVisualStyleBackColor = true;
@@ -187,7 +187,7 @@ namespace ApexComputerUse
             grpAiSettings.Controls.Add(lblAiSettingsPath);
             grpAiSettings.Location = new Point(8, 7);
             grpAiSettings.Name = "grpAiSettings";
-            grpAiSettings.Size = new Size(520, 236);
+            grpAiSettings.Size = new Size(592, 142);
             grpAiSettings.TabIndex = 0;
             grpAiSettings.TabStop = false;
             grpAiSettings.Text = "Provider Settings";
@@ -195,7 +195,7 @@ namespace ApexComputerUse
             // lblAiProvider
             // 
             lblAiProvider.AutoSize = true;
-            lblAiProvider.Location = new Point(8, 29);
+            lblAiProvider.Location = new Point(8, 26);
             lblAiProvider.Name = "lblAiProvider";
             lblAiProvider.Size = new Size(60, 17);
             lblAiProvider.TabIndex = 0;
@@ -205,16 +205,16 @@ namespace ApexComputerUse
             // 
             cboAiProvider.DropDownStyle = ComboBoxStyle.DropDownList;
             cboAiProvider.FormattingEnabled = true;
-            cboAiProvider.Location = new Point(90, 25);
+            cboAiProvider.Location = new Point(72, 22);
             cboAiProvider.Name = "cboAiProvider";
-            cboAiProvider.Size = new Size(160, 25);
+            cboAiProvider.Size = new Size(155, 25);
             cboAiProvider.TabIndex = 1;
             cboAiProvider.SelectedIndexChanged += cboAiProvider_SelectedIndexChanged;
             // 
             // lblAiModel
             // 
             lblAiModel.AutoSize = true;
-            lblAiModel.Location = new Point(8, 66);
+            lblAiModel.Location = new Point(237, 26);
             lblAiModel.Name = "lblAiModel";
             lblAiModel.Size = new Size(49, 17);
             lblAiModel.TabIndex = 2;
@@ -222,15 +222,15 @@ namespace ApexComputerUse
             // 
             // txtAiModel
             // 
-            txtAiModel.Location = new Point(90, 61);
+            txtAiModel.Location = new Point(287, 22);
             txtAiModel.Name = "txtAiModel";
-            txtAiModel.Size = new Size(360, 25);
+            txtAiModel.Size = new Size(155, 25);
             txtAiModel.TabIndex = 3;
             // 
             // lblAiApiKey
             // 
             lblAiApiKey.AutoSize = true;
-            lblAiApiKey.Location = new Point(8, 104);
+            lblAiApiKey.Location = new Point(8, 57);
             lblAiApiKey.Name = "lblAiApiKey";
             lblAiApiKey.Size = new Size(54, 17);
             lblAiApiKey.TabIndex = 4;
@@ -238,16 +238,16 @@ namespace ApexComputerUse
             // 
             // txtAiApiKey
             // 
-            txtAiApiKey.Location = new Point(90, 100);
+            txtAiApiKey.Location = new Point(90, 53);
             txtAiApiKey.Name = "txtAiApiKey";
             txtAiApiKey.PasswordChar = '●';
-            txtAiApiKey.Size = new Size(360, 25);
+            txtAiApiKey.Size = new Size(422, 25);
             txtAiApiKey.TabIndex = 5;
             // 
             // lblAiSysPrompt
             // 
             lblAiSysPrompt.AutoSize = true;
-            lblAiSysPrompt.Location = new Point(8, 143);
+            lblAiSysPrompt.Location = new Point(8, 92);
             lblAiSysPrompt.Name = "lblAiSysPrompt";
             lblAiSysPrompt.Size = new Size(52, 17);
             lblAiSysPrompt.TabIndex = 6;
@@ -255,17 +255,16 @@ namespace ApexComputerUse
             // 
             // txtAiSystemPrompt
             // 
-            txtAiSystemPrompt.Location = new Point(90, 138);
-            txtAiSystemPrompt.Multiline = true;
+            txtAiSystemPrompt.Location = new Point(90, 88);
             txtAiSystemPrompt.Name = "txtAiSystemPrompt";
-            txtAiSystemPrompt.Size = new Size(360, 52);
+            txtAiSystemPrompt.Size = new Size(422, 25);
             txtAiSystemPrompt.TabIndex = 7;
             // 
             // btnAiSaveSettings
             // 
-            btnAiSaveSettings.Location = new Point(456, 25);
+            btnAiSaveSettings.Location = new Point(452, 22);
             btnAiSaveSettings.Name = "btnAiSaveSettings";
-            btnAiSaveSettings.Size = new Size(56, 29);
+            btnAiSaveSettings.Size = new Size(52, 25);
             btnAiSaveSettings.TabIndex = 8;
             btnAiSaveSettings.Text = "Save";
             btnAiSaveSettings.UseVisualStyleBackColor = true;
@@ -275,7 +274,7 @@ namespace ApexComputerUse
             // 
             lblAiSettingsPath.AutoSize = true;
             lblAiSettingsPath.ForeColor = Color.Gray;
-            lblAiSettingsPath.Location = new Point(8, 209);
+            lblAiSettingsPath.Location = new Point(8, 122);
             lblAiSettingsPath.Name = "lblAiSettingsPath";
             lblAiSettingsPath.Size = new Size(95, 17);
             lblAiSettingsPath.TabIndex = 9;
@@ -283,45 +282,37 @@ namespace ApexComputerUse
             // 
             // grpAiSession
             // 
-            grpAiSession.Controls.Add(lblAiSessionStatus);
+            grpAiSession.Controls.Add(webViewChat);
             grpAiSession.Controls.Add(btnAiOpenChat);
-            grpAiSession.Controls.Add(btnAiResetChat);
-            grpAiSession.Location = new Point(8, 252);
+            grpAiSession.Location = new Point(8, 146);
             grpAiSession.Name = "grpAiSession";
-            grpAiSession.Size = new Size(520, 75);
+            grpAiSession.Size = new Size(594, 180);
             grpAiSession.TabIndex = 1;
             grpAiSession.TabStop = false;
             grpAiSession.Text = "Chat";
             // 
-            // lblAiSessionStatus
+            // webViewChat
             // 
-            lblAiSessionStatus.AutoSize = true;
-            lblAiSessionStatus.ForeColor = Color.Gray;
-            lblAiSessionStatus.Location = new Point(8, 27);
-            lblAiSessionStatus.Name = "lblAiSessionStatus";
-            lblAiSessionStatus.Size = new Size(110, 17);
-            lblAiSessionStatus.TabIndex = 0;
-            lblAiSessionStatus.Text = "No active session";
+            webViewChat.AllowExternalDrop = true;
+            webViewChat.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            webViewChat.CreationProperties = null;
+            webViewChat.DefaultBackgroundColor = Color.White;
+            webViewChat.Location = new Point(8, 18);
+            webViewChat.Name = "webViewChat";
+            webViewChat.Size = new Size(578, 131);
+            webViewChat.TabIndex = 0;
+            webViewChat.ZoomFactor = 1D;
             // 
             // btnAiOpenChat
             // 
-            btnAiOpenChat.Location = new Point(276, 23);
+            btnAiOpenChat.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            btnAiOpenChat.Location = new Point(515, 152);
             btnAiOpenChat.Name = "btnAiOpenChat";
-            btnAiOpenChat.Size = new Size(120, 29);
+            btnAiOpenChat.Size = new Size(71, 25);
             btnAiOpenChat.TabIndex = 1;
-            btnAiOpenChat.Text = "Open in Browser";
+            btnAiOpenChat.Text = "Load Chat";
             btnAiOpenChat.UseVisualStyleBackColor = true;
             btnAiOpenChat.Click += btnAiOpenChat_Click;
-            // 
-            // btnAiResetChat
-            // 
-            btnAiResetChat.Location = new Point(402, 23);
-            btnAiResetChat.Name = "btnAiResetChat";
-            btnAiResetChat.Size = new Size(110, 29);
-            btnAiResetChat.TabIndex = 2;
-            btnAiResetChat.Text = "Reset Conversation";
-            btnAiResetChat.UseVisualStyleBackColor = true;
-            btnAiResetChat.Click += btnAiResetChat_Click;
             // 
             // tabMain
             // 
@@ -330,10 +321,10 @@ namespace ApexComputerUse
             tabMain.Controls.Add(tabPageRemote);
             tabMain.Controls.Add(tabPageModel);
             tabMain.Controls.Add(tabPageChat);
-            tabMain.Location = new Point(0, 27);
+            tabMain.Location = new Point(0, 25);
             tabMain.Name = "tabMain";
             tabMain.SelectedIndex = 0;
-            tabMain.Size = new Size(573, 367);
+            tabMain.Size = new Size(615, 371);
             tabMain.TabIndex = 1;
             // 
             // tabPageConsole
@@ -346,7 +337,7 @@ namespace ApexComputerUse
             tabPageConsole.Location = new Point(4, 26);
             tabPageConsole.Name = "tabPageConsole";
             tabPageConsole.Padding = new Padding(3);
-            tabPageConsole.Size = new Size(565, 337);
+            tabPageConsole.Size = new Size(607, 337);
             tabPageConsole.TabIndex = 0;
             tabPageConsole.Text = "Console";
             tabPageConsole.UseVisualStyleBackColor = true;
@@ -395,7 +386,7 @@ namespace ApexComputerUse
             txtStatus.Name = "txtStatus";
             txtStatus.ReadOnly = true;
             txtStatus.ScrollBars = ScrollBars.Vertical;
-            txtStatus.Size = new Size(549, 269);
+            txtStatus.Size = new Size(591, 269);
             txtStatus.TabIndex = 4;
             // 
             // tabPageFind
@@ -918,7 +909,7 @@ namespace ApexComputerUse
             statusStrip1.Items.AddRange(new ToolStripItem[] { lblStatCpu, lblStatRam, lblStatModel, lblStatNet });
             statusStrip1.Location = new Point(0, 397);
             statusStrip1.Name = "statusStrip1";
-            statusStrip1.Size = new Size(577, 26);
+            statusStrip1.Size = new Size(615, 26);
             statusStrip1.TabIndex = 2;
             statusStrip1.Text = "statusStrip1";
             // 
@@ -946,7 +937,7 @@ namespace ApexComputerUse
             // lblStatNet
             // 
             lblStatNet.Name = "lblStatNet";
-            lblStatNet.Size = new Size(351, 21);
+            lblStatNet.Size = new Size(389, 21);
             lblStatNet.Spring = true;
             lblStatNet.Text = "Net: --";
             lblStatNet.TextAlign = ContentAlignment.MiddleRight;
@@ -955,7 +946,7 @@ namespace ApexComputerUse
             // 
             AutoScaleDimensions = new SizeF(7F, 17F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(577, 423);
+            ClientSize = new Size(615, 423);
             Controls.Add(tabMain);
             Controls.Add(statusStrip1);
             Controls.Add(menuStrip1);
@@ -972,7 +963,7 @@ namespace ApexComputerUse
             grpAiSettings.ResumeLayout(false);
             grpAiSettings.PerformLayout();
             grpAiSession.ResumeLayout(false);
-            grpAiSession.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)webViewChat).EndInit();
             tabMain.ResumeLayout(false);
             tabPageConsole.ResumeLayout(false);
             tabPageConsole.PerformLayout();
@@ -1089,8 +1080,7 @@ namespace ApexComputerUse
         private Button btnAiSaveSettings;
         private Label lblAiSettingsPath;
         private GroupBox grpAiSession;
-        private Label lblAiSessionStatus;
+        private Microsoft.Web.WebView2.WinForms.WebView2 webViewChat;
         private Button btnAiOpenChat;
-        private Button btnAiResetChat;
     }
 }
