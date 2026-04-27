@@ -71,6 +71,8 @@ dotnet run --project ApexComputerUse
 5. Browse its element tree, click an action button, see the result.
 
 > **Chat tab:** switch to the **Chat** tab and click **Load Chat** to open the streaming AI chat UI directly inside the app. Configure provider and API key in the settings group above, then chat away.
+>
+> **Clients tab:** use the **Clients** tab to register other machines running ApexComputerUse. Add each machine's name, IP/host, port, and API key, then click **Test** to confirm the connection is live. This registry lets you — or an AI agent — track and target multiple Apex endpoints from a single instance.
 
 Or go straight to curl (replace `<key>` with the API key from the Remote Control tab):
 
@@ -1360,7 +1362,7 @@ Download a vision-capable GGUF model and its multimodal projector (e.g. LFM2.5-V
 
 ```
 ApexComputerUse/
-├── Form1.cs / Form1.Designer.cs         — Main UI (tabs: Console, Find & Execute, Remote Control, Model)
+├── Form1.cs / Form1.Designer.cs         — Main UI (tabs: Console, Find & Execute, Remote Control, Model, Chat, Clients)
 ├── AiChatForm.cs / AiChatForm.Designer.cs — AI Chat window (Tools → AI Chat); 8-provider streaming chat
 ├── AiChatService.cs                     — Thread-safe service layer wrapping AiMessagingCore; manages provider config, session lifecycle, and streaming
 ├── FlaUIHelper.cs                       — All FlaUI automation wrappers
@@ -1380,6 +1382,9 @@ ApexComputerUse/
 ├── Scene.cs                             — SceneShape / Layer / Scene data models with stable IDs
 ├── SceneStore.cs                        — Thread-safe in-memory + disk-persisted scene store
 ├── SceneEditorForm.cs / .Designer.cs    — WinForms layered scene editor (Tools → Scene Editor)
+├── Clients/
+│     ├── RemoteClient.cs               — Data model (name, host, port, API key, OS version, description)
+│     └── ClientStore.cs                — Thread-safe store; persists to <exe>/clients/{id}.json
 ├── ai-settings.json                     — Starter config for AI Chat providers (placeholder keys)
 └── Scripts/
     ├── ApexComputerUse.psm1             — PowerShell module (pipe-based)

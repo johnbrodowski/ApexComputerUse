@@ -14,9 +14,11 @@ namespace ApexComputerUse
         private readonly DownloadManager _downloader = new();
         private readonly ActionExecutor _executor;
         private readonly StatusMonitor _statusMonitor;
+        private readonly ClientStore _clientStore = new();
         private readonly ServerTabController _servers;
         private readonly ChatTabController _chat;
         private readonly ModelTabController _model;
+        private readonly ClientsTabController _clients;
 
         /// <summary>
         /// Shared log-forwarding delegate for processor + all I/O servers.
@@ -183,6 +185,10 @@ namespace ApexComputerUse
                 lblDownloadStatus, lblModelStatus,
                 pbarDownload, tabMain, tabPageModel);
 
+            _clients = new ClientsTabController(
+                _clientStore, listViewClients,
+                btnAddClient, btnEditClient, btnRemoveClient, btnTestClient);
+
             // Action control-type picker
             cmbControlType.Items.AddRange(ControlActions.Keys.ToArray<object>());
             cmbControlType.SelectedIndex = 0;
@@ -198,6 +204,7 @@ namespace ApexComputerUse
 
             LoadSettings();
             _chat.Init();
+            _clients.Init();
 
             this.Load += (_, _) => { _model.WireDownloader(); _model.CheckFirstLaunch(); };
             this.Load += (_, _) =>

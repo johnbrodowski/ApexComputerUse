@@ -5,6 +5,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.13.0] — 2026-04-26
+
+### Added
+- **Clients tab — remote machine registry** — a new "Clients" tab (sixth tab in the main UI) lets users and AI maintain a persistent directory of other Apex-enabled machines. Each entry stores a friendly name, host/IP, port, API key, OS version, and description. Entries are listed in a six-column `ListView` and persisted to `<exe>/clients/{id}.json` using the same thread-safe JSON store pattern as scenes.
+- **`ClientStore`** (`Clients/ClientStore.cs`) — thread-safe store that loads all client records from disk on startup and writes individual JSON files on every create, update, or delete.
+- **`RemoteClient`** (`Clients/RemoteClient.cs`) — data model with `[JsonPropertyName]` attributes matching the project's snake_case serialization convention.
+- **`ClientsTabController`** (`UI/ClientsTabController.cs`) — tab logic wired to Add, Edit, Remove, and Test buttons. Test Connection fires an async `GET /ping` against the selected client's host:port (with its API key if set) and updates a live Status column green/red in-place, with no UI blocking.
+- **`ClientEditForm`** (`UI/ClientEditForm.cs` / `ClientEditForm.Designer.cs`) — fixed-size dialog for creating and editing client entries, with name/host required-field validation and port range validation.
+
+---
+
 ## [0.12.0] — 2026-04-26
 
 ### Added

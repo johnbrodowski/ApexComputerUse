@@ -101,8 +101,15 @@ namespace ApexComputerUse
             lblStatRam = new ToolStripStatusLabel();
             lblStatModel = new ToolStripStatusLabel();
             lblStatNet = new ToolStripStatusLabel();
+            tabPageClients = new TabPage();
+            listViewClients = new ListView();
+            btnAddClient = new Button();
+            btnEditClient = new Button();
+            btnRemoveClient = new Button();
+            btnTestClient = new Button();
             menuStrip1.SuspendLayout();
             tabPageChat.SuspendLayout();
+            tabPageClients.SuspendLayout();
             grpAiSettings.SuspendLayout();
             grpAiSession.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)webViewChat).BeginInit();
@@ -172,7 +179,72 @@ namespace ApexComputerUse
             tabPageChat.TabIndex = 4;
             tabPageChat.Text = "Chat";
             tabPageChat.UseVisualStyleBackColor = true;
-            // 
+            //
+            // tabPageClients
+            //
+            tabPageClients.Controls.Add(listViewClients);
+            tabPageClients.Controls.Add(btnAddClient);
+            tabPageClients.Controls.Add(btnEditClient);
+            tabPageClients.Controls.Add(btnRemoveClient);
+            tabPageClients.Controls.Add(btnTestClient);
+            tabPageClients.Location = new Point(4, 26);
+            tabPageClients.Name = "tabPageClients";
+            tabPageClients.Padding = new Padding(3);
+            tabPageClients.Size = new Size(607, 341);
+            tabPageClients.TabIndex = 5;
+            tabPageClients.Text = "Clients";
+            tabPageClients.UseVisualStyleBackColor = true;
+            //
+            // listViewClients
+            //
+            listViewClients.Columns.AddRange(new ColumnHeader[]
+            {
+                new ColumnHeader { Text = "Name",        Width = 150 },
+                new ColumnHeader { Text = "Host",        Width = 150 },
+                new ColumnHeader { Text = "Port",        Width = 55  },
+                new ColumnHeader { Text = "OS",          Width = 100 },
+                new ColumnHeader { Text = "Description", Width = 195 },
+                new ColumnHeader { Text = "Status",      Width = 80  },
+            });
+            listViewClients.FullRowSelect = true;
+            listViewClients.Location = new Point(6, 6);
+            listViewClients.Name = "listViewClients";
+            listViewClients.Size = new Size(487, 295);
+            listViewClients.TabIndex = 0;
+            listViewClients.View = View.Details;
+            //
+            // btnAddClient
+            //
+            btnAddClient.Location = new Point(499, 6);
+            btnAddClient.Name = "btnAddClient";
+            btnAddClient.Size = new Size(100, 28);
+            btnAddClient.TabIndex = 1;
+            btnAddClient.Text = "Add";
+            //
+            // btnEditClient
+            //
+            btnEditClient.Location = new Point(499, 40);
+            btnEditClient.Name = "btnEditClient";
+            btnEditClient.Size = new Size(100, 28);
+            btnEditClient.TabIndex = 2;
+            btnEditClient.Text = "Edit";
+            //
+            // btnRemoveClient
+            //
+            btnRemoveClient.Location = new Point(499, 74);
+            btnRemoveClient.Name = "btnRemoveClient";
+            btnRemoveClient.Size = new Size(100, 28);
+            btnRemoveClient.TabIndex = 3;
+            btnRemoveClient.Text = "Remove";
+            //
+            // btnTestClient
+            //
+            btnTestClient.Location = new Point(499, 120);
+            btnTestClient.Name = "btnTestClient";
+            btnTestClient.Size = new Size(100, 28);
+            btnTestClient.TabIndex = 4;
+            btnTestClient.Text = "Test";
+            //
             // grpAiSettings
             // 
             grpAiSettings.Controls.Add(lblAiProvider);
@@ -321,6 +393,7 @@ namespace ApexComputerUse
             tabMain.Controls.Add(tabPageRemote);
             tabMain.Controls.Add(tabPageModel);
             tabMain.Controls.Add(tabPageChat);
+            tabMain.Controls.Add(tabPageClients);
             tabMain.Location = new Point(0, 25);
             tabMain.Name = "tabMain";
             tabMain.SelectedIndex = 0;
@@ -960,6 +1033,7 @@ namespace ApexComputerUse
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
             tabPageChat.ResumeLayout(false);
+            tabPageClients.ResumeLayout(false);
             grpAiSettings.ResumeLayout(false);
             grpAiSettings.PerformLayout();
             grpAiSession.ResumeLayout(false);
@@ -1082,5 +1156,10 @@ namespace ApexComputerUse
         private GroupBox grpAiSession;
         private Microsoft.Web.WebView2.WinForms.WebView2 webViewChat;
         private Button btnAiOpenChat;
+
+        // ── Clients tab ───────────────────────────────────────────────────────
+        private TabPage  tabPageClients;
+        private ListView listViewClients;
+        private Button   btnAddClient, btnEditClient, btnRemoveClient, btnTestClient;
     }
 }
