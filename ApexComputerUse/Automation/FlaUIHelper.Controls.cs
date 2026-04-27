@@ -389,7 +389,7 @@ namespace ApexComputerUse
 
         public void SelectTab(AutomationElement el, int index)  => el.AsTab().SelectTabItem(index);
         public void SelectTabByName(AutomationElement el, string name) => el.AsTab().SelectTabItem(name);
-        public string GetSelectedTabName(AutomationElement el) => el.AsTab().SelectedTabItem.Name;
+        public string GetSelectedTabName(AutomationElement el) => el.AsTab().SelectedTabItem?.Name ?? string.Empty;
         public int GetTabCount(AutomationElement el) => el.AsTab().TabItems.Length;
 
         // ── Slider / Spinner (RangeValue) ─────────────────────────────────

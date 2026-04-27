@@ -205,7 +205,7 @@ namespace ApexComputerUse
                 _context!.NativeHandle.MemoryClear();
 
                 // Fresh executor per request — no state carried over
-                var executor = new InteractiveExecutor(_context, _clipModel);
+                var executor = new InteractiveExecutor(_context, _clipModel!);
                 foreach (var e in embeds) executor.Embeds.Add(e);
 
                 // Single-turn prompt — no history

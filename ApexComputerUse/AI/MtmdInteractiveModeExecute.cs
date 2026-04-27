@@ -35,7 +35,6 @@ namespace ApexComputerUse
 
             var ex = new InteractiveExecutor(context, clipModel);
             var chatHistory = new ChatHistory();
-            var isFirstTurn = true;
 
             Debug.WriteLine("The executor has been enabled. In this example the maximum tokens is set to {0} and the context size is {1}.", maxTokens, parameters.ContextSize);
             Debug.WriteLine("Model: {0}", modelPath);

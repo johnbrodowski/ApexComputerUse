@@ -93,7 +93,7 @@ public class UiMapRenderer
         if (element.Children != null)
         {
             foreach (var child in element.Children)
-                DrawElementRecursive(g, child);
+                if (child != null) DrawElementRecursive(g, child);
         }
     }
 
@@ -122,7 +122,7 @@ public class UiMapRenderer
 
     private class UiElement
     {
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
         public string ControlType { get; set; } = string.Empty;
         public BoundingRect BoundingRectangle { get; set; } = new();
         public List<UiElement?>? Children { get; set; }
@@ -205,7 +205,7 @@ public class UiMapRenderer
             // Form setup for transparent overlay
             this.FormBorderStyle = FormBorderStyle.None;
             this.StartPosition = FormStartPosition.Manual;
-            this.Bounds = Screen.PrimaryScreen.Bounds;
+            this.Bounds = Screen.PrimaryScreen?.Bounds ?? SystemInformation.VirtualScreen;
             this.TopMost = true;
             this.ShowInTaskbar = false;
             this.BackColor = Color.Magenta;

@@ -392,7 +392,7 @@ All settings can be layered via three sources (highest priority last wins for en
 
 **Network binding:** `HttpBindAll = false` (the default) binds to `http://localhost:{port}/` — loopback only, safe for single-machine use. Set `APEX_HTTP_BIND_ALL=true` to bind all interfaces for network-wide access (ensure firewall rules are in place).
 
-**Logs** are written to `<exe>/logs/apex-YYYYMMDD.log` (daily rotation, 7-day retention).
+**Logs** are written to `%LOCALAPPDATA%\ApexComputerUse\Logs\apex-YYYYMMDD.log` (daily rotation, 7-day retention).
 
 ### Run as a Windows Service
 
@@ -654,9 +654,10 @@ curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/shutdown
 # Run a shell command (cmd.exe /c); 30-second timeout
 # Requires EnableShellRun = true in appsettings.json or APEX_ENABLE_SHELL_RUN=true
 curl -H "X-Api-Key: <key>" "http://localhost:8081/run?cmd=whoami"
+curl -H "X-Api-Key: <key>" "http://localhost:8081/run?command=whoami"
 curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/run \
      -H "Content-Type: application/json" \
-     -d '{"value":"dir C:\\"}'
+     -d '{"command":"dir C:\\"}'
 ```
 
 `/run` response data fields: `cmd`, `stdout`, `stderr`, `exit_code`.

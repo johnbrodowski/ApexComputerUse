@@ -29,7 +29,7 @@ namespace ApexComputerUse
         private          Task?              _listenTask;
         private          int                _activeRequests;   // Interlocked counter for graceful drain
 
-        // â”€â”€ Metrics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // â"€â"€ Metrics â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
         private long _totalRequests;
         private long _errorRequests;
         private readonly ConcurrentDictionary<string, long>   _routeCounts       = new();
@@ -82,7 +82,7 @@ namespace ApexComputerUse
             _testRunnerConfigPath = string.IsNullOrWhiteSpace(testRunnerConfigPath) ? null : testRunnerConfigPath.Trim();
         }
 
-        // â”€â”€ Lifecycle â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // â"€â"€ Lifecycle â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 
         public void Start2()
         {
@@ -120,9 +120,10 @@ namespace ApexComputerUse
                     }
                     break;
                 }
-                catch (System.Net.HttpListenerException) when (attempt < maxTries - 1)
+                catch (System.Net.HttpListenerException hex)
+                    when (attempt < maxTries - 1 && (hex.ErrorCode == 183 || hex.ErrorCode == 32))
                 {
-                    // port in use â€” try the next one
+                    // address/port already in use — try the next one
                 }
             }
             IsRunning   = true;
@@ -150,7 +151,7 @@ namespace ApexComputerUse
                 : "HTTP server stopped.");
         }
 
-        // â”€â”€ Accept loop â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // â"€â"€ Accept loop â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 
         private async Task ListenLoop(CancellationToken ct)
         {
@@ -159,12 +160,12 @@ namespace ApexComputerUse
                 try
                 {
                     var ctx = await _listener.GetContextAsync().WaitAsync(ct);
-                    Interlocked.Increment(ref _activeRequests);
                     _ = Task.Run(async () =>
                     {
+                        Interlocked.Increment(ref _activeRequests);
                         try   { await HandleAsync(ctx); }
                         finally { Interlocked.Decrement(ref _activeRequests); }
-                    }, ct);
+                    });
                 }
                 catch (OperationCanceledException) { break; }
                 catch (Exception ex) when (!ct.IsCancellationRequested)
@@ -174,9 +175,9 @@ namespace ApexComputerUse
             }
         }
 
-        // â”€â”€ Request handler â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // â"€â"€ Request handler â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 
-        // â”€â”€ Authentication â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // â"€â"€ Authentication â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 
         /// <summary>
         /// Returns true if the request carries the correct API key, or if auth is disabled.
@@ -211,18 +212,20 @@ namespace ApexComputerUse
             return CryptographicOperations.FixedTimeEquals(a, b);
         }
 
-        // â”€â”€ Per-client permissions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // â"€â"€ Per-client permissions â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 
         private static readonly ClientPermissions _fullPermissions = new()
         {
             AllowAutomation = true, AllowCapture = true, AllowAi    = true,
-            AllowScenes     = true, AllowShellRun = true, AllowClients = true
+            AllowScenes     = true, AllowShellRun = true, AllowClients = true,
+            AllowDiagnostics = true
         };
 
         private static readonly ClientPermissions _noPermissions = new()
         {
             AllowAutomation = false, AllowCapture = false, AllowAi    = false,
-            AllowScenes     = false, AllowShellRun = false, AllowClients = false
+            AllowScenes     = false, AllowShellRun = false, AllowClients = false,
+            AllowDiagnostics = false
         };
 
         private ClientPermissions ResolvePermissions(HttpListenerRequest req)
@@ -232,7 +235,7 @@ namespace ApexComputerUse
             if (addr == null || System.Net.IPAddress.IsLoopback(addr)) return _fullPermissions;
 
             // Match against the client list by IP string.
-            // Unknown non-loopback callers are denied â€” the client list is authoritative.
+            // Unknown non-loopback callers are denied â€" the client list is authoritative.
             string host = addr.ToString();
             var client = _clientStore?.FindByHost(host);
             return client?.Permissions ?? _noPermissions;
@@ -240,10 +243,13 @@ namespace ApexComputerUse
 
         internal static bool IsPathAllowed(string path, ClientPermissions p)
         {
-            // Diagnostics/observability â€” always allow.
-            if (path is "/ping" or "/health" or "/metrics" or "/sysinfo"
-                     or "/env"  or "/ls"     or "/help"   or "/status")
-                return true;
+            // /health is unauthenticated (used by load-balancers and uptime monitors).
+            if (path == "/health") return true;
+
+            // Diagnostics — gated by AllowDiagnostics; loopback always gets _fullPermissions so
+            // localhost callers are unaffected.
+            if (path is "/ping" or "/metrics" or "/sysinfo" or "/env" or "/ls" or "/help" or "/status")
+                return p.AllowDiagnostics;
 
             if (path is "/run") return p.AllowShellRun;
 
@@ -286,14 +292,14 @@ namespace ApexComputerUse
             try
             {
 
-            // â”€â”€ Unauthenticated health probe (safe to expose; no sensitive data) â”€
+            // â"€â"€ Unauthenticated health probe (safe to expose; no sensitive data) â"€
             if (method == "GET" && rawPath.TrimEnd('/').Equals("/health", StringComparison.OrdinalIgnoreCase))
             {
                 statusCode = await WriteResponse(res, HandleHealth(), "json");
                 return;
             }
 
-            // â”€â”€ Auth gate â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+            // â"€â"€ Auth gate â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
             if (!IsAuthenticated(req))
             {
                 statusCode = 401;
@@ -313,7 +319,7 @@ namespace ApexComputerUse
                                     : rawPath.ToLowerInvariant();
             string format  = FormatAdapter.Negotiate(req, hasExt ? ext[1..] : null);
 
-            // â”€â”€ Per-client permission gate â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+            // â"€â"€ Per-client permission gate â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
             var perms = ResolvePermissions(req);
             if (!IsPathAllowed(path, perms))
             {
@@ -388,21 +394,21 @@ namespace ApexComputerUse
                     return;
                 }
 
-                // Test page â€” served directly, bypasses format adapter
+                // Test page â€" served directly, bypasses format adapter
                 if (method == "GET" && (path == "" || path == "/"))
                 {
                     await ServeTestPage(res);
                     return;
                 }
 
-                // Scene editor page â€” served directly
+                // Scene editor page â€" served directly
                 if (method == "GET" && path == "/editor")
                 {
                     await ServeEditorPage(res);
                     return;
                 }
 
-                // AI Chat page â€” served directly with key embedded
+                // AI Chat page â€" served directly with key embedded
                 if (method == "GET" && path == "/chat")
                 {
                     await ServeChatPage(res, _apiKey);
@@ -425,7 +431,7 @@ namespace ApexComputerUse
                     return;
                 }
 
-                // Graceful shutdown â€” host decides how to exit (WinForms: Application.Exit;
+                // Graceful shutdown â€" host decides how to exit (WinForms: Application.Exit;
                 // Service: Stop()). Falls back to Environment.Exit if nothing subscribed.
                 if (method == "POST" && path == "/shutdown")
                 {
@@ -448,7 +454,7 @@ namespace ApexComputerUse
                         }
                         else
                         {
-                            // No host wired â€” exit the process directly so the remote caller
+                            // No host wired â€" exit the process directly so the remote caller
                             // still gets what they asked for.
                             Environment.Exit(0);
                         }
@@ -456,7 +462,7 @@ namespace ApexComputerUse
                     return;
                 }
 
-                // Scene REST routes â€” handled before the main switch
+                // Scene REST routes â€" handled before the main switch
                 var sceneResult = TryHandleSceneRoute(method, path, body, req);
                 if (sceneResult != null)
                 {
@@ -465,7 +471,7 @@ namespace ApexComputerUse
                     return;
                 }
 
-                // /run is async â€” handled before the sync switch
+                // /run is async â€" handled before the sync switch
                 if (path == "/run")
                 {
                     if (!_enableShellRun)
@@ -481,8 +487,8 @@ namespace ApexComputerUse
                     else
                     {
                         string? cmd = method == "GET"
-                            ? req.QueryString["cmd"]
-                            : FromJson(body, "run").Value;
+                            ? (req.QueryString["cmd"] ?? req.QueryString["command"])
+                            : (FromJson(body, "run").Value ?? ParseJsonString(body, "command"));
                         result = await HandleRunAsync(cmd);
                     }
                 }
@@ -490,16 +496,16 @@ namespace ApexComputerUse
                 {
                     result = (method, path) switch
                     {
-                        // â”€â”€ Observability routes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                        // â"€â"€ Observability routes â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
                         ("GET", "/health")  => HandleHealth(),
                         ("GET", "/metrics") => HandleMetrics(),
-                        // â”€â”€ Diagnostic routes (auth-gated) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                        // â"€â"€ Diagnostic routes (auth-gated) â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
                         ("GET", "/ping")    => HandlePing(),
                         ("GET", "/sysinfo") => HandleSysinfo(),
                         ("GET", "/env")     => HandleEnv(),
                         ("GET", "/ls")      => HandleLs(req.QueryString["path"]),
 
-                        // â”€â”€ Existing routes â€” adapted to ApexResult â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                        // â"€â"€ Existing routes â€" adapted to ApexResult â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
                         ("GET", "/status")
                             => ApexResult.From("status",     _dispatcher.Dispatch(new CommandRequest { Command = "status" })),
                         ("GET", "/windows")
@@ -511,10 +517,10 @@ namespace ApexComputerUse
                             {
                                 Command        = "elements",
                                 SearchType     = req.QueryString["type"],
-                                AutomationId   = req.QueryString["id"],       // numeric â€” expands a subtree from a previously-mapped element
+                                AutomationId   = req.QueryString["id"],       // numeric â€" expands a subtree from a previously-mapped element
                                 Depth          = int.TryParse(req.QueryString["depth"], out int _elemDepth) ? _elemDepth : null,
                                 OnscreenOnly   = string.Equals(req.QueryString["onscreen"],       "true", StringComparison.OrdinalIgnoreCase),
-                                // â”€â”€ Browser-friendly tree shaping (opt-in; see README) â”€â”€
+                                // â"€â"€ Browser-friendly tree shaping (opt-in; see README) â"€â"€
                                 Match          = req.QueryString["match"],                        // text-search Name/AutomationId/Value
                                 CollapseChains = string.Equals(req.QueryString["collapseChains"], "true", StringComparison.OrdinalIgnoreCase),
                                 IncludePath    = string.Equals(req.QueryString["includePath"],    "true", StringComparison.OrdinalIgnoreCase),

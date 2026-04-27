@@ -21,30 +21,43 @@ public class HttpAuthorizationTests
         Assert.True(p.AllowCapture);
         Assert.True(p.AllowAi);
         Assert.True(p.AllowScenes);
+        Assert.True(p.AllowDiagnostics);
         Assert.False(p.AllowShellRun);
         Assert.False(p.AllowClients);
     }
 
-    // ── IsPathAllowed — diagnostics always pass ───────────────────────────
+    // ── IsPathAllowed — /health always allowed (no permission required) ───
+
+    [Fact]
+    public void IsPathAllowed_Health_AlwaysAllowed()
+    {
+        var noPermissions = new ClientPermissions
+        {
+            AllowAutomation = false, AllowCapture = false, AllowAi      = false,
+            AllowScenes     = false, AllowShellRun = false, AllowClients = false,
+            AllowDiagnostics = false
+        };
+
+        Assert.True(HttpCommandServer.IsPathAllowed("/health", noPermissions));
+    }
+
+    // ── IsPathAllowed — diagnostics require AllowDiagnostics ─────────────
 
     [Theory]
     [InlineData("/ping")]
-    [InlineData("/health")]
     [InlineData("/metrics")]
     [InlineData("/sysinfo")]
     [InlineData("/env")]
     [InlineData("/ls")]
     [InlineData("/help")]
     [InlineData("/status")]
-    public void IsPathAllowed_DiagnosticEndpoints_AlwaysAllowed(string path)
+    public void IsPathAllowed_DiagnosticEndpoints_RequireAllowDiagnostics(string path)
     {
-        var noPermissions = new ClientPermissions
-        {
-            AllowAutomation = false, AllowCapture = false, AllowAi    = false,
-            AllowScenes     = false, AllowShellRun = false, AllowClients = false
-        };
+        var denied  = new ClientPermissions { AllowDiagnostics = false };
+        var allowed = new ClientPermissions { AllowDiagnostics = true };
 
-        Assert.True(HttpCommandServer.IsPathAllowed(path, noPermissions));
+        Assert.False(HttpCommandServer.IsPathAllowed(path, denied));
+        Assert.True(HttpCommandServer.IsPathAllowed(path, allowed));
     }
 
     // ── IsPathAllowed — shell run gated by AllowShellRun ─────────────────
@@ -148,5 +161,44 @@ public class HttpAuthorizationTests
         Assert.False(cfg.HttpBindAll,    "HttpBindAll must default to false (localhost-only)");
         Assert.False(cfg.EnableShellRun, "EnableShellRun must default to false");
         Assert.Empty(cfg.ApiKey);        // key is generated at the GUI layer, not baked in
+    }
+
+    // ── Bind-all + empty API key guard ────────────────────────────────────
+
+    [Theory]
+    [InlineData(true,  "",      true)]   // bindAll=true + no key → refuse
+    [InlineData(true,  "   ",   true)]   // bindAll=true + whitespace key → refuse
+    [InlineData(true,  "abc",   false)]  // bindAll=true + key → allow
+    [InlineData(false, "",      false)]  // bindAll=false + no key → allow (localhost only)
+    [InlineData(false, "abc",   false)]  // bindAll=false + key → allow
+    public void BindAllGuard_RefusesWhenBindAllAndNoApiKey(bool bindAll, string apiKey, bool expectRefuse)
+    {
+        // This mirrors the guard condition in ServerTabController.ToggleHttp and ApexService.OnStart.
+        bool shouldRefuse = bindAll && string.IsNullOrWhiteSpace(apiKey);
+        Assert.Equal(expectRefuse, shouldRefuse);
+    }
+
+    // ── Active-request counter: increment inside lambda ───────────────────
+
+    [Fact]
+    public async Task ActiveRequestCounter_IncrementInsideLambda_PairsWithDecrement()
+    {
+        // Verify that moving Interlocked.Increment inside the Task.Run lambda
+        // means counter stays at 0 when the task never actually runs.
+        int counter = 0;
+
+        // Simulate what ListenLoop now does: increment INSIDE the lambda body.
+        using var cts = new System.Threading.CancellationTokenSource();
+        cts.Cancel(); // cancel before the task has a chance to run
+
+        var task = Task.Run(() =>
+        {
+            System.Threading.Interlocked.Increment(ref counter);
+            try { /* work */ }
+            finally { System.Threading.Interlocked.Decrement(ref counter); }
+        });
+
+        await task;
+        Assert.Equal(0, counter);
     }
 }

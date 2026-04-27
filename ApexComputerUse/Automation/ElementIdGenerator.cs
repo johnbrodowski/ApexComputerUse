@@ -101,11 +101,11 @@ namespace ApexComputerUse
             // Core stable properties (always included)
             sb.Append(SafeGetProperty<string>(() => props.ControlType.ValueOrDefault.ToString(), "Unknown"));
             sb.Append("|");
-            sb.Append(SafeGetProperty<string>(() => props.ClassName.ValueOrDefault, "") ?? "");
+            sb.Append(SafeGetProperty<string>(() => props.ClassName.ValueOrDefault!, ""));
             sb.Append("|");
-            sb.Append(SafeGetProperty<string>(() => props.AutomationId.ValueOrDefault, "") ?? "");
+            sb.Append(SafeGetProperty<string>(() => props.AutomationId.ValueOrDefault!, ""));
             sb.Append("|");
-            sb.Append(SafeGetProperty<string>(() => props.FrameworkId.ValueOrDefault, "") ?? "");
+            sb.Append(SafeGetProperty<string>(() => props.FrameworkId.ValueOrDefault!, ""));
             sb.Append("|");
 
             // ProcessName for cross-session stability
@@ -127,7 +127,7 @@ namespace ApexComputerUse
             if (!shouldExcludeName)
             {
                 sb.Append("|");
-                sb.Append(SafeGetProperty<string>(() => props.Name.ValueOrDefault, "") ?? "");
+                sb.Append(SafeGetProperty<string>(() => props.Name.ValueOrDefault!, ""));
             }
 
             // Sibling index: always include for non-root elements to avoid hash collisions

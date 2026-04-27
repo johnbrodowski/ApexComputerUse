@@ -53,5 +53,16 @@ namespace ApexComputerUse
         private static CommandRequest FromJson(string json, string command, string? action = null)
             => CommandRequestJsonMapper.FromJson(json, command, action);
 
+        internal static string? ParseJsonString(string json, string field)
+        {
+            if (string.IsNullOrWhiteSpace(json)) return null;
+            try
+            {
+                using var doc = JsonDocument.Parse(json);
+                return doc.RootElement.TryGetProperty(field, out var el) ? el.GetString() : null;
+            }
+            catch { return null; }
+        }
+
     }
 }

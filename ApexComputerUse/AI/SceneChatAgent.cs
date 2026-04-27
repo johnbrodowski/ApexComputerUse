@@ -17,7 +17,7 @@ namespace ApexComputerUse
         private readonly SceneStore      _store;
         private readonly AiChatService   _chat;
 
-        private readonly StringBuilder _replyBuffer = new();
+        private readonly SemaphoreSlim _turnGate = new(1, 1);
         private int _turn;
 
         private static readonly JsonSerializerOptions JsonOpts = new()
@@ -39,33 +39,40 @@ namespace ApexComputerUse
 
         private async void OnUserMessage(string text, string? sceneId)
         {
-            string prompt = BuildPrompt(text, sceneId);
-
-            _replyBuffer.Clear();
-            _editor.BeginAiLine();
-            _turn++;
-
+            await _turnGate.WaitAsync();
             try
             {
-                await _chat.SendAsync(
-                    prompt,
-                    onToken:    t  => { _replyBuffer.Append(t); _editor.AppendChatStream(t); },
-                    onComplete: _  => FinishReply(sceneId),
-                    onError:    m  => { _editor.AppendChatStream($"[error: {m}]"); _editor.EndChatLine(); });
+                string prompt = BuildPrompt(text, sceneId);
+                var replyBuffer = new StringBuilder();
+                _editor.BeginAiLine();
+                _turn++;
+
+                try
+                {
+                    await _chat.SendAsync(
+                        prompt,
+                        onToken:    t => { replyBuffer.Append(t); _editor.AppendChatStream(t); },
+                        onComplete: _ => FinishReply(replyBuffer.ToString(), sceneId),
+                        onError:    m => { _editor.AppendChatStream($"[error: {m}]"); _editor.EndChatLine(); });
+                }
+                catch (Exception ex)
+                {
+                    _editor.AppendChatStream($"[exception: {ex.Message}]");
+                    _editor.EndChatLine();
+                }
             }
-            catch (Exception ex)
+            finally
             {
-                _editor.AppendChatStream($"[exception: {ex.Message}]");
-                _editor.EndChatLine();
+                _turnGate.Release();
             }
         }
 
-        private void FinishReply(string? sceneId)
+        private void FinishReply(string reply, string? sceneId)
         {
             _editor.EndChatLine();
 
             if (sceneId == null) return;
-            int applied = ApplyOps(_replyBuffer.ToString(), sceneId);
+            int applied = ApplyOps(reply, sceneId);
             if (applied > 0)
                 _editor.AppendChatLog("sys", $"applied {applied} scene op{(applied == 1 ? "" : "s")}");
         }

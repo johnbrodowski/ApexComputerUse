@@ -21,5 +21,8 @@ namespace ApexComputerUse
 
         /// <summary>access to client list and cross-client control — off by default (isolation)</summary>
         [JsonPropertyName("allow_clients")]    public bool AllowClients    { get; set; } = false;
+
+        /// <summary>ping, metrics, sysinfo, env, ls — on by default for all registered clients</summary>
+        [JsonPropertyName("allow_diagnostics")] public bool AllowDiagnostics { get; set; } = true;
     }
 }

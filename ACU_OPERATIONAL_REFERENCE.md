@@ -577,7 +577,7 @@ HTML responses embed `<script type="application/json" id="apex-result">` — any
 | `APEX_MODEL_PATH` | — | Path to vision `.gguf` file |
 | `APEX_MMPROJ_PATH` | — | Path to multimodal projector `.gguf` file |
 
-Logs: `<exe>/logs/apex-YYYYMMDD.log` (daily rotation, 7-day retention).
+Logs: `%LOCALAPPDATA%\ApexComputerUse\Logs\apex-YYYYMMDD.log` (daily rotation, 7-day retention).
 
 ---
 

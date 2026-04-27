@@ -62,6 +62,11 @@ namespace ApexComputerUse
             {
                 string apiKey = _txtApiKey.Text.Trim();
                 var cfg = AppConfig.Current;
+                if (cfg.HttpBindAll && string.IsNullOrWhiteSpace(apiKey))
+                {
+                    _log("ERROR: Cannot start — HttpBindAll=true requires an API key. Set one in the API Key field before starting.");
+                    return;
+                }
                 Http = new HttpCommandServer(port, _processor, _sceneStore, _chatService, apiKey,
                            enableShellRun: cfg.EnableShellRun, bindAll: cfg.HttpBindAll,
                            testRunnerExePath: cfg.TestRunnerExePath,
@@ -89,7 +94,7 @@ namespace ApexComputerUse
                 _chatService.SetLocalServer(Http.Port, apiKey);
                 _btnStartHttp.Text = "Stop HTTP";
                 string authNote = string.IsNullOrWhiteSpace(apiKey) ? " (no auth)" : " (auth enabled)";
-                _lblHttpStatus.Text = $"Listening :{port}{authNote}";
+                _lblHttpStatus.Text = $"Listening :{Http.Port}{authNote}";
                 _lblHttpStatus.ForeColor = string.IsNullOrWhiteSpace(apiKey) ? Color.DarkOrange : Color.Green;
                 _btnApplyFirewall.Enabled = false;
                 _btnRemoveFirewall.Enabled = false;

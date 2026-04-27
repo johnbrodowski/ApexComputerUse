@@ -44,10 +44,9 @@ public sealed class DeepSeekChatSession : ChatSessionBase
         await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
         using var reader = new StreamReader(stream);
 
-        while (!reader.EndOfStream)
+        string? line;
+        while ((line = await reader.ReadLineAsync(cancellationToken)) != null)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            var line = await reader.ReadLineAsync(cancellationToken);
             if (string.IsNullOrWhiteSpace(line) || !line.StartsWith("data: ")) continue;
 
             var data = line[6..].Trim();
