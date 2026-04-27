@@ -1,7 +1,72 @@
 # Changelog
 
-All notable changes to ApexComputerUse are documented here.
-Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+All notable changes to ApexComputerUse are documented in this file.
+
+## [0.14.0] — 2026-04-27
+
+### Added
+
+#### Multiple Instance Support
+- Added `--port` command-line argument to override HTTP listen port for running multiple instances
+- Added `--pipe` command-line argument to override named-pipe name
+- Added `--client` command-line argument to mark an instance as a subordinate client (disables Launch Instance button)
+- Port auto-increment in `HttpCommandServer.Start()` — automatically tries next available port if preferred port is taken
+- New buttons in Clients tab: "Open Web UI" (launches `/chat` page in default browser) and "Launch Instance" (spawns new instance with incremented port)
+- `ClientsTabController.LaunchInstance()` auto-registers spawned instance in client list
+
+#### Client Permissions System
+- New `ClientPermissions` class with per-client flags: `AllowAutomation`, `AllowCapture`, `AllowAi`, `AllowScenes`, `AllowShellRun`, `AllowClients`
+- Permissions stored in JSON alongside each `RemoteClient` and loaded on reconnect
+- Permission enforcement in `HttpCommandServer`: loopback (127.0.0.1) always gets full access; registered clients get their stored permissions; unknown IPs get full access
+- All endpoints gated by appropriate permission: `/run` requires `AllowShellRun`, `/capture`/`ocr` require `AllowCapture`, `/ai`/`chat` require `AllowAi`, `/scenes`/`editor` require `AllowScenes`, `/clients` require `AllowClients`, everything else requires `AllowAutomation`
+- `ClientEditForm` redesigned with two tabs: "Connection" (existing fields) and "Permissions" (6 checkboxes with ShellRun/Clients highlighted in orange)
+- `ClientStore.FindByHost(string host)` — case-insensitive lookup by hostname
+
+#### AI Chat with API Tools
+- `AiChatService.SetLocalServer(int port, string? apiKey)` and `ClearLocalServer()` — configure local HTTP server context for AI chat
+- Agentic tool loop in `AiChatService.SendAsync()` — AI can issue ApexComputerUse API calls via `apex` code blocks
+- System prompt auto-extended with API reference when server context is set, including endpoint list and example calls
+- Loop executes up to 8 turns, executing calls and feeding results back until AI produces clean answer
+- `ServerTabController.ToggleHttp()` calls `SetLocalServer()` on start and `ClearLocalServer()` on stop
+- Parsing and system prompt generation exposed as `internal` for testing
+
+#### Security Hardening
+- Timing-safe API key comparison using `CryptographicOperations.FixedTimeEquals()` (replaced three separate `==` comparisons)
+- Shell command execution in `/run` now uses `ProcessStartInfo.ArgumentList` instead of string concatenation to prevent injection
+- `HttpCommandServer.Stop()` now explicitly closes `HttpListener` to immediately release port handles
+
+#### Bug Fixes
+- Fixed `MtmdInteractiveModeExecute` infinite loop with hardcoded test path — replaced with proper `Console.ReadLine()` loop
+- Fixed `CommandProcessor` element ID lookup to use `Equals()` instead of `ReferenceEquals()` (FlaUI uses `IUIAutomation.CompareElements`)
+- Added 50k-entry cap on `CommandProcessor._elementMap` to prevent unbounded growth during long sessions
+- Fixed `Form1.SetupNetshIfNeeded()` blocking UI thread — made async with proper timeout
+- Fixed `Form1.AutoLoadModelIfConfigured()` fire-and-forget — now logs async exceptions via `.ContinueWith()`
+- `SceneEditorForm` canvas paint optimization — eliminated per-paint full-scene bitmap allocation during drag
+
+### Changed
+
+#### Program Structure
+- `Program.IsClientInstance` — public static property detecting `--client` flag for UI gating
+- Command-line arg parsing restructured to support flag-only arguments alongside key-value pairs
+
+#### API & Configuration
+- `HttpCommandServer` constructor now accepts optional `ClientStore? clientStore` parameter
+- `HttpCommandServer.Port { get; private set; }` — made settable internally by `Start()` for auto-increment
+- `RemoteClient.Permissions` — new property with `ClientPermissions` value
+
+#### UI
+- `Form1.Designer.cs` — added "Open Web UI" and "Launch Instance" buttons to Clients tab
+- `ClientEditForm.Designer.cs` — complete redesign with TabControl (Connection / Permissions tabs)
+- `ClientsTabController` constructor signature expanded with button references and port getter
+
+### Testing
+- New test file `ApexComputerUse.Tests/AiChatServiceTests.cs` with 22 tests covering apex call parsing and system prompt generation
+- `ParseApexCalls` and `BuildApexSystemPrompt` exposed as `internal` via existing `InternalsVisibleTo` attribute
+- All 171 tests passing (149 existing + 22 new)
+
+### Known Limitations
+- AI tool-use loop is non-streaming (full response assembled before delivery)
+- IP-spoofing could bypass permission sandboxing on local network
 
 ---
 

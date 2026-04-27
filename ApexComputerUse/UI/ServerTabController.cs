@@ -40,6 +40,7 @@ namespace ApexComputerUse
             if (Http?.IsRunning == true)
             {
                 Http.Stop();
+                _chatService.ClearLocalServer();
                 _btnStartHttp.Text = "Start HTTP";
                 _lblHttpStatus.Text = "Stopped";
                 _lblHttpStatus.ForeColor = Color.Gray;
@@ -80,6 +81,7 @@ namespace ApexComputerUse
                     catch { Environment.Exit(0); }
                 };
                 Http.Start();
+                _chatService.SetLocalServer(Http.Port, apiKey);
                 _btnStartHttp.Text = "Stop HTTP";
                 string authNote = string.IsNullOrWhiteSpace(apiKey) ? " (no auth)" : " (auth enabled)";
                 _lblHttpStatus.Text = $"Listening :{port}{authNote}";
