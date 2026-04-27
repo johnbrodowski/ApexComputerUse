@@ -70,15 +70,24 @@ namespace WpfApplication
 
         private void OnChooseFont(object sender, RoutedEventArgs e)
         {
-            // System.Windows.Forms.FontDialog works in WPF with a reference
-            var dlg = new System.Windows.Forms.FontDialog();
-            dlg.ShowDialog();
+            if (!OperatingSystem.IsWindowsVersionAtLeast(6, 1))
+            {
+                return;
+            }
+
+            using var dlg = new System.Windows.Forms.FontDialog();
+            _ = dlg.ShowDialog();
         }
 
         private void OnChooseColor(object sender, RoutedEventArgs e)
         {
-            var dlg = new System.Windows.Forms.ColorDialog { AnyColor = true };
-            dlg.ShowDialog();
+            if (!OperatingSystem.IsWindowsVersionAtLeast(6, 1))
+            {
+                return;
+            }
+
+            using var dlg = new System.Windows.Forms.ColorDialog { AnyColor = true };
+            _ = dlg.ShowDialog();
         }
 
         private void OnMsgInfo(object sender, RoutedEventArgs e)

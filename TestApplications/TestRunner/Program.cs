@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Text.Json;
 
 int _MaxCycles = 1;
-bool _ShowPassed = false;
 // ── Config ─────────────────────────────────────────────────────────────────────
 string? cliMode = null;
 string? cliConfigPath = null;
@@ -597,8 +596,7 @@ while (cycle < maxCycles && !ct.IsCancellationRequested)
             if (r.Skipped)
                 Console.WriteLine($"  SKIP {r.Name} (previously passed)");
             else if (r.Passed)
-               // if(_ShowPassed) 
-                    Console.WriteLine($"  PASS {r.Name}" + (r.ElapsedMs.HasValue ? $"  ({r.ElapsedMs}ms)" : ""));
+                Console.WriteLine($"  PASS {r.Name}" + (r.ElapsedMs.HasValue ? $"  ({r.ElapsedMs}ms)" : ""));
             else
             {
                 var cmd = string.IsNullOrEmpty(r.Command) ? "" : $"  cmd={r.Command}";

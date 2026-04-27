@@ -17,7 +17,7 @@ namespace WinFormsApplication
                 new DataGridViewItem { Name = "Doe",  Number = 24, IsChecked = true }
             };
             var bindingList = new BindingList<DataGridViewItem>(list);
-            var source = new BindingSource(bindingList, null);
+            var source = new BindingSource { DataSource = bindingList };
             dataGridView.AutoGenerateColumns = true;
             dataGridView.DataSource = source;
         }

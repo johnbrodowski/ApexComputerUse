@@ -34,10 +34,9 @@ namespace WpfApplication
 
         private void OnShowLabel(object sender, RoutedEventArgs e)
         {
-            MenuItem menuitem = sender as MenuItem;
-            if (menuitem == null) { return; }
+            if (sender is not MenuItem menuItem) { return; }
 
-            if (menuitem.IsChecked == true)
+            if (menuItem.IsChecked)
             {
                 lblMenuChk.Visibility = Visibility.Visible;
             }

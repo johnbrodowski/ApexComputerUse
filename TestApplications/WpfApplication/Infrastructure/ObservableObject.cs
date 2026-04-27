@@ -10,31 +10,34 @@ namespace WpfApplication.Infrastructure
     [SuppressMessage("ReSharper", "ExplicitCallerInfoArgument")]
     public abstract class ObservableObject : INotifyPropertyChanged
     {
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
-        private readonly Dictionary<string, object> _backingFieldValues = new Dictionary<string, object>();
+        private readonly Dictionary<string, object?> _backingFieldValues = new Dictionary<string, object?>();
 
         /// <summary>
         /// Gets a property value from the internal backing field
         /// </summary>
-        protected T GetProperty<T>([CallerMemberName] string propertyName = null)
+        protected T GetProperty<T>([CallerMemberName] string? propertyName = null)
         {
             if (propertyName == null)
             {
                 throw new ArgumentNullException(nameof(propertyName));
             }
-            object value;
-            if (_backingFieldValues.TryGetValue(propertyName, out value))
+            if (_backingFieldValues.TryGetValue(propertyName, out var value))
             {
+                if (value is null)
+                {
+                    return default!;
+                }
                 return (T)value;
             }
-            return default(T);
+            return default!;
         }
 
         /// <summary>
         /// Saves a property value to the internal backing field
         /// </summary>
-        protected bool SetProperty<T>(T newValue, [CallerMemberName] string propertyName = null)
+        protected bool SetProperty<T>(T newValue, [CallerMemberName] string? propertyName = null)
         {
             if (propertyName == null)
             {
@@ -49,7 +52,7 @@ namespace WpfApplication.Infrastructure
         /// <summary>
         /// Sets a property value to the backing field
         /// </summary>
-        protected bool SetProperty<T>(ref T field, T newValue, [CallerMemberName] string propertyName = null)
+        protected bool SetProperty<T>(ref T field, T newValue, [CallerMemberName] string? propertyName = null)
         {
             if (IsEqual(field, newValue)) return false;
             field = newValue;
@@ -62,7 +65,7 @@ namespace WpfApplication.Infrastructure
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(GetNameFromExpression(selectorExpression)));
         }
 
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
