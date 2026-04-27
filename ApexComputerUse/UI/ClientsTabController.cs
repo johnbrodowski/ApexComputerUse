@@ -41,6 +41,9 @@ namespace ApexComputerUse
             _btnLaunch.Click    += (_, _) => LaunchInstance();
             _list.DoubleClick   += (_, _) => OpenWebUi();
 
+            if (Program.IsClientInstance)
+                _btnLaunch.Visible = false;
+
             RefreshList();
         }
 
@@ -129,7 +132,7 @@ namespace ApexComputerUse
 
             try
             {
-                var psi = new System.Diagnostics.ProcessStartInfo(exe, $"--port {nextPort}")
+                var psi = new System.Diagnostics.ProcessStartInfo(exe, $"--port {nextPort} --client")
                 {
                     UseShellExecute = true
                 };

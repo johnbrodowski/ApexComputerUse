@@ -44,6 +44,18 @@ namespace ApexComputerUse
                 return [.. _clients.Values.OrderBy(c => c.CreatedAt)];
         }
 
+        /// <summary>
+        /// Returns the first client whose Host matches <paramref name="host"/> (case-insensitive).
+        /// Used by the HTTP server to resolve per-client permissions from the caller's IP.
+        /// </summary>
+        public RemoteClient? FindByHost(string host)
+        {
+            if (string.IsNullOrWhiteSpace(host)) return null;
+            lock (_lock)
+                return _clients.Values.FirstOrDefault(
+                    c => c.Host.Equals(host, StringComparison.OrdinalIgnoreCase));
+        }
+
         public void Update(RemoteClient client)
         {
             lock (_lock)

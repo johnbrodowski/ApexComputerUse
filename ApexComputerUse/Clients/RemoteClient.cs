@@ -11,7 +11,8 @@ namespace ApexComputerUse
         [JsonPropertyName("api_key")]     public string ApiKey      { get; set; } = "";
         [JsonPropertyName("os_version")]  public string OsVersion   { get; set; } = "";
         [JsonPropertyName("description")] public string Description { get; set; } = "";
-        [JsonPropertyName("created_at")]  public string CreatedAt   { get; set; } = DateTimeOffset.UtcNow.ToString("O");
+        [JsonPropertyName("created_at")]  public string            CreatedAt   { get; set; } = DateTimeOffset.UtcNow.ToString("O");
+        [JsonPropertyName("permissions")] public ClientPermissions  Permissions { get; set; } = new();
     }
 
     internal static class ClientIds

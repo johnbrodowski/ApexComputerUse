@@ -14,6 +14,8 @@ namespace ApexComputerUse
             _existingId        = existing?.Id;
             _existingCreatedAt = existing?.CreatedAt ?? DateTimeOffset.UtcNow.ToString("O");
 
+            var perms = existing?.Permissions ?? new ClientPermissions();
+
             if (existing != null)
             {
                 txtName.Text        = existing.Name;
@@ -29,6 +31,14 @@ namespace ApexComputerUse
                 txtPort.Text = "8081";
                 Text         = "Add Client";
             }
+
+            // Load permission checkboxes
+            chkAutomation.Checked = perms.AllowAutomation;
+            chkCapture.Checked    = perms.AllowCapture;
+            chkAi.Checked         = perms.AllowAi;
+            chkScenes.Checked     = perms.AllowScenes;
+            chkShellRun.Checked   = perms.AllowShellRun;
+            chkClients.Checked    = perms.AllowClients;
         }
 
         private void btnOk_Click(object sender, EventArgs e)
@@ -59,7 +69,16 @@ namespace ApexComputerUse
                 ApiKey      = txtApiKey.Text.Trim(),
                 OsVersion   = txtOsVersion.Text.Trim(),
                 Description = txtDescription.Text.Trim(),
-                CreatedAt   = _existingCreatedAt
+                CreatedAt   = _existingCreatedAt,
+                Permissions = new ClientPermissions
+                {
+                    AllowAutomation = chkAutomation.Checked,
+                    AllowCapture    = chkCapture.Checked,
+                    AllowAi         = chkAi.Checked,
+                    AllowScenes     = chkScenes.Checked,
+                    AllowShellRun   = chkShellRun.Checked,
+                    AllowClients    = chkClients.Checked,
+                }
             };
 
             DialogResult = DialogResult.OK;

@@ -96,11 +96,6 @@ namespace ApexComputerUse
             lblDownloadStatus = new Label();
             btnDownload = new Button();
             btnDownloadAll = new Button();
-            statusStrip1 = new StatusStrip();
-            lblStatCpu = new ToolStripStatusLabel();
-            lblStatRam = new ToolStripStatusLabel();
-            lblStatModel = new ToolStripStatusLabel();
-            lblStatNet = new ToolStripStatusLabel();
             tabPageClients = new TabPage();
             listViewClients = new ListView();
             btnAddClient = new Button();
@@ -109,9 +104,13 @@ namespace ApexComputerUse
             btnTestClient = new Button();
             btnOpenWebUiClient = new Button();
             btnLaunchInstance = new Button();
+            statusStrip1 = new StatusStrip();
+            lblStatCpu = new ToolStripStatusLabel();
+            lblStatRam = new ToolStripStatusLabel();
+            lblStatModel = new ToolStripStatusLabel();
+            lblStatNet = new ToolStripStatusLabel();
             menuStrip1.SuspendLayout();
             tabPageChat.SuspendLayout();
-            tabPageClients.SuspendLayout();
             grpAiSettings.SuspendLayout();
             grpAiSession.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)webViewChat).BeginInit();
@@ -123,6 +122,7 @@ namespace ApexComputerUse
             tabPageModel.SuspendLayout();
             grpModelPaths.SuspendLayout();
             grpDownload.SuspendLayout();
+            tabPageClients.SuspendLayout();
             statusStrip1.SuspendLayout();
             SuspendLayout();
             // 
@@ -181,90 +181,7 @@ namespace ApexComputerUse
             tabPageChat.TabIndex = 4;
             tabPageChat.Text = "Chat";
             tabPageChat.UseVisualStyleBackColor = true;
-            //
-            // tabPageClients
-            //
-            tabPageClients.Controls.Add(listViewClients);
-            tabPageClients.Controls.Add(btnAddClient);
-            tabPageClients.Controls.Add(btnEditClient);
-            tabPageClients.Controls.Add(btnRemoveClient);
-            tabPageClients.Controls.Add(btnTestClient);
-            tabPageClients.Controls.Add(btnOpenWebUiClient);
-            tabPageClients.Controls.Add(btnLaunchInstance);
-            tabPageClients.Location = new Point(4, 26);
-            tabPageClients.Name = "tabPageClients";
-            tabPageClients.Padding = new Padding(3);
-            tabPageClients.Size = new Size(607, 341);
-            tabPageClients.TabIndex = 5;
-            tabPageClients.Text = "Clients";
-            tabPageClients.UseVisualStyleBackColor = true;
-            //
-            // listViewClients
-            //
-            listViewClients.Columns.AddRange(new ColumnHeader[]
-            {
-                new ColumnHeader { Text = "Name",        Width = 150 },
-                new ColumnHeader { Text = "Host",        Width = 150 },
-                new ColumnHeader { Text = "Port",        Width = 55  },
-                new ColumnHeader { Text = "OS",          Width = 100 },
-                new ColumnHeader { Text = "Description", Width = 195 },
-                new ColumnHeader { Text = "Status",      Width = 80  },
-            });
-            listViewClients.FullRowSelect = true;
-            listViewClients.Location = new Point(6, 6);
-            listViewClients.Name = "listViewClients";
-            listViewClients.Size = new Size(487, 295);
-            listViewClients.TabIndex = 0;
-            listViewClients.View = View.Details;
-            //
-            // btnAddClient
-            //
-            btnAddClient.Location = new Point(499, 6);
-            btnAddClient.Name = "btnAddClient";
-            btnAddClient.Size = new Size(100, 28);
-            btnAddClient.TabIndex = 1;
-            btnAddClient.Text = "Add";
-            //
-            // btnEditClient
-            //
-            btnEditClient.Location = new Point(499, 40);
-            btnEditClient.Name = "btnEditClient";
-            btnEditClient.Size = new Size(100, 28);
-            btnEditClient.TabIndex = 2;
-            btnEditClient.Text = "Edit";
-            //
-            // btnRemoveClient
-            //
-            btnRemoveClient.Location = new Point(499, 74);
-            btnRemoveClient.Name = "btnRemoveClient";
-            btnRemoveClient.Size = new Size(100, 28);
-            btnRemoveClient.TabIndex = 3;
-            btnRemoveClient.Text = "Remove";
-            //
-            // btnTestClient
-            //
-            btnTestClient.Location = new Point(499, 120);
-            btnTestClient.Name = "btnTestClient";
-            btnTestClient.Size = new Size(100, 28);
-            btnTestClient.TabIndex = 4;
-            btnTestClient.Text = "Test";
-            //
-            // btnOpenWebUiClient
-            //
-            btnOpenWebUiClient.Location = new Point(499, 154);
-            btnOpenWebUiClient.Name = "btnOpenWebUiClient";
-            btnOpenWebUiClient.Size = new Size(100, 28);
-            btnOpenWebUiClient.TabIndex = 5;
-            btnOpenWebUiClient.Text = "Open Web UI";
-            //
-            // btnLaunchInstance
-            //
-            btnLaunchInstance.Location = new Point(499, 200);
-            btnLaunchInstance.Name = "btnLaunchInstance";
-            btnLaunchInstance.Size = new Size(100, 28);
-            btnLaunchInstance.TabIndex = 6;
-            btnLaunchInstance.Text = "Launch Instance";
-            //
+            // 
             // grpAiSettings
             // 
             grpAiSettings.Controls.Add(lblAiProvider);
@@ -430,7 +347,7 @@ namespace ApexComputerUse
             tabPageConsole.Location = new Point(4, 26);
             tabPageConsole.Name = "tabPageConsole";
             tabPageConsole.Padding = new Padding(3);
-            tabPageConsole.Size = new Size(607, 337);
+            tabPageConsole.Size = new Size(607, 341);
             tabPageConsole.TabIndex = 0;
             tabPageConsole.Text = "Console";
             tabPageConsole.UseVisualStyleBackColor = true;
@@ -503,7 +420,7 @@ namespace ApexComputerUse
             tabPageFind.Location = new Point(4, 26);
             tabPageFind.Name = "tabPageFind";
             tabPageFind.Padding = new Padding(3);
-            tabPageFind.Size = new Size(565, 337);
+            tabPageFind.Size = new Size(607, 341);
             tabPageFind.TabIndex = 1;
             tabPageFind.Text = "Find & Execute";
             tabPageFind.UseVisualStyleBackColor = true;
@@ -648,7 +565,7 @@ namespace ApexComputerUse
             tabPageRemote.Location = new Point(4, 26);
             tabPageRemote.Name = "tabPageRemote";
             tabPageRemote.Padding = new Padding(3);
-            tabPageRemote.Size = new Size(565, 337);
+            tabPageRemote.Size = new Size(607, 341);
             tabPageRemote.TabIndex = 2;
             tabPageRemote.Text = "Remote Control";
             tabPageRemote.UseVisualStyleBackColor = true;
@@ -837,7 +754,7 @@ namespace ApexComputerUse
             tabPageModel.Location = new Point(4, 26);
             tabPageModel.Name = "tabPageModel";
             tabPageModel.Padding = new Padding(3);
-            tabPageModel.Size = new Size(565, 337);
+            tabPageModel.Size = new Size(607, 341);
             tabPageModel.TabIndex = 3;
             tabPageModel.Text = "Model";
             tabPageModel.UseVisualStyleBackColor = true;
@@ -997,6 +914,81 @@ namespace ApexComputerUse
             btnDownloadAll.Text = "Download All  (LFM2.5-VL model + projector + tessdata)";
             btnDownloadAll.Click += btnDownloadAll_Click;
             // 
+            // tabPageClients
+            // 
+            tabPageClients.Controls.Add(listViewClients);
+            tabPageClients.Controls.Add(btnAddClient);
+            tabPageClients.Controls.Add(btnEditClient);
+            tabPageClients.Controls.Add(btnRemoveClient);
+            tabPageClients.Controls.Add(btnTestClient);
+            tabPageClients.Controls.Add(btnOpenWebUiClient);
+            tabPageClients.Controls.Add(btnLaunchInstance);
+            tabPageClients.Location = new Point(4, 26);
+            tabPageClients.Name = "tabPageClients";
+            tabPageClients.Padding = new Padding(3);
+            tabPageClients.Size = new Size(607, 341);
+            tabPageClients.TabIndex = 5;
+            tabPageClients.Text = "Clients";
+            tabPageClients.UseVisualStyleBackColor = true;
+            // 
+            // listViewClients
+            // 
+            listViewClients.FullRowSelect = true;
+            listViewClients.Location = new Point(6, 6);
+            listViewClients.Name = "listViewClients";
+            listViewClients.Size = new Size(487, 295);
+            listViewClients.TabIndex = 0;
+            listViewClients.UseCompatibleStateImageBehavior = false;
+            listViewClients.View = View.Details;
+            // 
+            // btnAddClient
+            // 
+            btnAddClient.Location = new Point(499, 6);
+            btnAddClient.Name = "btnAddClient";
+            btnAddClient.Size = new Size(100, 28);
+            btnAddClient.TabIndex = 1;
+            btnAddClient.Text = "Add";
+            // 
+            // btnEditClient
+            // 
+            btnEditClient.Location = new Point(499, 40);
+            btnEditClient.Name = "btnEditClient";
+            btnEditClient.Size = new Size(100, 28);
+            btnEditClient.TabIndex = 2;
+            btnEditClient.Text = "Edit";
+            // 
+            // btnRemoveClient
+            // 
+            btnRemoveClient.Location = new Point(499, 74);
+            btnRemoveClient.Name = "btnRemoveClient";
+            btnRemoveClient.Size = new Size(100, 28);
+            btnRemoveClient.TabIndex = 3;
+            btnRemoveClient.Text = "Remove";
+            // 
+            // btnTestClient
+            // 
+            btnTestClient.Location = new Point(499, 120);
+            btnTestClient.Name = "btnTestClient";
+            btnTestClient.Size = new Size(100, 28);
+            btnTestClient.TabIndex = 4;
+            btnTestClient.Text = "Test";
+            // 
+            // btnOpenWebUiClient
+            // 
+            btnOpenWebUiClient.Location = new Point(499, 154);
+            btnOpenWebUiClient.Name = "btnOpenWebUiClient";
+            btnOpenWebUiClient.Size = new Size(100, 28);
+            btnOpenWebUiClient.TabIndex = 5;
+            btnOpenWebUiClient.Text = "Open Web UI";
+            // 
+            // btnLaunchInstance
+            // 
+            btnLaunchInstance.Location = new Point(499, 200);
+            btnLaunchInstance.Name = "btnLaunchInstance";
+            btnLaunchInstance.Size = new Size(100, 28);
+            btnLaunchInstance.TabIndex = 6;
+            btnLaunchInstance.Text = "Launch Instance";
+            // 
             // statusStrip1
             // 
             statusStrip1.Items.AddRange(new ToolStripItem[] { lblStatCpu, lblStatRam, lblStatModel, lblStatNet });
@@ -1053,7 +1045,6 @@ namespace ApexComputerUse
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
             tabPageChat.ResumeLayout(false);
-            tabPageClients.ResumeLayout(false);
             grpAiSettings.ResumeLayout(false);
             grpAiSettings.PerformLayout();
             grpAiSession.ResumeLayout(false);
@@ -1071,6 +1062,7 @@ namespace ApexComputerUse
             grpModelPaths.PerformLayout();
             grpDownload.ResumeLayout(false);
             grpDownload.PerformLayout();
+            tabPageClients.ResumeLayout(false);
             statusStrip1.ResumeLayout(false);
             statusStrip1.PerformLayout();
             ResumeLayout(false);

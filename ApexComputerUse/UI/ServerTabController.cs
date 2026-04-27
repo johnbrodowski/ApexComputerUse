@@ -3,8 +3,9 @@ namespace ApexComputerUse
     internal sealed class ServerTabController : IDisposable
     {
         private readonly CommandProcessor _processor;
-        private readonly SceneStore _sceneStore;
-        private readonly AiChatService _chatService;
+        private readonly SceneStore       _sceneStore;
+        private readonly AiChatService    _chatService;
+        private readonly ClientStore?     _clientStore;
         private readonly Action<string> _logHandler;
         private readonly Action<string> _log;
 
@@ -18,6 +19,7 @@ namespace ApexComputerUse
 
         internal ServerTabController(
             CommandProcessor processor, SceneStore sceneStore, AiChatService chatService,
+            ClientStore? clientStore,
             Action<string> logHandler, Action<string> log,
             TextBox txtHttpPort, TextBox txtApiKey,
             TextBox txtPipeName, TextBox txtBotToken, TextBox txtAllowedChatIds,
@@ -25,6 +27,7 @@ namespace ApexComputerUse
             Label lblHttpStatus, Label lblPipeStatus, Label lblTelegramStatus)
         {
             _processor = processor; _sceneStore = sceneStore; _chatService = chatService;
+            _clientStore = clientStore;
             _logHandler = logHandler; _log = log;
             _txtHttpPort = txtHttpPort; _txtApiKey = txtApiKey;
             _txtPipeName = txtPipeName; _txtBotToken = txtBotToken; _txtAllowedChatIds = txtAllowedChatIds;
@@ -56,7 +59,8 @@ namespace ApexComputerUse
                 Http = new HttpCommandServer(port, _processor, _sceneStore, _chatService, apiKey,
                            enableShellRun: cfg.EnableShellRun, bindAll: cfg.HttpBindAll,
                            testRunnerExePath: cfg.TestRunnerExePath,
-                           testRunnerConfigPath: cfg.TestRunnerConfigPath);
+                           testRunnerConfigPath: cfg.TestRunnerConfigPath,
+                           clientStore: _clientStore);
                 Http.OnLog += _logHandler;
                 Http.OnShutdownRequested += () =>
                 {

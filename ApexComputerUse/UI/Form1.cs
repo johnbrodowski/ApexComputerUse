@@ -168,7 +168,7 @@ namespace ApexComputerUse
             _statusMonitor = new StatusMonitor(lblStatCpu, lblStatRam, lblStatModel, lblStatNet, _processor);
 
             _servers = new ServerTabController(
-                _processor, _sceneStore, _chatService, _logHandler, Log,
+                _processor, _sceneStore, _chatService, _clientStore, _logHandler, Log,
                 txtHttpPort, txtApiKey, txtPipeName, txtBotToken, txtAllowedChatIds,
                 btnStartHttp, btnStartPipe, btnStartTelegram,
                 lblHttpStatus, lblPipeStatus, lblTelegramStatus);

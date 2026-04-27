@@ -5,6 +5,8 @@ namespace ApexComputerUse
 {
     internal static class Program
     {
+        public static bool IsClientInstance { get; private set; }
+
         /// <summary>
         /// Entry point.  Run without arguments for the WinForms GUI.
         /// Run with <c>--service</c> (or register via sc.exe) for headless Windows Service mode.
@@ -13,16 +15,24 @@ namespace ApexComputerUse
         private static void Main(string[] args)
         {
             // ── Command-line overrides (must precede AppConfig.Current) ────
-            // --port <n>  overrides the HTTP listen port (useful for running multiple instances)
-            // --pipe <name>  overrides the named-pipe name
-            for (int i = 0; i < args.Length - 1; i++)
+            // --port <n>   overrides the HTTP listen port (useful for running multiple instances)
+            // --pipe <name> overrides the named-pipe name
+            // --client      marks this instance as a subordinate client (disables Launch Instance)
+            for (int i = 0; i < args.Length; i++)
             {
-                if (args[i].Equals("--port", StringComparison.OrdinalIgnoreCase) &&
-                    int.TryParse(args[i + 1], out _))
-                    Environment.SetEnvironmentVariable("APEX_HTTP_PORT", args[i + 1]);
-                else if (args[i].Equals("--pipe", StringComparison.OrdinalIgnoreCase) &&
-                    !string.IsNullOrWhiteSpace(args[i + 1]))
-                    Environment.SetEnvironmentVariable("APEX_PIPE_NAME", args[i + 1]);
+                if (args[i].Equals("--client", StringComparison.OrdinalIgnoreCase))
+                {
+                    IsClientInstance = true;
+                }
+                else if (i < args.Length - 1)
+                {
+                    if (args[i].Equals("--port", StringComparison.OrdinalIgnoreCase) &&
+                        int.TryParse(args[i + 1], out _))
+                        Environment.SetEnvironmentVariable("APEX_HTTP_PORT", args[i + 1]);
+                    else if (args[i].Equals("--pipe", StringComparison.OrdinalIgnoreCase) &&
+                        !string.IsNullOrWhiteSpace(args[i + 1]))
+                        Environment.SetEnvironmentVariable("APEX_PIPE_NAME", args[i + 1]);
+                }
             }
 
             // ── Configuration + structured logging ────────────────────────

@@ -18,6 +18,7 @@ namespace ApexComputerUse
         private readonly CommandDispatcher   _dispatcher;
         private readonly SceneStore          _store;
         private readonly AiChatService?      _chatService;
+        private readonly ClientStore?        _clientStore;
         private readonly string?             _apiKey;
         private readonly bool                _enableShellRun;
         private readonly bool                _bindAll;
@@ -65,13 +66,15 @@ namespace ApexComputerUse
                                  string? apiKey = null, bool enableShellRun = false,
                                  bool bindAll = false,
                                  string? testRunnerExePath = null,
-                                 string? testRunnerConfigPath = null)
+                                 string? testRunnerConfigPath = null,
+                                 ClientStore? clientStore = null)
         {
             Port            = port;
             _processor      = processor;
             _dispatcher     = new CommandDispatcher(processor);
             _store          = store;
             _chatService    = chatService;
+            _clientStore    = clientStore;
             _apiKey         = string.IsNullOrWhiteSpace(apiKey) ? null : apiKey.Trim();
             _enableShellRun = enableShellRun;
             _bindAll        = bindAll;
@@ -193,6 +196,55 @@ namespace ApexComputerUse
             return CryptographicOperations.FixedTimeEquals(a, b);
         }
 
+        // ── Per-client permissions ────────────────────────────────────────
+
+        private static readonly ClientPermissions _fullPermissions = new()
+        {
+            AllowAutomation = true, AllowCapture = true, AllowAi    = true,
+            AllowScenes     = true, AllowShellRun = true, AllowClients = true
+        };
+
+        private ClientPermissions ResolvePermissions(HttpListenerRequest req)
+        {
+            // Loopback (localhost / 127.0.0.1 / ::1) always gets full access.
+            var addr = req.RemoteEndPoint?.Address;
+            if (addr == null || System.Net.IPAddress.IsLoopback(addr)) return _fullPermissions;
+
+            // Match against the client list by IP string.
+            string host = addr.ToString();
+            var client = _clientStore?.FindByHost(host);
+            return client?.Permissions ?? _fullPermissions;
+        }
+
+        private static bool IsPathAllowed(string path, ClientPermissions p)
+        {
+            // Diagnostics/observability — always allow.
+            if (path is "/ping" or "/health" or "/metrics" or "/sysinfo"
+                     or "/env"  or "/ls"     or "/help"   or "/status")
+                return true;
+
+            if (path is "/run") return p.AllowShellRun;
+
+            if (path.StartsWith("/capture") || path.StartsWith("/ocr"))
+                return p.AllowCapture;
+
+            if (path.StartsWith("/ai") || path.StartsWith("/chat"))
+                return p.AllowAi;
+
+            if (path.StartsWith("/scenes") || path == "/editor")
+                return p.AllowScenes;
+
+            if (path.StartsWith("/clients"))
+                return p.AllowClients;
+
+            // find, exec, elements, windows, uimap, draw and everything else is automation.
+            return p.AllowAutomation;
+        }
+
+        private static readonly byte[] ForbiddenBody =
+            Encoding.UTF8.GetBytes(
+                """{"success":false,"error":"Forbidden. Your client does not have permission for this endpoint."}""");
+
         private static readonly byte[] UnauthorizedBody =
             System.Text.Encoding.UTF8.GetBytes(
                 """{"success":false,"error":"Unauthorized. Supply the API key via 'Authorization: Bearer <key>', 'X-Api-Key: <key>' header, or '?apiKey=<key>' query parameter."}""");
@@ -238,6 +290,20 @@ namespace ApexComputerUse
             string path    = hasExt ? rawPath[..^ext.Length].ToLowerInvariant()
                                     : rawPath.ToLowerInvariant();
             string format  = FormatAdapter.Negotiate(req, hasExt ? ext[1..] : null);
+
+            // ── Per-client permission gate ─────────────────────────────────
+            var perms = ResolvePermissions(req);
+            if (!IsPathAllowed(path, perms))
+            {
+                statusCode = 403;
+                Interlocked.Increment(ref _errorRequests);
+                res.StatusCode      = 403;
+                res.ContentType     = "application/json; charset=utf-8";
+                res.ContentLength64 = ForbiddenBody.Length;
+                try   { await res.OutputStream.WriteAsync(ForbiddenBody); }
+                finally { res.Close(); }
+                return;
+            }
 
             ApexResult result;
 
