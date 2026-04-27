@@ -178,7 +178,7 @@ public class AiChatServiceTests
     [Fact]
     public void BuildApexSystemPrompt_ContainsApexBlockExample()
     {
-        var prompt = AiChatService.BuildApexSystemPrompt(8081);
+        var prompt = AiChatService.BuildApexSystemPrompt(8080);
         Assert.Contains("```apex", prompt);
     }
 
@@ -190,7 +190,7 @@ public class AiChatServiceTests
     [InlineData("POST /capture")]
     public void BuildApexSystemPrompt_ListsKeyEndpoints(string endpoint)
     {
-        var prompt = AiChatService.BuildApexSystemPrompt(8081);
+        var prompt = AiChatService.BuildApexSystemPrompt(8080);
         Assert.Contains(endpoint, prompt);
     }
 }

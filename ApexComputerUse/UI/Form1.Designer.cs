@@ -65,6 +65,8 @@ namespace ApexComputerUse
             lblHttpPort = new Label();
             txtHttpPort = new TextBox();
             btnStartHttp = new Button();
+            btnApplyFirewall = new Button();
+            btnRemoveFirewall = new Button();
             lblHttpStatus = new Label();
             lblApiKey = new Label();
             txtApiKey = new TextBox();
@@ -109,6 +111,9 @@ namespace ApexComputerUse
             lblStatRam = new ToolStripStatusLabel();
             lblStatModel = new ToolStripStatusLabel();
             lblStatNet = new ToolStripStatusLabel();
+            toolTipRemote = new ToolTip();
+            lblRemoteLog = new Label();
+            txtRemoteLog = new TextBox();
             menuStrip1.SuspendLayout();
             tabPageChat.SuspendLayout();
             grpAiSettings.SuspendLayout();
@@ -562,6 +567,8 @@ namespace ApexComputerUse
             // tabPageRemote
             // 
             tabPageRemote.Controls.Add(grpRemote);
+            tabPageRemote.Controls.Add(lblRemoteLog);
+            tabPageRemote.Controls.Add(txtRemoteLog);
             tabPageRemote.Location = new Point(4, 26);
             tabPageRemote.Name = "tabPageRemote";
             tabPageRemote.Padding = new Padding(3);
@@ -575,6 +582,8 @@ namespace ApexComputerUse
             grpRemote.Controls.Add(lblHttpPort);
             grpRemote.Controls.Add(txtHttpPort);
             grpRemote.Controls.Add(btnStartHttp);
+            grpRemote.Controls.Add(btnApplyFirewall);
+            grpRemote.Controls.Add(btnRemoveFirewall);
             grpRemote.Controls.Add(lblHttpStatus);
             grpRemote.Controls.Add(lblApiKey);
             grpRemote.Controls.Add(txtApiKey);
@@ -591,7 +600,7 @@ namespace ApexComputerUse
             grpRemote.Controls.Add(lblPipeStatus);
             grpRemote.Location = new Point(8, 9);
             grpRemote.Name = "grpRemote";
-            grpRemote.Size = new Size(519, 262);
+            grpRemote.Size = new Size(591, 230);
             grpRemote.TabIndex = 0;
             grpRemote.TabStop = false;
             grpRemote.Text = "Remote Control";
@@ -599,7 +608,7 @@ namespace ApexComputerUse
             // lblHttpPort
             // 
             lblHttpPort.AutoSize = true;
-            lblHttpPort.Location = new Point(8, 29);
+            lblHttpPort.Location = new Point(8, 22);
             lblHttpPort.Name = "lblHttpPort";
             lblHttpPort.Size = new Size(69, 17);
             lblHttpPort.TabIndex = 0;
@@ -607,26 +616,57 @@ namespace ApexComputerUse
             // 
             // txtHttpPort
             // 
-            txtHttpPort.Location = new Point(82, 26);
+            txtHttpPort.Location = new Point(82, 19);
             txtHttpPort.Name = "txtHttpPort";
             txtHttpPort.Size = new Size(55, 25);
             txtHttpPort.TabIndex = 1;
-            txtHttpPort.Text = "8081";
+            txtHttpPort.Text = "8080";
             // 
             // btnStartHttp
             // 
-            btnStartHttp.Location = new Point(146, 25);
+            btnStartHttp.Location = new Point(146, 18);
             btnStartHttp.Name = "btnStartHttp";
             btnStartHttp.Size = new Size(90, 29);
             btnStartHttp.TabIndex = 2;
             btnStartHttp.Text = "Start HTTP";
             btnStartHttp.Click += btnStartHttp_Click;
+            //
+            // btnApplyFirewall
+            //
+            btnApplyFirewall.Location = new Point(397, 18);
+            btnApplyFirewall.Name = "btnApplyFirewall";
+            btnApplyFirewall.Size = new Size(91, 29);
+            btnApplyFirewall.TabIndex = 20;
+            btnApplyFirewall.Text = "Allow Port";
+            btnApplyFirewall.Click += btnApplyFirewall_Click;
+            toolTipRemote.SetToolTip(btnApplyFirewall,
+                "Allows external clients on your network to reach the HTTP server on the port above\r\n" +
+                "by adding a Windows Firewall inbound rule (and a URL reservation when 'Bind All\r\n" +
+                "Interfaces' is enabled). Also clears any stale URL ACL that may be preventing the\r\n" +
+                "server from binding.\r\n\r\n" +
+                "Does NOT start the server — use 'Start HTTP' for that.\r\n" +
+                "Has no observable effect on localhost connections (loopback bypasses the firewall).");
+            //
+            // btnRemoveFirewall
+            //
+            btnRemoveFirewall.Location = new Point(493, 18);
+            btnRemoveFirewall.Name = "btnRemoveFirewall";
+            btnRemoveFirewall.Size = new Size(92, 29);
+            btnRemoveFirewall.TabIndex = 21;
+            btnRemoveFirewall.Text = "Revoke Port";
+            btnRemoveFirewall.Click += btnRemoveFirewall_Click;
+            toolTipRemote.SetToolTip(btnRemoveFirewall,
+                "Removes the Windows Firewall inbound rule and any URL reservation for the port above.\r\n" +
+                "Use this to block external network clients, or to clear a stale URL ACL that's\r\n" +
+                "preventing the server from binding.\r\n\r\n" +
+                "Does NOT stop the server — use 'Stop HTTP' for that.\r\n" +
+                "Has no observable effect on localhost connections (loopback bypasses the firewall).");
             // 
             // lblHttpStatus
             // 
             lblHttpStatus.AutoSize = true;
             lblHttpStatus.ForeColor = Color.Gray;
-            lblHttpStatus.Location = new Point(246, 29);
+            lblHttpStatus.Location = new Point(242, 24);
             lblHttpStatus.Name = "lblHttpStatus";
             lblHttpStatus.Size = new Size(58, 17);
             lblHttpStatus.TabIndex = 3;
@@ -635,7 +675,7 @@ namespace ApexComputerUse
             // lblApiKey
             // 
             lblApiKey.AutoSize = true;
-            lblApiKey.Location = new Point(8, 66);
+            lblApiKey.Location = new Point(8, 58);
             lblApiKey.Name = "lblApiKey";
             lblApiKey.Size = new Size(54, 17);
             lblApiKey.TabIndex = 12;
@@ -643,7 +683,7 @@ namespace ApexComputerUse
             // 
             // txtApiKey
             // 
-            txtApiKey.Location = new Point(82, 62);
+            txtApiKey.Location = new Point(82, 54);
             txtApiKey.Name = "txtApiKey";
             txtApiKey.PlaceholderText = "(leave blank to disable auth)";
             txtApiKey.Size = new Size(349, 25);
@@ -651,7 +691,7 @@ namespace ApexComputerUse
             // 
             // btnCopyApiKey
             // 
-            btnCopyApiKey.Location = new Point(439, 61);
+            btnCopyApiKey.Location = new Point(439, 53);
             btnCopyApiKey.Name = "btnCopyApiKey";
             btnCopyApiKey.Size = new Size(52, 29);
             btnCopyApiKey.TabIndex = 14;
@@ -661,7 +701,7 @@ namespace ApexComputerUse
             // lblBotToken
             // 
             lblBotToken.AutoSize = true;
-            lblBotToken.Location = new Point(8, 111);
+            lblBotToken.Location = new Point(8, 103);
             lblBotToken.Name = "lblBotToken";
             lblBotToken.Size = new Size(68, 17);
             lblBotToken.TabIndex = 4;
@@ -669,7 +709,7 @@ namespace ApexComputerUse
             // 
             // txtBotToken
             // 
-            txtBotToken.Location = new Point(82, 108);
+            txtBotToken.Location = new Point(82, 100);
             txtBotToken.Name = "txtBotToken";
             txtBotToken.PlaceholderText = "123456:ABC-DEF...";
             txtBotToken.Size = new Size(265, 25);
@@ -677,7 +717,7 @@ namespace ApexComputerUse
             // 
             // btnStartTelegram
             // 
-            btnStartTelegram.Location = new Point(357, 107);
+            btnStartTelegram.Location = new Point(357, 99);
             btnStartTelegram.Name = "btnStartTelegram";
             btnStartTelegram.Size = new Size(120, 29);
             btnStartTelegram.TabIndex = 6;
@@ -688,7 +728,7 @@ namespace ApexComputerUse
             // 
             lblTelegramStatus.AutoSize = true;
             lblTelegramStatus.ForeColor = Color.Gray;
-            lblTelegramStatus.Location = new Point(8, 176);
+            lblTelegramStatus.Location = new Point(8, 168);
             lblTelegramStatus.Name = "lblTelegramStatus";
             lblTelegramStatus.Size = new Size(119, 17);
             lblTelegramStatus.TabIndex = 7;
@@ -697,7 +737,7 @@ namespace ApexComputerUse
             // lblAllowedChatIds
             // 
             lblAllowedChatIds.AutoSize = true;
-            lblAllowedChatIds.Location = new Point(8, 145);
+            lblAllowedChatIds.Location = new Point(8, 137);
             lblAllowedChatIds.Name = "lblAllowedChatIds";
             lblAllowedChatIds.Size = new Size(59, 17);
             lblAllowedChatIds.TabIndex = 15;
@@ -705,7 +745,7 @@ namespace ApexComputerUse
             // 
             // txtAllowedChatIds
             // 
-            txtAllowedChatIds.Location = new Point(82, 142);
+            txtAllowedChatIds.Location = new Point(82, 134);
             txtAllowedChatIds.Name = "txtAllowedChatIds";
             txtAllowedChatIds.PlaceholderText = "123456789,987654321 (leave blank to allow all)";
             txtAllowedChatIds.Size = new Size(395, 25);
@@ -714,7 +754,7 @@ namespace ApexComputerUse
             // lblPipeName
             // 
             lblPipeName.AutoSize = true;
-            lblPipeName.Location = new Point(8, 221);
+            lblPipeName.Location = new Point(8, 194);
             lblPipeName.Name = "lblPipeName";
             lblPipeName.Size = new Size(75, 17);
             lblPipeName.TabIndex = 8;
@@ -722,7 +762,7 @@ namespace ApexComputerUse
             // 
             // txtPipeName
             // 
-            txtPipeName.Location = new Point(82, 218);
+            txtPipeName.Location = new Point(82, 191);
             txtPipeName.Name = "txtPipeName";
             txtPipeName.Size = new Size(120, 25);
             txtPipeName.TabIndex = 9;
@@ -730,7 +770,7 @@ namespace ApexComputerUse
             // 
             // btnStartPipe
             // 
-            btnStartPipe.Location = new Point(211, 216);
+            btnStartPipe.Location = new Point(211, 189);
             btnStartPipe.Name = "btnStartPipe";
             btnStartPipe.Size = new Size(90, 29);
             btnStartPipe.TabIndex = 10;
@@ -741,12 +781,30 @@ namespace ApexComputerUse
             // 
             lblPipeStatus.AutoSize = true;
             lblPipeStatus.ForeColor = Color.Gray;
-            lblPipeStatus.Location = new Point(311, 221);
+            lblPipeStatus.Location = new Point(311, 194);
             lblPipeStatus.Name = "lblPipeStatus";
             lblPipeStatus.Size = new Size(58, 17);
             lblPipeStatus.TabIndex = 11;
             lblPipeStatus.Text = "Stopped";
-            // 
+            //
+            // lblRemoteLog
+            //
+            lblRemoteLog.AutoSize = true;
+            lblRemoteLog.Location = new Point(8, 245);
+            lblRemoteLog.Name = "lblRemoteLog";
+            lblRemoteLog.Text = "Firewall / URL ACL Log:";
+            //
+            // txtRemoteLog
+            //
+            txtRemoteLog.Location = new Point(8, 265);
+            txtRemoteLog.Name = "txtRemoteLog";
+            txtRemoteLog.Size = new Size(591, 70);
+            txtRemoteLog.Multiline = true;
+            txtRemoteLog.ReadOnly = true;
+            txtRemoteLog.ScrollBars = ScrollBars.Vertical;
+            txtRemoteLog.Font = new Font("Consolas", 9F);
+            txtRemoteLog.WordWrap = false;
+            //
             // tabPageModel
             // 
             tabPageModel.Controls.Add(grpModelPaths);
@@ -1132,11 +1190,17 @@ namespace ApexComputerUse
         private System.Windows.Forms.ToolStripStatusLabel lblStatModel;
         private System.Windows.Forms.ToolStripStatusLabel lblStatNet;
 
+        private System.Windows.Forms.ToolTip    toolTipRemote;
+        private System.Windows.Forms.Label      lblRemoteLog;
+        private System.Windows.Forms.TextBox    txtRemoteLog;
+
         // ── Remote Control tab ────────────────────────────────────────────
         private System.Windows.Forms.GroupBox  grpRemote;
         private System.Windows.Forms.Label     lblHttpPort;
         private System.Windows.Forms.TextBox   txtHttpPort;
         private System.Windows.Forms.Button    btnStartHttp;
+        private System.Windows.Forms.Button    btnApplyFirewall;
+        private System.Windows.Forms.Button    btnRemoveFirewall;
         private System.Windows.Forms.Label     lblHttpStatus;
         private System.Windows.Forms.Label     lblApiKey;
         private System.Windows.Forms.TextBox   txtApiKey;

@@ -8,18 +8,18 @@ namespace ApexComputerUse
             "It will be detected, executed against the real running server, and the actual result shown to you. " +
             "Wait for results before continuing. Never invent or guess results.\n\n" +
             "Available commands (omit the API key header — it is added automatically):\n\n" +
-            "  curl http://localhost:8081/windows.json\n" +
-            "  curl http://localhost:8081/status.json\n" +
-            "  curl \"http://localhost:8081/elements.json?onscreen=true\"\n" +
-            "  curl -X POST http://localhost:8081/find -d '{\"window\":\"Title\",\"name\":\"Name\",\"type\":\"Edit\"}'\n" +
-            "  curl -X POST http://localhost:8081/exec -d '{\"action\":\"click\"}'\n" +
-            "  curl -X POST http://localhost:8081/exec -d '{\"action\":\"type\",\"value\":\"text\"}'\n" +
-            "  curl -X POST http://localhost:8081/exec -d '{\"action\":\"gettext\"}'\n" +
-            "  curl -X POST http://localhost:8081/exec -d '{\"action\":\"keys\",\"value\":\"{ENTER}\"}'\n" +
-            "  curl -X POST http://localhost:8081/exec -d '{\"action\":\"highlight\"}'\n" +
-            "  curl -X POST http://localhost:8081/exec -d '{\"action\":\"describe\"}'\n" +
-            "  curl -X POST http://localhost:8081/capture -d '{\"action\":\"screen\"}'\n\n" +
-            "Start every new task with: curl http://localhost:8081/windows.json";
+            "  curl http://localhost:8080/windows.json\n" +
+            "  curl http://localhost:8080/status.json\n" +
+            "  curl \"http://localhost:8080/elements.json?onscreen=true\"\n" +
+            "  curl -X POST http://localhost:8080/find -d '{\"window\":\"Title\",\"name\":\"Name\",\"type\":\"Edit\"}'\n" +
+            "  curl -X POST http://localhost:8080/exec -d '{\"action\":\"click\"}'\n" +
+            "  curl -X POST http://localhost:8080/exec -d '{\"action\":\"type\",\"value\":\"text\"}'\n" +
+            "  curl -X POST http://localhost:8080/exec -d '{\"action\":\"gettext\"}'\n" +
+            "  curl -X POST http://localhost:8080/exec -d '{\"action\":\"keys\",\"value\":\"{ENTER}\"}'\n" +
+            "  curl -X POST http://localhost:8080/exec -d '{\"action\":\"highlight\"}'\n" +
+            "  curl -X POST http://localhost:8080/exec -d '{\"action\":\"describe\"}'\n" +
+            "  curl -X POST http://localhost:8080/capture -d '{\"action\":\"screen\"}'\n\n" +
+            "Start every new task with: curl http://localhost:8080/windows.json";
 
         private readonly AiChatService _chatService;
         private readonly Func<HttpCommandServer?> _getHttp;

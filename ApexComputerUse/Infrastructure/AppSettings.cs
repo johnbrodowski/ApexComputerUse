@@ -15,5 +15,6 @@ namespace ApexComputerUse
         /// </summary>
         public string AllowedChatIds { get; set; } = "";
         public bool NetshConfigured { get; set; } = false;
+        public int NetshPort { get; set; } = 0;
     }
 }

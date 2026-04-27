@@ -27,7 +27,7 @@ Opens a WinForms application with tabs:
 **`appsettings.json`** (next to executable):
 ```json
 {
-  "HttpPort": 8081,                    // HTTP server listen port
+  "HttpPort": 8080,                    // HTTP server listen port
   "HttpBindAll": false,                // false: localhost only | true: all interfaces
   "PipeName": "ApexComputerUse",      // Named pipe name
   "LogLevel": "Information",           // Debug, Information, Warning, Error
@@ -39,7 +39,7 @@ Opens a WinForms application with tabs:
 
 **Environment Variables** (override `appsettings.json`):
 ```bash
-APEX_HTTP_PORT=8081
+APEX_HTTP_PORT=8080
 APEX_HTTP_BIND_ALL=false
 APEX_PIPE_NAME=ApexComputerUse
 APEX_LOG_LEVEL=Information
@@ -66,13 +66,13 @@ Every HTTP request requires an API key. Three equivalent methods:
 
 ```bash
 # Authorization header (recommended)
-curl -H "Authorization: Bearer <key>" http://localhost:8081/ping
+curl -H "Authorization: Bearer <key>" http://localhost:8080/ping
 
 # X-Api-Key header
-curl -H "X-Api-Key: <key>" http://localhost:8081/ping
+curl -H "X-Api-Key: <key>" http://localhost:8080/ping
 
 # Query parameter (browser links / quick tests only)
-curl "http://localhost:8081/ping?apiKey=<key>"
+curl "http://localhost:8080/ping?apiKey=<key>"
 ```
 
 - Generated automatically on first launch
@@ -86,7 +86,7 @@ curl "http://localhost:8081/ping?apiKey=<key>"
 ### **Interactive Test Console**
 ```bash
 # Open in browser
-http://localhost:8081/
+http://localhost:8080/
 ```
 
 Features:
@@ -101,76 +101,76 @@ Features:
 
 ```bash
 # List all open windows with IDs
-curl -H "X-Api-Key: <key>" http://localhost:8081/windows
+curl -H "X-Api-Key: <key>" http://localhost:8080/windows
 # Returns: [{"id":42,"title":"Notepad"},{"id":107,"title":"Calculator"}]
 
 # Get system info
-curl -H "X-Api-Key: <key>" http://localhost:8081/sysinfo
+curl -H "X-Api-Key: <key>" http://localhost:8080/sysinfo
 
 # Get current state
-curl -H "X-Api-Key: <key>" http://localhost:8081/status
+curl -H "X-Api-Key: <key>" http://localhost:8080/status
 
 # Get help
-curl -H "X-Api-Key: <key>" http://localhost:8081/help
+curl -H "X-Api-Key: <key>" http://localhost:8080/help
 ```
 
 ### **Element Discovery**
 
 ```bash
 # Get element tree (nested JSON with IDs)
-curl -H "X-Api-Key: <key>" http://localhost:8081/elements
+curl -H "X-Api-Key: <key>" http://localhost:8080/elements
 
 # Onscreen only (80% fewer elements on browsers)
-curl -H "X-Api-Key: <key>" "http://localhost:8081/elements?onscreen=true"
+curl -H "X-Api-Key: <key>" "http://localhost:8080/elements?onscreen=true"
 
 # Shallow overview (depth=2)
-curl -H "X-Api-Key: <key>" "http://localhost:8081/elements?depth=2&onscreen=true"
+curl -H "X-Api-Key: <key>" "http://localhost:8080/elements?depth=2&onscreen=true"
 
 # Expand specific node (preserves map, IDs stable)
-curl -H "X-Api-Key: <key>" "http://localhost:8081/elements?id=708379645&depth=2"
+curl -H "X-Api-Key: <key>" "http://localhost:8080/elements?id=708379645&depth=2"
 
 # Filter by ControlType
-curl -H "X-Api-Key: <key>" "http://localhost:8081/elements?type=Button"
+curl -H "X-Api-Key: <key>" "http://localhost:8080/elements?type=Button"
 
 # Text search across Name, AutomationId, Value
-curl -H "X-Api-Key: <key>" "http://localhost:8081/elements?match=submit&onscreen=true&depth=1"
+curl -H "X-Api-Key: <key>" "http://localhost:8080/elements?match=submit&onscreen=true&depth=1"
 
 # Collapse wrapper chains (remove identity-less Pane/Group/Custom single-child nodes)
-curl -H "X-Api-Key: <key>" "http://localhost:8081/elements?collapseChains=true"
+curl -H "X-Api-Key: <key>" "http://localhost:8080/elements?collapseChains=true"
 
 # Add ancestor breadcrumbs
-curl -H "X-Api-Key: <key>" "http://localhost:8081/elements?includePath=true"
+curl -H "X-Api-Key: <key>" "http://localhost:8080/elements?includePath=true"
 
 # Include Value pattern + HelpText on nodes
-curl -H "X-Api-Key: <key>" "http://localhost:8081/elements?properties=extra"
+curl -H "X-Api-Key: <key>" "http://localhost:8080/elements?properties=extra"
 
 # Combine all
-curl -H "X-Api-Key: <key>" "http://localhost:8081/elements?onscreen=true&collapseChains=true&type=Button&depth=2&match=save&properties=extra"
+curl -H "X-Api-Key: <key>" "http://localhost:8080/elements?onscreen=true&collapseChains=true&type=Button&depth=2&match=save&properties=extra"
 ```
 
 ### **Window & Element Finding**
 
 ```bash
 # Find window by title (fuzzy match)
-curl -X POST http://localhost:8081/find \
+curl -X POST http://localhost:8080/find \
      -H "X-Api-Key: <key>" \
      -H "Content-Type: application/json" \
      -d '{"window":"Notepad"}'
 
 # Find element by AutomationId or Name
-curl -X POST http://localhost:8081/find \
+curl -X POST http://localhost:8080/find \
      -H "X-Api-Key: <key>" \
      -H "Content-Type: application/json" \
      -d '{"window":"Notepad","automationId":"15"}'
 
 # Find with ControlType filter
-curl -X POST http://localhost:8081/find \
+curl -X POST http://localhost:8080/find \
      -H "X-Api-Key: <key>" \
      -H "Content-Type: application/json" \
      -d '{"window":"Notepad","elementName":"Text Editor","searchType":"Edit"}'
 
 # Find by numeric IDs (fast, no fuzzy search)
-curl -X POST http://localhost:8081/find \
+curl -X POST http://localhost:8080/find \
      -H "X-Api-Key: <key>" \
      -H "Content-Type: application/json" \
      -d '{"window":42,"id":105}'
@@ -180,49 +180,49 @@ curl -X POST http://localhost:8081/find \
 
 ```bash
 # Click
-curl -X POST http://localhost:8081/execute \
+curl -X POST http://localhost:8080/execute \
      -H "X-Api-Key: <key>" \
      -H "Content-Type: application/json" \
      -d '{"action":"click"}'
 
 # Type text
-curl -X POST http://localhost:8081/execute \
+curl -X POST http://localhost:8080/execute \
      -H "X-Api-Key: <key>" \
      -H "Content-Type: application/json" \
      -d '{"action":"type","value":"Hello World"}'
 
 # Read text
-curl -X POST http://localhost:8081/execute \
+curl -X POST http://localhost:8080/execute \
      -H "X-Api-Key: <key>" \
      -H "Content-Type: application/json" \
      -d '{"action":"gettext"}'
 
 # Toggle checkbox
-curl -X POST http://localhost:8081/execute \
+curl -X POST http://localhost:8080/execute \
      -H "X-Api-Key: <key>" \
      -H "Content-Type: application/json" \
      -d '{"action":"toggle"}'
 
 # Set slider value
-curl -X POST http://localhost:8081/execute \
+curl -X POST http://localhost:8080/execute \
      -H "X-Api-Key: <key>" \
      -H "Content-Type: application/json" \
      -d '{"action":"setrange","value":"7"}'
 
 # Expand/collapse
-curl -X POST http://localhost:8081/execute \
+curl -X POST http://localhost:8080/execute \
      -H "X-Api-Key: <key>" \
      -H "Content-Type: application/json" \
      -d '{"action":"expand"}'
 
 # Select item
-curl -X POST http://localhost:8081/execute \
+curl -X POST http://localhost:8080/execute \
      -H "X-Api-Key: <key>" \
      -H "Content-Type: application/json" \
      -d '{"action":"select","value":"Item Text"}'
 
 # Send keys
-curl -X POST http://localhost:8081/execute \
+curl -X POST http://localhost:8080/execute \
      -H "X-Api-Key: <key>" \
      -H "Content-Type: application/json" \
      -d '{"action":"keys","value":"Ctrl+A"}'
@@ -244,23 +244,23 @@ curl -X POST http://localhost:8081/execute \
 
 ```bash
 # Capture current element as base64 PNG
-curl -X POST http://localhost:8081/capture \
+curl -X POST http://localhost:8080/capture \
      -H "X-Api-Key: <key>"
 
 # Capture full screen
-curl -X POST http://localhost:8081/capture \
+curl -X POST http://localhost:8080/capture \
      -H "X-Api-Key: <key>" \
      -H "Content-Type: application/json" \
      -d '{"action":"screen"}'
 
 # Capture window
-curl -X POST http://localhost:8081/capture \
+curl -X POST http://localhost:8080/capture \
      -H "X-Api-Key: <key>" \
      -H "Content-Type: application/json" \
      -d '{"action":"window"}'
 
 # Stitch multiple elements into one image
-curl -X POST http://localhost:8081/capture \
+curl -X POST http://localhost:8080/capture \
      -H "X-Api-Key: <key>" \
      -H "Content-Type: application/json" \
      -d '{"action":"elements","value":"42,105,106"}'
@@ -270,11 +270,11 @@ curl -X POST http://localhost:8081/capture \
 
 ```bash
 # OCR current element (requires eng.traineddata in tessdata/)
-curl -X POST http://localhost:8081/ocr \
+curl -X POST http://localhost:8080/ocr \
      -H "X-Api-Key: <key>"
 
 # OCR region (x,y,width,height)
-curl -X POST http://localhost:8081/ocr \
+curl -X POST http://localhost:8080/ocr \
      -H "X-Api-Key: <key>" \
      -H "Content-Type: application/json" \
      -d '{"value":"0,0,300,50"}'
@@ -284,33 +284,33 @@ curl -X POST http://localhost:8081/ocr \
 
 ```bash
 # Check model status
-curl http://localhost:8081/ai/status \
+curl http://localhost:8080/ai/status \
      -H "X-Api-Key: <key>"
 
 # Load vision model and projector
-curl -X POST http://localhost:8081/ai/init \
+curl -X POST http://localhost:8080/ai/init \
      -H "X-Api-Key: <key>" \
      -H "Content-Type: application/json" \
      -d '{"model":"C:\\models\\vision.gguf","proj":"C:\\models\\mmproj.gguf"}'
 
 # Describe current element
-curl -X POST http://localhost:8081/ai/describe \
+curl -X POST http://localhost:8080/ai/describe \
      -H "X-Api-Key: <key>"
 
 # Describe with custom prompt
-curl -X POST http://localhost:8081/ai/describe \
+curl -X POST http://localhost:8080/ai/describe \
      -H "X-Api-Key: <key>" \
      -H "Content-Type: application/json" \
      -d '{"prompt":"List every button you can see."}'
 
 # Ask question about current element
-curl -X POST http://localhost:8081/ai/ask \
+curl -X POST http://localhost:8080/ai/ask \
      -H "X-Api-Key: <key>" \
      -H "Content-Type: application/json" \
      -d '{"prompt":"Is there an error message visible?"}'
 
 # Describe image file
-curl -X POST http://localhost:8081/ai/file \
+curl -X POST http://localhost:8080/ai/file \
      -H "X-Api-Key: <key>" \
      -H "Content-Type: application/json" \
      -d '{"value":"C:\\screenshots\\app.png","prompt":"What dialog is shown?"}'
@@ -322,37 +322,37 @@ All endpoints support: **`.json`**, **`.html`**, **`.txt`**, **`.pdf`**
 
 ```bash
 # URL extension (highest priority)
-curl http://localhost:8081/windows.json
-curl http://localhost:8081/help.txt
-curl http://localhost:8081/status.pdf --output status.pdf
+curl http://localhost:8080/windows.json
+curl http://localhost:8080/help.txt
+curl http://localhost:8080/status.pdf --output status.pdf
 
 # Query parameter
-curl "http://localhost:8081/ping?format=json"
+curl "http://localhost:8080/ping?format=json"
 
 # Accept header
-curl -H "Accept: application/json" http://localhost:8081/ping
+curl -H "Accept: application/json" http://localhost:8080/ping
 
 # Default: HTML with embedded JSON in <script type="application/json" id="apex-result">
-curl http://localhost:8081/ping
+curl http://localhost:8080/ping
 ```
 
 ### **System Routes**
 
 ```bash
 # Health check
-curl http://localhost:8081/ping
+curl http://localhost:8080/ping
 
 # System information
-curl http://localhost:8081/sysinfo
+curl http://localhost:8080/sysinfo
 
 # Environment variables
-curl http://localhost:8081/env
+curl http://localhost:8080/env
 
 # Directory listing
-curl "http://localhost:8081/ls?path=C:\Users"
+curl "http://localhost:8080/ls?path=C:\Users"
 
 # Run shell command (requires APEX_ENABLE_SHELL_RUN=true)
-curl -X POST http://localhost:8081/run \
+curl -X POST http://localhost:8080/run \
      -H "X-Api-Key: <key>" \
      -H "Content-Type: application/json" \
      -d '{"value":"whoami"}'
@@ -362,7 +362,7 @@ curl -X POST http://localhost:8081/run \
 
 ## **cmd.exe Helper (`apex.cmd`)**
 
-Batch script wrapper for curl-based HTTP commands. Requires HTTP server running (default port 8081).
+Batch script wrapper for curl-based HTTP commands. Requires HTTP server running (default port 8080).
 
 **Setup:**
 ```batch
@@ -370,7 +370,7 @@ Batch script wrapper for curl-based HTTP commands. Requires HTTP server running 
 set PATH=%PATH%;C:\path\to\ApexComputerUse\Scripts
 
 :: Override port if needed
-set APEX_PORT=8081
+set APEX_PORT=8080
 ```
 
 **Commands:**
@@ -555,7 +555,7 @@ dotnet run --project TestApplications/TestRunner -- --mode benchmark
   "SolutionPath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse",
   "BuildConfiguration": "Release",
   "BridgeExePath": "C:\\...",
-  "BridgeBaseUrl": "http://localhost:8081",
+  "BridgeBaseUrl": "http://localhost:8080",
   "BridgeApiKey": "<api-key>",
   "WinFormsExePath": "C:\\...",
   "WpfExePath": "C:\\...",
@@ -686,17 +686,17 @@ dotnet run --project ApexComputerUse
 
 # 2. In Remote Control tab, click "Start HTTP" — API key displayed
 
-# 3. In browser, open http://localhost:8081/
+# 3. In browser, open http://localhost:8080/
 #    OR use curl:
-curl -H "X-Api-Key: <key>" http://localhost:8081/windows
+curl -H "X-Api-Key: <key>" http://localhost:8080/windows
 
 # 4. Find and interact
-curl -X POST http://localhost:8081/find \
+curl -X POST http://localhost:8080/find \
      -H "X-Api-Key: <key>" \
      -H "Content-Type: application/json" \
      -d '{"window":"Notepad"}'
 
-curl -X POST http://localhost:8081/execute \
+curl -X POST http://localhost:8080/execute \
      -H "X-Api-Key: <key>" \
      -H "Content-Type: application/json" \
      -d '{"action":"type","value":"Hello"}'
@@ -766,7 +766,7 @@ dotnet run --project TestRunner -- --mode benchmark
   "SolutionPath": "...",
   "BuildConfiguration": "Release",
   "BridgeExePath": "...",
-  "BridgeBaseUrl": "http://localhost:8081",
+  "BridgeBaseUrl": "http://localhost:8080",
   "WinFormsExePath": "...",
   "WpfExePath": "..."
 }

@@ -11,6 +11,7 @@ namespace ApexComputerUse
 
         private readonly TextBox _txtHttpPort, _txtApiKey, _txtPipeName, _txtBotToken, _txtAllowedChatIds;
         private readonly Button _btnStartHttp, _btnStartPipe, _btnStartTelegram;
+        private readonly Button _btnApplyFirewall, _btnRemoveFirewall;
         private readonly Label _lblHttpStatus, _lblPipeStatus, _lblTelegramStatus;
 
         public HttpCommandServer? Http { get; private set; }
@@ -24,6 +25,7 @@ namespace ApexComputerUse
             TextBox txtHttpPort, TextBox txtApiKey,
             TextBox txtPipeName, TextBox txtBotToken, TextBox txtAllowedChatIds,
             Button btnStartHttp, Button btnStartPipe, Button btnStartTelegram,
+            Button btnApplyFirewall, Button btnRemoveFirewall,
             Label lblHttpStatus, Label lblPipeStatus, Label lblTelegramStatus)
         {
             _processor = processor; _sceneStore = sceneStore; _chatService = chatService;
@@ -32,6 +34,7 @@ namespace ApexComputerUse
             _txtHttpPort = txtHttpPort; _txtApiKey = txtApiKey;
             _txtPipeName = txtPipeName; _txtBotToken = txtBotToken; _txtAllowedChatIds = txtAllowedChatIds;
             _btnStartHttp = btnStartHttp; _btnStartPipe = btnStartPipe; _btnStartTelegram = btnStartTelegram;
+            _btnApplyFirewall = btnApplyFirewall; _btnRemoveFirewall = btnRemoveFirewall;
             _lblHttpStatus = lblHttpStatus; _lblPipeStatus = lblPipeStatus; _lblTelegramStatus = lblTelegramStatus;
         }
 
@@ -44,6 +47,8 @@ namespace ApexComputerUse
                 _btnStartHttp.Text = "Start HTTP";
                 _lblHttpStatus.Text = "Stopped";
                 _lblHttpStatus.ForeColor = Color.Gray;
+                _btnApplyFirewall.Enabled = true;
+                _btnRemoveFirewall.Enabled = true;
                 return;
             }
 
@@ -86,8 +91,14 @@ namespace ApexComputerUse
                 string authNote = string.IsNullOrWhiteSpace(apiKey) ? " (no auth)" : " (auth enabled)";
                 _lblHttpStatus.Text = $"Listening :{port}{authNote}";
                 _lblHttpStatus.ForeColor = string.IsNullOrWhiteSpace(apiKey) ? Color.DarkOrange : Color.Green;
+                _btnApplyFirewall.Enabled = false;
+                _btnRemoveFirewall.Enabled = false;
             }
-            catch (Exception ex) { _log($"HTTP start error: {ex.Message}"); }
+            catch (Exception ex)
+            {
+                _log($"HTTP start error: {ex.Message}");
+                _log($"Tip: Click 'Allow Port' to add a firewall rule for port {_txtHttpPort.Text.Trim()}, or try a different port number.");
+            }
         }
 
         internal void TogglePipe()

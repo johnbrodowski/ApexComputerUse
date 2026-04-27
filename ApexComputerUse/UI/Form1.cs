@@ -33,6 +33,7 @@ namespace ApexComputerUse
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ApexComputerUse");
         private static readonly string SettingsFile = Path.Combine(SettingsDir, "settings.json");
         private bool _netshConfigured;
+        private int  _netshPort;
 
         private static readonly Dictionary<string, string[]> ControlActions = new()
         {
@@ -171,6 +172,7 @@ namespace ApexComputerUse
                 _processor, _sceneStore, _chatService, _clientStore, _logHandler, Log,
                 txtHttpPort, txtApiKey, txtPipeName, txtBotToken, txtAllowedChatIds,
                 btnStartHttp, btnStartPipe, btnStartTelegram,
+                btnApplyFirewall, btnRemoveFirewall,
                 lblHttpStatus, lblPipeStatus, lblTelegramStatus);
 
             _chat = new ChatTabController(
@@ -232,6 +234,7 @@ namespace ApexComputerUse
                         if (!string.IsNullOrWhiteSpace(s.ApiKey)) txtApiKey.Text = s.ApiKey;
                         if (!string.IsNullOrWhiteSpace(s.AllowedChatIds)) txtAllowedChatIds.Text = s.AllowedChatIds;
                         _netshConfigured = s.NetshConfigured;
+                        _netshPort       = s.NetshPort;
                     }
                 }
             }
@@ -241,7 +244,7 @@ namespace ApexComputerUse
 
             // Layer 2: deployment config / env vars (APEX_*) — highest priority, applied last
             var cfg = AppConfig.Current;
-            if (cfg.HttpPort != 8081) txtHttpPort.Text = cfg.HttpPort.ToString();
+            if (cfg.HttpPort != 8080) txtHttpPort.Text = cfg.HttpPort.ToString();
             if (!string.IsNullOrWhiteSpace(cfg.PipeName) &&
                 cfg.PipeName != "ApexComputerUse") txtPipeName.Text = cfg.PipeName;
             if (!string.IsNullOrWhiteSpace(cfg.ModelPath)) txtModelPath.Text = cfg.ModelPath;
@@ -262,7 +265,8 @@ namespace ApexComputerUse
                     ProjPath         = txtProjPath.Text,
                     ApiKey           = txtApiKey.Text,
                     AllowedChatIds   = txtAllowedChatIds.Text,
-                    NetshConfigured  = _netshConfigured
+                    NetshConfigured  = _netshConfigured,
+                    NetshPort        = _netshPort
                 };
                 File.WriteAllText(SettingsFile,
                     JsonSerializer.Serialize(s, new JsonSerializerOptions { WriteIndented = true }));
@@ -288,44 +292,136 @@ namespace ApexComputerUse
 
         private async Task SetupNetshIfNeededAsync()
         {
-            if (_netshConfigured) return;
-
             // URL ACL and firewall rules are only required when binding to all interfaces.
             if (!AppConfig.Current.HttpBindAll) return;
 
             int port = AppConfig.Current.HttpPort;
+
+            // If port changed since last setup, remove stale rules for the old port first.
+            if (_netshConfigured && _netshPort != port && _netshPort != 0)
+            {
+                await RunElevatedAsync(
+                    $"netsh http delete urlacl url=http://+:{_netshPort}/ & " +
+                    $"netsh advfirewall firewall delete rule name=\"ApexComputerUse\"");
+                _netshConfigured = false;
+            }
+
+            if (_netshConfigured) return;
+
             bool urlAclOk = IsNetshUrlAclSet(port);
-            bool firewallOk = IsFirewallRuleSet("ApexComputerUse");
+            bool firewallOk = IsFirewallRuleSet("ApexComputerUse", port);
 
             if (urlAclOk && firewallOk)
             {
                 _netshConfigured = true;
+                _netshPort = port;
                 SaveSettings();
                 return;
             }
 
+            await ApplyFirewallAsync(port);
+        }
+
+        private async Task ApplyFirewallAsync(int port)
+        {
+            bool bindAll = AppConfig.Current.HttpBindAll;
+            LogRemote($"Apply firewall rules for port {port} ({(bindAll ? "all interfaces" : "localhost")} mode)...");
             try
             {
-                // Combine both commands in one elevated cmd session; & continues on error
-                string cmds = $"netsh http add urlacl url=http://+:{port}/ user=Everyone & " +
-                              $"netsh advfirewall firewall add rule name=\"ApexComputerUse\" " +
-                              $"dir=in action=allow protocol=TCP localport={port}";
-                var psi = new System.Diagnostics.ProcessStartInfo("cmd", $"/c {cmds}")
-                {
-                    Verb = "runas",
-                    UseShellExecute = true,
-                    CreateNoWindow = false
-                };
-                using var proc = System.Diagnostics.Process.Start(psi);
-                if (proc != null)
-                    await proc.WaitForExitAsync();
+                // Always clear any stale URL ACL first — a strong-wildcard reservation can block
+                // localhost binding even when the ACL is set to Everyone.
+                string cmds =
+                    $"netsh http delete urlacl url=http://+:{port}/ & " +
+                    $"netsh advfirewall firewall delete rule name=\"ApexComputerUse\" & ";
+
+                // Only add a wildcard URL ACL when binding to all interfaces; localhost-only binding
+                // doesn't need one and is actively hindered by it.
+                if (bindAll)
+                    cmds += $"netsh http add urlacl url=http://+:{port}/ user=Everyone & ";
+
+                cmds += $"netsh advfirewall firewall add rule name=\"ApexComputerUse\" " +
+                        $"dir=in action=allow protocol=TCP localport={port}";
+
+                string output = await RunElevatedAsync(cmds);
                 _netshConfigured = true;
+                _netshPort = port;
                 SaveSettings();
+                LogRemote(output);
+                LogRemote($"Done. Firewall rules applied for port {port}.");
+                if (!bindAll)
+                    LogRemote("Note: 'Bind All Interfaces' is OFF, so these rules only affect external connections — localhost binding works regardless.");
             }
             catch (Exception ex)
             {
-                Log($"Netsh setup skipped: {ex.Message}");
+                LogRemote($"Apply firewall failed: {ex.Message}");
             }
+        }
+
+        private async Task RemoveFirewallAsync(int port)
+        {
+            bool bindAll = AppConfig.Current.HttpBindAll;
+            LogRemote($"Remove firewall rules for port {port} ({(bindAll ? "all interfaces" : "localhost")} mode)...");
+            try
+            {
+                string output = await RunElevatedAsync(
+                    $"netsh http delete urlacl url=http://+:{port}/ & " +
+                    $"netsh advfirewall firewall delete rule name=\"ApexComputerUse\"");
+                _netshConfigured = false;
+                _netshPort = 0;
+                SaveSettings();
+                LogRemote(output);
+                LogRemote($"Done. Firewall rules removed for port {port}.");
+                if (!bindAll)
+                    LogRemote("Note: 'Bind All Interfaces' is OFF, so these rules only affected external connections — localhost binding still works. Use 'Stop HTTP' to stop the server.");
+            }
+            catch (Exception ex)
+            {
+                LogRemote($"Remove firewall failed: {ex.Message}");
+            }
+        }
+
+        private void LogRemote(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return;
+            string stamped = $"[{DateTime.Now:HH:mm:ss}] {text.TrimEnd()}{Environment.NewLine}";
+            if (txtRemoteLog.InvokeRequired)
+                txtRemoteLog.BeginInvoke(() => { txtRemoteLog.AppendText(stamped); });
+            else
+                txtRemoteLog.AppendText(stamped);
+        }
+
+        private static async Task<string> RunElevatedAsync(string cmds)
+        {
+            string tempFile = Path.Combine(Path.GetTempPath(), $"apex-netsh-{Guid.NewGuid():N}.log");
+            var psi = new System.Diagnostics.ProcessStartInfo("cmd", $"/c ({cmds}) > \"{tempFile}\" 2>&1")
+            {
+                Verb = "runas",
+                UseShellExecute = true,
+                WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden
+            };
+            try
+            {
+                using var proc = System.Diagnostics.Process.Start(psi);
+                if (proc != null)
+                    await proc.WaitForExitAsync();
+                return File.Exists(tempFile) ? await File.ReadAllTextAsync(tempFile) : "";
+            }
+            finally
+            {
+                try { if (File.Exists(tempFile)) File.Delete(tempFile); } catch { }
+            }
+        }
+
+        private async void btnApplyFirewall_Click(object sender, EventArgs e)
+        {
+            if (int.TryParse(txtHttpPort.Text, out int port))
+                await ApplyFirewallAsync(port);
+        }
+
+        private async void btnRemoveFirewall_Click(object sender, EventArgs e)
+        {
+            if (int.TryParse(txtHttpPort.Text, out int port))
+                await RemoveFirewallAsync(port);
         }
 
         private static bool IsNetshUrlAclSet(int port)
@@ -343,7 +439,7 @@ namespace ApexComputerUse
             catch { return false; }
         }
 
-        private static bool IsFirewallRuleSet(string ruleName)
+        private static bool IsFirewallRuleSet(string ruleName, int port)
         {
             try
             {
@@ -353,7 +449,10 @@ namespace ApexComputerUse
                 using var proc = System.Diagnostics.Process.Start(psi);
                 var output = proc?.StandardOutput.ReadToEnd() ?? "";
                 proc?.WaitForExit();
-                return output.Contains("Rule Name:", StringComparison.OrdinalIgnoreCase);
+                if (!output.Contains("Rule Name:", StringComparison.OrdinalIgnoreCase)) return false;
+                int portIdx = output.IndexOf("LocalPort:", StringComparison.OrdinalIgnoreCase);
+                return portIdx >= 0 &&
+                       output.IndexOf(port.ToString(), portIdx, StringComparison.OrdinalIgnoreCase) >= 0;
             }
             catch { return false; }
         }

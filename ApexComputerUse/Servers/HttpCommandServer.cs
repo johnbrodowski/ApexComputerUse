@@ -84,7 +84,7 @@ namespace ApexComputerUse
 
         // â”€â”€ Lifecycle â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-        public void Start()
+        public void Start2()
         {
             if (IsRunning) return;
             _listener.Prefixes.Clear();
@@ -99,7 +99,7 @@ namespace ApexComputerUse
 
         }
 
-        public void Start2()
+        public void Start()
         {
             if (IsRunning) return;
             // Try the configured port first, then increment until one binds.

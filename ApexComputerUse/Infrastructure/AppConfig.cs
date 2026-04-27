@@ -10,7 +10,7 @@ namespace ApexComputerUse
     ///   3. Environment variables prefixed with <c>APEX_</c>
     ///
     /// Environment variable names:
-    ///   APEX_HTTP_PORT         int    HTTP listen port (default 8081)
+    ///   APEX_HTTP_PORT         int    HTTP listen port (default 8080)
     ///   APEX_HTTP_BIND_ALL     bool   Bind to all interfaces instead of localhost (default false)
     ///   APEX_HTTP_AUTOSTART    bool   Auto-start HTTP server in GUI mode (default false)
     ///   APEX_PIPE_NAME         string Named-pipe name (default ApexComputerUse)
@@ -27,7 +27,7 @@ namespace ApexComputerUse
     /// </summary>
     internal sealed record AppConfig
     {
-        public int    HttpPort        { get; init; } = 8081;
+        public int    HttpPort        { get; init; } = 8080;
         public bool   HttpBindAll     { get; init; } = false;
         public bool   HttpAutoStart   { get; init; } = false;
         public string PipeName        { get; init; } = "ApexComputerUse";

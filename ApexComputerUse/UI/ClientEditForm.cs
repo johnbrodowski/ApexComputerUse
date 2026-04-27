@@ -28,7 +28,7 @@ namespace ApexComputerUse
             }
             else
             {
-                txtPort.Text = "8081";
+                txtPort.Text = "8080";
                 Text         = "Add Client";
             }
 
