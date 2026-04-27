@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 namespace ApexComputerUse
 {
     internal sealed class ChatTabController
@@ -29,7 +31,6 @@ namespace ApexComputerUse
         private readonly ComboBox _cboAiProvider;
         private readonly TextBox _txtAiModel, _txtAiSystemPrompt, _txtAiApiKey;
         private readonly Label _lblAiSettingsPath;
-        private readonly Microsoft.Web.WebView2.WinForms.WebView2 _webViewChat;
 
         internal ChatTabController(
             AiChatService chatService,
@@ -39,8 +40,7 @@ namespace ApexComputerUse
             Action<string> log,
             ComboBox cboAiProvider,
             TextBox txtAiModel, TextBox txtAiSystemPrompt, TextBox txtAiApiKey,
-            Label lblAiSettingsPath,
-            Microsoft.Web.WebView2.WinForms.WebView2 webViewChat)
+            Label lblAiSettingsPath)
         {
             _chatService       = chatService;
             _getHttp           = getHttp;
@@ -51,7 +51,6 @@ namespace ApexComputerUse
             _txtAiSystemPrompt = txtAiSystemPrompt;
             _txtAiApiKey       = txtAiApiKey;
             _lblAiSettingsPath = lblAiSettingsPath;
-            _webViewChat       = webViewChat;
         }
 
         internal void Init()
@@ -93,13 +92,20 @@ namespace ApexComputerUse
             var http = _getHttp();
             if (http?.IsRunning != true) { _log("Start the HTTP server first (Remote Control tab)."); return; }
             var url = $"http://localhost:{http.Port}/chat?apiKey={Uri.EscapeDataString(_getApiKey())}";
-            _webViewChat.Source = new Uri(url);
+            try
+            {
+                Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+            }
+            catch (Exception ex)
+            {
+                _log($"Failed to open browser: {ex.Message}");
+            }
         }
 
         internal void ResetChat()
         {
             _chatService.ResetSession();
-            _webViewChat.Reload();
+            _log("Chat session reset. Re-open chat in your default browser.");
         }
 
         private void LoadProviderFields(string provider)

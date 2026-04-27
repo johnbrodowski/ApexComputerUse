@@ -178,7 +178,7 @@ namespace ApexComputerUse
             _chat = new ChatTabController(
                 _chatService, _processor, () => _servers.Http, () => txtApiKey.Text, Log,
                 cboAiProvider, txtAiModel, txtAiSystemPrompt, txtAiApiKey,
-                lblAiSettingsPath, webViewChat);
+                lblAiSettingsPath);
 
             _model = new ModelTabController(
                 _processor, _downloader, SaveSettings, Log,

@@ -34,7 +34,6 @@ namespace ApexComputerUse
             btnAiSaveSettings = new Button();
             lblAiSettingsPath = new Label();
             grpAiSession = new GroupBox();
-            webViewChat = new Microsoft.Web.WebView2.WinForms.WebView2();
             btnAiOpenChat = new Button();
             tabMain = new TabControl();
             tabPageConsole = new TabPage();
@@ -118,7 +117,6 @@ namespace ApexComputerUse
             tabPageChat.SuspendLayout();
             grpAiSettings.SuspendLayout();
             grpAiSession.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)webViewChat).BeginInit();
             tabMain.SuspendLayout();
             tabPageConsole.SuspendLayout();
             tabPageFind.SuspendLayout();
@@ -296,7 +294,6 @@ namespace ApexComputerUse
             // 
             // grpAiSession
             // 
-            grpAiSession.Controls.Add(webViewChat);
             grpAiSession.Controls.Add(btnAiOpenChat);
             grpAiSession.Location = new Point(8, 146);
             grpAiSession.Name = "grpAiSession";
@@ -305,26 +302,14 @@ namespace ApexComputerUse
             grpAiSession.TabStop = false;
             grpAiSession.Text = "Chat";
             // 
-            // webViewChat
-            // 
-            webViewChat.AllowExternalDrop = true;
-            webViewChat.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            webViewChat.CreationProperties = null;
-            webViewChat.DefaultBackgroundColor = Color.White;
-            webViewChat.Location = new Point(8, 18);
-            webViewChat.Name = "webViewChat";
-            webViewChat.Size = new Size(578, 131);
-            webViewChat.TabIndex = 0;
-            webViewChat.ZoomFactor = 1D;
-            // 
             // btnAiOpenChat
             // 
-            btnAiOpenChat.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            btnAiOpenChat.Location = new Point(515, 152);
+            btnAiOpenChat.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnAiOpenChat.Location = new Point(443, 24);
             btnAiOpenChat.Name = "btnAiOpenChat";
-            btnAiOpenChat.Size = new Size(71, 25);
+            btnAiOpenChat.Size = new Size(143, 32);
             btnAiOpenChat.TabIndex = 1;
-            btnAiOpenChat.Text = "Load Chat";
+            btnAiOpenChat.Text = "Open In Browser";
             btnAiOpenChat.UseVisualStyleBackColor = true;
             btnAiOpenChat.Click += btnAiOpenChat_Click;
             // 
@@ -1106,7 +1091,6 @@ namespace ApexComputerUse
             grpAiSettings.ResumeLayout(false);
             grpAiSettings.PerformLayout();
             grpAiSession.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)webViewChat).EndInit();
             tabMain.ResumeLayout(false);
             tabPageConsole.ResumeLayout(false);
             tabPageConsole.PerformLayout();
@@ -1230,7 +1214,6 @@ namespace ApexComputerUse
         private Button btnAiSaveSettings;
         private Label lblAiSettingsPath;
         private GroupBox grpAiSession;
-        private Microsoft.Web.WebView2.WinForms.WebView2 webViewChat;
         private Button btnAiOpenChat;
 
         // ── Clients tab ───────────────────────────────────────────────────────

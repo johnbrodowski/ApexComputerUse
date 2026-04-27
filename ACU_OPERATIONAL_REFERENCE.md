@@ -512,7 +512,14 @@ curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/shutdown
 
 # Shell execution — disabled by default
 # Enable: set EnableShellRun=true in appsettings.json or APEX_ENABLE_SHELL_RUN=true
+# Primary query parameter
+curl -H "X-Api-Key: <key>" "http://localhost:8081/run?command=whoami"
+# Backward-compatible alias
 curl -H "X-Api-Key: <key>" "http://localhost:8081/run?cmd=whoami"
+# JSON body form
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/run \
+     -H "Content-Type: application/json" \
+     -d '{"command":"whoami"}'
 ```
 
 `/health` is the only route that does not require the API key — safe to use from external monitoring.
