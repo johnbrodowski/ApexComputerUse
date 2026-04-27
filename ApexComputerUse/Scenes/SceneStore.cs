@@ -12,8 +12,11 @@ namespace ApexComputerUse
     {
         // ── Storage paths ─────────────────────────────────────────────────
 
-        private static readonly string ScenesDir =
-            Path.Combine(AppContext.BaseDirectory, "scenes");
+        private static readonly string DefaultScenesDir =
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                         "ApexComputerUse", "scenes");
+
+        private readonly string _scenesDir;
 
         private static readonly JsonSerializerOptions JsonOpts = new()
         {
@@ -28,10 +31,22 @@ namespace ApexComputerUse
 
         // ── Lifecycle ─────────────────────────────────────────────────────
 
-        public SceneStore()
+        public SceneStore(string? scenesDir = null)
         {
-            Directory.CreateDirectory(ScenesDir);
+            _scenesDir = scenesDir ?? DefaultScenesDir;
+            MigrateFromExeDirIfNeeded();
+            Directory.CreateDirectory(_scenesDir);
             LoadAllFromDisk();
+        }
+
+        private void MigrateFromExeDirIfNeeded()
+        {
+            if (Directory.Exists(_scenesDir) && Directory.EnumerateFiles(_scenesDir, "*.json").Any()) return;
+            string legacy = Path.Combine(AppContext.BaseDirectory, "scenes");
+            if (!Directory.Exists(legacy)) return;
+            Directory.CreateDirectory(_scenesDir);
+            foreach (string file in Directory.GetFiles(legacy, "*.json"))
+                File.Copy(file, Path.Combine(_scenesDir, Path.GetFileName(file)), overwrite: false);
         }
 
         // ── Scene CRUD ────────────────────────────────────────────────────
@@ -303,7 +318,7 @@ namespace ApexComputerUse
 
         private void LoadAllFromDisk()
         {
-            foreach (string file in Directory.GetFiles(ScenesDir, "*.json"))
+            foreach (string file in Directory.GetFiles(_scenesDir, "*.json"))
             {
                 try
                 {
@@ -316,8 +331,8 @@ namespace ApexComputerUse
             }
         }
 
-        private static string SceneFilePath(string id) =>
-            Path.Combine(ScenesDir, $"{id}.json");
+        private string SceneFilePath(string id) =>
+            Path.Combine(_scenesDir, $"{id}.json");
 
         // ── Internal helpers ──────────────────────────────────────────────
 

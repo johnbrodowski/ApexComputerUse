@@ -4,8 +4,11 @@ namespace ApexComputerUse
 {
     public sealed class ClientStore
     {
-        private static readonly string ClientsDir =
-            Path.Combine(AppContext.BaseDirectory, "clients");
+        private static readonly string Default_clientsDir =
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                         "ApexComputerUse", "clients");
+
+        private readonly string _clientsDir;
 
         private static readonly JsonSerializerOptions JsonOpts = new()
         {
@@ -16,10 +19,22 @@ namespace ApexComputerUse
         private readonly Dictionary<string, RemoteClient> _clients = new();
         private readonly object _lock = new();
 
-        public ClientStore()
+        public ClientStore(string? clientsDir = null)
         {
-            Directory.CreateDirectory(ClientsDir);
+            _clientsDir = clientsDir ?? Default_clientsDir;
+            MigrateFromExeDirIfNeeded();
+            Directory.CreateDirectory(_clientsDir);
             LoadAllFromDisk();
+        }
+
+        private void MigrateFromExeDirIfNeeded()
+        {
+            if (Directory.Exists(_clientsDir) && Directory.EnumerateFiles(_clientsDir, "*.json").Any()) return;
+            string legacy = Path.Combine(AppContext.BaseDirectory, "clients");
+            if (!Directory.Exists(legacy)) return;
+            Directory.CreateDirectory(_clientsDir);
+            foreach (string file in Directory.GetFiles(legacy, "*.json"))
+                File.Copy(file, Path.Combine(_clientsDir, Path.GetFileName(file)), overwrite: false);
         }
 
         public RemoteClient Add(RemoteClient client)
@@ -87,7 +102,7 @@ namespace ApexComputerUse
 
         private void LoadAllFromDisk()
         {
-            foreach (string file in Directory.GetFiles(ClientsDir, "*.json"))
+            foreach (string file in Directory.GetFiles(_clientsDir, "*.json"))
             {
                 try
                 {
@@ -100,7 +115,7 @@ namespace ApexComputerUse
             }
         }
 
-        private static string ClientFilePath(string id) =>
-            Path.Combine(ClientsDir, $"{id}.json");
+        private string ClientFilePath(string id) =>
+            Path.Combine(_clientsDir, $"{id}.json");
     }
 }

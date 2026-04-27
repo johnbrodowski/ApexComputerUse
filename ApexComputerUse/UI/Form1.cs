@@ -290,6 +290,9 @@ namespace ApexComputerUse
         {
             if (_netshConfigured) return;
 
+            // URL ACL and firewall rules are only required when binding to all interfaces.
+            if (!AppConfig.Current.HttpBindAll) return;
+
             int port = AppConfig.Current.HttpPort;
             bool urlAclOk = IsNetshUrlAclSet(port);
             bool firewallOk = IsFirewallRuleSet("ApexComputerUse");

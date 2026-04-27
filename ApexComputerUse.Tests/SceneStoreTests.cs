@@ -7,29 +7,19 @@ namespace ApexComputerUse.Tests;
 /// Unit tests for <see cref="SceneStore"/> covering CRUD operations, disk persistence
 /// round-trips, and concurrent access.
 ///
-/// SceneStore persists to AppContext.BaseDirectory/scenes/, which in the test runner
-/// resolves to the test output directory.  The fixture cleans that directory before
-/// and after the test class runs so tests start from a known empty state.
+/// Each test instance gets its own isolated temp directory passed to SceneStore's
+/// constructor, so tests run in parallel without interfering with each other or with
+/// the user's real data in %LocalAppData%.
 /// </summary>
-[Collection("SceneStore")]  // serialize all SceneStore tests (shared static dir)
 public class SceneStoreTests : IDisposable
 {
-    private static readonly string ScenesDir =
-        Path.Combine(AppContext.BaseDirectory, "scenes");
+    private readonly string _scenesDir =
+        Path.Combine(Path.GetTempPath(), "ApexTests_Scenes_" + Guid.NewGuid().ToString("N"));
 
-    public SceneStoreTests()
+    public void Dispose()
     {
-        // Start each test class from a clean slate.
-        CleanScenesDir();
-    }
-
-    public void Dispose() => CleanScenesDir();
-
-    private static void CleanScenesDir()
-    {
-        if (!Directory.Exists(ScenesDir)) return;
-        foreach (string f in Directory.GetFiles(ScenesDir, "*.json"))
-            try { File.Delete(f); } catch { /* best-effort */ }
+        if (Directory.Exists(_scenesDir))
+            try { Directory.Delete(_scenesDir, recursive: true); } catch { /* best-effort */ }
     }
 
     // ── CreateScene ───────────────────────────────────────────────────────
@@ -37,7 +27,7 @@ public class SceneStoreTests : IDisposable
     [Fact]
     public void CreateScene_DefaultValues_AreCorrect()
     {
-        var store = new SceneStore();
+        var store = new SceneStore(_scenesDir);
         var scene = store.CreateScene("Test Scene");
 
         Assert.Equal("Test Scene", scene.Name);
@@ -52,7 +42,7 @@ public class SceneStoreTests : IDisposable
     [Fact]
     public void CreateScene_EmptyName_FallsBackToUntitled()
     {
-        var store = new SceneStore();
+        var store = new SceneStore(_scenesDir);
         var scene = store.CreateScene("");
         Assert.Equal("Untitled", scene.Name);
     }
@@ -60,7 +50,7 @@ public class SceneStoreTests : IDisposable
     [Fact]
     public void CreateScene_DimensionsClamped_To8192()
     {
-        var store = new SceneStore();
+        var store = new SceneStore(_scenesDir);
         var scene = store.CreateScene("big", width: 99999, height: -5);
         Assert.Equal(8192, scene.Width);
         Assert.Equal(1,    scene.Height);    // clamped to min=1
@@ -69,7 +59,7 @@ public class SceneStoreTests : IDisposable
     [Fact]
     public void CreateScene_UniqueIds()
     {
-        var store  = new SceneStore();
+        var store  = new SceneStore(_scenesDir);
         var scene1 = store.CreateScene("A");
         var scene2 = store.CreateScene("B");
         Assert.NotEqual(scene1.Id, scene2.Id);
@@ -80,7 +70,7 @@ public class SceneStoreTests : IDisposable
     [Fact]
     public void GetScene_ExistingId_ReturnsScene()
     {
-        var store = new SceneStore();
+        var store = new SceneStore(_scenesDir);
         var scene = store.CreateScene("Lookup");
         var found = store.GetScene(scene.Id);
         Assert.NotNull(found);
@@ -90,7 +80,7 @@ public class SceneStoreTests : IDisposable
     [Fact]
     public void GetScene_NonExistentId_ReturnsNull()
     {
-        var store = new SceneStore();
+        var store = new SceneStore(_scenesDir);
         Assert.Null(store.GetScene("does-not-exist"));
     }
 
@@ -99,7 +89,7 @@ public class SceneStoreTests : IDisposable
     [Fact]
     public void ListScenes_OrderedByCreatedAt()
     {
-        var store = new SceneStore();
+        var store = new SceneStore(_scenesDir);
         var s1 = store.CreateScene("First");
         // Small delay to ensure distinct CreatedAt timestamps.
         Thread.Sleep(10);
@@ -114,7 +104,7 @@ public class SceneStoreTests : IDisposable
     [Fact]
     public void ListScenes_EmptyStore_ReturnsEmptyArray()
     {
-        var store = new SceneStore();
+        var store = new SceneStore(_scenesDir);
         Assert.Empty(store.ListScenes());
     }
 
@@ -123,7 +113,7 @@ public class SceneStoreTests : IDisposable
     [Fact]
     public void UpdateSceneMeta_UpdatesOnlySuppliedFields()
     {
-        var store = new SceneStore();
+        var store = new SceneStore(_scenesDir);
         var scene = store.CreateScene("Original", width: 400);
 
         string originalUpdatedAt = scene.UpdatedAt;
@@ -139,7 +129,7 @@ public class SceneStoreTests : IDisposable
     [Fact]
     public void UpdateSceneMeta_UnknownId_Throws()
     {
-        var store = new SceneStore();
+        var store = new SceneStore(_scenesDir);
         Assert.Throws<KeyNotFoundException>(() =>
             store.UpdateSceneMeta("ghost", "x", null, null, null));
     }
@@ -149,9 +139,9 @@ public class SceneStoreTests : IDisposable
     [Fact]
     public void DeleteScene_RemovesFromMemoryAndDisk()
     {
-        var store = new SceneStore();
+        var store = new SceneStore(_scenesDir);
         var scene = store.CreateScene("ToDelete");
-        string path = Path.Combine(ScenesDir, $"{scene.Id}.json");
+        string path = Path.Combine(_scenesDir, $"{scene.Id}.json");
         Assert.True(File.Exists(path));
 
         store.DeleteScene(scene.Id);
@@ -163,7 +153,7 @@ public class SceneStoreTests : IDisposable
     [Fact]
     public void DeleteScene_NonExistentId_IsNoOp()
     {
-        var store = new SceneStore();
+        var store = new SceneStore(_scenesDir);
         var ex = Record.Exception(() => store.DeleteScene("no-such-id"));
         Assert.Null(ex);
     }
@@ -173,7 +163,7 @@ public class SceneStoreTests : IDisposable
     [Fact]
     public void AddLayer_AppendsLayerWithIncrementingZIndex()
     {
-        var store = new SceneStore();
+        var store = new SceneStore(_scenesDir);
         var scene = store.CreateScene("LayerTest");
 
         var layer2 = store.AddLayer(scene.Id, "Layer 2");
@@ -187,7 +177,7 @@ public class SceneStoreTests : IDisposable
     [Fact]
     public void AddLayer_EmptyName_FallsBackToLayer()
     {
-        var store = new SceneStore();
+        var store = new SceneStore(_scenesDir);
         var scene = store.CreateScene("S");
         var layer = store.AddLayer(scene.Id, "");
         Assert.Equal("Layer", layer.Name);
@@ -196,7 +186,7 @@ public class SceneStoreTests : IDisposable
     [Fact]
     public void DeleteLayer_RemovesLayer()
     {
-        var store = new SceneStore();
+        var store = new SceneStore(_scenesDir);
         var scene = store.CreateScene("DL");
         var extra = store.AddLayer(scene.Id, "Extra");
 
@@ -209,7 +199,7 @@ public class SceneStoreTests : IDisposable
     [Fact]
     public void DeleteLayer_UnknownLayerId_Throws()
     {
-        var store = new SceneStore();
+        var store = new SceneStore(_scenesDir);
         var scene = store.CreateScene("S");
         Assert.Throws<KeyNotFoundException>(() =>
             store.DeleteLayer(scene.Id, "no-such-layer"));
@@ -221,11 +211,11 @@ public class SceneStoreTests : IDisposable
     public void CreateScene_PersistsToDisk_NewStoreLoadsIt()
     {
         // Write via first instance.
-        var store1 = new SceneStore();
+        var store1 = new SceneStore(_scenesDir);
         var scene  = store1.CreateScene("Persisted", width: 1024, height: 768, background: "navy");
 
         // Load from disk via a second instance.
-        var store2 = new SceneStore();
+        var store2 = new SceneStore(_scenesDir);
         var loaded = store2.GetScene(scene.Id);
 
         Assert.NotNull(loaded);
@@ -238,11 +228,11 @@ public class SceneStoreTests : IDisposable
     [Fact]
     public void DeleteScene_DiskFileRemovedBeforeReload()
     {
-        var store1 = new SceneStore();
+        var store1 = new SceneStore(_scenesDir);
         var scene  = store1.CreateScene("Ephemeral");
         store1.DeleteScene(scene.Id);
 
-        var store2 = new SceneStore();
+        var store2 = new SceneStore(_scenesDir);
         Assert.Null(store2.GetScene(scene.Id));
     }
 
@@ -251,7 +241,7 @@ public class SceneStoreTests : IDisposable
     [Fact]
     public async Task CreateScene_ConcurrentCreates_AllSucceed()
     {
-        var store = new SceneStore();
+        var store = new SceneStore(_scenesDir);
         const int count = 20;
         await Task.WhenAll(Enumerable.Range(0, count)
             .Select(i => Task.Run(() => store.CreateScene($"Concurrent_{i}"))));

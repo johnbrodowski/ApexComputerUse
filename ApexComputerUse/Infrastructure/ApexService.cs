@@ -35,6 +35,15 @@ namespace ApexComputerUse
         protected override void OnStart(string[] args)
         {
             var cfg = AppConfig.Current;
+
+            if (cfg.HttpBindAll && string.IsNullOrWhiteSpace(cfg.ApiKey))
+            {
+                AppLog.Error("[Service] FATAL: HttpBindAll=true with no API key — refusing to start network-exposed with no authentication. Set APEX_API_KEY or ApiKey in appsettings.json.");
+                ExitCode = 1;
+                Stop();
+                return;
+            }
+
             AppLog.Info($"[Service] Starting — HTTP port {cfg.HttpPort}, pipe '{cfg.PipeName}'");
 
             _store     = new SceneStore();
