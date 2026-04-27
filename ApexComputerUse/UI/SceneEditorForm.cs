@@ -521,11 +521,7 @@ namespace ApexComputerUse
             var selSs = GetSelectedSceneShape();
             if (selSs != null && (_dragMode == DragMode.Move || _dragMode == DragMode.Resize || _dragMode == DragMode.Rotate))
             {
-                using var selBmp = new Bitmap(_scene.Width, _scene.Height);
-                using var sg = Graphics.FromImage(selBmp);
-                sg.SmoothingMode = SmoothingMode.AntiAlias;
-                AIDrawingCommand.RenderShapeTo(sg, selSs.Shape);
-                g.DrawImageUnscaled(selBmp, 0, 0);
+                AIDrawingCommand.RenderShapeTo(g, selSs.Shape);
             }
 
             // Selection box
@@ -1159,31 +1155,7 @@ namespace ApexComputerUse
         }
 
         private static RectangleF? ShapeBBox(AIDrawingCommand.ShapeCommand s) =>
-            s.Type switch
-            {
-                "rect" or "ellipse" or "triangle" or "arc"
-                                   => new RectangleF(s.X, s.Y, s.W > 0 ? s.W : 1, s.H > 0 ? s.H : 1),
-                "circle"           => new RectangleF(s.X - s.R, s.Y - s.R, s.R * 2, s.R * 2),
-                "line" or "arrow"  => new RectangleF(
-                                          Math.Min(s.X, s.X2), Math.Min(s.Y, s.Y2),
-                                          Math.Max(1, Math.Abs(s.X2 - s.X)), Math.Max(1, Math.Abs(s.Y2 - s.Y))),
-                "text"             => new RectangleF(s.X, s.Y, (s.Text?.Length ?? 4) * (s.FontSize > 0 ? s.FontSize : 14) * 0.6f, (s.FontSize > 0 ? s.FontSize : 14) + 4),
-                "polygon" when s.Points != null && s.Points.Length >= 4 => PolygonBBox(s.Points),
-                _                  => null
-            };
-
-        private static RectangleF PolygonBBox(float[] pts)
-        {
-            float minX = pts[0], maxX = pts[0], minY = pts[1], maxY = pts[1];
-            for (int i = 0; i < pts.Length - 1; i += 2)
-            {
-                if (pts[i]   < minX) minX = pts[i];
-                if (pts[i]   > maxX) maxX = pts[i];
-                if (pts[i+1] < minY) minY = pts[i+1];
-                if (pts[i+1] > maxY) maxY = pts[i+1];
-            }
-            return new RectangleF(minX, minY, Math.Max(1, maxX - minX), Math.Max(1, maxY - minY));
-        }
+            AIDrawingCommand.ShapeBBoxInternal(s);
 
         private AIDrawingCommand.ShapeCommand MakeShape(string tool, PointF at)
         {

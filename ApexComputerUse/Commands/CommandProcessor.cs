@@ -299,7 +299,7 @@ namespace ApexComputerUse
             {
                 foreach (var kv in _elementMap)
                 {
-                    if (ReferenceEquals(kv.Value, el)) { id = kv.Key; break; }
+                    if (kv.Value.Equals(el)) { id = kv.Key; break; }
                 }
             }
 
@@ -1240,6 +1240,12 @@ namespace ApexComputerUse
                     hash = _idGen.GenerateElementHash(el, parentId, parentHash,
                               excludeName: isWindowOrPane, siblingIndex: siblingIndex);
                     id = _idGen.GenerateIdFromHash(hash);
+                }
+                if (_elementMap.Count >= 50_000)
+                {
+                    _elementMap.Clear();
+                    _elementHashes.Clear();
+                    OnLog?.Invoke("[Warn] Element map cleared (50k cap reached).");
                 }
                 _elementMap[id]    = el;
                 _elementHashes[id] = hash;

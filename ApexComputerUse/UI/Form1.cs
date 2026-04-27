@@ -187,7 +187,8 @@ namespace ApexComputerUse
 
             _clients = new ClientsTabController(
                 _clientStore, listViewClients,
-                btnAddClient, btnEditClient, btnRemoveClient, btnTestClient);
+                btnAddClient, btnEditClient, btnRemoveClient, btnTestClient, btnOpenWebUiClient,
+                btnLaunchInstance, () => _servers.Http?.Port ?? AppConfig.Current.HttpPort);
 
             // Action control-type picker
             cmbControlType.Items.AddRange(ControlActions.Keys.ToArray<object>());
@@ -207,9 +208,9 @@ namespace ApexComputerUse
             _clients.Init();
 
             this.Load += (_, _) => { _model.WireDownloader(); _model.CheckFirstLaunch(); };
-            this.Load += (_, _) =>
+            this.Load += async (_, _) =>
             {
-                SetupNetshIfNeeded();
+                await SetupNetshIfNeededAsync();
                 if (AppConfig.Current.HttpAutoStart)
                     _servers.ToggleHttp();
                 AutoLoadModelIfConfigured();
@@ -285,7 +286,7 @@ namespace ApexComputerUse
 
         // ── First-run netsh setup ─────────────────────────────────────────
 
-        private void SetupNetshIfNeeded()
+        private async Task SetupNetshIfNeededAsync()
         {
             if (_netshConfigured) return;
 
@@ -312,8 +313,9 @@ namespace ApexComputerUse
                     UseShellExecute = true,
                     CreateNoWindow = false
                 };
-                var proc = System.Diagnostics.Process.Start(psi);
-                proc?.WaitForExit();
+                using var proc = System.Diagnostics.Process.Start(psi);
+                if (proc != null)
+                    await proc.WaitForExitAsync();
                 _netshConfigured = true;
                 SaveSettings();
             }
@@ -359,7 +361,9 @@ namespace ApexComputerUse
         {
             if (!string.IsNullOrWhiteSpace(txtModelPath.Text) &&
                 !string.IsNullOrWhiteSpace(txtProjPath.Text))
-                _ = _model.LoadModel();
+                _model.LoadModel().ContinueWith(
+                    t => BeginInvoke(() => Log($"Model auto-load failed: {t.Exception!.InnerException?.Message ?? t.Exception.Message}")),
+                    TaskContinuationOptions.OnlyOnFaulted);
         }
 
         // ── Control-type picker ───────────────────────────────────────────

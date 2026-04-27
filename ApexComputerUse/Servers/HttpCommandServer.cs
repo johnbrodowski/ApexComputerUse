@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Net;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 
@@ -34,7 +35,7 @@ namespace ApexComputerUse
         private readonly ConcurrentDictionary<string, double> _routeLastLatencyMs = new();
         private const int MaxRequestBodyBytes = 1 * 1024 * 1024; // 1 MiB request-body cap
 
-        public int    Port      { get; }
+        public int    Port      { get; private set; }
         public bool   IsRunning { get; private set; }
         public event  Action<string>? OnLog;
 
@@ -83,13 +84,31 @@ namespace ApexComputerUse
         public void Start()
         {
             if (IsRunning) return;
-            _listener.Prefixes.Clear();
-            // Default to loopback-only; set bindAll=true (or APEX_HTTP_BIND_ALL=true) for network-wide binding.
-            string prefix = _bindAll ? $"http://+:{Port}/" : $"http://localhost:{Port}/";
-            _listener.Prefixes.Add(prefix);
-            _listener.Start();
-            IsRunning  = true;
-            _cts       = new CancellationTokenSource();
+            // Try the configured port first, then increment until one binds.
+            const int maxTries = 100;
+            for (int attempt = 0; attempt < maxTries; attempt++)
+            {
+                int tryPort = Port + attempt;
+                _listener.Prefixes.Clear();
+                string prefix = _bindAll ? $"http://+:{tryPort}/" : $"http://localhost:{tryPort}/";
+                _listener.Prefixes.Add(prefix);
+                try
+                {
+                    _listener.Start();
+                    if (attempt > 0)
+                    {
+                        OnLog?.Invoke($"Port {Port} in use; bound to {tryPort} instead.");
+                        Port = tryPort;
+                    }
+                    break;
+                }
+                catch (System.Net.HttpListenerException) when (attempt < maxTries - 1)
+                {
+                    // port in use — try the next one
+                }
+            }
+            IsRunning   = true;
+            _cts        = new CancellationTokenSource();
             _listenTask = Task.Run(() => ListenLoop(_cts.Token));
             string bindDesc = _bindAll ? $"http://+:{Port}/ (all interfaces)" : $"http://localhost:{Port}/";
             OnLog?.Invoke($"HTTP server listening on {bindDesc}");
@@ -99,7 +118,7 @@ namespace ApexComputerUse
         {
             if (!IsRunning) return;
             _cts?.Cancel();
-            try { _listener.Stop(); } catch { /* already stopped */ }
+            try { _listener.Stop(); _listener.Close(); } catch { /* already stopped */ }
             IsRunning = false;
 
             // Wait for in-flight request handlers to complete (default 5 s).
@@ -152,19 +171,26 @@ namespace ApexComputerUse
             // Authorization: Bearer <key>
             string? authHeader = req.Headers["Authorization"];
             if (authHeader != null && authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
-                return authHeader[7..].Trim() == _apiKey;
+                return KeyEquals(authHeader[7..].Trim(), _apiKey);
 
             // X-Api-Key: <key>
             string? apiKeyHeader = req.Headers["X-Api-Key"];
             if (apiKeyHeader != null)
-                return apiKeyHeader.Trim() == _apiKey;
+                return KeyEquals(apiKeyHeader.Trim(), _apiKey);
 
             // ?apiKey=<key>  (convenient for browser / curl testing)
             string? queryKey = req.QueryString["apiKey"];
             if (queryKey != null)
-                return queryKey.Trim() == _apiKey;
+                return KeyEquals(queryKey.Trim(), _apiKey);
 
             return false;
+        }
+
+        private static bool KeyEquals(string supplied, string expected)
+        {
+            var a = Encoding.UTF8.GetBytes(supplied);
+            var b = Encoding.UTF8.GetBytes(expected);
+            return CryptographicOperations.FixedTimeEquals(a, b);
         }
 
         private static readonly byte[] UnauthorizedBody =
@@ -1966,12 +1992,15 @@ namespace ApexComputerUse
             var psi = new ProcessStartInfo
             {
                 FileName               = "cmd.exe",
-                Arguments              = $"/c {cmd}",
                 RedirectStandardOutput = true,
                 RedirectStandardError  = true,
                 UseShellExecute        = false,
                 CreateNoWindow         = true
             };
+            // Pass via ArgumentList so cmd is quoted as a single token, preventing
+            // cmd.exe from parsing outer shell metacharacters injected by callers.
+            psi.ArgumentList.Add("/c");
+            psi.ArgumentList.Add(cmd!);
 
             using var proc = new Process { StartInfo = psi };
             proc.Start();

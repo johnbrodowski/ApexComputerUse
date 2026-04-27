@@ -2,9 +2,10 @@ namespace ApexComputerUse
 {
     internal sealed class ClientsTabController
     {
-        private readonly ClientStore _store;
-        private readonly ListView    _list;
-        private readonly Button      _btnAdd, _btnEdit, _btnRemove, _btnTest;
+        private readonly ClientStore   _store;
+        private readonly ListView      _list;
+        private readonly Button        _btnAdd, _btnEdit, _btnRemove, _btnTest, _btnOpenWebUi, _btnLaunch;
+        private readonly Func<int>     _getCurrentPort;
 
         private static readonly HttpClient _http = new() { Timeout = TimeSpan.FromSeconds(3) };
 
@@ -14,22 +15,31 @@ namespace ApexComputerUse
             Button      btnAdd,
             Button      btnEdit,
             Button      btnRemove,
-            Button      btnTest)
+            Button      btnTest,
+            Button      btnOpenWebUi,
+            Button      btnLaunchInstance,
+            Func<int>   getCurrentPort)
         {
-            _store     = store;
-            _list      = listViewClients;
-            _btnAdd    = btnAdd;
-            _btnEdit   = btnEdit;
-            _btnRemove = btnRemove;
-            _btnTest   = btnTest;
+            _store          = store;
+            _list           = listViewClients;
+            _btnAdd         = btnAdd;
+            _btnEdit        = btnEdit;
+            _btnRemove      = btnRemove;
+            _btnTest        = btnTest;
+            _btnOpenWebUi   = btnOpenWebUi;
+            _btnLaunch      = btnLaunchInstance;
+            _getCurrentPort = getCurrentPort;
         }
 
         internal void Init()
         {
-            _btnAdd.Click    += (_, _) => Add();
-            _btnEdit.Click   += (_, _) => Edit();
-            _btnRemove.Click += (_, _) => Remove();
-            _btnTest.Click   += (_, _) => _ = TestConnectionAsync();
+            _btnAdd.Click       += (_, _) => Add();
+            _btnEdit.Click      += (_, _) => Edit();
+            _btnRemove.Click    += (_, _) => Remove();
+            _btnTest.Click      += (_, _) => _ = TestConnectionAsync();
+            _btnOpenWebUi.Click += (_, _) => OpenWebUi();
+            _btnLaunch.Click    += (_, _) => LaunchInstance();
+            _list.DoubleClick   += (_, _) => OpenWebUi();
 
             RefreshList();
         }
@@ -83,6 +93,64 @@ namespace ApexComputerUse
             catch
             {
                 _list.Invoke(() => SetStatus(item, "Offline", Color.Red));
+            }
+        }
+
+        internal void OpenWebUi()
+        {
+            if (SelectedClient() is not RemoteClient client) return;
+            var key = Uri.EscapeDataString(client.ApiKey);
+            var url = $"http://{client.Host}:{client.Port}/chat{(key.Length > 0 ? $"?apiKey={key}" : "")}";
+            try
+            {
+                System.Diagnostics.Process.Start(
+                    new System.Diagnostics.ProcessStartInfo(url) { UseShellExecute = true });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Could not open browser:\n{ex.Message}", "Open Web UI",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        internal void LaunchInstance()
+        {
+            string? exe = Environment.ProcessPath;
+            if (string.IsNullOrEmpty(exe))
+            {
+                MessageBox.Show("Cannot determine the executable path.", "Launch Instance",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Suggest the port after the one this instance is using; the new process will
+            // auto-increment further if that port is also taken.
+            int nextPort = _getCurrentPort() + 1;
+
+            try
+            {
+                var psi = new System.Diagnostics.ProcessStartInfo(exe, $"--port {nextPort}")
+                {
+                    UseShellExecute = true
+                };
+                System.Diagnostics.Process.Start(psi);
+
+                // Pre-add a client entry for the new instance so it appears in the list.
+                var client = new RemoteClient
+                {
+                    Name        = $"Local :{nextPort}",
+                    Host        = "localhost",
+                    Port        = nextPort,
+                    OsVersion   = Environment.OSVersion.VersionString,
+                    Description = "Launched instance"
+                };
+                _store.Add(client);
+                RefreshList();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Could not launch instance:\n{ex.Message}", "Launch Instance",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 

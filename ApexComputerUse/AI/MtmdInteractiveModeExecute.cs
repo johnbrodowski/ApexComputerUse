@@ -18,8 +18,6 @@ namespace ApexComputerUse
         {
             const int maxTokens = 4096;
 
-            string? prompt = @"{{C:\Users\Administrator\Pictures\aug1.jpg}}";
-
             var parameters = new ModelParams(modelPath);
 
             var mtmdParameters = MtmdContextParams.Default();
@@ -77,9 +75,17 @@ namespace ApexComputerUse
 
             do
             {
- 
+                Debug.Write("User: ");
+                string? prompt = Console.ReadLine();
+                if (prompt is null || prompt.Equals("/exit", StringComparison.OrdinalIgnoreCase))
+                    break;
+                if (prompt.Equals("/clear", StringComparison.OrdinalIgnoreCase))
+                {
+                    ResetConversation();
+                    continue;
+                }
 
-                var userPrompt = prompt ?? string.Empty;
+                var userPrompt = prompt;
 
                 // Evaluate if we have media
                 //

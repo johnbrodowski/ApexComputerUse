@@ -107,6 +107,8 @@ namespace ApexComputerUse
             btnEditClient = new Button();
             btnRemoveClient = new Button();
             btnTestClient = new Button();
+            btnOpenWebUiClient = new Button();
+            btnLaunchInstance = new Button();
             menuStrip1.SuspendLayout();
             tabPageChat.SuspendLayout();
             tabPageClients.SuspendLayout();
@@ -187,6 +189,8 @@ namespace ApexComputerUse
             tabPageClients.Controls.Add(btnEditClient);
             tabPageClients.Controls.Add(btnRemoveClient);
             tabPageClients.Controls.Add(btnTestClient);
+            tabPageClients.Controls.Add(btnOpenWebUiClient);
+            tabPageClients.Controls.Add(btnLaunchInstance);
             tabPageClients.Location = new Point(4, 26);
             tabPageClients.Name = "tabPageClients";
             tabPageClients.Padding = new Padding(3);
@@ -244,6 +248,22 @@ namespace ApexComputerUse
             btnTestClient.Size = new Size(100, 28);
             btnTestClient.TabIndex = 4;
             btnTestClient.Text = "Test";
+            //
+            // btnOpenWebUiClient
+            //
+            btnOpenWebUiClient.Location = new Point(499, 154);
+            btnOpenWebUiClient.Name = "btnOpenWebUiClient";
+            btnOpenWebUiClient.Size = new Size(100, 28);
+            btnOpenWebUiClient.TabIndex = 5;
+            btnOpenWebUiClient.Text = "Open Web UI";
+            //
+            // btnLaunchInstance
+            //
+            btnLaunchInstance.Location = new Point(499, 200);
+            btnLaunchInstance.Name = "btnLaunchInstance";
+            btnLaunchInstance.Size = new Size(100, 28);
+            btnLaunchInstance.TabIndex = 6;
+            btnLaunchInstance.Text = "Launch Instance";
             //
             // grpAiSettings
             // 
@@ -1160,6 +1180,6 @@ namespace ApexComputerUse
         // ── Clients tab ───────────────────────────────────────────────────────
         private TabPage  tabPageClients;
         private ListView listViewClients;
-        private Button   btnAddClient, btnEditClient, btnRemoveClient, btnTestClient;
+        private Button   btnAddClient, btnEditClient, btnRemoveClient, btnTestClient, btnOpenWebUiClient, btnLaunchInstance;
     }
 }

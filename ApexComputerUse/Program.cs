@@ -12,6 +12,19 @@ namespace ApexComputerUse
         [STAThread]
         private static void Main(string[] args)
         {
+            // ── Command-line overrides (must precede AppConfig.Current) ────
+            // --port <n>  overrides the HTTP listen port (useful for running multiple instances)
+            // --pipe <name>  overrides the named-pipe name
+            for (int i = 0; i < args.Length - 1; i++)
+            {
+                if (args[i].Equals("--port", StringComparison.OrdinalIgnoreCase) &&
+                    int.TryParse(args[i + 1], out _))
+                    Environment.SetEnvironmentVariable("APEX_HTTP_PORT", args[i + 1]);
+                else if (args[i].Equals("--pipe", StringComparison.OrdinalIgnoreCase) &&
+                    !string.IsNullOrWhiteSpace(args[i + 1]))
+                    Environment.SetEnvironmentVariable("APEX_PIPE_NAME", args[i + 1]);
+            }
+
             // ── Configuration + structured logging ────────────────────────
             var cfg = AppConfig.Current;   // loads appsettings.json + APEX_* env vars
             AppLog.Configure(
