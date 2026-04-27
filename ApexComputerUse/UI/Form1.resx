@@ -118,12 +118,32 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <metadata name="menuStrip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>132, 17</value>
+    <value>281, 17</value>
   </metadata>
-  <metadata name="statusStrip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+  <metadata name="toolTipRemote.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
+  <data name="btnApplyFirewall.ToolTip" xml:space="preserve">
+    <value>Allows external clients on your network to reach the HTTP server on the port above
+by adding a Windows Firewall inbound rule (and a URL reservation when 'Bind All
+Interfaces' is enabled). Also clears any stale URL ACL that may be preventing the
+server from binding.
+
+Does NOT start the server — use 'Start HTTP' for that.
+Has no observable effect on localhost connections (loopback bypasses the firewall).</value>
+  </data>
+  <data name="btnRemoveFirewall.ToolTip" xml:space="preserve">
+    <value>Removes the Windows Firewall inbound rule and any URL reservation for the port above.
+Use this to block external network clients, or to clear a stale URL ACL that's
+preventing the server from binding.
+
+Does NOT stop the server — use 'Stop HTTP' for that.
+Has no observable effect on localhost connections (loopback bypasses the firewall).</value>
+  </data>
+  <metadata name="statusStrip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>158, 17</value>
+  </metadata>
   <metadata name="$this.TrayHeight" type="System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-    <value>62</value>
+    <value>50</value>
   </metadata>
 </root>

@@ -24,12 +24,12 @@ namespace ApexComputerUse
 
             try
             {
-                // POST /scenes/[id]/shapes/[sid]/move
-                if (seg.Length == 6 && seg[4] == "shapes" && seg[5] == "move" && method == "POST")
+                // POST /scenes/{id}/shapes/{sid}/move
+                if (seg.Length == 6 && seg[3] == "shapes" && seg[5] == "move" && method == "POST")
                 {
                     using var d = JsonDocument.Parse(body.Length > 0 ? body : "{}");
                     string targetLayerId = d.RootElement.Str("target_layer_id") ?? "";
-                    var ss = _store.MoveShapeToLayer(seg[2], seg[3], targetLayerId);
+                    var ss = _store.MoveShapeToLayer(seg[2], seg[4], targetLayerId);
                     return Ok("scene/shapes/move", "shape", JsonSerializer.Serialize(ss));
                 }
 
@@ -107,11 +107,19 @@ namespace ApexComputerUse
                         break;
                     }
 
-                    // GET/PUT/DELETE /scenes/{id}/layers/{lid}
+                    // GET/PUT/PATCH/DELETE /scenes/{id}/layers/{lid}
                     case 5 when seg[3] == "layers":
                     {
                         string sceneId  = seg[2];
                         string layerId  = seg[4];
+                        if (method == "GET")
+                        {
+                            var scene = _store.GetScene(sceneId)
+                                        ?? throw new KeyNotFoundException($"Scene '{sceneId}' not found.");
+                            var layer = scene.Layers.FirstOrDefault(l => l.Id == layerId)
+                                        ?? throw new KeyNotFoundException($"Layer '{layerId}' not found.");
+                            return Ok("scenes/layers/get", "layer", JsonSerializer.Serialize(layer));
+                        }
                         if (method == "PUT" || method == "PATCH")
                         {
                             using var d = JsonDocument.Parse(body.Length > 0 ? body : "{}");
@@ -167,6 +175,16 @@ namespace ApexComputerUse
                         string sceneId = seg[2];
                         string layerId = seg[4];
                         string shapeId = seg[6];
+                        if (method == "GET")
+                        {
+                            var scene = _store.GetScene(sceneId)
+                                        ?? throw new KeyNotFoundException($"Scene '{sceneId}' not found.");
+                            var layer = scene.Layers.FirstOrDefault(l => l.Id == layerId)
+                                        ?? throw new KeyNotFoundException($"Layer '{layerId}' not found.");
+                            var shape = layer.Shapes.FirstOrDefault(s => s.Id == shapeId)
+                                        ?? throw new KeyNotFoundException($"Shape '{shapeId}' not found.");
+                            return Ok("scenes/shapes/get", "shape", JsonSerializer.Serialize(shape));
+                        }
                         if (method == "PUT")
                         {
                             using var d = JsonDocument.Parse(body.Length > 0 ? body : "{}");

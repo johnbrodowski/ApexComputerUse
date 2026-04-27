@@ -15,6 +15,8 @@ namespace ApexComputerUse
 
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             menuStrip1 = new MenuStrip();
             toolsToolStripMenuItem = new ToolStripMenuItem();
             runAIComputerUseToolStripMenuItem = new ToolStripMenuItem();
@@ -80,6 +82,8 @@ namespace ApexComputerUse
             txtPipeName = new TextBox();
             btnStartPipe = new Button();
             lblPipeStatus = new Label();
+            lblRemoteLog = new Label();
+            txtRemoteLog = new TextBox();
             tabPageModel = new TabPage();
             grpModelPaths = new GroupBox();
             lblModelPath = new Label();
@@ -110,9 +114,7 @@ namespace ApexComputerUse
             lblStatRam = new ToolStripStatusLabel();
             lblStatModel = new ToolStripStatusLabel();
             lblStatNet = new ToolStripStatusLabel();
-            toolTipRemote = new ToolTip();
-            lblRemoteLog = new Label();
-            txtRemoteLog = new TextBox();
+            toolTipRemote = new ToolTip(components);
             menuStrip1.SuspendLayout();
             tabPageChat.SuspendLayout();
             grpAiSettings.SuspendLayout();
@@ -615,37 +617,26 @@ namespace ApexComputerUse
             btnStartHttp.TabIndex = 2;
             btnStartHttp.Text = "Start HTTP";
             btnStartHttp.Click += btnStartHttp_Click;
-            //
+            // 
             // btnApplyFirewall
-            //
+            // 
             btnApplyFirewall.Location = new Point(397, 18);
             btnApplyFirewall.Name = "btnApplyFirewall";
             btnApplyFirewall.Size = new Size(91, 29);
             btnApplyFirewall.TabIndex = 20;
             btnApplyFirewall.Text = "Allow Port";
+            toolTipRemote.SetToolTip(btnApplyFirewall, resources.GetString("btnApplyFirewall.ToolTip"));
             btnApplyFirewall.Click += btnApplyFirewall_Click;
-            toolTipRemote.SetToolTip(btnApplyFirewall,
-                "Allows external clients on your network to reach the HTTP server on the port above\r\n" +
-                "by adding a Windows Firewall inbound rule (and a URL reservation when 'Bind All\r\n" +
-                "Interfaces' is enabled). Also clears any stale URL ACL that may be preventing the\r\n" +
-                "server from binding.\r\n\r\n" +
-                "Does NOT start the server — use 'Start HTTP' for that.\r\n" +
-                "Has no observable effect on localhost connections (loopback bypasses the firewall).");
-            //
+            // 
             // btnRemoveFirewall
-            //
+            // 
             btnRemoveFirewall.Location = new Point(493, 18);
             btnRemoveFirewall.Name = "btnRemoveFirewall";
             btnRemoveFirewall.Size = new Size(92, 29);
             btnRemoveFirewall.TabIndex = 21;
             btnRemoveFirewall.Text = "Revoke Port";
+            toolTipRemote.SetToolTip(btnRemoveFirewall, resources.GetString("btnRemoveFirewall.ToolTip"));
             btnRemoveFirewall.Click += btnRemoveFirewall_Click;
-            toolTipRemote.SetToolTip(btnRemoveFirewall,
-                "Removes the Windows Firewall inbound rule and any URL reservation for the port above.\r\n" +
-                "Use this to block external network clients, or to clear a stale URL ACL that's\r\n" +
-                "preventing the server from binding.\r\n\r\n" +
-                "Does NOT stop the server — use 'Stop HTTP' for that.\r\n" +
-                "Has no observable effect on localhost connections (loopback bypasses the firewall).");
             // 
             // lblHttpStatus
             // 
@@ -771,25 +762,28 @@ namespace ApexComputerUse
             lblPipeStatus.Size = new Size(58, 17);
             lblPipeStatus.TabIndex = 11;
             lblPipeStatus.Text = "Stopped";
-            //
+            // 
             // lblRemoteLog
-            //
+            // 
             lblRemoteLog.AutoSize = true;
             lblRemoteLog.Location = new Point(8, 245);
             lblRemoteLog.Name = "lblRemoteLog";
+            lblRemoteLog.Size = new Size(142, 17);
+            lblRemoteLog.TabIndex = 1;
             lblRemoteLog.Text = "Firewall / URL ACL Log:";
-            //
+            // 
             // txtRemoteLog
-            //
+            // 
+            txtRemoteLog.Font = new Font("Consolas", 9F);
             txtRemoteLog.Location = new Point(8, 265);
-            txtRemoteLog.Name = "txtRemoteLog";
-            txtRemoteLog.Size = new Size(591, 70);
             txtRemoteLog.Multiline = true;
+            txtRemoteLog.Name = "txtRemoteLog";
             txtRemoteLog.ReadOnly = true;
             txtRemoteLog.ScrollBars = ScrollBars.Vertical;
-            txtRemoteLog.Font = new Font("Consolas", 9F);
+            txtRemoteLog.Size = new Size(591, 70);
+            txtRemoteLog.TabIndex = 2;
             txtRemoteLog.WordWrap = false;
-            //
+            // 
             // tabPageModel
             // 
             tabPageModel.Controls.Add(grpModelPaths);
@@ -1097,6 +1091,7 @@ namespace ApexComputerUse
             tabPageFind.ResumeLayout(false);
             tabPageFind.PerformLayout();
             tabPageRemote.ResumeLayout(false);
+            tabPageRemote.PerformLayout();
             grpRemote.ResumeLayout(false);
             grpRemote.PerformLayout();
             tabPageModel.ResumeLayout(false);

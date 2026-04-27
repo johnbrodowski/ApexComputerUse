@@ -64,11 +64,13 @@ dotnet build
 dotnet run --project ApexComputerUse
 ```
 
-1. The app opens. The HTTP server starts automatically and binds to all interfaces. On first launch, a UAC prompt appears once to configure the URL ACL and Windows Firewall rule — approve it.
-2. The API key is shown in the **Remote Control** tab → **API Key** field — copy it.
-3. Open `http://localhost:8081/` in a browser — the interactive console appears (the browser console pre-fills the key).
-4. Pick any open window from the **Windows** panel on the left.
-5. Browse its element tree, click an action button, see the result.
+1. The app opens. The HTTP server starts automatically on port `8080` (`HttpAutoStart=true` in `appsettings.json`).
+2. By default it binds to localhost only (`HttpBindAll=false`), so no first-run UAC network setup is required.
+3. If you enable `HttpBindAll=true`, the app prompts once (UAC) to configure URL ACL + Windows Firewall for the selected port.
+4. The API key is shown in the **Remote Control** tab → **API Key** field — copy it.
+5. Open `http://localhost:8080/?apiKey=<key>` in a browser — the interactive console appears (the browser console pre-fills the key).
+6. Pick any open window from the **Windows** panel on the left.
+7. Browse its element tree, click an action button, see the result.
 
 > **Chat tab:** switch to the **Chat** tab and click **Load Chat** to open the streaming AI chat UI directly inside the app. Configure provider and API key in the settings group above, then chat away.
 >
@@ -78,12 +80,12 @@ Or go straight to curl (replace `<key>` with the API key from the Remote Control
 
 ```bash
 # Confirm the server is up
-curl -H "X-Api-Key: <key>" http://localhost:8081/ping
+curl -H "X-Api-Key: <key>" http://localhost:8080/ping
 
 # Find Notepad and read its text editor content
-curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/find \
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8080/find \
      -H "Content-Type: application/json" -d '{"window":"Notepad"}'
-curl -H "X-Api-Key: <key>" http://localhost:8081/exec?action=gettext
+curl -H "X-Api-Key: <key>" http://localhost:8080/exec?action=gettext
 ```
 
 > **OCR:** requires `eng.traineddata` — download from [github.com/tesseract-ocr/tessdata](https://github.com/tesseract-ocr/tessdata) and place it in `tessdata\` next to the executable.
@@ -175,10 +177,10 @@ Several agents support the Model Context Protocol. If you prefer a tighter integ
 Start the HTTP server, then drop this into your Claude Code session:
 
 ```
-The ApexComputerUse REST API is running at http://localhost:8081.
+The ApexComputerUse REST API is running at http://localhost:8080.
 Use curl (or Python requests if curl is blocked) to control Windows apps.
-Start with: curl http://localhost:8081/ping
-Then: curl http://localhost:8081/windows  (to see what's open)
+Start with: curl http://localhost:8080/ping
+Then: curl http://localhost:8080/windows  (to see what's open)
 Then find and interact with any element using /find and /exec.
 ```
 
@@ -203,11 +205,11 @@ For deep pages, fetch a shallow overview first, then drill into only the branche
 
 ```bash
 # Step 1 — shallow overview (fast, small response)
-curl "http://localhost:8081/elements?depth=2&onscreen=true"
+curl "http://localhost:8080/elements?depth=2&onscreen=true"
 # Nodes that have children beyond the depth limit show "childCount": N instead of "children"
 
 # Step 2 — expand a specific node by its ID (IDs are stable between calls)
-curl "http://localhost:8081/elements?id=708379645&depth=2&onscreen=true"
+curl "http://localhost:8080/elements?id=708379645&depth=2&onscreen=true"
 # Returns only that subtree, 2 levels deep — existing map entries are preserved
 ```
 
@@ -220,22 +222,22 @@ Modern web pages often wrap every visible element in several identity-less `Pane
 ```bash
 # Text search across Name, AutomationId, and Value — one call returns every
 # match with its ancestor path plus `depth` levels of descendants under each.
-curl "http://localhost:8081/elements?match=add+to+cart&onscreen=true&depth=1"
+curl "http://localhost:8080/elements?match=add+to+cart&onscreen=true&depth=1"
 
 # Collapse "1-in-1-in-1" wrapper chains. A wrapper is skipped only when it has
 # exactly one child, no name, no AutomationId, and its control type is Pane,
 # Group, or Custom. Named containers and anything with an AutomationId survive.
-curl "http://localhost:8081/elements?onscreen=true&collapseChains=true"
+curl "http://localhost:8080/elements?onscreen=true&collapseChains=true"
 
 # Ancestor breadcrumb on every emitted node: "Chrome > Document > Main > Form".
-curl "http://localhost:8081/elements?onscreen=true&includePath=true"
+curl "http://localhost:8080/elements?onscreen=true&includePath=true"
 
 # Opt into Value pattern + HelpText on every node — useful for web inputs
 # whose Name is empty and whose visible content lives in the Value pattern.
-curl "http://localhost:8081/elements?onscreen=true&properties=extra"
+curl "http://localhost:8080/elements?onscreen=true&properties=extra"
 
 # All new filters combine cleanly with existing ones.
-curl "http://localhost:8081/elements?onscreen=true&collapseChains=true&match=submit&type=Button&depth=1&properties=extra"
+curl "http://localhost:8080/elements?onscreen=true&collapseChains=true&match=submit&type=Button&depth=1&properties=extra"
 ```
 
 Truncated nodes (ones whose children were cut off by `depth`) now also emit `descendantCount` alongside `childCount`, so an agent can decide whether a subtree is worth expanding without another round trip. Element IDs are computed against the real, unflattened tree — hoisting a descendant through `collapseChains` does not change its ID, and follow-up `/elements?id=<id>` and `/execute id=<id>` calls still resolve.
@@ -268,7 +270,7 @@ Truncated nodes (ones whose children were cut off by `depth`) now also emit `des
 - **System utility routes** — `/health` (unauthenticated), `/ping`, `/metrics`, `/sysinfo`, `/env`, `/ls`, `/run`, `/run-tests`, `/shutdown` for AI agents that need OS-level context without a separate tool
 - **Embedded AI chat in the Chat tab** — the Chat tab hosts the streaming HTML chat UI (`/chat`) directly in an embedded WebView2 control; click **Load Chat** to connect. The HTML page handles streaming, provider/model display, and session reset natively.
 - **AI Chat over HTTP** — streaming chat UI at `GET /chat` backed by `/chat/send`, `/chat/status`, `/chat/reset`; same 8 providers as the desktop AI Chat window; also accessible from any browser
-- **Auto-start on launch** — HTTP server starts and binds to all interfaces automatically; local vision model is loaded automatically if paths are saved; first-run netsh setup (URL ACL + Firewall rule) runs once with a single UAC prompt
+- **Auto-start on launch** — HTTP server starts automatically (`HttpAutoStart=true` by default), binds to localhost by default (`HttpBindAll=false`), and can be switched to all-interfaces mode with one-time netsh setup (URL ACL + Firewall rule)
 - **Auto-download setup** — Model tab "Download All" button fetches the LFM2.5-VL model, projector, and Tesseract data to fixed local paths on first launch
 
 ---
@@ -283,16 +285,16 @@ cd ApexComputerUse
 dotnet run --project ApexComputerUse
 ```
 
-### 2. First-run network setup (automatic)
+### 2. First-run network setup (only when `HttpBindAll=true`)
 
-On first launch, ApexComputerUse checks whether the HTTP URL ACL and Windows Firewall inbound rule for port 8081 exist. If either is missing, a single elevated `cmd` window opens (one UAC prompt) and runs:
+When `HttpBindAll=true`, ApexComputerUse checks whether the HTTP URL ACL and Windows Firewall inbound rule exist for the configured port. If either is missing, a single elevated `cmd` window opens (one UAC prompt) and runs:
 
 ```
-netsh http add urlacl url=http://+:8081/ user=Everyone
-netsh advfirewall firewall add rule name="ApexComputerUse" dir=in action=allow protocol=TCP localport=8081
+netsh http add urlacl url=http://+:{port}/ user=Everyone
+netsh advfirewall firewall add rule name="ApexComputerUse" dir=in action=allow protocol=TCP localport={port}
 ```
 
-This happens once — the result is saved to `%APPDATA%\ApexComputerUse\settings.json`. On every subsequent launch the check is skipped.
+This happens once and is tracked in `%APPDATA%\ApexComputerUse\settings.json`. With the default `HttpBindAll=false`, this setup is skipped.
 
 ### 3. Models and OCR data (optional — auto-download available)
 
@@ -323,13 +325,13 @@ Every HTTP request must include the API key. Three equivalent methods:
 
 ```bash
 # Authorization header (recommended)
-curl -H "Authorization: Bearer <key>" http://localhost:8081/ping
+curl -H "Authorization: Bearer <key>" http://localhost:8080/ping
 
 # X-Api-Key header
-curl -H "X-Api-Key: <key>" http://localhost:8081/ping
+curl -H "X-Api-Key: <key>" http://localhost:8080/ping
 
 # Query parameter (use only for browser links / quick tests)
-curl "http://localhost:8081/ping?apiKey=<key>"
+curl "http://localhost:8080/ping?apiKey=<key>"
 ```
 
 Requests without a valid key receive **HTTP 401**. The interactive web console (`GET /`) pre-fills the key automatically — paste it from the Remote Control tab on first launch.
@@ -343,6 +345,10 @@ The named pipe is ACL-restricted to the current Windows user. Other local users 
 ### Telegram Bot Authorization
 
 Enter one or more Telegram chat IDs in the **Allowed Chat IDs** field (comma-separated). Any message from an unlisted chat ID receives "Unauthorized." and is logged. Leave the field empty only for local testing.
+
+### Client Permission Gating (non-loopback callers)
+
+Requests from `localhost` / loopback always have full access. Non-loopback callers are matched against entries in the **Clients** tab and constrained by per-client permissions (`allow_automation`, `allow_capture`, `allow_ai`, `allow_scenes`, `allow_shell_run`, `allow_clients`, `allow_diagnostics`). Unknown non-loopback callers are denied.
 
 ### Shell Execution (`/run`)
 
@@ -359,28 +365,27 @@ All settings can be layered via three sources (highest priority last wins for en
 
 ```json
 {
-  "HttpPort":       8081,
-  "HttpBindAll":    true,
-  "HttpAutoStart":  true,
-  "PipeName":       "ApexComputerUse",
-  "LogLevel":       "Information",
-  "EnableShellRun": true,
-  "ApiKey":         "",
-  "AllowedChatIds": "",
-  "TelegramToken":  "",
-  "ModelPath":      "",
-  "MmProjPath":     ""
+  "HttpPort":             8080,
+  "HttpBindAll":          false,
+  "HttpAutoStart":        true,
+  "PipeName":             "ApexComputerUse",
+  "LogLevel":             "Information",
+  "EnableShellRun":       false,
+  "TelegramToken":        "",
+  "TestRunnerExePath":    "",
+  "TestRunnerConfigPath": ""
 }
 ```
 
-> `HttpBindAll` and `HttpAutoStart` default to `true` — the server starts automatically and is accessible from other machines on the network. Set both to `false` for localhost-only / manual-start mode.
+> Shipped defaults are `HttpAutoStart=true` and `HttpBindAll=false` (auto-start on localhost only). Set `HttpBindAll=true` for LAN access.
 
 **Environment variables** (prefix `APEX_`, override `appsettings.json`):
 
 | Variable | Description |
 |---|---|
-| `APEX_HTTP_PORT` | HTTP listen port (default `8081`) |
+| `APEX_HTTP_PORT` | HTTP listen port (default `8080`) |
 | `APEX_HTTP_BIND_ALL` | `true` to bind all interfaces instead of localhost only |
+| `APEX_HTTP_AUTOSTART` | `true` to auto-start HTTP server in GUI mode |
 | `APEX_PIPE_NAME` | Named pipe name |
 | `APEX_LOG_LEVEL` | Serilog minimum level: `Debug` / `Information` / `Warning` / `Error` |
 | `APEX_ENABLE_SHELL_RUN` | `true` to enable the `/run` shell-execution endpoint |
@@ -389,6 +394,8 @@ All settings can be layered via three sources (highest priority last wins for en
 | `APEX_TELEGRAM_TOKEN` | Telegram bot token |
 | `APEX_MODEL_PATH` | Default LLM `.gguf` path |
 | `APEX_MMPROJ_PATH` | Default multimodal projector `.gguf` path |
+| `APEX_TEST_RUNNER_EXE_PATH` | Path to `TestApplications/TestRunner` executable for `/run-tests` |
+| `APEX_TEST_RUNNER_CONFIG_PATH` | Optional config file path passed to TestRunner |
 
 **Network binding:** `HttpBindAll = false` (the default) binds to `http://localhost:{port}/` — loopback only, safe for single-machine use. Set `APEX_HTTP_BIND_ALL=true` to bind all interfaces for network-wide access (ensure firewall rules are in place).
 
@@ -409,6 +416,14 @@ sc.exe delete ApexComputerUse
 ```
 
 Configure via `appsettings.json` or `APEX_*` environment variables before starting the service. The `APEX_TELEGRAM_TOKEN` and `APEX_API_KEY` variables are the recommended way to inject secrets in a service context.
+
+### Command-line overrides
+
+`Program.cs` supports lightweight startup overrides:
+
+- `--port <n>` sets `APEX_HTTP_PORT` for that process
+- `--pipe <name>` sets `APEX_PIPE_NAME` for that process
+- `--client` marks the instance as a subordinate client instance
 
 ---
 
@@ -445,23 +460,23 @@ Every window and element is assigned a **stable numeric ID** (SHA-256 hash-based
 
 ```bash
 # 1. Get windows with their IDs
-curl http://localhost:8081/windows
+curl http://localhost:8080/windows
 # Returns: [{"id":42,"title":"Notepad"},{"id":107,"title":"Calculator"},...]
 
 # 2. Get elements with their IDs for the current window
-curl http://localhost:8081/elements
+curl http://localhost:8080/elements
 
 # Onscreen elements only (prunes offscreen subtrees — 80% fewer elements on browser pages)
-curl "http://localhost:8081/elements?onscreen=true"
+curl "http://localhost:8080/elements?onscreen=true"
 
 # Limit tree depth — nodes at the cutoff show "childCount" instead of "children"
-curl "http://localhost:8081/elements?depth=2&onscreen=true"
+curl "http://localhost:8080/elements?depth=2&onscreen=true"
 
 # Expand a specific subtree by numeric ID (IDs are stable; map is preserved between expansion calls)
-curl "http://localhost:8081/elements?id=708379645&depth=2&onscreen=true"
+curl "http://localhost:8080/elements?id=708379645&depth=2&onscreen=true"
 
 # Combine with type filter
-curl "http://localhost:8081/elements?onscreen=true&type=Button"
+curl "http://localhost:8080/elements?onscreen=true&type=Button"
 
 # Returns nested JSON including bounding rectangles:
 # {
@@ -483,7 +498,7 @@ curl "http://localhost:8081/elements?onscreen=true&type=Button"
 # }
 
 # 3. Find using numeric IDs (no fuzzy matching, direct map lookup)
-curl -X POST http://localhost:8081/find \
+curl -X POST http://localhost:8080/find \
      -H "Content-Type: application/json" \
      -d '{"window":42,"id":105}'
 ```
@@ -540,7 +555,9 @@ The `?onscreen=true` filter further reduces the element map to only what is visi
 
 ## Usage — HTTP API
 
-Start the HTTP server from the **Remote Control** group box, then use curl or open `http://localhost:8081/` in a browser to access the interactive test console.
+Start the HTTP server from the **Remote Control** group box, then use curl or open `http://localhost:8080/?apiKey=<key>` in a browser to access the interactive test console.
+
+> Authentication reminder: every route except `GET /health` requires the API key. For curl, add `-H "X-Api-Key: <key>"`. For browser URLs, append `?apiKey=<key>`.
 
 ### Interactive Test Console (`GET /`)
 
@@ -565,21 +582,21 @@ Every endpoint adapts its response to whatever format the caller can consume, se
 
 ```bash
 # URL extension (highest priority — works even if the AI cannot set headers or query params)
-curl http://localhost:8081/status.json
-curl http://localhost:8081/help.txt
-curl http://localhost:8081/windows.html
-curl http://localhost:8081/status.pdf --output status.pdf
+curl http://localhost:8080/status.json
+curl http://localhost:8080/help.txt
+curl http://localhost:8080/windows.html
+curl http://localhost:8080/status.pdf --output status.pdf
 
 # ?format= query parameter
-curl "http://localhost:8081/ping?format=text"
-curl "http://localhost:8081/ping?format=json"
+curl "http://localhost:8080/ping?format=text"
+curl "http://localhost:8080/ping?format=json"
 
 # Accept header
-curl -H "Accept: application/json"  http://localhost:8081/ping
-curl -H "Accept: application/pdf"   http://localhost:8081/help --output help.pdf
+curl -H "Accept: application/json"  http://localhost:8080/ping
+curl -H "Accept: application/pdf"   http://localhost:8080/help --output help.pdf
 
 # HTML response (default — works in any browser or AI that can fetch a page)
-curl http://localhost:8081/ping
+curl http://localhost:8080/ping
 ```
 
 **HTML** includes a `<pre>` block for human readability and an embedded `<script type="application/json" id="apex-result">` block containing the full result as JSON — allowing any AI that can fetch a webpage to extract structured data without a vision model.
@@ -592,14 +609,14 @@ All command endpoints accept both `POST` (JSON body) and `GET` (query string par
 
 ```bash
 # Find a window via GET
-curl "http://localhost:8081/find?window=Notepad"
+curl "http://localhost:8080/find?window=Notepad"
 
 # Execute an action via GET
-curl "http://localhost:8081/exec?action=gettext"
+curl "http://localhost:8080/exec?action=gettext"
 
 # Combine with URL extension for full URL-only access
-curl "http://localhost:8081/find.json?window=Notepad&id=15"
-curl "http://localhost:8081/exec.pdf?action=describe" --output result.pdf
+curl "http://localhost:8080/find.json?window=Notepad&id=15"
+curl "http://localhost:8080/exec.pdf?action=describe" --output result.pdf
 ```
 
 **GET parameter names** match the JSON body field names: `window`, `id` / `automationId`, `name` / `elementName`, `type` / `searchType`, `action`, `value`, `onscreen`, `depth`, `prompt`, `model`, `proj`.
@@ -627,35 +644,36 @@ HTTP status: **200** on success, **400** on error.
 
 ```bash
 # Unauthenticated liveness probe — safe for external monitoring (the only route that doesn't require the API key)
-curl http://localhost:8081/health
+curl http://localhost:8080/health
 
 # Authenticated health check
-curl -H "X-Api-Key: <key>" http://localhost:8081/ping
+curl -H "X-Api-Key: <key>" http://localhost:8080/ping
 
 # Per-route request counters
-curl -H "X-Api-Key: <key>" http://localhost:8081/metrics
+curl -H "X-Api-Key: <key>" http://localhost:8080/metrics
 
 # System information (OS, machine, user, CPU, CLR)
-curl http://localhost:8081/sysinfo
+curl -H "X-Api-Key: <key>" http://localhost:8080/sysinfo
 
 # All environment variables
-curl http://localhost:8081/env
+curl -H "X-Api-Key: <key>" http://localhost:8080/env
 
 # Directory listing (defaults to current working directory)
-curl http://localhost:8081/ls
-curl "http://localhost:8081/ls?path=C:\Users"
+curl -H "X-Api-Key: <key>" http://localhost:8080/ls
+curl -H "X-Api-Key: <key>" "http://localhost:8080/ls?path=C:\Users"
 
 # Trigger the bundled integration test runner (TestApplications/TestRunner)
-curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/run-tests
+# Requires TestRunnerExePath (or APEX_TEST_RUNNER_EXE_PATH) to be configured.
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8080/run-tests
 
 # Gracefully stop the HTTP server
-curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/shutdown
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8080/shutdown
 
 # Run a shell command (cmd.exe /c); 30-second timeout
 # Requires EnableShellRun = true in appsettings.json or APEX_ENABLE_SHELL_RUN=true
-curl -H "X-Api-Key: <key>" "http://localhost:8081/run?cmd=whoami"
-curl -H "X-Api-Key: <key>" "http://localhost:8081/run?command=whoami"
-curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/run \
+curl -H "X-Api-Key: <key>" "http://localhost:8080/run?cmd=whoami"
+curl -H "X-Api-Key: <key>" "http://localhost:8080/run?command=whoami"
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8080/run \
      -H "Content-Type: application/json" \
      -d '{"command":"dir C:\\"}'
 ```
@@ -670,124 +688,124 @@ curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/run \
 
 ```bash
 # List all open windows (with stable IDs)
-curl http://localhost:8081/windows
+curl http://localhost:8080/windows
 
 # Get current state
-curl http://localhost:8081/status
+curl http://localhost:8080/status
 
 # List all elements in the current window (nested JSON with IDs and bounding rectangles)
-curl http://localhost:8081/elements
+curl http://localhost:8080/elements
 
 # Onscreen elements only — prunes offscreen subtrees for maximum token efficiency
-curl "http://localhost:8081/elements?onscreen=true"
+curl "http://localhost:8080/elements?onscreen=true"
 
 # Limit depth — truncated nodes show "childCount" so you know where to drill in
-curl "http://localhost:8081/elements?depth=2&onscreen=true"
+curl "http://localhost:8080/elements?depth=2&onscreen=true"
 
 # Expand a specific node by numeric ID (preserves the rest of the map — IDs stay stable)
-curl "http://localhost:8081/elements?id=<elementId>&depth=2&onscreen=true"
+curl "http://localhost:8080/elements?id=<elementId>&depth=2&onscreen=true"
 
 # Filter by ControlType
-curl "http://localhost:8081/elements?type=Button"
+curl "http://localhost:8080/elements?type=Button"
 
 # Text search across Name, AutomationId, and Value — returns only matching
 # branches, each wrapped in its ancestor path, with `depth` levels below.
-curl "http://localhost:8081/elements?match=add+to+cart&onscreen=true&depth=1"
+curl "http://localhost:8080/elements?match=add+to+cart&onscreen=true&depth=1"
 
 # Collapse identity-less single-child Pane/Group/Custom wrapper chains
 # (named containers and anything with an AutomationId are preserved).
-curl "http://localhost:8081/elements?onscreen=true&collapseChains=true"
+curl "http://localhost:8080/elements?onscreen=true&collapseChains=true"
 
 # Add an ancestor breadcrumb ("path") to every emitted node.
-curl "http://localhost:8081/elements?onscreen=true&includePath=true"
+curl "http://localhost:8080/elements?onscreen=true&includePath=true"
 
 # Opt into Value pattern + HelpText (omitted by default to keep payloads small).
-curl "http://localhost:8081/elements?onscreen=true&properties=extra"
+curl "http://localhost:8080/elements?onscreen=true&properties=extra"
 
 # All filters combined
-curl "http://localhost:8081/elements?depth=3&onscreen=true&type=Button&collapseChains=true&match=submit&properties=extra"
+curl "http://localhost:8080/elements?depth=3&onscreen=true&type=Button&collapseChains=true&match=submit&properties=extra"
 
 # Render the current window's UI element tree as a colour-coded PNG (returns base64)
-curl http://localhost:8081/uimap
+curl http://localhost:8080/uimap
 
 # Help
-curl http://localhost:8081/help
+curl http://localhost:8080/help
 
 # Find a window and element by title/name
-curl -X POST http://localhost:8081/find \
+curl -X POST http://localhost:8080/find \
      -H "Content-Type: application/json" \
      -d '{"window":"Notepad","id":"15"}'
 
 # Find by element name with ControlType filter
-curl -X POST http://localhost:8081/find \
+curl -X POST http://localhost:8080/find \
      -H "Content-Type: application/json" \
      -d '{"window":"Notepad","name":"Text Editor","type":"Edit"}'
 
 # Find by numeric window/element IDs (fast, no fuzzy search)
-curl -X POST http://localhost:8081/find \
+curl -X POST http://localhost:8080/find \
      -H "Content-Type: application/json" \
      -d '{"window":42,"id":105}'
 
 # Type text into the found element
-curl -X POST http://localhost:8081/execute \
+curl -X POST http://localhost:8080/execute \
      -H "Content-Type: application/json" \
      -d '{"action":"type","value":"Hello World"}'
 
 # Click a button
-curl -X POST http://localhost:8081/execute \
+curl -X POST http://localhost:8080/execute \
      -H "Content-Type: application/json" \
      -d '{"action":"click"}'
 
 # Read text from element
-curl -X POST http://localhost:8081/execute \
+curl -X POST http://localhost:8080/execute \
      -H "Content-Type: application/json" \
      -d '{"action":"gettext"}'
 
 # Capture current element (returns base64 PNG in data field)
-curl -X POST http://localhost:8081/capture
+curl -X POST http://localhost:8080/capture
 
 # Capture full screen
-curl -X POST http://localhost:8081/capture \
+curl -X POST http://localhost:8080/capture \
      -H "Content-Type: application/json" \
      -d '{"action":"screen"}'
 
 # Capture multiple elements stitched into one image
-curl -X POST http://localhost:8081/capture \
+curl -X POST http://localhost:8080/capture \
      -H "Content-Type: application/json" \
      -d '{"action":"elements","value":"42,105,106"}'
 
 # OCR the found element
-curl -X POST http://localhost:8081/ocr
+curl -X POST http://localhost:8080/ocr
 
 # OCR a region (x,y,width,height) within the element
-curl -X POST http://localhost:8081/ocr \
+curl -X POST http://localhost:8080/ocr \
      -H "Content-Type: application/json" \
      -d '{"value":"0,0,300,50"}'
 
 # Check AI model status
-curl http://localhost:8081/ai/status
+curl http://localhost:8080/ai/status
 
 # Load a vision/audio LLM (run once; model stays loaded until the server restarts)
-curl -X POST http://localhost:8081/ai/init \
+curl -X POST http://localhost:8080/ai/init \
      -H "Content-Type: application/json" \
      -d '{"model":"C:\\models\\vision.gguf","proj":"C:\\models\\mmproj.gguf"}'
 
 # Describe the currently selected UI element using the vision model
 # Captures the element as an image and sends it to the LLM
-curl -X POST http://localhost:8081/ai/describe
+curl -X POST http://localhost:8080/ai/describe
 
 # Describe with a custom prompt
-curl -X POST http://localhost:8081/ai/describe \
+curl -X POST http://localhost:8080/ai/describe \
      -H "Content-Type: application/json" \
      -d '{"prompt":"List every button you can see."}'
 
 # Ask a specific question about the current element
-curl -X POST http://localhost:8081/ai/ask \
+curl -X POST http://localhost:8080/ai/ask \
      -H "Content-Type: application/json" \
      -d '{"prompt":"Is there an error message visible?"}'
 
 # Describe an image file on disk
-curl -X POST http://localhost:8081/ai/file \
+curl -X POST http://localhost:8080/ai/file \
      -H "Content-Type: application/json" \
      -d '{"value":"C:\\screenshots\\app.png","prompt":"What dialog is shown?"}'
 ```
@@ -816,7 +834,7 @@ The drawing engine renders GDI+ shapes to a base64 PNG on demand. Every shape ty
 
 ```bash
 # Draw a filled blue circle with white text
-curl -X POST http://localhost:8081/draw \
+curl -X POST http://localhost:8080/draw \
      -H "Content-Type: application/json" \
      -d '{
        "value": "{\"canvas\":\"blank\",\"width\":400,\"height\":300,\"shapes\":[
@@ -826,10 +844,10 @@ curl -X POST http://localhost:8081/draw \
      }'
 
 # Render the built-in space scene
-curl http://localhost:8081/draw/demo
+curl http://localhost:8080/draw/demo
 
 # Show it as a full-screen overlay for 6 seconds
-curl "http://localhost:8081/draw/demo?overlay=true&ms=6000"
+curl "http://localhost:8080/draw/demo?overlay=true&ms=6000"
 ```
 
 The `data.result` field contains the base64 PNG. The web console renders it inline.
@@ -862,45 +880,45 @@ The scene system lets AI agents and users collaborate on persistent, structured 
 
 ```bash
 # Create a scene
-curl -X POST http://localhost:8081/scenes \
+curl -X POST http://localhost:8080/scenes \
      -H "Content-Type: application/json" \
      -d '{"name":"My Scene","width":800,"height":600,"background":"#1a1a2e"}'
 # → data.scene contains the full scene with id
 
 # List scenes
-curl http://localhost:8081/scenes
+curl http://localhost:8080/scenes
 
 # Get a scene
-curl http://localhost:8081/scenes/{id}
+curl http://localhost:8080/scenes/{id}
 
 # Add a layer
-curl -X POST http://localhost:8081/scenes/{id}/layers \
+curl -X POST http://localhost:8080/scenes/{id}/layers \
      -H "Content-Type: application/json" \
      -d '{"name":"Background"}'
 
 # Add a shape to a layer
-curl -X POST http://localhost:8081/scenes/{id}/layers/{lid}/shapes \
+curl -X POST http://localhost:8080/scenes/{id}/layers/{lid}/shapes \
      -H "Content-Type: application/json" \
      -d '{"shape":{"type":"circle","x":400,"y":300,"r":80,"color":"royalblue","fill":true},"name":"Planet"}'
 
 # Render the scene to a PNG
-curl http://localhost:8081/scenes/{id}/render
+curl http://localhost:8080/scenes/{id}/render
 # → data.result is base64 PNG
 
 # Patch shape geometry (after user drags it — never clobbers color/style)
-curl -X PATCH http://localhost:8081/scenes/{id}/layers/{lid}/shapes/{sid} \
+curl -X PATCH http://localhost:8080/scenes/{id}/layers/{lid}/shapes/{sid} \
      -H "Content-Type: application/json" \
      -d '{"x":420,"y":310}'
 
 # Move a shape to a different layer
-curl -X POST http://localhost:8081/scenes/{id}/shapes/{sid}/move \
+curl -X POST http://localhost:8080/scenes/{id}/shapes/{sid}/move \
      -H "Content-Type: application/json" \
      -d '{"target_layer_id":"{newLayerId}"}'
 
 # Delete a shape / layer / scene
-curl -X DELETE http://localhost:8081/scenes/{id}/layers/{lid}/shapes/{sid}
-curl -X DELETE http://localhost:8081/scenes/{id}/layers/{lid}
-curl -X DELETE http://localhost:8081/scenes/{id}
+curl -X DELETE http://localhost:8080/scenes/{id}/layers/{lid}/shapes/{sid}
+curl -X DELETE http://localhost:8080/scenes/{id}/layers/{lid}
+curl -X DELETE http://localhost:8080/scenes/{id}
 ```
 
 ### Full route reference
@@ -908,10 +926,10 @@ curl -X DELETE http://localhost:8081/scenes/{id}
 | Method | Route | Description |
 |---|---|---|
 | `GET` / `POST` | `/scenes` | List all scenes / create scene |
-| `GET` / `PUT` / `DELETE` | `/scenes/{id}` | Get / update meta / delete scene |
+| `GET` / `PUT` / `PATCH` / `DELETE` | `/scenes/{id}` | Get / update meta / delete scene |
 | `GET` | `/scenes/{id}/render` | Render scene → base64 PNG |
 | `GET` / `POST` | `/scenes/{id}/layers` | List layers / add layer |
-| `GET` / `PUT` / `DELETE` | `/scenes/{id}/layers/{lid}` | Get / update / delete layer |
+| `GET` / `PUT` / `PATCH` / `DELETE` | `/scenes/{id}/layers/{lid}` | Get / update / delete layer |
 | `GET` / `POST` | `/scenes/{id}/layers/{lid}/shapes` | List shapes / add shape |
 | `GET` / `PUT` / `PATCH` / `DELETE` | `/scenes/{id}/layers/{lid}/shapes/{sid}` | Get / replace / patch geometry / delete shape |
 | `POST` | `/scenes/{id}/shapes/{sid}/move` | Move shape to a different layer |
@@ -927,11 +945,11 @@ The desktop editor opens a standalone window with:
 - **Properties panel** — x, y, w, h, r fields for the selected shape; edits commit to the store immediately
 - **Keyboard shortcuts** — V/R/E/C/L/T for tools, Delete to remove selected shape, Escape to deselect
 
-All changes are persisted to disk (`<exe>/scenes/{id}.json`) and immediately available via the REST API.
+All changes are persisted to disk (`%LOCALAPPDATA%\ApexComputerUse\scenes\{id}.json`) and immediately available via the REST API.
 
 ### Scene Editor — Browser (`GET /editor`)
 
-Open `http://localhost:8081/editor` for the same editing experience in a browser:
+Open `http://localhost:8080/editor?apiKey=<key>` for the same editing experience in a browser:
 
 - HTML5 Canvas renderer for all 7 shape types
 - Click-and-drag to place shapes; click to select and drag to move
@@ -1053,8 +1071,8 @@ Disconnect-FlaUI
 Use `Scripts\apex.cmd` — a batch helper that wraps the HTTP server with simpler positional syntax. Requires the HTTP server to be started first and `curl` (built-in on Windows 10+).
 
 ```batch
-:: Optional: override port (default is 8081)
-set APEX_HTTP_PORT=8081
+:: Optional: override port (default is 8080)
+set APEX_HTTP_PORT=8080
 
 :: Discovery
 apex windows
@@ -1139,7 +1157,7 @@ The UI Map Renderer scans the current window's accessibility tree and renders ev
 
 ```bash
 # Returns base64-encoded PNG of the current window's element tree
-curl http://localhost:8081/uimap
+curl http://localhost:8080/uimap
 ```
 
 Requires a prior `find` call to select a window. The response `data.result` field contains the base64 PNG — identical format to the `/capture` endpoints. In the interactive test console, the **UI map** button (in the Capture group) renders the result inline in the response log.
@@ -1301,27 +1319,27 @@ For `elements`, provide comma-separated numeric IDs from a prior `elements` scan
 
 ```bash
 # Current element
-curl -X POST http://localhost:8081/capture
+curl -X POST http://localhost:8080/capture
 
 # Full screen
-curl -X POST http://localhost:8081/capture \
+curl -X POST http://localhost:8080/capture \
      -H "Content-Type: application/json" \
      -d '{"action":"screen"}'
 
 # Current window
-curl -X POST http://localhost:8081/capture \
+curl -X POST http://localhost:8080/capture \
      -H "Content-Type: application/json" \
      -d '{"action":"window"}'
 
 # Multiple elements stitched into one image
-curl -X POST http://localhost:8081/capture \
+curl -X POST http://localhost:8080/capture \
      -H "Content-Type: application/json" \
      -d '{"action":"elements","value":"42,105,106"}'
 ```
 
 Response `data` field contains the base64 PNG. Decode it to get the image:
 ```bash
-curl -s -X POST http://localhost:8081/capture -d '{"action":"screen"}' \
+curl -s -X POST http://localhost:8080/capture -d '{"action":"screen"}' \
   | python -c "import sys,json,base64; d=json.load(sys.stdin)['data']; open('screen.png','wb').write(base64.b64decode(d))"
 ```
 
@@ -1363,39 +1381,55 @@ Download a vision-capable GGUF model and its multimodal projector (e.g. LFM2.5-V
 
 ```
 ApexComputerUse/
-├── Form1.cs / Form1.Designer.cs         — Main UI (tabs: Console, Find & Execute, Remote Control, Model, Chat, Clients)
-├── AiChatForm.cs / AiChatForm.Designer.cs — AI Chat window (Tools → AI Chat); 8-provider streaming chat
-├── AiChatService.cs                     — Thread-safe service layer wrapping AiMessagingCore; manages provider config, session lifecycle, and streaming
-├── FlaUIHelper.cs                       — All FlaUI automation wrappers
-├── ElementIdGenerator.cs                — Stable SHA-256 hash-based element ID mapping
-├── CommandProcessor.cs                  — Shared remote command logic (used by all server types)
-├── HttpCommandServer.cs                 — HTTP REST server (System.Net.HttpListener)
-│     ├── ApexResult                     — Canonical {success, action, data, error} result type
-│     ├── FormatAdapter                  — Format negotiation (HTML / JSON / text / PDF)
-│     └── PdfWriter                      — Minimal PDF generator (no external dependencies)
-├── PipeCommandServer.cs                 — Named-pipe server
-├── TelegramController.cs                — Telegram bot (Telegram.Bot)
-├── OcrHelper.cs                         — Tesseract OCR wrapper
-├── MtmdHelper.cs                        — Stateless multimodal LLM wrapper (LLamaSharp MTMD)
-├── MtmdInteractiveModeExecute.cs        — Interactive AI computer use mode (Tools menu)
-├── UiMapRenderer.cs                     — Renders element trees as colour-coded screen overlays and PNG images
-├── AIDrawingCommand.cs                  — GDI+ drawing engine; 9 shape types; screen overlay; built-in space scene
-├── Scene.cs                             — SceneShape / Layer / Scene data models with stable IDs
-├── SceneStore.cs                        — Thread-safe in-memory + disk-persisted scene store
-├── SceneEditorForm.cs / .Designer.cs    — WinForms layered scene editor (Tools → Scene Editor)
+├── Program.cs                            — Entry point (`--service`, `--port`, `--pipe`, `--client`)
+├── appsettings.json                      — Deployment defaults (Http/pipe/log/shell/test-runner)
+├── ai-settings.json                      — AI provider credentials/settings
+├── AI/
+│   ├── AiChatService.cs                  — Provider-agnostic chat service (streaming + session state)
+│   ├── AIDrawingCommand.cs               — GDI+ drawing engine (`/draw`, overlays, built-in demo scene)
+│   ├── MtmdHelper.cs                     — Local multimodal model wrapper (LLamaSharp MTMD)
+│   ├── MtmdInteractiveModeExecute.cs     — Interactive AI computer-use mode
+│   └── SceneChatAgent.cs                 — Scene-oriented assistant logic
+├── Automation/
+│   ├── FlaUIHelper*.cs                   — UIA wrappers (find, actions, capture, text, keyboard, scrolling)
+│   ├── ElementIdGenerator.cs             — Stable hash-based element/window IDs
+│   └── UiMapRenderer.cs                  — Colour-coded tree renderer to PNG/overlay
+├── Commands/
+│   ├── CommandProcessor*.cs              — Core command handlers (find/exec/ocr/capture/ai/scenes/help)
+│   ├── CommandLineParser.cs              — cmd.exe command parsing
+│   ├── CommandRequest.cs                 — Normalized command DTO
+│   └── CommandRequestJsonMapper.cs       — HTTP JSON/query mapping helpers
+├── Servers/
+│   ├── HttpCommandServer*.cs             — HTTP API + chat/page/scene/system route handlers
+│   ├── FormatAdapter.cs                  — Response negotiation (HTML/JSON/text/PDF; includes `PdfWriter`)
+│   ├── PipeCommandServer.cs              — Named-pipe server
+│   └── TelegramController.cs             — Telegram command surface
+├── Scenes/
+│   ├── Scene.cs                          — Scene/layer/shape models with stable IDs
+│   └── SceneStore.cs                     — Thread-safe scene store (`%LOCALAPPDATA%\ApexComputerUse\scenes`)
 ├── Clients/
-│     ├── RemoteClient.cs               — Data model (name, host, port, API key, OS version, description)
-│     └── ClientStore.cs                — Thread-safe store; persists to <exe>/clients/{id}.json
-├── ai-settings.json                     — Starter config for AI Chat providers (placeholder keys)
-└── Scripts/
-    ├── ApexComputerUse.psm1             — PowerShell module (pipe-based)
-    └── apex.cmd                         — cmd.exe helper (HTTP-based)
+│   ├── RemoteClient.cs                   — Remote endpoint metadata
+│   ├── ClientPermissions.cs              — Per-client endpoint permission gates
+│   └── ClientStore.cs                    — Persistent client registry (`%LOCALAPPDATA%\ApexComputerUse\clients`)
+├── Infrastructure/
+│   ├── AppConfig.cs / AppSettings.cs     — Config layering (`appsettings.json` + `APEX_*` + user prefs)
+│   ├── AppLog.cs                         — Serilog bootstrap/log sink wiring
+│   ├── OcrHelper.cs                      — Tesseract OCR wrapper
+│   ├── DownloadManager.cs                — Model/OCR asset download support
+│   └── ApexService.cs                    — Windows Service host
+└── UI/
+    ├── Form1.cs / Form1.Designer.cs      — Main WinForms host
+    ├── ServerTabController.cs            — HTTP/pipe/server lifecycle controls
+    ├── ChatTabController.cs              — Embedded `/chat` WebView + provider controls
+    ├── ModelTabController.cs             — Model/asset management
+    ├── ClientsTabController.cs           — Multi-endpoint registry UI
+    ├── SceneEditorForm.cs / .Designer.cs — WinForms scene editor
+    └── ClientEditForm.cs / .Designer.cs  — Client create/edit dialog
 
-restart-apex.bat / restart-apex.ps1     — Kill all running instances and relaunch (Release → Debug → dotnet run)
-
-AIClients/                               — AI messaging projects (also in ApexComputerUse.sln)
-├── AiMessagingCore/                     — Provider-neutral .NET 10 library; 8 providers; streaming via events
-└── AIClients/                           — Standalone WinForms chat harness (builds independently via AIClients.sln)
+Scripts/                                  — `ApexComputerUse.psm1` (pipe module) and `apex.cmd` (HTTP helper)
+restart-apex.bat / restart-apex.ps1       — Restart helpers for local development
+AIClients/                                 — AI messaging libraries and harness projects
+TestApplications/                          — WPF/WinForms/Web test apps and TestRunner
 ```
 
 > **OCR:** place Tesseract language files in a `tessdata\` folder next to the executable. Not included in the repo — download from [github.com/tesseract-ocr/tessdata](https://github.com/tesseract-ocr/tessdata).
