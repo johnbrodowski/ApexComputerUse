@@ -202,7 +202,7 @@ Key settings:
 
 | Key | Default | Description |
 |---|---|---|
-| `HttpPort` | `8081` | HTTP listen port |
+| `HttpPort` | `8080` | HTTP listen port |
 | `HttpBindAll` | `false` | `true` binds all interfaces |
 | `PipeName` | `ApexComputerUse` | Named pipe name |
 | `EnableShellRun` | `false` | Enables `/run` shell execution endpoint |

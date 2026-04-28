@@ -268,7 +268,7 @@ Truncated nodes (ones whose children were cut off by `depth`) now also emit `des
 - **UI Map Renderer** — renders the element tree as a colour-coded overlay drawn directly on screen, and optionally exports a PNG image; accessible via Tools → Render UI Map or `GET /uimap`
 - **Format-adaptive responses** — every endpoint serves HTML, plain text, JSON, or **PDF** via URL extension (`.json`, `.html`, `.txt`, `.pdf`), `?format=` parameter, or `Accept` header; default is an HTML page with embedded JSON readable by any AI that can fetch a URL
 - **System utility routes** — `/health` (unauthenticated), `/ping`, `/metrics`, `/sysinfo`, `/env`, `/ls`, `/run`, `/run-tests`, `/shutdown` for AI agents that need OS-level context without a separate tool
-- **Embedded AI chat in the Chat tab** — the Chat tab hosts the streaming HTML chat UI (`/chat`) directly in an embedded WebView2 control; click **Load Chat** to connect. The HTML page handles streaming, provider/model display, and session reset natively.
+- **Embedded AI chat in the Chat tab** — the Chat tab opens the streaming HTML chat UI (`/chat`) in your default browser; click **Open In Browser** to launch it. The HTML page handles streaming, provider/model display, and session reset natively.
 - **AI Chat over HTTP** — streaming chat UI at `GET /chat` backed by `/chat/send`, `/chat/status`, `/chat/reset`; same 8 providers as the desktop AI Chat window; also accessible from any browser
 - **Auto-start on launch** — HTTP server starts automatically (`HttpAutoStart=true` by default), binds to localhost by default (`HttpBindAll=false`), and can be switched to all-interfaces mode with one-time netsh setup (URL ACL + Firewall rule)
 - **Auto-download setup** — Model tab "Download All" button fetches the LFM2.5-VL model, projector, and Tesseract data to fixed local paths on first launch
@@ -450,7 +450,7 @@ Configure via `appsettings.json` or `APEX_*` environment variables before starti
 | **Output UI Map** | Scans the current window's element tree and logs it as nested JSON to the console tab. |
 | **Render UI Map** | Scans the current window's element tree, draws a colour-coded bounding-box overlay on screen for 5 seconds, and offers to save the overlay as a PNG image. |
 | **Scene Editor** | Opens the layered scene editor — create scenes, add shapes to layers, drag to reposition, use AI to generate and refine compositions. |
-| **AI Chat** | Opens a standalone streaming chat window with support for 8 AI providers (OpenAI, Anthropic, DeepSeek, Grok, Groq, Duck, LM Studio, LlamaSharp). Configure API keys in `ai-settings.json` next to the executable. The **Chat tab** also embeds the same chat UI directly inside the app via WebView2 — click **Load Chat** after the HTTP server starts. |
+| **AI Chat** | Opens a standalone streaming chat window with support for 8 AI providers (OpenAI, Anthropic, DeepSeek, Grok, Groq, Duck, LM Studio, LlamaSharp). Configure API keys in `ai-settings.json` next to the executable. The **Chat tab** opens the same chat UI in your default browser — click **Open In Browser** after the HTTP server starts. |
 
 ---
 

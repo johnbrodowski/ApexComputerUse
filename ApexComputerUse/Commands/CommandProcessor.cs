@@ -14,6 +14,8 @@ namespace ApexComputerUse
         private readonly ElementIdGenerator _idGen = new() { UseIncrementalIds = false };
         private readonly Dictionary<int, AutomationElement> _elementMap    = new();
         private readonly Dictionary<int, string>            _elementHashes = new();   // parallel to _elementMap — stores each element's hash so a subtree can be re-scanned without re-walking from the window root
+        private readonly Dictionary<AutomationElement, int> _elementReverse = new();  // fast-path for /find ID recovery; default equality uses UIA CompareElements via AutomationElement.Equals
+        private readonly Queue<int>                         _elementInsertOrder = new();  // FIFO tracker so the 50k cap evicts oldest IDs instead of nuking the whole map
         private readonly Dictionary<int, Window>            _windowMap     = new();
         private IntPtr _mappedWindowHandle = IntPtr.Zero;
 

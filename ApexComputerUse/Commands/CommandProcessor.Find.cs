@@ -117,9 +117,16 @@ namespace ApexComputerUse
             int? id = preferredId;
             if (id == null)
             {
-                foreach (var kv in _elementMap)
+                // Fast path — reverse index is O(1) average. Falls back to the linear scan
+                // below if the dictionary misses (e.g. FlaUI returned a new instance with a
+                // different hash code), which is still correct via Equals (UIA CompareElements).
+                if (_elementReverse.TryGetValue(el, out int mapped)) id = mapped;
+                else
                 {
-                    if (kv.Value.Equals(el)) { id = kv.Key; break; }
+                    foreach (var kv in _elementMap)
+                    {
+                        if (kv.Value.Equals(el)) { id = kv.Key; break; }
+                    }
                 }
             }
 

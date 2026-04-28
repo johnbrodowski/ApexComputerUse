@@ -172,14 +172,29 @@ namespace ApexComputerUse
                               excludeName: isWindowOrPane, siblingIndex: siblingIndex);
                     id = _idGen.GenerateIdFromHash(hash);
                 }
-                if (_elementMap.Count >= 50_000)
+                // Drop the old reverse entry first — FlaUI hands out a fresh AutomationElement
+                // instance on each scan even though the resulting hash/id is the same, so the
+                // previously-mapped instance would otherwise leak in _elementReverse forever.
+                if (_elementMap.TryGetValue(id, out var oldEl)) _elementReverse.Remove(oldEl);
+                bool isNewId = oldEl == null;
+                _elementMap[id]     = el;
+                _elementHashes[id]  = hash;
+                _elementReverse[el] = id;
+                if (isNewId) _elementInsertOrder.Enqueue(id);
+
+                // FIFO eviction at the cap — preserves most recently inserted IDs instead of
+                // wiping the entire map at once (which would invalidate every ID an active
+                // session has cached).
+                while (_elementMap.Count > 50_000 && _elementInsertOrder.Count > 0)
                 {
-                    _elementMap.Clear();
-                    _elementHashes.Clear();
-                    OnLog?.Invoke("[Warn] Element map cleared (50k cap reached).");
+                    int evictId = _elementInsertOrder.Dequeue();
+                    if (_elementMap.TryGetValue(evictId, out var evicted))
+                    {
+                        _elementMap.Remove(evictId);
+                        _elementHashes.Remove(evictId);
+                        _elementReverse.Remove(evicted);
+                    }
                 }
-                _elementMap[id]    = el;
-                _elementHashes[id] = hash;
 
                 bool truncate = options.MaxDepth.HasValue && depth >= options.MaxDepth.Value;
 
@@ -280,8 +295,12 @@ namespace ApexComputerUse
         /// via <c>/elements?id=&lt;id&gt;</c>. No ID hashing, no node construction, no mapping —
         /// just walks children to produce an integer so the caller can estimate cost.
         /// </summary>
-        private static int CountDescendantsBelow(AutomationElement el, bool onscreenOnly)
+        private static int CountDescendantsBelow(AutomationElement el, bool onscreenOnly, int depth = 0)
         {
+            // Cyclic UIA trees (seen in some UWP/WPF apps) would otherwise recurse to stack
+            // overflow — main scanner uses the same ScanMaxDepth ceiling.
+            if (depth > ScanMaxDepth) return 0;
+
             AutomationElement[]? children;
             try
             {
@@ -297,7 +316,7 @@ namespace ApexComputerUse
                 try
                 {
                     if (onscreenOnly && c.Properties.IsOffscreen.ValueOrDefault) continue;
-                    total += 1 + CountDescendantsBelow(c, onscreenOnly);
+                    total += 1 + CountDescendantsBelow(c, onscreenOnly, depth + 1);
                 }
                 catch { /* stale child — skip */ }
             }

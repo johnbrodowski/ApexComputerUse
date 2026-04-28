@@ -3,7 +3,7 @@ using System.Net.Sockets;
 
 namespace ApexComputerUse
 {
-    internal sealed class ClientsTabController
+    internal sealed class ClientsTabController : IDisposable
     {
         private readonly ClientStore    _store;
         private readonly ListView       _list;
@@ -121,15 +121,24 @@ namespace ApexComputerUse
                     request.Headers.Add("X-Api-Key", client.ApiKey);
 
                 var resp = await _http.SendAsync(request).ConfigureAwait(false);
-                _list.Invoke(() => SetStatus(
+                SafeInvoke(() => SetStatus(
                     item,
                     resp.IsSuccessStatusCode ? "Online" : $"HTTP {(int)resp.StatusCode}",
                     resp.IsSuccessStatusCode ? Color.Green : Color.OrangeRed));
             }
             catch
             {
-                _list.Invoke(() => SetStatus(item, "Offline", Color.Red));
+                SafeInvoke(() => SetStatus(item, "Offline", Color.Red));
             }
+        }
+
+        // Form may have closed between the awaited HTTP response and this Invoke. Swallow the
+        // disposal-race exceptions; they're routine during teardown and not actionable.
+        private void SafeInvoke(Action a)
+        {
+            try { _list.Invoke(a); }
+            catch (ObjectDisposedException) { }
+            catch (InvalidOperationException) { }
         }
 
         private async Task PingAllAsync()
@@ -150,21 +159,31 @@ namespace ApexComputerUse
             {
                 _pingInFlight = false;
                 if (_updateClientsStatus != null)
-                    _list.Invoke(() =>
+                {
+                    // Form may have closed while the ping batch was in flight — Dispose stops
+                    // the timer but doesn't await this task, so the Invoke can race with
+                    // teardown. Swallow the disposal exceptions exactly like Form1's _logHandler.
+                    try
                     {
-                        int tot = _list.Items.Count;
-                        int on  = _list.Items.Cast<ListViewItem>()
-                                      .Count(i => i.SubItems[5].Text == "Online");
-                        if (tot == 0)
-                            _updateClientsStatus("Clients: --", SystemColors.GrayText);
-                        else
+                        _list.Invoke(() =>
                         {
-                            Color c = on == tot ? Color.Green
-                                    : on  > 0   ? Color.DarkOrange
-                                                : SystemColors.GrayText;
-                            _updateClientsStatus($"Clients: {on}/{tot}", c);
-                        }
-                    });
+                            int tot = _list.Items.Count;
+                            int on  = _list.Items.Cast<ListViewItem>()
+                                          .Count(i => i.SubItems[5].Text == "Online");
+                            if (tot == 0)
+                                _updateClientsStatus("Clients: --", SystemColors.GrayText);
+                            else
+                            {
+                                Color c = on == tot ? Color.Green
+                                        : on  > 0   ? Color.DarkOrange
+                                                    : SystemColors.GrayText;
+                                _updateClientsStatus($"Clients: {on}/{tot}", c);
+                            }
+                        });
+                    }
+                    catch (ObjectDisposedException) { }
+                    catch (InvalidOperationException) { }
+                }
             }
         }
 
@@ -278,6 +297,13 @@ namespace ApexComputerUse
         {
             item.SubItems[5].Text      = text;
             item.SubItems[5].ForeColor = colour;
+        }
+
+        public void Dispose()
+        {
+            _heartbeat?.Stop();
+            _heartbeat?.Dispose();
+            _heartbeat = null;
         }
     }
 }

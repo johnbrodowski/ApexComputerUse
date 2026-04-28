@@ -68,6 +68,8 @@ namespace ApexComputerUse
                 {
                     _elementMap.Clear();
                     _elementHashes.Clear();
+                    _elementReverse.Clear();
+                    _elementInsertOrder.Clear();
                     _idGen.Reset();
                     _mappedWindowHandle = hwnd;
                 }
@@ -75,6 +77,8 @@ namespace ApexComputerUse
                 {
                     _elementMap.Clear();
                     _elementHashes.Clear();
+                    _elementReverse.Clear();
+                    _elementInsertOrder.Clear();
                 }
                 scanRoot = CurrentWindow;
             }

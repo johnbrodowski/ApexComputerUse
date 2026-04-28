@@ -1087,7 +1087,6 @@ namespace ApexComputerUse
             Name = "Form1";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "ApexComputerUse";
-            Load += Form1_Load;
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
             tabPageChat.ResumeLayout(false);

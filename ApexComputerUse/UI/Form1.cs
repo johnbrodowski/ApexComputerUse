@@ -3,7 +3,7 @@ using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Definitions;
 
 namespace ApexComputerUse
-{//?apiKey=
+{
     public partial class Form1 : Form
     {
         private readonly ApexHelper _helper = new();
@@ -271,8 +271,12 @@ namespace ApexComputerUse
                     NetshConfigured  = _netshConfigured,
                     NetshPort        = _netshPort
                 };
-                File.WriteAllText(SettingsFile,
+                // Atomic write: a crash mid-write would otherwise corrupt settings.json,
+                // and a corrupt file is treated as missing — wiping out the saved API key.
+                string tmp = SettingsFile + ".tmp";
+                File.WriteAllText(tmp,
                     JsonSerializer.Serialize(s, new JsonSerializerOptions { WriteIndented = true }));
+                File.Move(tmp, SettingsFile, overwrite: true);
             }
             catch (Exception ex) { AppLog.Warning($"SaveSettings: failed to write settings — {ex.Message}"); }
         }
@@ -311,8 +315,8 @@ namespace ApexComputerUse
 
             if (_netshConfigured) return;
 
-            bool urlAclOk = IsNetshUrlAclSet(port);
-            bool firewallOk = IsFirewallRuleSet("ApexComputerUse", port);
+            bool urlAclOk = await IsNetshUrlAclSetAsync(port);
+            bool firewallOk = await IsFirewallRuleSetAsync("ApexComputerUse", port);
 
             if (urlAclOk && firewallOk)
             {
@@ -386,11 +390,20 @@ namespace ApexComputerUse
         private void LogRemote(string text)
         {
             if (string.IsNullOrWhiteSpace(text)) return;
+            if (IsDisposed || Disposing || !IsHandleCreated) return;
             string stamped = $"[{DateTime.Now:HH:mm:ss}] {text.TrimEnd()}{Environment.NewLine}";
-            if (txtRemoteLog.InvokeRequired)
-                txtRemoteLog.BeginInvoke(() => { txtRemoteLog.AppendText(stamped); });
-            else
-                txtRemoteLog.AppendText(stamped);
+            try
+            {
+                if (txtRemoteLog.InvokeRequired)
+                    txtRemoteLog.BeginInvoke(() => { txtRemoteLog.AppendText(stamped); TrimLog(txtRemoteLog); });
+                else
+                {
+                    txtRemoteLog.AppendText(stamped);
+                    TrimLog(txtRemoteLog);
+                }
+            }
+            catch (ObjectDisposedException) { /* form closed between check and call */ }
+            catch (InvalidOperationException) { /* handle destroyed between check and call */ }
         }
 
         private static async Task<string> RunElevatedAsync(string cmds)
@@ -418,16 +431,16 @@ namespace ApexComputerUse
         private async void btnApplyFirewall_Click(object sender, EventArgs e)
         {
             if (int.TryParse(txtHttpPort.Text, out int port))
-                await ApplyFirewallAsync(port);
+                await SafeRun(() => ApplyFirewallAsync(port), nameof(ApplyFirewallAsync));
         }
 
         private async void btnRemoveFirewall_Click(object sender, EventArgs e)
         {
             if (int.TryParse(txtHttpPort.Text, out int port))
-                await RemoveFirewallAsync(port);
+                await SafeRun(() => RemoveFirewallAsync(port), nameof(RemoveFirewallAsync));
         }
 
-        private static bool IsNetshUrlAclSet(int port)
+        private static async Task<bool> IsNetshUrlAclSetAsync(int port)
         {
             try
             {
@@ -435,14 +448,15 @@ namespace ApexComputerUse
                     "netsh", $"http show urlacl url=http://+:{port}/")
                 { UseShellExecute = false, RedirectStandardOutput = true, CreateNoWindow = true };
                 using var proc = System.Diagnostics.Process.Start(psi);
-                var output = proc?.StandardOutput.ReadToEnd() ?? "";
-                proc?.WaitForExit();
+                if (proc == null) return false;
+                var output = await proc.StandardOutput.ReadToEndAsync();
+                await proc.WaitForExitAsync();
                 return output.Contains($"+:{port}/", StringComparison.OrdinalIgnoreCase);
             }
             catch { return false; }
         }
 
-        private static bool IsFirewallRuleSet(string ruleName, int port)
+        private static async Task<bool> IsFirewallRuleSetAsync(string ruleName, int port)
         {
             try
             {
@@ -450,8 +464,9 @@ namespace ApexComputerUse
                     "netsh", $"advfirewall firewall show rule name=\"{ruleName}\"")
                 { UseShellExecute = false, RedirectStandardOutput = true, CreateNoWindow = true };
                 using var proc = System.Diagnostics.Process.Start(psi);
-                var output = proc?.StandardOutput.ReadToEnd() ?? "";
-                proc?.WaitForExit();
+                if (proc == null) return false;
+                var output = await proc.StandardOutput.ReadToEndAsync();
+                await proc.WaitForExitAsync();
                 if (!output.Contains("Rule Name:", StringComparison.OrdinalIgnoreCase)) return false;
                 int portIdx = output.IndexOf("LocalPort:", StringComparison.OrdinalIgnoreCase);
                 return portIdx >= 0 &&
@@ -464,11 +479,19 @@ namespace ApexComputerUse
 
         private void AutoLoadModelIfConfigured()
         {
-            if (!string.IsNullOrWhiteSpace(txtModelPath.Text) &&
-                !string.IsNullOrWhiteSpace(txtProjPath.Text))
-                _model.LoadModel().ContinueWith(
-                    t => BeginInvoke(() => Log($"Model auto-load failed: {t.Exception!.InnerException?.Message ?? t.Exception.Message}")),
-                    TaskContinuationOptions.OnlyOnFaulted);
+            if (string.IsNullOrWhiteSpace(txtModelPath.Text) ||
+                string.IsNullOrWhiteSpace(txtProjPath.Text)) return;
+
+            // ContinueWith runs on the thread pool; marshal the BeginInvoke through the same
+            // disposed-form guard _logHandler uses so a late failure on shutdown can't crash.
+            _model.LoadModel().ContinueWith(t =>
+            {
+                if (IsDisposed || Disposing || !IsHandleCreated) return;
+                string msg = $"Model auto-load failed: {t.Exception!.InnerException?.Message ?? t.Exception.Message}";
+                try { BeginInvoke(() => Log(msg)); }
+                catch (ObjectDisposedException) { }
+                catch (InvalidOperationException) { }
+            }, TaskContinuationOptions.OnlyOnFaulted);
         }
 
         // ── Control-type picker ───────────────────────────────────────────
@@ -621,8 +644,26 @@ namespace ApexComputerUse
 
         private void btnClear_Click(object sender, EventArgs e) => txtStatus.Clear();
 
-        private void Log(string msg) =>
+        private void Log(string msg)
+        {
             txtStatus.AppendText($"[{DateTime.Now:HH:mm:ss}] {msg}{Environment.NewLine}");
+            TrimLog(txtStatus);
+        }
+
+        // Cap log textboxes so a long agent session doesn't accumulate hundreds of MB of text.
+        private const int LogCapChars   = 200_000;
+        private const int LogTrimTarget = 150_000;
+        private static void TrimLog(TextBoxBase tb)
+        {
+            if (tb.TextLength <= LogCapChars) return;
+            string text = tb.Text;
+            tb.Text = text[^LogTrimTarget..];
+            tb.SelectionStart  = tb.TextLength;
+            tb.SelectionLength = 0;
+            // Setting Text resets the scroll position; SelectionStart alone doesn't move the
+            // viewport on a multiline TextBox — ScrollToCaret keeps the user pinned to the tail.
+            tb.ScrollToCaret();
+        }
 
         /// <summary>
         /// Top-level exception boundary for <c>async void</c> event handlers.
@@ -647,6 +688,7 @@ namespace ApexComputerUse
             _processor.OnLog -= _logHandler;
             _servers.Dispose();   // unsubscribes log handlers and stops all servers
             _statusMonitor.Dispose();
+            _clients.Dispose();   // stops the heartbeat Timer
             _downloader.Cancel();
             _processor.Dispose();
             _helper.Dispose();
@@ -725,12 +767,5 @@ namespace ApexComputerUse
             editor.Show(this);
         }
 
-        private void Form1_Load(object sender, EventArgs e) {
-
-
- 
-
-
-        }
     }
 }
