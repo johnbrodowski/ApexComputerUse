@@ -584,7 +584,8 @@ namespace ApexComputerUse
                 string routeKey = $"{method} {rawPath}";
                 _routeCounts.AddOrUpdate(routeKey, 1, (_, n) => n + 1);
                 _routeLastLatencyMs[routeKey] = sw.Elapsed.TotalMilliseconds;
-                OnLog?.Invoke($"HTTP {statusCode} {method} {rawPath} ({sw.ElapsedMilliseconds}ms) [{clientIp}]");
+                if (rawPath != "/ping")
+                    OnLog?.Invoke($"HTTP {statusCode} {method} {rawPath} ({sw.ElapsedMilliseconds}ms) [{clientIp}]");
             }
         }
 

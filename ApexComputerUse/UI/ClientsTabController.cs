@@ -1,34 +1,46 @@
+using System.Net;
+using System.Net.Sockets;
+
 namespace ApexComputerUse
 {
     internal sealed class ClientsTabController
     {
-        private readonly ClientStore   _store;
-        private readonly ListView      _list;
-        private readonly Button        _btnAdd, _btnEdit, _btnRemove, _btnTest, _btnOpenWebUi, _btnLaunch;
-        private readonly Func<int>     _getCurrentPort;
+        private readonly ClientStore    _store;
+        private readonly ListView       _list;
+        private readonly Button         _btnAdd, _btnEdit, _btnRemove, _btnTest, _btnOpenWebUi, _btnLaunch;
+        private readonly Func<int>               _getCurrentPort;
+        private readonly Func<string>            _getCurrentApiKey;
+        private readonly Action<string, Color>?  _updateClientsStatus;
+
+        private System.Windows.Forms.Timer? _heartbeat;
+        private bool                        _pingInFlight;
 
         private static readonly HttpClient _http = new() { Timeout = TimeSpan.FromSeconds(3) };
 
         internal ClientsTabController(
-            ClientStore store,
-            ListView    listViewClients,
-            Button      btnAdd,
-            Button      btnEdit,
-            Button      btnRemove,
-            Button      btnTest,
-            Button      btnOpenWebUi,
-            Button      btnLaunchInstance,
-            Func<int>   getCurrentPort)
+            ClientStore   store,
+            ListView      listViewClients,
+            Button        btnAdd,
+            Button        btnEdit,
+            Button        btnRemove,
+            Button        btnTest,
+            Button        btnOpenWebUi,
+            Button        btnLaunchInstance,
+            Func<int>              getCurrentPort,
+            Func<string>           getCurrentApiKey,
+            Action<string, Color>? updateClientsStatus = null)
         {
-            _store          = store;
-            _list           = listViewClients;
-            _btnAdd         = btnAdd;
-            _btnEdit        = btnEdit;
-            _btnRemove      = btnRemove;
-            _btnTest        = btnTest;
-            _btnOpenWebUi   = btnOpenWebUi;
-            _btnLaunch      = btnLaunchInstance;
-            _getCurrentPort = getCurrentPort;
+            _store               = store;
+            _list                = listViewClients;
+            _btnAdd              = btnAdd;
+            _btnEdit             = btnEdit;
+            _btnRemove           = btnRemove;
+            _btnTest             = btnTest;
+            _btnOpenWebUi        = btnOpenWebUi;
+            _btnLaunch           = btnLaunchInstance;
+            _getCurrentPort      = getCurrentPort;
+            _getCurrentApiKey    = getCurrentApiKey;
+            _updateClientsStatus = updateClientsStatus;
         }
 
         internal void Init()
@@ -44,7 +56,21 @@ namespace ApexComputerUse
             if (Program.IsClientInstance)
                 _btnLaunch.Visible = false;
 
+            if (_list.Columns.Count == 0)
+            {
+                _list.Columns.Add("Name",        120);
+                _list.Columns.Add("Host",         90);
+                _list.Columns.Add("Port",         50);
+                _list.Columns.Add("OS",          120);
+                _list.Columns.Add("Description", 100);
+                _list.Columns.Add("Status",       87);
+            }
+
             RefreshList();
+
+            _heartbeat = new System.Windows.Forms.Timer { Interval = 5000 };
+            _heartbeat.Tick += (_, _) => { if (_pingInFlight) return; _ = PingAllAsync(); };
+            _heartbeat.Start();
         }
 
         internal void Add()
@@ -82,21 +108,80 @@ namespace ApexComputerUse
 
             var item = _list.SelectedItems[0];
             SetStatus(item, "Testing…", Color.Gray);
+            await PingOneAsync(item, client).ConfigureAwait(false);
+        }
 
+        private async Task PingOneAsync(ListViewItem item, RemoteClient client)
+        {
             try
             {
-                string url = $"http://{client.Host}:{client.Port}/ping";
-                var headers = new HttpRequestMessage(HttpMethod.Get, url);
+                string url     = $"http://{client.Host}:{client.Port}/ping";
+                var    request = new HttpRequestMessage(HttpMethod.Get, url);
                 if (client.ApiKey.Length > 0)
-                    headers.Headers.Add("X-Api-Key", client.ApiKey);
+                    request.Headers.Add("X-Api-Key", client.ApiKey);
 
-                var resp = await _http.SendAsync(headers).ConfigureAwait(false);
-                _list.Invoke(() => SetStatus(item, resp.IsSuccessStatusCode ? "Online" : $"HTTP {(int)resp.StatusCode}", resp.IsSuccessStatusCode ? Color.Green : Color.OrangeRed));
+                var resp = await _http.SendAsync(request).ConfigureAwait(false);
+                _list.Invoke(() => SetStatus(
+                    item,
+                    resp.IsSuccessStatusCode ? "Online" : $"HTTP {(int)resp.StatusCode}",
+                    resp.IsSuccessStatusCode ? Color.Green : Color.OrangeRed));
             }
             catch
             {
                 _list.Invoke(() => SetStatus(item, "Offline", Color.Red));
             }
+        }
+
+        private async Task PingAllAsync()
+        {
+            try
+            {
+                _pingInFlight = true;
+                var rows = _list.Items.Cast<ListViewItem>().ToArray();
+                foreach (var item in rows)
+                {
+                    if (item.Tag is not string id) continue;
+                    if (item.SubItems[5].Text == "Testing…") continue;
+                    if (_store.Get(id) is not RemoteClient client) continue;
+                    await PingOneAsync(item, client).ConfigureAwait(false);
+                }
+            }
+            finally
+            {
+                _pingInFlight = false;
+                if (_updateClientsStatus != null)
+                    _list.Invoke(() =>
+                    {
+                        int tot = _list.Items.Count;
+                        int on  = _list.Items.Cast<ListViewItem>()
+                                      .Count(i => i.SubItems[5].Text == "Online");
+                        if (tot == 0)
+                            _updateClientsStatus("Clients: --", SystemColors.GrayText);
+                        else
+                        {
+                            Color c = on == tot ? Color.Green
+                                    : on  > 0   ? Color.DarkOrange
+                                                : SystemColors.GrayText;
+                            _updateClientsStatus($"Clients: {on}/{tot}", c);
+                        }
+                    });
+            }
+        }
+
+        private static int FindFreeLoopbackPort(int startPort, int maxAttempts = 50)
+        {
+            for (int p = startPort; p < startPort + maxAttempts; p++)
+            {
+                try
+                {
+                    var l = new TcpListener(IPAddress.Loopback, p);
+                    l.Start();
+                    l.Stop();
+                    return p;
+                }
+                catch (SocketException) { }
+            }
+            return startPort;
         }
 
         internal void OpenWebUi()
@@ -126,9 +211,9 @@ namespace ApexComputerUse
                 return;
             }
 
-            // Suggest the port after the one this instance is using; the new process will
-            // auto-increment further if that port is also taken.
-            int nextPort = _getCurrentPort() + 1;
+            // Probe for an actually-free loopback port starting one above this instance's
+            // port; the child's HttpCommandServer.Start() still auto-increments as a fallback.
+            int nextPort = FindFreeLoopbackPort(_getCurrentPort() + 1);
 
             try
             {
@@ -138,16 +223,24 @@ namespace ApexComputerUse
                 };
                 System.Diagnostics.Process.Start(psi);
 
-                // Pre-add a client entry for the new instance so it appears in the list.
-                var client = new RemoteClient
+                // Pre-add a client entry only if no entry with the same host:port already exists.
+                bool exists = _store.GetAll().Any(c =>
+                    c.Port == nextPort &&
+                    c.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase));
+
+                if (!exists)
                 {
-                    Name        = $"Local :{nextPort}",
-                    Host        = "localhost",
-                    Port        = nextPort,
-                    OsVersion   = Environment.OSVersion.VersionString,
-                    Description = "Launched instance"
-                };
-                _store.Add(client);
+                    var client = new RemoteClient
+                    {
+                        Name        = $"Local :{nextPort}",
+                        Host        = "localhost",
+                        Port        = nextPort,
+                        ApiKey      = _getCurrentApiKey(),
+                        OsVersion   = Environment.OSVersion.VersionString,
+                        Description = "Launched instance"
+                    };
+                    _store.Add(client);
+                }
                 RefreshList();
             }
             catch (Exception ex)

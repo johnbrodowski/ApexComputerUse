@@ -190,7 +190,10 @@ namespace ApexComputerUse
             _clients = new ClientsTabController(
                 _clientStore, listViewClients,
                 btnAddClient, btnEditClient, btnRemoveClient, btnTestClient, btnOpenWebUiClient,
-                btnLaunchInstance, () => _servers.Http?.Port ?? AppConfig.Current.HttpPort);
+                btnLaunchInstance,
+                () => _servers.Http?.Port ?? AppConfig.Current.HttpPort,
+                () => txtApiKey.Text,
+                (text, color) => { lblStatClients.Text = text; lblStatClients.ForeColor = color; });
 
             // Action control-type picker
             cmbControlType.Items.AddRange(ControlActions.Keys.ToArray<object>());
@@ -722,6 +725,12 @@ namespace ApexComputerUse
             editor.Show(this);
         }
 
-        private void Form1_Load(object sender, EventArgs e) { }
+        private void Form1_Load(object sender, EventArgs e) {
+
+
+ 
+
+
+        }
     }
 }

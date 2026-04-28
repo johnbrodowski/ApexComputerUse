@@ -113,6 +113,7 @@ namespace ApexComputerUse
             lblStatCpu = new ToolStripStatusLabel();
             lblStatRam = new ToolStripStatusLabel();
             lblStatModel = new ToolStripStatusLabel();
+            lblStatClients = new ToolStripStatusLabel();
             lblStatNet = new ToolStripStatusLabel();
             toolTipRemote = new ToolTip(components);
             menuStrip1.SuspendLayout();
@@ -1028,7 +1029,7 @@ namespace ApexComputerUse
             // 
             // statusStrip1
             // 
-            statusStrip1.Items.AddRange(new ToolStripItem[] { lblStatCpu, lblStatRam, lblStatModel, lblStatNet });
+            statusStrip1.Items.AddRange(new ToolStripItem[] { lblStatCpu, lblStatRam, lblStatModel, lblStatClients, lblStatNet });
             statusStrip1.Location = new Point(0, 397);
             statusStrip1.Name = "statusStrip1";
             statusStrip1.Size = new Size(615, 26);
@@ -1056,10 +1057,17 @@ namespace ApexComputerUse
             lblStatModel.Size = new Size(67, 21);
             lblStatModel.Text = "Model: --";
             // 
+            // lblStatClients
+            // 
+            lblStatClients.BorderSides = ToolStripStatusLabelBorderSides.Right;
+            lblStatClients.Name = "lblStatClients";
+            lblStatClients.Size = new Size(67, 21);
+            lblStatClients.Text = "Clients: --";
+            // 
             // lblStatNet
             // 
             lblStatNet.Name = "lblStatNet";
-            lblStatNet.Size = new Size(389, 21);
+            lblStatNet.Size = new Size(322, 21);
             lblStatNet.Spring = true;
             lblStatNet.Text = "Net: --";
             lblStatNet.TextAlign = ContentAlignment.MiddleRight;
@@ -1068,6 +1076,7 @@ namespace ApexComputerUse
             // 
             AutoScaleDimensions = new SizeF(7F, 17F);
             AutoScaleMode = AutoScaleMode.Font;
+            BackColor = SystemColors.Control;
             ClientSize = new Size(615, 423);
             Controls.Add(tabMain);
             Controls.Add(statusStrip1);
@@ -1167,6 +1176,7 @@ namespace ApexComputerUse
         private System.Windows.Forms.ToolStripStatusLabel lblStatCpu;
         private System.Windows.Forms.ToolStripStatusLabel lblStatRam;
         private System.Windows.Forms.ToolStripStatusLabel lblStatModel;
+        private System.Windows.Forms.ToolStripStatusLabel lblStatClients;
         private System.Windows.Forms.ToolStripStatusLabel lblStatNet;
 
         private System.Windows.Forms.ToolTip    toolTipRemote;

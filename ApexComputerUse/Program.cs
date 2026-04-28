@@ -7,6 +7,9 @@ namespace ApexComputerUse
     {
         public static bool IsClientInstance { get; private set; }
 
+        // Held for the process lifetime when this is the server instance; prevents a second server starting.
+        private static Mutex? _serverMutex;
+
         /// <summary>
         /// Entry point.  Run without arguments for the WinForms GUI.
         /// Run with <c>--service</c> (or register via sc.exe) for headless Windows Service mode.
@@ -32,6 +35,22 @@ namespace ApexComputerUse
                     else if (args[i].Equals("--pipe", StringComparison.OrdinalIgnoreCase) &&
                         !string.IsNullOrWhiteSpace(args[i + 1]))
                         Environment.SetEnvironmentVariable("APEX_PIPE_NAME", args[i + 1]);
+                }
+            }
+
+            // ── Server singleton guard ────────────────────────────────────
+            // Only one non-client instance may run on this machine at a time.
+            if (!IsClientInstance)
+            {
+                _serverMutex = new Mutex(true, @"Global\ApexComputerUse_Server", out bool isNew);
+                if (!isNew)
+                {
+                    _serverMutex.Dispose();
+                    _serverMutex = null;
+                    MessageBox.Show(
+                        "An ApexComputerUse server is already running on this machine.",
+                        "Already Running", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
                 }
             }
 
