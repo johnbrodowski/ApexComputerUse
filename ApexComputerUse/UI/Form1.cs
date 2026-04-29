@@ -335,26 +335,18 @@ namespace ApexComputerUse
 
         private async Task ApplyFirewallAsync(int port)
         {
-            bool bindAll = AppConfig.Current.HttpBindAll;
-            LogRemote($"Apply firewall rules for port {port} ({(bindAll ? "all interfaces" : "localhost")} mode)...");
+            LogRemote($"Opening port {port} for network access...");
             try
             {
-                // Always clear any stale URL ACL first — a strong-wildcard reservation can block
-                // localhost binding even when the ACL is set to Everyone.
                 string cmds =
                     $"netsh http delete urlacl url=http://+:{port}/ & " +
-                    $"netsh advfirewall firewall delete rule name=\"ApexComputerUse\" & ";
+                    $"netsh advfirewall firewall delete rule name=\"ApexComputerUse\" & " +
+                    $"netsh http add urlacl url=http://+:{port}/ user=Everyone & ";
 
-                // Only add a wildcard URL ACL when binding to all interfaces; localhost-only binding
-                // doesn't need one and is actively hindered by it.
-                if (bindAll)
-                {
-                    cmds += $"netsh http add urlacl url=http://+:{port}/ user=Everyone & ";
-                    var localIPs = System.Net.Dns.GetHostAddresses(System.Net.Dns.GetHostName())
-                        .Where(a => a.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork);
-                    foreach (var ip in localIPs)
-                        cmds += $"netsh http add urlacl url=http://{ip}:{port}/ user=Everyone & ";
-                }
+                var localIPs = System.Net.Dns.GetHostAddresses(System.Net.Dns.GetHostName())
+                    .Where(a => a.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork);
+                foreach (var ip in localIPs)
+                    cmds += $"netsh http add urlacl url=http://{ip}:{port}/ user=Everyone & ";
 
                 cmds += $"netsh advfirewall firewall add rule name=\"ApexComputerUse\" " +
                         $"dir=in action=allow protocol=TCP localport={port}";
@@ -364,9 +356,8 @@ namespace ApexComputerUse
                 _netshPort = port;
                 SaveSettings();
                 LogRemote(output);
-                LogRemote($"Done. Firewall rules applied for port {port}.");
-                if (!bindAll)
-                    LogRemote("Note: 'Bind All Interfaces' is OFF, so these rules only affect external connections — localhost binding works regardless.");
+                LogRemote($"Port {port} open. Restarting server on all interfaces...");
+                _servers.RestartHttp(true);
             }
             catch (Exception ex)
             {
@@ -376,8 +367,7 @@ namespace ApexComputerUse
 
         private async Task RemoveFirewallAsync(int port)
         {
-            bool bindAll = AppConfig.Current.HttpBindAll;
-            LogRemote($"Remove firewall rules for port {port} ({(bindAll ? "all interfaces" : "localhost")} mode)...");
+            LogRemote($"Closing port {port} to network access...");
             try
             {
                 var delCmds = $"netsh http delete urlacl url=http://+:{port}/ & " +
@@ -391,9 +381,8 @@ namespace ApexComputerUse
                 _netshPort = 0;
                 SaveSettings();
                 LogRemote(output);
-                LogRemote($"Done. Firewall rules removed for port {port}.");
-                if (!bindAll)
-                    LogRemote("Note: 'Bind All Interfaces' is OFF, so these rules only affected external connections — localhost binding still works. Use 'Stop HTTP' to stop the server.");
+                LogRemote($"Port {port} closed. Restarting server on localhost only...");
+                _servers.RestartHttp(false);
             }
             catch (Exception ex)
             {

@@ -106,6 +106,44 @@ namespace ApexComputerUse
             }
         }
 
+        internal void RestartHttp(bool bindAll)
+        {
+            if (!int.TryParse(_txtHttpPort.Text.Trim(), out int port) || port < 1 || port > 65535) return;
+            string apiKey = _txtApiKey.Text.Trim();
+            if (bindAll && string.IsNullOrWhiteSpace(apiKey))
+            {
+                _log("ERROR: Cannot bind to all interfaces without an API key. Set one in the API Key field.");
+                return;
+            }
+            if (Http?.IsRunning == true) { Http.Stop(); _chatService.ClearLocalServer(); }
+            var cfg = AppConfig.Current;
+            Http = new HttpCommandServer(port, _processor, _sceneStore, _chatService, apiKey,
+                       enableShellRun: cfg.EnableShellRun, bindAll: bindAll,
+                       testRunnerExePath: cfg.TestRunnerExePath,
+                       testRunnerConfigPath: cfg.TestRunnerConfigPath,
+                       clientStore: _clientStore);
+            Http.OnLog += _logHandler;
+            Http.OnShutdownRequested += () =>
+            {
+                try
+                {
+                    if (System.Windows.Forms.Application.OpenForms.Count > 0)
+                        System.Windows.Forms.Application.OpenForms[0]!.BeginInvoke(() => System.Windows.Forms.Application.Exit());
+                    else
+                        System.Windows.Forms.Application.Exit();
+                }
+                catch { Environment.Exit(0); }
+            };
+            Http.Start();
+            _chatService.SetLocalServer(Http.Port, apiKey);
+            _btnStartHttp.Text = "Stop HTTP";
+            string authNote = string.IsNullOrWhiteSpace(apiKey) ? " (no auth)" : " (auth enabled)";
+            _lblHttpStatus.Text = $"Listening :{Http.Port}{authNote}";
+            _lblHttpStatus.ForeColor = string.IsNullOrWhiteSpace(apiKey) ? Color.DarkOrange : Color.Green;
+            _btnApplyFirewall.Enabled = false;
+            _btnRemoveFirewall.Enabled = false;
+        }
+
         internal void TogglePipe()
         {
             if (Pipe?.IsRunning == true)
