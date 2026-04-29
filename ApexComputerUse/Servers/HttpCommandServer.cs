@@ -235,10 +235,15 @@ namespace ApexComputerUse
             if (addr == null || System.Net.IPAddress.IsLoopback(addr)) return _fullPermissions;
 
             // Match against the client list by IP string.
-            // Unknown non-loopback callers are denied â€" the client list is authoritative.
             string host = addr.ToString();
             var client = _clientStore?.FindByHost(host);
-            return client?.Permissions ?? _noPermissions;
+            if (client != null) return client.Permissions;
+
+            // Unknown non-loopback caller: if they have a valid API key, grant full access.
+            // The API key is the authentication — the client list is for per-client restriction only.
+            if (IsAuthenticated(req)) return _fullPermissions;
+
+            return _noPermissions;
         }
 
         internal static bool IsPathAllowed(string path, ClientPermissions p)
