@@ -307,9 +307,13 @@ namespace ApexComputerUse
             // If port changed since last setup, remove stale rules for the old port first.
             if (_netshConfigured && _netshPort != port && _netshPort != 0)
             {
-                await RunElevatedAsync(
-                    $"netsh http delete urlacl url=http://+:{_netshPort}/ & " +
-                    $"netsh advfirewall firewall delete rule name=\"ApexComputerUse\"");
+                var staleCmds = $"netsh http delete urlacl url=http://+:{_netshPort}/ & " +
+                    $"netsh advfirewall firewall delete rule name=\"ApexComputerUse\"";
+                var staleIPs = System.Net.Dns.GetHostAddresses(System.Net.Dns.GetHostName())
+                    .Where(a => a.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork);
+                foreach (var ip in staleIPs)
+                    staleCmds += $" & netsh http delete urlacl url=http://{ip}:{_netshPort}/";
+                await RunElevatedAsync(staleCmds);
                 _netshConfigured = false;
             }
 
@@ -344,7 +348,13 @@ namespace ApexComputerUse
                 // Only add a wildcard URL ACL when binding to all interfaces; localhost-only binding
                 // doesn't need one and is actively hindered by it.
                 if (bindAll)
+                {
                     cmds += $"netsh http add urlacl url=http://+:{port}/ user=Everyone & ";
+                    var localIPs = System.Net.Dns.GetHostAddresses(System.Net.Dns.GetHostName())
+                        .Where(a => a.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork);
+                    foreach (var ip in localIPs)
+                        cmds += $"netsh http add urlacl url=http://{ip}:{port}/ user=Everyone & ";
+                }
 
                 cmds += $"netsh advfirewall firewall add rule name=\"ApexComputerUse\" " +
                         $"dir=in action=allow protocol=TCP localport={port}";
@@ -370,9 +380,13 @@ namespace ApexComputerUse
             LogRemote($"Remove firewall rules for port {port} ({(bindAll ? "all interfaces" : "localhost")} mode)...");
             try
             {
-                string output = await RunElevatedAsync(
-                    $"netsh http delete urlacl url=http://+:{port}/ & " +
-                    $"netsh advfirewall firewall delete rule name=\"ApexComputerUse\"");
+                var delCmds = $"netsh http delete urlacl url=http://+:{port}/ & " +
+                    $"netsh advfirewall firewall delete rule name=\"ApexComputerUse\"";
+                var localIPs2 = System.Net.Dns.GetHostAddresses(System.Net.Dns.GetHostName())
+                    .Where(a => a.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork);
+                foreach (var ip in localIPs2)
+                    delCmds += $" & netsh http delete urlacl url=http://{ip}:{port}/";
+                string output = await RunElevatedAsync(delCmds);
                 _netshConfigured = false;
                 _netshPort = 0;
                 SaveSettings();
