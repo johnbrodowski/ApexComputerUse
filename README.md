@@ -199,6 +199,8 @@ Every element is assigned a **SHA-256 hash-based numeric ID** derived from its c
 
 The filter composes with the type filter and the new depth/expansion params: `?onscreen=true&type=Button`.
 
+When `?match=` is combined with `?onscreen=true`, the match search scans **all** elements (including offscreen ones) so content that has been scrolled out of view can still be found by text search. Offscreen matches are tagged with `"isOffscreen": true` in the response. Use `exec action=scrollinto` on the returned element ID to bring an offscreen match into view before interacting with it.
+
 ### Progressive tree expansion
 
 For deep pages, fetch a shallow overview first, then drill into only the branches you care about:
@@ -1207,6 +1209,7 @@ Element JSON includes bounding rectangles:
 | `isenabled` | — | — | Returns `True` or `False` |
 | `isvisible` | — | — | Returns `True` or `False` |
 | `wait` | — | automationId | Wait for element with given AutomationId to appear |
+| `wait-page-load` | `waitpageload` | seconds (default 10) | Poll window title until browser page finishes loading; returns page title on success |
 
 ### Text / Value
 
@@ -1284,12 +1287,14 @@ Element JSON includes bounding rectangles:
 
 ### Scroll
 
+Mouse scroll actions move the cursor to the element centre before firing the scroll event, so scrolling reliably lands in the browser content area rather than wherever the cursor happens to be.
+
 | Action | Aliases | Value | Description |
 |---|---|---|---|
-| `scroll-up` | `scrollup` | n (optional) | Scroll up n clicks (default 3) |
-| `scroll-down` | `scrolldown` | n (optional) | Scroll down n clicks (default 3) |
-| `scroll-left` | `scrollleft` | n (optional) | Horizontal scroll left n clicks (default 3) |
-| `scroll-right` | `scrollright` | n (optional) | Horizontal scroll right n clicks (default 3) |
+| `scroll-up` | `scrollup` | n (optional) | Move cursor to element centre, scroll up n clicks (default 3) |
+| `scroll-down` | `scrolldown` | n (optional) | Move cursor to element centre, scroll down n clicks (default 3) |
+| `scroll-left` | `scrollleft` | n (optional) | Move cursor to element centre, horizontal scroll left n clicks (default 3) |
+| `scroll-right` | `scrollright` | n (optional) | Move cursor to element centre, horizontal scroll right n clicks (default 3) |
 | `scrollinto` | `scrollintoview` | — | Scroll element into view |
 | `scrollpercent` | — | `h,v` | Scroll to h%/v% position via Scroll pattern (0–100) |
 | `getscrollinfo` | — | — | Scroll position and scrollable flags |

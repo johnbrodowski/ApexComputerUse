@@ -42,8 +42,7 @@ namespace ApexComputerUse
         public string ToJson()
         {
             var obj = new { success = Success, message = Message, data = Data };
-            return System.Text.Json.JsonSerializer.Serialize(obj,
-                new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+            return System.Text.Json.JsonSerializer.Serialize(obj, FormatAdapter.s_indented);
         }
     }
 }

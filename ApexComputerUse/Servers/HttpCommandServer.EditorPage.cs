@@ -9,7 +9,7 @@ namespace ApexComputerUse
 {
     public partial class HttpCommandServer
     {
-        // â”€â”€ Editor page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // Editor page 
 
         private static async Task ServeEditorPage(HttpListenerResponse res)
         {
@@ -18,7 +18,7 @@ namespace ApexComputerUse
                 <html lang="en">
                 <head>
                 <meta charset="utf-8">
-                <title>Scene Editor â€” ApexComputerUse</title>
+                <title>Scene Editor ” ApexComputerUse</title>
                 <style>
                   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
                   body { font-family: monospace; font-size: 13px; background: #1e1e1e; color: #d4d4d4;
@@ -101,10 +101,10 @@ namespace ApexComputerUse
                 <main>
                   <!-- Scenes sidebar -->
                   <div id="scenePanel">
-                    <div class="ph"><span>Scenes</span><button onclick="loadScenes()" title="Refresh">â†º</button></div>
+                    <div class="ph"><span>Scenes</span><button onclick="loadScenes()" title="Refresh">†º</button></div>
                     <select class="lst" id="sceneList" size="10" onchange="onSceneSelect()"></select>
                     <div class="btnrow">
-                      <input id="newSceneName" placeholder="scene nameâ€¦">
+                      <input id="newSceneName" placeholder="scene name¦">
                       <button class="sm" onclick="createScene()">+</button>
                     </div>
                     <div class="btnrow">
@@ -152,7 +152,7 @@ namespace ApexComputerUse
                       </div>
                     </div>
                     <div id="statusBar">
-                      <span id="sCursor">x: â€” y: â€”</span>
+                      <span id="sCursor">x: ” y: ”</span>
                       <span id="sSelected">nothing selected</span>
                       <span id="sScene"></span>
                     </div>
@@ -162,7 +162,7 @@ namespace ApexComputerUse
                 <script>
                 'use strict';
 
-                // â”€â”€ State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                // State
                 let scenes      = [];
                 let curScene    = null;   // full scene object
                 let curLayerId  = null;
@@ -181,10 +181,10 @@ namespace ApexComputerUse
                 const cv        = document.getElementById('cv');
                 const ctx       = cv.getContext('2d');
 
-                // â”€â”€ Boot â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                // Boot
                 (async () => { await loadScenes(); })();
 
-                // â”€â”€ Scene management â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                // Scene management 
                 async function loadScenes() {
                   const r = await api('GET', '/scenes');
                   scenes  = r.scenes ? JSON.parse(r.scenes) : [];
@@ -264,7 +264,7 @@ namespace ApexComputerUse
                   cv.style.display = v ? 'block' : 'none';
                 }
 
-                // â”€â”€ Layer management â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                // Layer management 
                 function renderLayers() {
                   const el  = document.getElementById('layerList');
                   el.innerHTML = '';
@@ -310,7 +310,7 @@ namespace ApexComputerUse
                   renderLayers(); draw();
                 }
 
-                // â”€â”€ Shape helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                // Shape helpers 
                 function activeLayer() {
                   if (!curScene || !curLayerId) return null;
                   return curScene.layers.find(l => l.id === curLayerId) || null;
@@ -329,7 +329,7 @@ namespace ApexComputerUse
                   return r ? r.shape : null;
                 }
 
-                // â”€â”€ Canvas drawing â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                // Canvas drawing 
                 function draw() {
                   if (!curScene) return;
                   ctx.clearRect(0, 0, cv.width, cv.height);
@@ -531,7 +531,7 @@ namespace ApexComputerUse
                   return null;
                 }
 
-                // â”€â”€ Mouse events â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                // Mouse events 
                 cv.addEventListener('mousedown', onMouseDown);
                 cv.addEventListener('mousemove', onMouseMove);
                 cv.addEventListener('mouseup',   onMouseUp);
@@ -674,7 +674,7 @@ namespace ApexComputerUse
                   }
                 }
 
-                // â”€â”€ Tool buttons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                // Tool buttons 
                 function setTool(t) {
                   tool = t;
                   document.querySelectorAll('#toolbar button.sm').forEach(b => b.classList.remove('on'));
@@ -682,7 +682,7 @@ namespace ApexComputerUse
                   if (btn) btn.classList.add('on');
                 }
 
-                // â”€â”€ Properties panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                // Properties panel 
                 function showShapeProps() {
                   const el  = document.getElementById('propsContent');
                   const sel = curShape();
@@ -697,9 +697,9 @@ namespace ApexComputerUse
                     ${sel.r!==undefined ? '<div class="prop"><label>r</label><input type="number" value="'+sel.r+'" onchange="patchProp(\'r\',+this.value)"></div>' : ''}
                     ${sel.x2!==undefined ? '<div class="prop"><label>x2</label><input type="number" value="'+sel.x2+'" onchange="patchProp(\'x2\',+this.value)"></div>' : ''}
                     ${sel.y2!==undefined ? '<div class="prop"><label>y2</label><input type="number" value="'+sel.y2+'" onchange="patchProp(\'y2\',+this.value)"></div>' : ''}
-                    ${sel.type==='arc' ? '<div class="prop"><label>startÂ°</label><input type="number" value="'+(sel.start_angle??0)+'" onchange="patchProp(\'start_angle\',+this.value)"></div>' : ''}
-                    ${sel.type==='arc' ? '<div class="prop"><label>sweepÂ°</label><input type="number" value="'+(sel.sweep_angle??90)+'" onchange="patchProp(\'sweep_angle\',+this.value)"></div>' : ''}
-                    <div class="prop"><label>rotateÂ°</label><input type="number" value="${sel.rotation??0}" onchange="patchProp('rotation',+this.value)"></div>`;
+                    ${sel.type==='arc' ? '<div class="prop"><label>start°</label><input type="number" value="'+(sel.start_angle??0)+'" onchange="patchProp(\'start_angle\',+this.value)"></div>' : ''}
+                    ${sel.type==='arc' ? '<div class="prop"><label>sweep°</label><input type="number" value="'+(sel.sweep_angle??90)+'" onchange="patchProp(\'sweep_angle\',+this.value)"></div>' : ''}
+                    <div class="prop"><label>rotate°</label><input type="number" value="${sel.rotation??0}" onchange="patchProp('rotation',+this.value)"></div>`;
                 }
 
                 async function patchProp(field, val) {
@@ -710,7 +710,7 @@ namespace ApexComputerUse
                   await api('PATCH', '/scenes/' + curScene.id + '/layers/' + ss.layer.id + '/shapes/' + curShapeId, { [field]: val });
                 }
 
-                // â”€â”€ Keyboard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                // Keyboard 
                 document.addEventListener('keydown', ev => {
                   if (ev.target.tagName === 'INPUT') return;
                   if (ev.key === 'Delete' || ev.key === 'Backspace') { ev.preventDefault(); deleteSelected(); }
@@ -734,7 +734,7 @@ namespace ApexComputerUse
                   curShapeId = null; draw(); showShapeProps();
                 }
 
-                // â”€â”€ API helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                // API helper 
                 async function api(method, path, body) {
                   const opts = { method };
                   if (body !== undefined) {

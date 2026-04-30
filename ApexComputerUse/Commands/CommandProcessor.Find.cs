@@ -169,13 +169,7 @@ namespace ApexComputerUse
                 helpText          = includeExtra ? _helper.ReadHelpText(el)     : null
             };
 
-            return System.Text.Json.JsonSerializer.Serialize(payload,
-                new System.Text.Json.JsonSerializerOptions
-                {
-                    WriteIndented          = true,
-                    PropertyNamingPolicy   = System.Text.Json.JsonNamingPolicy.CamelCase,
-                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
-                });
+            return System.Text.Json.JsonSerializer.Serialize(payload, FormatAdapter.s_indentedCamel);
         }
 
         private CommandResponse CmdExecute(CommandRequest req)

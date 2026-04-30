@@ -10,7 +10,7 @@ namespace ApexComputerUse
     public partial class HttpCommandServer
     {
 
-        // â”€â”€ Scene REST routes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // Scene REST routes 
 
         /// <summary>
         /// Returns a result if the path matches a /scenes/* route, null otherwise.
@@ -30,7 +30,7 @@ namespace ApexComputerUse
                     using var d = JsonDocument.Parse(body.Length > 0 ? body : "{}");
                     string targetLayerId = d.RootElement.Str("target_layer_id") ?? "";
                     var ss = _store.MoveShapeToLayer(seg[2], seg[4], targetLayerId);
-                    return Ok("scene/shapes/move", "shape", JsonSerializer.Serialize(ss));
+                    return Ok("scene/shapes/move", "shape", JsonSerializer.Serialize(ss, FormatAdapter.s_compact));
                 }
 
                 switch (seg.Length)
@@ -40,7 +40,7 @@ namespace ApexComputerUse
                         if (method == "GET")
                         {
                             var list = _store.ListScenes();
-                            return Ok("scenes/list", "scenes", JsonSerializer.Serialize(list));
+                            return Ok("scenes/list", "scenes", JsonSerializer.Serialize(list, FormatAdapter.s_compact));
                         }
                         if (method == "POST")
                         {
@@ -50,7 +50,7 @@ namespace ApexComputerUse
                                 d.RootElement.Int("width") ?? 800,
                                 d.RootElement.Int("height") ?? 600,
                                 d.RootElement.Str("background") ?? "white");
-                            return Ok("scenes/create", "scene", JsonSerializer.Serialize(scene));
+                            return Ok("scenes/create", "scene", JsonSerializer.Serialize(scene, FormatAdapter.s_compact));
                         }
                         break;
 
@@ -62,7 +62,7 @@ namespace ApexComputerUse
                         {
                             var scene = _store.GetScene(id)
                                         ?? throw new KeyNotFoundException($"Scene '{id}' not found.");
-                            return Ok("scenes/get", "scene", JsonSerializer.Serialize(scene));
+                            return Ok("scenes/get", "scene", JsonSerializer.Serialize(scene, FormatAdapter.s_compact));
                         }
                         if (method == "PUT" || method == "PATCH")
                         {
@@ -72,7 +72,7 @@ namespace ApexComputerUse
                                 d.RootElement.Int("width"),
                                 d.RootElement.Int("height"),
                                 d.RootElement.Str("background"));
-                            return Ok("scenes/update", "scene", JsonSerializer.Serialize(scene));
+                            return Ok("scenes/update", "scene", JsonSerializer.Serialize(scene, FormatAdapter.s_compact));
                         }
                         if (method == "DELETE")
                         {
@@ -102,7 +102,7 @@ namespace ApexComputerUse
                         {
                             using var d = JsonDocument.Parse(body.Length > 0 ? body : "{}");
                             var layer = _store.AddLayer(sceneId, d.RootElement.Str("name") ?? "Layer");
-                            return Ok("scenes/layers/add", "layer", JsonSerializer.Serialize(layer));
+                            return Ok("scenes/layers/add", "layer", JsonSerializer.Serialize(layer, FormatAdapter.s_compact));
                         }
                         break;
                     }
@@ -118,7 +118,7 @@ namespace ApexComputerUse
                                         ?? throw new KeyNotFoundException($"Scene '{sceneId}' not found.");
                             var layer = scene.Layers.FirstOrDefault(l => l.Id == layerId)
                                         ?? throw new KeyNotFoundException($"Layer '{layerId}' not found.");
-                            return Ok("scenes/layers/get", "layer", JsonSerializer.Serialize(layer));
+                            return Ok("scenes/layers/get", "layer", JsonSerializer.Serialize(layer, FormatAdapter.s_compact));
                         }
                         if (method == "PUT" || method == "PATCH")
                         {
@@ -131,7 +131,7 @@ namespace ApexComputerUse
                             bool?  locked  = d.RootElement.Bool("locked");
                             var    layer   = _store.UpdateLayer(sceneId, layerId,
                                                 d.RootElement.Str("name"), visible, locked, opacity, zIndex);
-                            return Ok("scenes/layers/update", "layer", JsonSerializer.Serialize(layer));
+                            return Ok("scenes/layers/update", "layer", JsonSerializer.Serialize(layer, FormatAdapter.s_compact));
                         }
                         if (method == "DELETE")
                         {
@@ -164,7 +164,7 @@ namespace ApexComputerUse
                                 shapeJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
                                 ?? throw new InvalidOperationException("Invalid shape JSON.");
                             var ss = _store.AddShape(sceneId, layerId, shapeCmd, name);
-                            return Ok("scenes/shapes/add", "shape", JsonSerializer.Serialize(ss));
+                            return Ok("scenes/shapes/add", "shape", JsonSerializer.Serialize(ss, FormatAdapter.s_compact));
                         }
                         break;
                     }
@@ -183,7 +183,7 @@ namespace ApexComputerUse
                                         ?? throw new KeyNotFoundException($"Layer '{layerId}' not found.");
                             var shape = layer.Shapes.FirstOrDefault(s => s.Id == shapeId)
                                         ?? throw new KeyNotFoundException($"Shape '{shapeId}' not found.");
-                            return Ok("scenes/shapes/get", "shape", JsonSerializer.Serialize(shape));
+                            return Ok("scenes/shapes/get", "shape", JsonSerializer.Serialize(shape, FormatAdapter.s_compact));
                         }
                         if (method == "PUT")
                         {
@@ -195,7 +195,7 @@ namespace ApexComputerUse
                                 shapeJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
                                 ?? throw new InvalidOperationException("Invalid shape JSON.");
                             var ss = _store.UpdateShape(sceneId, layerId, shapeId, shapeCmd, name);
-                            return Ok("scenes/shapes/update", "shape", JsonSerializer.Serialize(ss));
+                            return Ok("scenes/shapes/update", "shape", JsonSerializer.Serialize(ss, FormatAdapter.s_compact));
                         }
                         if (method == "PATCH")
                         {
@@ -214,7 +214,7 @@ namespace ApexComputerUse
                                 rotation:   d.RootElement.Float("rotation"),
                                 startAngle: d.RootElement.Float("start_angle"),
                                 sweepAngle: d.RootElement.Float("sweep_angle"));
-                            return Ok("scenes/shapes/patch", "shape", JsonSerializer.Serialize(ss));
+                            return Ok("scenes/shapes/patch", "shape", JsonSerializer.Serialize(ss, FormatAdapter.s_compact));
                         }
                         if (method == "DELETE")
                         {

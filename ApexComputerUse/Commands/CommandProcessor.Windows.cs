@@ -21,8 +21,7 @@ namespace ApexComputerUse
                 return new { id, title = w.Properties.Name.ValueOrDefault ?? "" };
             }).ToList();
 
-            string json = System.Text.Json.JsonSerializer.Serialize(entries,
-                new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+            string json = System.Text.Json.JsonSerializer.Serialize(entries, FormatAdapter.s_indented);
 
             return Ok($"{entries.Count} open window(s)", json);
         }
@@ -88,6 +87,7 @@ namespace ApexComputerUse
             var options = new ScanOptions
             {
                 OnscreenOnly = req.OnscreenOnly,
+                MatchAll     = !string.IsNullOrEmpty(req.Match),
                 MaxDepth     = maxDepth,
                 IncludePath  = req.IncludePath,
                 IncludeExtra = string.Equals(req.Properties, "extra", StringComparison.OrdinalIgnoreCase)
@@ -122,19 +122,12 @@ namespace ApexComputerUse
                 string.Equals(req.ChangedSince, treeHash, StringComparison.Ordinal))
             {
                 string shortJson = System.Text.Json.JsonSerializer.Serialize(
-                    new { treeHash, notModified = true },
-                    new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+                    new { treeHash, notModified = true }, FormatAdapter.s_indented);
                 return Ok($"{count} element(s) (unchanged)", shortJson);
             }
 
             string json = System.Text.Json.JsonSerializer.Serialize(
-                new { treeHash, root },
-                new System.Text.Json.JsonSerializerOptions
-                {
-                    WriteIndented          = true,
-                    PropertyNamingPolicy   = System.Text.Json.JsonNamingPolicy.CamelCase,
-                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
-                });
+                new { treeHash, root }, FormatAdapter.s_indentedCamel);
 
             return Ok($"{count} element(s)", json);
         }

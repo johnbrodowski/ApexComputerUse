@@ -9,7 +9,7 @@ namespace ApexComputerUse
 {
     public partial class HttpCommandServer
     {
-        // â”€â”€ New route handlers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // New route handlers 
 
         private ApexResult HandleDrawDemo(HttpListenerRequest req)
         {
@@ -36,7 +36,7 @@ namespace ApexComputerUse
             };
         }
 
-        // â”€â”€ /health â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // /health
 
         private ApexResult HandleHealth()
         {
@@ -58,7 +58,7 @@ namespace ApexComputerUse
             };
         }
 
-        // â”€â”€ /metrics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // /metrics
 
         private ApexResult HandleMetrics()
         {
@@ -80,7 +80,7 @@ namespace ApexComputerUse
                     ["total_requests"]   = Volatile.Read(ref _totalRequests).ToString(),
                     ["error_requests"]   = Volatile.Read(ref _errorRequests).ToString(),
                     ["active_requests"]  = Volatile.Read(ref _activeRequests).ToString(),
-                    ["routes"]           = JsonSerializer.Serialize(routes)
+                    ["routes"]           = JsonSerializer.Serialize(routes, FormatAdapter.s_compact)
                 }
             };
         }

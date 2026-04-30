@@ -9,7 +9,7 @@ namespace ApexComputerUse
 {
     public partial class HttpCommandServer
     {
-        // â”€â”€ JSON parsing â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // JSON parsing 
 
         // HttpListenerRequest.QueryString decodes '+' as space (form-encoding), which breaks
         // key combo strings like "Ctrl+A". Parse 'value' from the raw URL to preserve '+'.

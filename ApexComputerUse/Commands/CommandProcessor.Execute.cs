@@ -90,10 +90,10 @@ namespace ApexComputerUse
                 "resize"                             => Do(() => { var p = ParsePair(input); _helper.ResizeElement(el, p.a, p.b); }),
 
                 // ── Scroll ────────────────────────────────────────────────
-                "scroll-up"   or "scrollup"          => Do(() => _helper.ScrollUp(ParseIntOr(input, 3))),
-                "scroll-down" or "scrolldown"        => Do(() => _helper.ScrollDown(ParseIntOr(input, 3))),
-                "scroll-left" or "scrollleft"        => Do(() => _helper.HorizontalScroll(-ParseIntOr(input, 3))),
-                "scroll-right" or "scrollright"      => Do(() => _helper.HorizontalScroll(ParseIntOr(input, 3))),
+                "scroll-up"   or "scrollup"          => Scroll(el, input, "up"),
+                "scroll-down" or "scrolldown"        => Scroll(el, input, "down"),
+                "scroll-left" or "scrollleft"        => Scroll(el, input, "left"),
+                "scroll-right" or "scrollright"      => Scroll(el, input, "right"),
                 "scrollinto"  or "scrollintoview"    => Do(() => _helper.ScrollIntoView(el)),
                 "scrollpercent"                      => Do(() => { var p = ParsePairD(input); _helper.ScrollByPercent(el, p.a, p.b); }),
                 "getscrollinfo"                      => _helper.GetScrollInfo(el),
@@ -108,6 +108,7 @@ namespace ApexComputerUse
 
                 // ── Wait ──────────────────────────────────────────────────
                 "wait"                               => WaitFor(input),
+                "wait-page-load" or "waitpageload"   => WaitPageLoad(ParseIntOr(input, 10)),
 
                 _ => $"Unknown action '{action}'. Send 'help' for a list."
             };
@@ -123,6 +124,35 @@ namespace ApexComputerUse
             return _elementDesc;
         }
 
+        private string WaitPageLoad(int timeoutSeconds)
+        {
+            if (CurrentWindow == null) return "No window selected.";
+            return _helper.WaitPageLoad(CurrentWindow, timeoutSeconds);
+        }
+
+        // Parses scroll value: plain int ("5"), visual-only ("visual"), or combined ("5,visual" / "visual,5").
+        private static (int amount, bool visual) ParseScrollInput(string input)
+        {
+            bool visual = input.Contains("visual", StringComparison.OrdinalIgnoreCase);
+            int amount = 3;
+            foreach (var part in input.Split(','))
+                if (int.TryParse(part.Trim(), out int n)) { amount = n; break; }
+            return (amount, visual);
+        }
+
+        private string Scroll(AutomationElement el, string input, string dir)
+        {
+            var (amount, visual) = ParseScrollInput(input);
+            return dir switch
+            {
+                "up"    => _helper.ScrollUp(el,   amount,  visual),
+                "down"  => _helper.ScrollDown(el, amount,  visual),
+                "left"  => _helper.HorizontalScroll(el, -amount, visual),
+                "right" => _helper.HorizontalScroll(el,  amount, visual),
+                _       => ""
+            };
+        }
+
         private const int ScanMaxDepth    = 25;
         private const int ScanChildTimeout = 2000; // ms per FindAllChildren call
 
@@ -133,6 +163,7 @@ namespace ApexComputerUse
         private readonly struct ScanOptions
         {
             public bool    OnscreenOnly    { get; init; }
+            public bool    MatchAll        { get; init; }  // scan offscreen elements too when match is set; onscreen pruning skipped
             public int?    MaxDepth        { get; init; }
             public bool    IncludePath     { get; init; }
             public bool    IncludeExtra    { get; init; }  // properties=extra → value + helpText
@@ -149,7 +180,9 @@ namespace ApexComputerUse
 
             // Onscreen filter — skip element and its entire subtree if off-viewport.
             // depth == 0 is always the scan root (window or expansion target); never filter it out.
-            if (options.OnscreenOnly && depth > 0 && el.Properties.IsOffscreen.ValueOrDefault)
+            // MatchAll suppresses pruning so match= can find offscreen content; nodes are tagged below.
+            bool elementIsOffscreen = depth > 0 && el.Properties.IsOffscreen.ValueOrDefault;
+            if (options.OnscreenOnly && elementIsOffscreen && !options.MatchAll)
                 return null;
 
             try
@@ -283,7 +316,8 @@ namespace ApexComputerUse
                     DescendantCount   = descendantCountOut,
                     Path              = path,
                     Value             = valueOut,
-                    HelpText          = helpTextOut
+                    HelpText          = helpTextOut,
+                    IsOffscreen       = (options.MatchAll && elementIsOffscreen) ? true : null
                 };
             }
             catch { return null; } // element became stale mid-scan — skip silently
@@ -340,6 +374,7 @@ namespace ApexComputerUse
             public string?             Path              { get; init; }  // ancestor breadcrumb, e.g. "Chrome > Document > Form" — set only when the caller requested IncludePath
             public string?             Value             { get; init; }  // Value pattern content — set only when the caller requested properties=extra
             public string?             HelpText          { get; init; }  // HelpText property — set only when the caller requested properties=extra
+            public bool?               IsOffscreen       { get; init; }  // set only when true — element is off-viewport but included via match= scan
         }
 
         internal sealed class BoundingRect

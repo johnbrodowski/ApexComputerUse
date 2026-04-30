@@ -8,7 +8,24 @@ namespace ApexComputerUse
 
     internal static class FormatAdapter
     {
-        private static readonly JsonSerializerOptions s_indented = new() { WriteIndented = true };
+        internal static readonly JsonSerializerOptions s_indented = new()
+        {
+            WriteIndented = true,
+            Encoder       = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        };
+
+        internal static readonly JsonSerializerOptions s_indentedCamel = new()
+        {
+            WriteIndented          = true,
+            PropertyNamingPolicy   = JsonNamingPolicy.CamelCase,
+            DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,
+            Encoder                = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        };
+
+        internal static readonly JsonSerializerOptions s_compact = new()
+        {
+            Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        };
 
         public static string Negotiate(HttpListenerRequest req, string? extHint = null)
         {
@@ -46,7 +63,7 @@ namespace ApexComputerUse
         private static string RenderJson(ApexResult r) =>
             JsonSerializer.Serialize(
                 new { success = r.Success, action = r.Action, data = r.Data, error = r.Error },
-                new JsonSerializerOptions { WriteIndented = true });
+                s_indented);
 
         private static string RenderText(ApexResult r)
         {

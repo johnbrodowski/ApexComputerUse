@@ -9,7 +9,7 @@ namespace ApexComputerUse
 {
     public partial class HttpCommandServer
     {
-        // â”€â”€ Test page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // Test page
 
         private static async Task ServeTestPage(HttpListenerResponse res)
         {
@@ -24,7 +24,7 @@ namespace ApexComputerUse
                   body { font-family: monospace; font-size: 13px; background: #1e1e1e; color: #d4d4d4;
                          display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
 
-                  /* â”€â”€ Header â”€â”€ */
+                  /* Header */
                   header { background: #252526; border-bottom: 1px solid #3c3c3c;
                            padding: .35em 1em; display: flex; align-items: center; gap: .75em;
                            flex-shrink: 0; }
@@ -35,10 +35,10 @@ namespace ApexComputerUse
                   header span.spacer { flex: 1; }
                   header span.brand  { font-size: .82em; color: #9cdcfe; }
 
-                  /* â”€â”€ Main 2-col layout â”€â”€ */
+                  /* Main 2-col layout */
                   main { display: grid; grid-template-columns: 270px 1fr; flex: 1; overflow: hidden; min-height: 0; }
 
-                  /* â”€â”€ Left sidebar â”€â”€ */
+                  /* Left sidebar */
                   aside { background: #252526; border-right: 1px solid #3c3c3c;
                           display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
 
@@ -67,14 +67,14 @@ namespace ApexComputerUse
                   .frow select { flex: 1; background: #3c3c3c; color: #d4d4d4; border: 1px solid #555;
                                  border-radius: 2px; padding: .15em .3em; font: inherit; font-size: .76em; }
 
-                  /* â”€â”€ Right panel â”€â”€ */
+                  /* Right panel */
                   section { display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
 
                   #selInfo { padding: .3em .8em; font-size: .75em; color: #9cdcfe; background: #252526;
                              border-bottom: 1px solid #3c3c3c; white-space: nowrap; overflow: hidden;
                              text-overflow: ellipsis; flex-shrink: 0; min-height: 1.8em; }
 
-                  /* â”€â”€ Command builder â”€â”€ */
+                  /* Command builder */
                   .cmdbuild { padding: .7em .9em; border-bottom: 1px solid #3c3c3c; flex-shrink: 0; }
                   .cmdbuild h3 { font-size: .68em; color: #666; text-transform: uppercase;
                                  letter-spacing: .06em; margin-bottom: .55em; }
@@ -93,7 +93,7 @@ namespace ApexComputerUse
                   button.a.ai      { background: #2d2840; border-color: #5a4a8a; color: #b08ae0; }
                   button.a.ai:hover  { background: #3a3460; }
 
-                  /* â”€â”€ Format bar â”€â”€ */
+                  /* Format bar */
                   .fmt-bar { display: flex; gap: .5em; align-items: center; }
                   .fmt-bar label { font-size: .75em; color: #888; }
                   .fmt-bar select { background: #3c3c3c; color: #d4d4d4; border: 1px solid #555;
@@ -114,7 +114,7 @@ namespace ApexComputerUse
                               font: inherit; font-size: .85em; white-space: nowrap; }
                   button#go:hover { background: #1177bb; }
 
-                  /* â”€â”€ Output â”€â”€ */
+                  /* Output */
                   #out { flex: 1; overflow-y: auto; padding: .6em .9em; min-height: 0; }
 
                   .msg { border-left: 3px solid #555; background: #252526; border-radius: 2px;
@@ -132,10 +132,10 @@ namespace ApexComputerUse
 
                 <header>
                   <span id="dot"></span>
-                  <span id="statusTxt">connectingâ€¦</span>
+                  <span id="statusTxt">connecting¦</span>
                   <span class="spacer"></span>
                   <label style="font-size:.75em;color:#9cdcfe;">API Key
-                    <input id="apiKeyBox" type="password" placeholder="paste keyâ€¦" autocomplete="off"
+                    <input id="apiKeyBox" type="password" placeholder="paste key¦" autocomplete="off"
                            style="background:#3c3c3c;color:#d4d4d4;border:1px solid #555;border-radius:2px;
                                   padding:.15em .3em;font:inherit;font-size:.76em;width:140px;margin-left:.3em;">
                     <button type="button" id="apiKeyShow" title="Show / hide"
@@ -167,12 +167,12 @@ namespace ApexComputerUse
                 </header>
 
                 <main>
-                  <!-- â”€â”€ Left sidebar â”€â”€ -->
+                  <!-- Left sidebar -->
                   <aside>
                     <div class="panel wins">
                       <div class="phead">
                         <span>Windows</span>
-                        <button onclick="loadWindows()" title="Refresh">â†º</button>
+                        <button onclick="loadWindows()" title="Refresh">†º</button>
                       </div>
                       <select class="lst" id="winList" size="8" onchange="onWinSelect()"></select>
                     </div>
@@ -180,7 +180,7 @@ namespace ApexComputerUse
                     <div class="panel elems">
                       <div class="phead">
                         <span>Elements</span>
-                        <button onclick="loadElements()" title="Refresh">â†º</button>
+                        <button onclick="loadElements()" title="Refresh">†º</button>
                       </div>
                       <div class="frow">
                         <label>
@@ -206,9 +206,9 @@ namespace ApexComputerUse
                     </div>
                   </aside>
 
-                  <!-- â”€â”€ Right panel â”€â”€ -->
+                  <!-- Right panel -->
                   <section>
-                    <div id="selInfo">No element selected â€” pick a window to start</div>
+                    <div id="selInfo">No element selected ” pick a window to start</div>
 
                     <div class="cmdbuild">
                       <h3>Command Builder</h3>
@@ -262,10 +262,10 @@ namespace ApexComputerUse
 
                         <div class="grp">
                           <span class="glabel">Scroll</span>
-                          <button class="a" onclick="act('scroll-up')">â†‘</button>
-                          <button class="a" onclick="act('scroll-down')">â†“</button>
-                          <button class="a" onclick="act('scroll-left')">â†</button>
-                          <button class="a" onclick="act('scroll-right')">â†’</button>
+                          <button class="a" onclick="act('scroll-up')">†‘</button>
+                          <button class="a" onclick="act('scroll-down')">†“</button>
+                          <button class="a" onclick="act('scroll-left')">†</button>
+                          <button class="a" onclick="act('scroll-right')">†’</button>
                           <button class="a" onclick="act('scrollinto')">into view</button>
                           <button class="a" onclick="act('scrollpercent')">percent</button>
                           <button class="a" onclick="act('getscrollinfo')">info</button>
@@ -335,8 +335,8 @@ namespace ApexComputerUse
                           <button class="a cap" onclick="doCapture('screen')">screen</button>
                           <button class="a cap" onclick="doOcr()">OCR</button>
                           <button class="a cap" onclick="doUiMap()">UI map</button>
-                          <button class="a cap" onclick="doDraw()" title="POST /draw â€” Value field must be a JSON DrawRequest (shapes array). Canvas: blank|white|black|screen|window|element">draw</button>
-                          <button class="a cap" onclick="doDrawDemo()" title="GET /draw/demo â€” renders the built-in space scene. Add ?overlay=true to also show on screen.">demo</button>
+                          <button class="a cap" onclick="doDraw()" title="POST /draw ” Value field must be a JSON DrawRequest (shapes array). Canvas: blank|white|black|screen|window|element">draw</button>
+                          <button class="a cap" onclick="doDrawDemo()" title="GET /draw/demo ” renders the built-in space scene. Add ?overlay=true to also show on screen.">demo</button>
                         </div>
 
                         <div class="grp">
@@ -351,10 +351,10 @@ namespace ApexComputerUse
 
                       <div class="vrow">
                         <label>Value</label>
-                        <textarea id="val" rows="1" placeholder="(optional â€” text, x,y, JSON, â€¦)  Ctrl+Enter to execute"
+                        <textarea id="val" rows="1" placeholder="(optional ” text, x,y, JSON, ¦)  Ctrl+Enter to execute"
                                   onkeydown="if(event.key==='Enter'&&(event.ctrlKey||event.metaKey)){event.preventDefault();doExec();}"
                                   oninput="this.rows=Math.min(12,Math.max(1,this.value.split('\n').length))"></textarea>
-                        <button id="go" onclick="doExec()">â–¶ Execute</button>
+                        <button id="go" onclick="doExec()">–¶ Execute</button>
                       </div>
                     </div>
 
@@ -368,7 +368,7 @@ namespace ApexComputerUse
                 let curWin    = '';
                 let curElemId = null;
 
-                // â”€â”€ Boot â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                // Boot
                 (async () => {
                   try {
                     const r = await call('GET', '/ping');
@@ -386,7 +386,7 @@ namespace ApexComputerUse
                   document.getElementById('dot').className = ok ? 'ok' : 'err';
                 }
 
-                // â”€â”€ Windows â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                // Windows 
                 async function loadWindows() {
                   try {
                     const r    = await call('GET', '/windows');
@@ -424,7 +424,7 @@ namespace ApexComputerUse
                   }
                 }
 
-                // â”€â”€ Elements â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                // Elements 
                 async function loadElements() {
                   if (!curWin) return;
                   const onscreen = document.getElementById('onscreen').checked;
@@ -491,7 +491,7 @@ namespace ApexComputerUse
                   el.textContent = parts.join('  \u203a  ');
                 }
 
-                // â”€â”€ Command builder â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                // Command builder 
                 const VALUE_HINTS = {
                   'type':          'text to type',
                   'keys':          '{CTRL}c or Ctrl+A',
@@ -535,7 +535,7 @@ namespace ApexComputerUse
                   }
                 }
 
-                // â”€â”€ Capture & OCR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                // Capture & OCR
                 async function doCapture(target) {
                   try {
                     const body = target === 'element' ? {} : { action: target };
@@ -557,7 +557,7 @@ namespace ApexComputerUse
                   }
                 }
 
-                // â”€â”€ UI Map â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                // UI Map
                 async function doUiMap() {
                   appendLog('uimap', true, 'Rendering UI map\u2026');
                   try {
@@ -568,7 +568,7 @@ namespace ApexComputerUse
                   }
                 }
 
-                // â”€â”€ Draw demo â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                // Draw demo
                 async function doDrawDemo() {
                   appendLog('draw/demo', true, 'Rendering space scene\u2026');
                   try {
@@ -581,7 +581,7 @@ namespace ApexComputerUse
                   }
                 }
 
-                // â”€â”€ Draw â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                // Draw
                 async function doDraw() {
                   const val = document.getElementById('val').value.trim();
                   if (!val) {
@@ -601,7 +601,7 @@ namespace ApexComputerUse
                   }
                 }
 
-                // â”€â”€ AI Vision â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                // AI Vision
                 async function doAiStatus() {
                   try {
                     const r = await call('GET', '/ai/status');
@@ -666,7 +666,7 @@ namespace ApexComputerUse
                   }
                 }
 
-                // â”€â”€ Logging â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                // Logging
                 function log(r) {
                   const ok  = r && r.success;
                   const div = msgDiv(ok);
@@ -675,7 +675,7 @@ namespace ApexComputerUse
                   ts.textContent = now() + ' ' + (r && r.action ? r.action : '');
                   div.appendChild(ts);
                   if (r._isPdf && r.data?.result) {
-                    // PDF â€” show open link (blob URL)
+                    // PDF ” show open link (blob URL)
                     const a = document.createElement('a');
                     a.href = r.data.result;
                     a.target = '_blank';
@@ -719,7 +719,7 @@ namespace ApexComputerUse
                   return new Date().toLocaleTimeString();
                 }
 
-                // â”€â”€ API key (persistent via localStorage) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                // API key (persistent via localStorage)
                 const API_KEY_STORAGE = 'apex_api_key';
                 function getApiKey() { return localStorage.getItem(API_KEY_STORAGE) || ''; }
                 function withKey(url) {
@@ -754,7 +754,7 @@ namespace ApexComputerUse
                       const status = document.getElementById('statusTxt');
                       if (r && r.success) {
                         const pid = r.data && r.data.pid ? r.data.pid : '?';
-                        status.textContent = `TestRunner PID ${pid} started (${mode}) â€” bridge will restart mid-run`;
+                        status.textContent = `TestRunner PID ${pid} started (${mode}) ” bridge will restart mid-run`;
                       } else {
                         status.textContent = 'Run failed: ' + (r && r.error ? r.error : 'unknown error');
                       }
@@ -766,7 +766,7 @@ namespace ApexComputerUse
                   });
                 })();
 
-                // â”€â”€ Format bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                // Format bar
                 function onFmtChange() {
                   const fmt = document.getElementById('fmtSel').value;
                   const ext = fmt === 'json' ? 'json' : fmt;
@@ -775,7 +775,7 @@ namespace ApexComputerUse
                   document.getElementById('lnkWindows').href = withKey('/windows.' + ext);
                 }
 
-                // â”€â”€ API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                // API
                 async function call(method, path, body) {
                   const fmt  = document.getElementById('fmtSel')?.value ?? 'json';
                   const sep  = path.includes('?') ? '&' : '?';

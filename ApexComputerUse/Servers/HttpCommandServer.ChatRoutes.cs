@@ -9,7 +9,7 @@ namespace ApexComputerUse
 {
     public partial class HttpCommandServer
     {
-        // â”€â”€ AI Chat â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // AI Chat
 
         private ApexResult HandleChatStatus()
         {
@@ -187,7 +187,7 @@ namespace ApexComputerUse
             <head>
             <meta charset="utf-8">
             <meta name="viewport" content="width=device-width,initial-scale=1">
-            <title>AI Chat â€” ApexComputerUse</title>
+            <title>AI Chat ApexComputerUse</title>
             <style>
               *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
               :root { --bg:#1e1e1e; --surface:#252526; --border:#3e3e42; --accent:#0e639c;
@@ -229,21 +229,21 @@ namespace ApexComputerUse
               #sendBtn:hover { background: var(--accent2); }
               #sendBtn:disabled { opacity: 0.5; cursor: default; }
               #statusBar { font-size: 11px; color: var(--muted); padding: 2px 14px 6px; flex-shrink: 0; }
-              .typing::after { content: "â–‹"; animation: blink .7s step-end infinite; }
+              .typing::after { content: "–‹"; animation: blink .7s step-end infinite; }
               @keyframes blink { 50% { opacity: 0; } }
             </style>
             </head>
             <body>
             <header>
               <span class="title">AI Chat</span>
-              <span id="badge">â€”</span>
-              <span id="modelLabel">loadingâ€¦</span>
+              <span id="badge">”</span>
+              <span id="modelLabel">loading¦</span>
               <button id="resetBtn" title="Clear conversation history on server">New chat</button>
             </header>
             <div id="messages"></div>
             <div id="statusBar"></div>
             <div id="inputArea">
-              <textarea id="inputBox" rows="1" placeholder="Messageâ€¦ (Enter to send, Shift+Enter for newline)"></textarea>
+              <textarea id="inputBox" rows="1" placeholder="Message (Enter to send, Shift+Enter for newline)"></textarea>
               <button id="sendBtn">Send</button>
             </div>
             <script>
@@ -268,7 +268,7 @@ namespace ApexComputerUse
                 const r = await fetch('/chat/status', { headers: headers() });
                 const d = await r.json();
                 if (d.success && d.data) {
-                  $badge.textContent = d.data.provider || 'â€”';
+                  $badge.textContent = d.data.provider || '”';
                   $model.textContent = d.data.model || '';
                 }
               } catch { $model.textContent = 'could not connect'; }
@@ -298,7 +298,7 @@ namespace ApexComputerUse
 
               const bubble = addMessage('asst', '');
               bubble.classList.add('typing');
-              setStatus('Thinkingâ€¦');
+              setStatus('Thinking¦');
 
               let buffer = '';
               try {

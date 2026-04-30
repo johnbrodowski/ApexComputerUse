@@ -29,7 +29,7 @@ namespace ApexComputerUse
         private          Task?              _listenTask;
         private          int                _activeRequests;   // Interlocked counter for graceful drain
 
-        // â"€â"€ Metrics â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
+        // Metrics
         private long _totalRequests;
         private long _errorRequests;
         private readonly ConcurrentDictionary<string, long>   _routeCounts       = new();
@@ -59,8 +59,8 @@ namespace ApexComputerUse
         /// authenticated callers to execute arbitrary OS commands.
         /// </summary>
         /// <paramref name="bindAll"/> controls the listener prefix:
-        /// false (default) â†’ <c>http://localhost:{port}/</c> (loopback only, safer default).
-        /// true â†’ <c>http://+:{port}/</c> (all interfaces; set APEX_HTTP_BIND_ALL=true or HttpBindAll in appsettings.json).
+        /// false (default) †’ <c>http://localhost:{port}/</c> (loopback only, safer default).
+        /// true †’ <c>http://+:{port}/</c> (all interfaces; set APEX_HTTP_BIND_ALL=true or HttpBindAll in appsettings.json).
         public HttpCommandServer(int port, CommandProcessor processor, SceneStore store,
                                  AiChatService? chatService = null,
                                  string? apiKey = null, bool enableShellRun = false,
@@ -82,7 +82,7 @@ namespace ApexComputerUse
             _testRunnerConfigPath = string.IsNullOrWhiteSpace(testRunnerConfigPath) ? null : testRunnerConfigPath.Trim();
         }
 
-        // â"€â"€ Lifecycle â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
+        // Lifecycle
 
         public void Start2()
         {
@@ -151,7 +151,7 @@ namespace ApexComputerUse
                 : "HTTP server stopped.");
         }
 
-        // â"€â"€ Accept loop â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
+        // Accept loop
 
         private async Task ListenLoop(CancellationToken ct)
         {
@@ -175,10 +175,9 @@ namespace ApexComputerUse
             }
         }
 
-        // â"€â"€ Request handler â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
-
-        // â"€â"€ Authentication â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
-
+        // Request handler 
+        // Authentication
+        
         /// <summary>
         /// Returns true if the request carries the correct API key, or if auth is disabled.
         /// Checks (in order): Authorization: Bearer, X-Api-Key header, ?apiKey= query param.
@@ -212,7 +211,7 @@ namespace ApexComputerUse
             return CryptographicOperations.FixedTimeEquals(a, b);
         }
 
-        // â"€â"€ Per-client permissions â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
+        // Per-client permissions
 
         private static readonly ClientPermissions _fullPermissions = new()
         {
@@ -253,7 +252,7 @@ namespace ApexComputerUse
 
             // Diagnostics — gated by AllowDiagnostics; loopback always gets _fullPermissions so
             // localhost callers are unaffected.
-            if (path is "/ping" or "/metrics" or "/sysinfo" or "/env" or "/ls" or "/help" or "/status")
+            if (path is "/ping" or "/metrics" or "/sysinfo" or "/env" or "/ls" or "/help" or "/status" or "/settings")
                 return p.AllowDiagnostics;
 
             if (path is "/run") return p.AllowShellRun;
@@ -297,14 +296,14 @@ namespace ApexComputerUse
             try
             {
 
-            // â"€â"€ Unauthenticated health probe (safe to expose; no sensitive data) â"€
+            // Unauthenticated health probe (safe to expose; no sensitive data)
             if (method == "GET" && rawPath.TrimEnd('/').Equals("/health", StringComparison.OrdinalIgnoreCase))
             {
                 statusCode = await WriteResponse(res, HandleHealth(), "json");
                 return;
             }
 
-            // â"€â"€ Auth gate â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
+            // Auth gate
             if (!IsAuthenticated(req))
             {
                 statusCode = 401;
@@ -324,7 +323,7 @@ namespace ApexComputerUse
                                     : rawPath.ToLowerInvariant();
             string format  = FormatAdapter.Negotiate(req, hasExt ? ext[1..] : null);
 
-            // â"€â"€ Per-client permission gate â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
+            // Per-client permission gate
             var perms = ResolvePermissions(req);
             if (!IsPathAllowed(path, perms))
             {
@@ -357,7 +356,7 @@ namespace ApexComputerUse
                         action = result.Action,
                         data = (object?)null,
                         error = result.Error
-                    }, new JsonSerializerOptions { WriteIndented = true }));
+                    }, FormatAdapter.s_indented));
                     res.ContentType = "application/json; charset=utf-8";
                     res.ContentLength64 = buf.Length;
                     res.StatusCode = statusCode;
@@ -389,7 +388,7 @@ namespace ApexComputerUse
                         action = result.Action,
                         data = (object?)null,
                         error = result.Error
-                    }, new JsonSerializerOptions { WriteIndented = true }));
+                    }, FormatAdapter.s_indented));
                     res.ContentType = "application/json; charset=utf-8";
                     res.ContentLength64 = buf.Length;
                     res.StatusCode = statusCode;
@@ -399,21 +398,35 @@ namespace ApexComputerUse
                     return;
                 }
 
-                // Test page â€" served directly, bypasses format adapter
+                // Test page  served directly, bypasses format adapter
                 if (method == "GET" && (path == "" || path == "/"))
                 {
                     await ServeTestPage(res);
                     return;
                 }
 
-                // Scene editor page â€" served directly
+                // Scene editor page  served directly
                 if (method == "GET" && path == "/editor")
                 {
                     await ServeEditorPage(res);
                     return;
                 }
 
-                // AI Chat page â€" served directly with key embedded
+                                // Help reference page
+                if (method == "GET" && path == "/help" && format is "html")
+                {
+                    await ServeHelpPage(res);
+                    return;
+                }
+
+                // Control panel — served directly
+                if (method == "GET" && path == "/settings")
+                {
+                    await ServeSettingsPage(res);
+                    return;
+                }
+
+                // AI Chat page  served directly with key embedded
                 if (method == "GET" && path == "/chat")
                 {
                     await ServeChatPage(res, _apiKey);
@@ -436,7 +449,7 @@ namespace ApexComputerUse
                     return;
                 }
 
-                // Graceful shutdown â€" host decides how to exit (WinForms: Application.Exit;
+                // Graceful shutdown  host decides how to exit (WinForms: Application.Exit;
                 // Service: Stop()). Falls back to Environment.Exit if nothing subscribed.
                 if (method == "POST" && path == "/shutdown")
                 {
@@ -459,7 +472,7 @@ namespace ApexComputerUse
                         }
                         else
                         {
-                            // No host wired â€" exit the process directly so the remote caller
+                            // No host wired  exit the process directly so the remote caller
                             // still gets what they asked for.
                             Environment.Exit(0);
                         }
@@ -467,7 +480,7 @@ namespace ApexComputerUse
                     return;
                 }
 
-                // Scene REST routes â€" handled before the main switch
+                // Scene REST routes  handled before the main switch
                 var sceneResult = TryHandleSceneRoute(method, path, body, req);
                 if (sceneResult != null)
                 {
@@ -476,7 +489,7 @@ namespace ApexComputerUse
                     return;
                 }
 
-                // /run is async â€" handled before the sync switch
+                // /run is async  handled before the sync switch
                 if (path == "/run")
                 {
                     if (!_enableShellRun)
@@ -501,35 +514,35 @@ namespace ApexComputerUse
                 {
                     result = (method, path) switch
                     {
-                        // â"€â"€ Observability routes â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
+                        // Observability routes
                         ("GET", "/health")  => HandleHealth(),
                         ("GET", "/metrics") => HandleMetrics(),
-                        // â"€â"€ Diagnostic routes (auth-gated) â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
+                        // Diagnostic routes (auth-gated)
                         ("GET", "/ping")    => HandlePing(),
                         ("GET", "/sysinfo") => HandleSysinfo(),
                         ("GET", "/env")     => HandleEnv(),
                         ("GET", "/ls")      => HandleLs(req.QueryString["path"]),
 
-                        // â"€â"€ Existing routes â€" adapted to ApexResult â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
+                        // Existing routes  adapted to ApexResult
                         ("GET", "/status")
                             => ApexResult.From("status",     _dispatcher.Dispatch(new CommandRequest { Command = "status" })),
                         ("GET", "/windows")
                             => ApexResult.From("windows",    _dispatcher.Dispatch(new CommandRequest { Command = "windows" })),
                         ("GET", "/help")
-                            => ApexResult.From("help",       _dispatcher.Dispatch(new CommandRequest { Command = "help" })),
+                            => HandleHelp(req),
                         ("GET", "/elements")
                             => ApexResult.From("elements",   _dispatcher.Dispatch(new CommandRequest
                             {
                                 Command        = "elements",
                                 SearchType     = req.QueryString["type"],
-                                AutomationId   = req.QueryString["id"],       // numeric â€" expands a subtree from a previously-mapped element
+                                AutomationId   = req.QueryString["id"],       // numeric  expands a subtree from a previously-mapped element
                                 Depth          = int.TryParse(req.QueryString["depth"], out int _elemDepth) ? _elemDepth : null,
                                 OnscreenOnly   = string.Equals(req.QueryString["onscreen"],       "true", StringComparison.OrdinalIgnoreCase),
-                                // â"€â"€ Browser-friendly tree shaping (opt-in; see README) â"€â"€
+                                // " Browser-friendly tree shaping (opt-in; see README) "
                                 Match          = req.QueryString["match"],                        // text-search Name/AutomationId/Value
                                 CollapseChains = string.Equals(req.QueryString["collapseChains"], "true", StringComparison.OrdinalIgnoreCase),
                                 IncludePath    = string.Equals(req.QueryString["includePath"],    "true", StringComparison.OrdinalIgnoreCase),
-                                Properties     = req.QueryString["properties"],                   // "extra" â†’ value + helpText
+                                Properties     = req.QueryString["properties"],                   // "extra" †’ value + helpText
                                 ChangedSince   = req.QueryString["since"] ?? req.QueryString["changedSince"]
                             })),
                         ("GET", "/uimap")

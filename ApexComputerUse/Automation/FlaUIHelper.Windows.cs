@@ -159,6 +159,26 @@ namespace ApexComputerUse
                 TimeSpan.FromMilliseconds(200)
             ).Result;
 
+        public string WaitPageLoad(Window window, int timeoutSeconds = 10)
+        {
+            var deadline = DateTime.UtcNow.AddSeconds(timeoutSeconds);
+            string? lastTitle = null;
+            DateTime? stableAt = null;
+
+            while (DateTime.UtcNow < deadline)
+            {
+                Thread.Sleep(200);
+                string title = window.Properties.Name.ValueOrDefault ?? "";
+                if (title.Contains("Loading", StringComparison.OrdinalIgnoreCase))
+                { lastTitle = null; stableAt = null; continue; }
+                if (title != lastTitle)
+                { lastTitle = title; stableAt = DateTime.UtcNow.AddMilliseconds(500); }
+                else if (stableAt.HasValue && DateTime.UtcNow >= stableAt.Value && !string.IsNullOrEmpty(title))
+                    return $"Page loaded: {title}";
+            }
+            return $"Timeout waiting for page load (last title: {lastTitle ?? "unknown"})";
+        }
+
         // ── Discovery ─────────────────────────────────────────────────────
 
         public AutomationElement[] GetDesktopWindows() =>

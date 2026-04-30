@@ -13,9 +13,57 @@ namespace ApexComputerUse
     {
         // ── Mouse ─────────────────────────────────────────────────────────
 
-        public void ScrollUp(int amount = 3)   => Mouse.Scroll(amount);
-        public void ScrollDown(int amount = 3) => Mouse.Scroll(-amount);
-        public void HorizontalScroll(int amount) => Mouse.HorizontalScroll(amount);
+        private static void MoveToCenterOf(AutomationElement el)
+        {
+            try
+            {
+                var b = el.BoundingRectangle;
+                if (!b.IsEmpty)
+                    Mouse.MoveTo(new System.Drawing.Point((int)(b.X + b.Width / 2), (int)(b.Y + b.Height / 2)));
+            }
+            catch { }
+        }
+
+        public string ScrollUp(AutomationElement el, int amount = 3, bool visual = false)
+        {
+            string name = el.Properties.Name.ValueOrDefault ?? "";
+            if (!visual && el.Patterns.Scroll.TryGetPattern(out var p) && p.VerticallyScrollable.ValueOrDefault)
+            {
+                for (int i = 0; i < amount; i++) p.Scroll(ScrollAmount.NoAmount, ScrollAmount.SmallDecrement);
+                return $"Scrolled up {amount} at '{name}' (pattern)";
+            }
+            MoveToCenterOf(el);
+            Mouse.Scroll(amount);
+            return $"Scrolled up {amount} at '{name}' (mouse)";
+        }
+
+        public string ScrollDown(AutomationElement el, int amount = 3, bool visual = false)
+        {
+            string name = el.Properties.Name.ValueOrDefault ?? "";
+            if (!visual && el.Patterns.Scroll.TryGetPattern(out var p) && p.VerticallyScrollable.ValueOrDefault)
+            {
+                for (int i = 0; i < amount; i++) p.Scroll(ScrollAmount.NoAmount, ScrollAmount.SmallIncrement);
+                return $"Scrolled down {amount} at '{name}' (pattern)";
+            }
+            MoveToCenterOf(el);
+            Mouse.Scroll(-amount);
+            return $"Scrolled down {amount} at '{name}' (mouse)";
+        }
+
+        public string HorizontalScroll(AutomationElement el, int amount, bool visual = false)
+        {
+            string name = el.Properties.Name.ValueOrDefault ?? "";
+            bool left = amount < 0;
+            if (!visual && el.Patterns.Scroll.TryGetPattern(out var p) && p.HorizontallyScrollable.ValueOrDefault)
+            {
+                var dir = left ? ScrollAmount.SmallDecrement : ScrollAmount.SmallIncrement;
+                for (int i = 0; i < Math.Abs(amount); i++) p.Scroll(dir, ScrollAmount.NoAmount);
+                return $"Scrolled {(left ? "left" : "right")} {Math.Abs(amount)} at '{name}' (pattern)";
+            }
+            MoveToCenterOf(el);
+            Mouse.HorizontalScroll(amount);
+            return $"Scrolled {(left ? "left" : "right")} {Math.Abs(amount)} at '{name}' (mouse)";
+        }
 
         public void DragAndDrop(AutomationElement source, AutomationElement target)
         {

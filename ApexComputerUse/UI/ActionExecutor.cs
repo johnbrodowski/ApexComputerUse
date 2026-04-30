@@ -114,9 +114,9 @@ namespace ApexComputerUse
 
                 // ── Scroll ────────────────────────────────────────────
                 "Scroll Into View" => Do(() => _helper.ScrollIntoView(el)),
-                "Scroll Up" => Do(() => _helper.ScrollUp(ParseIntOr(input, 3))),
-                "Scroll Down" => Do(() => _helper.ScrollDown(ParseIntOr(input, 3))),
-                "Horizontal Scroll" => Do(() => _helper.HorizontalScroll(ParseInt(input))),
+                "Scroll Up" => _helper.ScrollUp(el, ParseIntOr(input, 3)),
+                "Scroll Down" => _helper.ScrollDown(el, ParseIntOr(input, 3)),
+                "Horizontal Scroll" => _helper.HorizontalScroll(el, ParseInt(input)),
 
                 // ── Drag and Drop ─────────────────────────────────────
                 "Drag to Element (target AutomationId)" => DragToElement(el, input),

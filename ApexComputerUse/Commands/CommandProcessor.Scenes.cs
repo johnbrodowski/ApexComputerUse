@@ -9,7 +9,11 @@ namespace ApexComputerUse
         {
             if (SceneStore == null) return Fail("SceneStore not initialised.");
 
-            var opts = new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            var opts = new System.Text.Json.JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+            };
             string action = (req.Action ?? "").ToLowerInvariant();
 
             try
