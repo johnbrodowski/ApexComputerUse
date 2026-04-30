@@ -148,6 +148,8 @@ namespace ApexComputerUse
         /// </summary>
         public void SendKeysEnhanced(AutomationElement el, string keys)
         {
+            keys = NormalizeBracketKeyTokens(keys);
+
             el.Focus();
             Thread.Sleep(FocusDelayMs);
 
@@ -197,6 +199,42 @@ namespace ApexComputerUse
             {
                 Keyboard.Type(keys);
             }
+        }
+
+        /// <summary>
+        /// Normalizes bracket-style key tokens (for example [Enter]) into the
+        /// brace style supported by SendBraceKeys ({Enter}).
+        /// Only recognized key names are converted; unknown bracketed text is left unchanged.
+        /// </summary>
+        internal static string NormalizeBracketKeyTokens(string keys)
+        {
+            if (string.IsNullOrEmpty(keys) || !keys.Contains('['))
+                return keys;
+
+            var sb = new System.Text.StringBuilder(keys.Length);
+            int i = 0;
+            while (i < keys.Length)
+            {
+                if (keys[i] == '[')
+                {
+                    int end = keys.IndexOf(']', i + 1);
+                    if (end > i + 1)
+                    {
+                        string token = keys[(i + 1)..end].Trim();
+                        if (ParseVirtualKey(token).HasValue)
+                        {
+                            sb.Append('{').Append(token).Append('}');
+                            i = end + 1;
+                            continue;
+                        }
+                    }
+                }
+
+                sb.Append(keys[i]);
+                i++;
+            }
+
+            return sb.ToString();
         }
 
         private static void SendBraceKeys(string keys)
