@@ -41,12 +41,12 @@ namespace ApexComputerUse
         public string TestRunnerExePath    { get; init; } = "";
         public string TestRunnerConfigPath { get; init; } = "";
 
-        // ── Singleton ─────────────────────────────────────────────────────
+        // -- Singleton -----------------------------------------------------
 
         /// <summary>Loaded once at startup; available application-wide.</summary>
         public static AppConfig Current { get; } = Load();
 
-        // ── Loading ───────────────────────────────────────────────────────
+        // -- Loading -------------------------------------------------------
 
         public static AppConfig Load()
         {
@@ -75,7 +75,7 @@ namespace ApexComputerUse
             return cfg;
         }
 
-        // ── JSON overlay ──────────────────────────────────────────────────
+        // -- JSON overlay --------------------------------------------------
 
         private static AppConfig ApplyJson(AppConfig cfg, JsonElement root)
         {
@@ -107,7 +107,7 @@ namespace ApexComputerUse
             };
         }
 
-        // ── Environment variable overlay ──────────────────────────────────
+        // -- Environment variable overlay ----------------------------------
 
         private static AppConfig ApplyEnv(AppConfig cfg)
         {
@@ -136,3 +136,4 @@ namespace ApexComputerUse
         }
     }
 }
+

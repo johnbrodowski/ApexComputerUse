@@ -4,7 +4,7 @@ using System.Text.Json;
 
 namespace ApexComputerUse
 {
-    // ── Format adapter ────────────────────────────────────────────────────
+    // -- Format adapter ----------------------------------------------------
 
     internal static class FormatAdapter
     {
@@ -137,7 +137,7 @@ namespace ApexComputerUse
         }
     }
 
-    // ── Minimal raw PDF generator (no external dependencies) ─────────────────
+    // -- Minimal raw PDF generator (no external dependencies) -----------------
 
     internal static class PdfWriter
     {
@@ -164,22 +164,22 @@ namespace ApexComputerUse
             int firstPage   = 4;
             int firstStream = firstPage + nPages;
 
-            // Build in Latin-1: 1 char == 1 byte → sb.Length gives exact byte offsets
+            // Build in Latin-1: 1 char == 1 byte -> sb.Length gives exact byte offsets
             var sb      = new StringBuilder();
             var offsets = new List<int>();
 
             sb.Append("%PDF-1.4\n");
 
-            // obj 1 — Catalog
+            // obj 1 - Catalog
             offsets.Add(sb.Length);
             sb.Append("1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n");
 
-            // obj 2 — Pages
+            // obj 2 - Pages
             string kids = string.Join(" ", Enumerable.Range(firstPage, nPages).Select(i => $"{i} 0 R"));
             offsets.Add(sb.Length);
             sb.Append($"2 0 obj<</Type/Pages/Kids[{kids}]/Count {nPages}>>endobj\n");
 
-            // obj 3 — Font (Courier built-in — no embedding needed)
+            // obj 3 - Font (Courier built-in - no embedding needed)
             offsets.Add(sb.Length);
             sb.Append("3 0 obj<</Type/Font/Subtype/Type1/BaseFont/Courier/Encoding/WinAnsiEncoding>>endobj\n");
 
@@ -237,3 +237,4 @@ namespace ApexComputerUse
         }
     }
 }
+

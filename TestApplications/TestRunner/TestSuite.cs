@@ -4,8 +4,8 @@ using System.Diagnostics;
 using System.Text.Json.Nodes;
 
 /// <summary>
-/// The full test suite. Exercises the bridge exactly the way an AI coding agent would —
-/// via HTTP (GET /windows, POST /find, GET /elements, POST /execute, GET /help) — then
+/// The full test suite. Exercises the bridge exactly the way an AI coding agent would -
+/// via HTTP (GET /windows, POST /find, GET /elements, POST /execute, GET /help) - then
 /// walks the returned JSON element tree to find controls by name/AutomationId and
 /// interacts with them by numeric element id.
 ///
@@ -51,7 +51,7 @@ public sealed class TestSuite
         Catalog = BuildCatalog();
     }
 
-    // ── Public API ─────────────────────────────────────────────────────────────
+    // -- Public API -------------------------------------------------------------
 
     /// <summary>Run the full catalog in order and return aggregated results.</summary>
     public async Task<CycleResult> RunAsync(CancellationToken ct) => await RunAllAsync(ct);
@@ -133,20 +133,20 @@ public sealed class TestSuite
         return await RunOneInternalAsync(tc, ct);
     }
 
-    // ── Catalog construction ──────────────────────────────────────────────────
+    // -- Catalog construction --------------------------------------------------
 
     private IReadOnlyList<TestCase> BuildCatalog()
     {
         var list = new List<TestCase>
         {
             // Discovery
-            new("discovery-winforms-visible", "GET /windows — WinForms app visible", "discovery",
-                ct => CheckAsync("GET /windows — WinForms app visible", "GET /windows",
+            new("discovery-winforms-visible", "GET /windows - WinForms app visible", "discovery",
+                ct => CheckAsync("GET /windows - WinForms app visible", "GET /windows",
                     () => _client.ListWindowsAsync(ct),
                     r => r.Success && (r.Result?.Contains(WinFormsTitle) ?? false), ct)),
 
-            new("discovery-wpf-visible", "GET /windows — WPF app visible", "discovery",
-                ct => CheckAsync("GET /windows — WPF app visible", "GET /windows",
+            new("discovery-wpf-visible", "GET /windows - WPF app visible", "discovery",
+                ct => CheckAsync("GET /windows - WPF app visible", "GET /windows",
                     () => _client.ListWindowsAsync(ct),
                     r => r.Success && (r.Result?.Contains(WpfTitle) ?? false), ct)),
 
@@ -154,231 +154,231 @@ public sealed class TestSuite
             new("winforms-scan", "SCAN_WINDOW WinForms", "winforms",
                 ct => ScanAsRootTestAsync("WinForms", WinFormsTitle, ct)),
 
-            new("winforms-textbox-type", "POST /execute type → WinForms TextBox", "winforms",
+            new("winforms-textbox-type", "POST /execute type -> WinForms TextBox", "winforms",
                 async ct =>
                 {
                     var (tree, error) = await SelectTabAndScanAsync(WinFormsTitle, "Identity", ct);
-                    if (tree == null) return Fail("POST /execute type → WinForms TextBox", error ?? "WinForms scan failed");
+                    if (tree == null) return Fail("POST /execute type -> WinForms TextBox", error ?? "WinForms scan failed");
                     var tb = FindNode(tree, n => ControlTypeIs(n, "Edit"));
-                    if (tb == null) return Fail("POST /execute type → WinForms TextBox", "No Edit control found");
+                    if (tb == null) return Fail("POST /execute type -> WinForms TextBox", "No Edit control found");
                     var typed = $"autotest_{DateTime.Now:HHmmss}";
-                    return await ExecAsync("POST /execute type → WinForms TextBox", tb, "type", typed, ct);
+                    return await ExecAsync("POST /execute type -> WinForms TextBox", tb, "type", typed, ct);
                 }),
 
-            new("winforms-textbox-gettext", "POST /execute gettext → typed value", "winforms",
+            new("winforms-textbox-gettext", "POST /execute gettext -> typed value", "winforms",
                 async ct =>
                 {
                     // Type a deterministic value, then gettext and assert round-trip.
                     var (tree, error) = await SelectTabAndScanAsync(WinFormsTitle, "Identity", ct);
-                    if (tree == null) return Fail("POST /execute gettext → typed value", error ?? "WinForms scan failed");
+                    if (tree == null) return Fail("POST /execute gettext -> typed value", error ?? "WinForms scan failed");
                     var tb = FindNode(tree, n => ControlTypeIs(n, "Edit"));
-                    if (tb == null) return Fail("POST /execute gettext → typed value", "No Edit control found");
+                    if (tb == null) return Fail("POST /execute gettext -> typed value", "No Edit control found");
                     var typed = $"autotest_{DateTime.Now:HHmmss}";
                     var typeResp = await _client.ExecuteAsync(tb["id"]!.GetValue<int>(), "type", typed, ct);
-                    if (!typeResp.Success) return Fail("POST /execute gettext → typed value", $"type failed: {typeResp.Detail}");
+                    if (!typeResp.Success) return Fail("POST /execute gettext -> typed value", $"type failed: {typeResp.Detail}");
                     if (_actionDelayMs > 0) await Task.Delay(_actionDelayMs, ct);
-                    return await CheckAsync("POST /execute gettext → typed value",
+                    return await CheckAsync("POST /execute gettext -> typed value",
                         $"POST /execute action=gettext id={tb["id"]}",
                         () => _client.ExecuteAsync(tb["id"]!.GetValue<int>(), "gettext", null, ct),
                         r => r.Success && (r.Result?.Contains(typed) ?? false), ct);
                 }),
 
-            new("winforms-checkbox-toggle", "POST /execute toggle → WinForms SimpleCheckBox", "winforms",
+            new("winforms-checkbox-toggle", "POST /execute toggle -> WinForms SimpleCheckBox", "winforms",
                 async ct =>
                 {
                     var (tree, error) = await SelectTabAndScanAsync(WinFormsTitle, "Identity", ct);
-                    if (tree == null) return Fail("POST /execute toggle → WinForms SimpleCheckBox", error ?? "WinForms scan failed");
+                    if (tree == null) return Fail("POST /execute toggle -> WinForms SimpleCheckBox", error ?? "WinForms scan failed");
                     var cb = FindNode(tree, n => NameOrIdContains(n, "AD Sync") && ControlTypeIs(n, "CheckBox"));
-                    if (cb == null) return Fail("POST /execute toggle → WinForms SimpleCheckBox", "Not found");
-                    var r = await ExecAsync("POST /execute toggle → WinForms SimpleCheckBox", cb, "toggle", null, ct);
+                    if (cb == null) return Fail("POST /execute toggle -> WinForms SimpleCheckBox", "Not found");
+                    var r = await ExecAsync("POST /execute toggle -> WinForms SimpleCheckBox", cb, "toggle", null, ct);
                     // Restore so subsequent runs are idempotent.
                     _ = await _client.ExecuteAsync(cb["id"]!.GetValue<int>(), "toggle", null, ct);
                     return r;
                 }),
 
-            new("winforms-contextmenu-click", "POST /execute click → WinForms ContextMenu button", "winforms",
+            new("winforms-contextmenu-click", "POST /execute click -> WinForms ContextMenu button", "winforms",
                 async ct =>
                 {
                     var tree = await GetScanAsync(WinFormsTitle, ct);
-                    if (tree == null) return Fail("POST /execute click → WinForms ContextMenu button", "WinForms scan failed");
+                    if (tree == null) return Fail("POST /execute click -> WinForms ContextMenu button", "WinForms scan failed");
                     var btn = FindNode(tree, n => ControlTypeIs(n, "Button") && NameOrIdContains(n, "Save"));
-                    if (btn == null) return Fail("POST /execute click → WinForms ContextMenu button", "Not found");
-                    return await ExecAsync("POST /execute click → WinForms ContextMenu button", btn, "click", null, ct);
+                    if (btn == null) return Fail("POST /execute click -> WinForms ContextMenu button", "Not found");
+                    return await ExecAsync("POST /execute click -> WinForms ContextMenu button", btn, "click", null, ct);
                 }),
 
-            new("winforms-progressbar-gettext", "POST /execute gettext → WinForms ProgressBar", "winforms",
+            new("winforms-progressbar-gettext", "POST /execute gettext -> WinForms ProgressBar", "winforms",
                 async ct =>
                 {
                     var tree = await GetScanAsync(WinFormsTitle, ct);
-                    if (tree == null) return Fail("POST /execute gettext → WinForms ProgressBar", "WinForms scan failed");
+                    if (tree == null) return Fail("POST /execute gettext -> WinForms ProgressBar", "WinForms scan failed");
                     var pb = FindNode(tree, n => ControlTypeIs(n, "ProgressBar"));
-                    if (pb == null) return Fail("POST /execute gettext → WinForms ProgressBar", "Not found");
-                    return await ExecAsync("POST /execute gettext → WinForms ProgressBar", pb, "gettext", null, ct);
+                    if (pb == null) return Fail("POST /execute gettext -> WinForms ProgressBar", "Not found");
+                    return await ExecAsync("POST /execute gettext -> WinForms ProgressBar", pb, "gettext", null, ct);
                 }),
 
-            new("winforms-combo-expand-collapse", "POST /execute expand/collapse → WinForms EditableCombo", "winforms",
+            new("winforms-combo-expand-collapse", "POST /execute expand/collapse -> WinForms EditableCombo", "winforms",
                 async ct =>
                 {
                     var (tree, error) = await SelectTabAndScanAsync(WinFormsTitle, "Identity", ct);
-                    if (tree == null) return Fail("POST /execute expand/collapse → WinForms EditableCombo", error ?? "WinForms scan failed");
+                    if (tree == null) return Fail("POST /execute expand/collapse -> WinForms EditableCombo", error ?? "WinForms scan failed");
                     var combo = FindNode(tree, n => ControlTypeIs(n, "ComboBox") && NameOrIdContains(n, "Department"));
-                    if (combo == null) return Fail("POST /execute expand/collapse → WinForms EditableCombo", "Not found");
-                    var expand = await ExecAsync("POST /execute expand → WinForms EditableCombo", combo, "expand", null, ct);
-                    if (!expand.Passed) return expand with { Name = "POST /execute expand/collapse → WinForms EditableCombo" };
-                    var collapse = await ExecAsync("POST /execute collapse → WinForms EditableCombo", combo, "collapse", null, ct);
-                    return collapse with { Name = "POST /execute expand/collapse → WinForms EditableCombo" };
+                    if (combo == null) return Fail("POST /execute expand/collapse -> WinForms EditableCombo", "Not found");
+                    var expand = await ExecAsync("POST /execute expand -> WinForms EditableCombo", combo, "expand", null, ct);
+                    if (!expand.Passed) return expand with { Name = "POST /execute expand/collapse -> WinForms EditableCombo" };
+                    var collapse = await ExecAsync("POST /execute collapse -> WinForms EditableCombo", combo, "collapse", null, ct);
+                    return collapse with { Name = "POST /execute expand/collapse -> WinForms EditableCombo" };
                 }),
 
             // WPF
             new("wpf-scan", "SCAN_WINDOW WPF", "wpf",
                 ct => ScanAsRootTestAsync("WPF", WpfTitle, ct)),
 
-            new("wpf-textbox-type", "POST /execute type → WPF TextBox", "wpf",
+            new("wpf-textbox-type", "POST /execute type -> WPF TextBox", "wpf",
                 async ct =>
                 {
                     var (tree, error) = await SelectTabAndScanAsync(WpfTitle, "Identity", ct);
-                    if (tree == null) return Fail("POST /execute type → WPF TextBox", error ?? "WPF scan failed");
+                    if (tree == null) return Fail("POST /execute type -> WPF TextBox", error ?? "WPF scan failed");
                     var tb = FindNode(tree, n => ControlTypeIs(n, "Edit"));
-                    if (tb == null) return Fail("POST /execute type → WPF TextBox", "Not found");
-                    return await ExecAsync("POST /execute type → WPF TextBox", tb, "type",
+                    if (tb == null) return Fail("POST /execute type -> WPF TextBox", "Not found");
+                    return await ExecAsync("POST /execute type -> WPF TextBox", tb, "type",
                         $"wpf_auto_{DateTime.Now:HHmmss}", ct);
                 }),
 
-            new("wpf-checkbox-toggle", "POST /execute toggle → WPF SimpleCheckBox", "wpf",
+            new("wpf-checkbox-toggle", "POST /execute toggle -> WPF SimpleCheckBox", "wpf",
                 async ct =>
                 {
                     var (tree, error) = await SelectTabAndScanAsync(WpfTitle, "Identity", ct);
-                    if (tree == null) return Fail("POST /execute toggle → WPF SimpleCheckBox", error ?? "WPF scan failed");
+                    if (tree == null) return Fail("POST /execute toggle -> WPF SimpleCheckBox", error ?? "WPF scan failed");
                     var cb = FindNode(tree, n => AutomationIdIs(n, "FlagAdSync"));
-                    if (cb == null) return Fail("POST /execute toggle → WPF SimpleCheckBox", "Not found");
-                    var r = await ExecAsync("POST /execute toggle → WPF SimpleCheckBox", cb, "toggle", null, ct);
+                    if (cb == null) return Fail("POST /execute toggle -> WPF SimpleCheckBox", "Not found");
+                    var r = await ExecAsync("POST /execute toggle -> WPF SimpleCheckBox", cb, "toggle", null, ct);
                     _ = await _client.ExecuteAsync(cb["id"]!.GetValue<int>(), "toggle", null, ct);
                     return r;
                 }),
 
-            new("wpf-invokable-click", "POST /execute click → WPF InvokableButton", "wpf",
+            new("wpf-invokable-click", "POST /execute click -> WPF InvokableButton", "wpf",
                 async ct =>
                 {
                     var tree = await GetScanAsync(WpfTitle, ct);
-                    if (tree == null) return Fail("POST /execute click → WPF InvokableButton", "WPF scan failed");
+                    if (tree == null) return Fail("POST /execute click -> WPF InvokableButton", "WPF scan failed");
                     var inv = FindNode(tree, n => AutomationIdIs(n, "TbSave"));
-                    if (inv == null) return Fail("POST /execute click → WPF InvokableButton", "Not found");
-                    return await ExecAsync("POST /execute click → WPF InvokableButton", inv, "click", null, ct);
+                    if (inv == null) return Fail("POST /execute click -> WPF InvokableButton", "Not found");
+                    return await ExecAsync("POST /execute click -> WPF InvokableButton", inv, "click", null, ct);
                 }),
 
-            new("wpf-combo-expand-collapse", "POST /execute expand/collapse → WPF NonEditableCombo", "wpf",
+            new("wpf-combo-expand-collapse", "POST /execute expand/collapse -> WPF NonEditableCombo", "wpf",
                 async ct =>
                 {
                     var (tree, error) = await SelectTabAndScanAsync(WpfTitle, "Identity", ct);
-                    if (tree == null) return Fail("POST /execute expand/collapse → WPF NonEditableCombo", error ?? "WPF scan failed");
+                    if (tree == null) return Fail("POST /execute expand/collapse -> WPF NonEditableCombo", error ?? "WPF scan failed");
                     var combo = FindNode(tree, n => AutomationIdIs(n, "Department"));
-                    if (combo == null) return Fail("POST /execute expand/collapse → WPF NonEditableCombo", "Not found");
-                    var expand = await ExecAsync("POST /execute expand → WPF NonEditableCombo", combo, "expand", null, ct);
-                    if (!expand.Passed) return expand with { Name = "POST /execute expand/collapse → WPF NonEditableCombo" };
-                    var collapse = await ExecAsync("POST /execute collapse → WPF NonEditableCombo", combo, "collapse", null, ct);
-                    return collapse with { Name = "POST /execute expand/collapse → WPF NonEditableCombo" };
+                    if (combo == null) return Fail("POST /execute expand/collapse -> WPF NonEditableCombo", "Not found");
+                    var expand = await ExecAsync("POST /execute expand -> WPF NonEditableCombo", combo, "expand", null, ct);
+                    if (!expand.Passed) return expand with { Name = "POST /execute expand/collapse -> WPF NonEditableCombo" };
+                    var collapse = await ExecAsync("POST /execute collapse -> WPF NonEditableCombo", combo, "collapse", null, ct);
+                    return collapse with { Name = "POST /execute expand/collapse -> WPF NonEditableCombo" };
                 }),
 
-            new("wpf-slider-setrange-verify", "POST /execute setrange 4 → WPF Slider (verified)", "wpf",
-                ct => SliderSetAndVerifyAsync("POST /execute setrange 4 → WPF Slider (verified)",
+            new("wpf-slider-setrange-verify", "POST /execute setrange 4 -> WPF Slider (verified)", "wpf",
+                ct => SliderSetAndVerifyAsync("POST /execute setrange 4 -> WPF Slider (verified)",
                     WpfTitle, "4", ct, tabName: "Identity")),
 
-            // Richer WinForms interactions ─────────────────────────────────────
-            new("winforms-textbox-edit-clear-retype", "TextBox edit → clear → retype (verified)", "winforms",
-                ct => TextBoxEditRetypeAsync("TextBox edit → clear → retype (verified)",
+            // Richer WinForms interactions -------------------------------------
+            new("winforms-textbox-edit-clear-retype", "TextBox edit -> clear -> retype (verified)", "winforms",
+                ct => TextBoxEditRetypeAsync("TextBox edit -> clear -> retype (verified)",
                     WinFormsTitle, ControlTypeEdit, ct, tabName: "Identity")),
 
-            new("winforms-slider-setrange-verify", "POST /execute setrange 50 → WinForms Slider (verified)", "winforms",
-                ct => SliderSetAndVerifyAsync("POST /execute setrange 50 → WinForms Slider (verified)",
+            new("winforms-slider-setrange-verify", "POST /execute setrange 50 -> WinForms Slider (verified)", "winforms",
+                ct => SliderSetAndVerifyAsync("POST /execute setrange 50 -> WinForms Slider (verified)",
                     WinFormsTitle, "50", ct, tabName: "Identity", nameHint: "Access Level")),
 
-            new("winforms-listbox-select", "POST /execute select → WinForms ListBox item", "winforms",
-                ct => ListBoxSelectFirstItemAsync("POST /execute select → WinForms ListBox item",
+            new("winforms-listbox-select", "POST /execute select -> WinForms ListBox item", "winforms",
+                ct => ListBoxSelectFirstItemAsync("POST /execute select -> WinForms ListBox item",
                     WinFormsTitle, ct, tabName: "Dialogs")),
 
-            new("winforms-radio-select", "POST /execute click → WinForms RadioButton2 (mutex)", "winforms",
-                ct => RadioSelectAsync("POST /execute click → WinForms RadioButton2 (mutex)",
+            new("winforms-radio-select", "POST /execute click -> WinForms RadioButton2 (mutex)", "winforms",
+                ct => RadioSelectAsync("POST /execute click -> WinForms RadioButton2 (mutex)",
                     WinFormsTitle, "Via Proxy", ct, tabName: "Network")),
 
             new("winforms-3state-cycle", "Cycle ThreeStateCheckBox x3 (WinForms)", "winforms",
                 ct => ThreeStateCycleAsync("Cycle ThreeStateCheckBox x3 (WinForms)", WinFormsTitle, "Indeterminate state", ct, tabName: "Dialogs")),
 
-            new("winforms-menu-edit-copy", "Click Edit → Copy Plain menu item (WinForms)", "winforms",
-                ct => MenuClickAsync("Click Edit → Copy Plain menu item (WinForms)",
+            new("winforms-menu-edit-copy", "Click Edit -> Copy Plain menu item (WinForms)", "winforms",
+                ct => MenuClickAsync("Click Edit -> Copy Plain menu item (WinForms)",
                     WinFormsTitle, parentMenu: "Edit", leafMenu: "Plain Text", ct)),
 
-            // Richer WPF interactions ──────────────────────────────────────────
-            new("wpf-listbox-select", "POST /execute select → WPF ListBox item", "wpf",
-                ct => ListBoxSelectFirstItemAsync("POST /execute select → WPF ListBox item",
+            // Richer WPF interactions ------------------------------------------
+            new("wpf-listbox-select", "POST /execute select -> WPF ListBox item", "wpf",
+                ct => ListBoxSelectFirstItemAsync("POST /execute select -> WPF ListBox item",
                     WpfTitle, ct, tabName: "Network", listSelector: n => AutomationIdIs(n, "EndpointList"))),
 
-            new("wpf-expander-toggle", "POST /execute expand/collapse → WPF Expander", "wpf",
+            new("wpf-expander-toggle", "POST /execute expand/collapse -> WPF Expander", "wpf",
                 async ct =>
                 {
                     var (tree, error) = await SelectTabAndScanAsync(WpfTitle, "WPF", ct);
-                    if (tree == null) return Fail("POST /execute expand/collapse → WPF Expander", error ?? "WPF scan failed");
+                    if (tree == null) return Fail("POST /execute expand/collapse -> WPF Expander", error ?? "WPF scan failed");
                     var exp = FindNode(tree, n => AutomationIdIs(n, "ExpanderServer"))
                            ?? FindNode(tree, n => NameOrIdContains(n, "Server Configuration"));
-                    if (exp == null) return Fail("POST /execute expand/collapse → WPF Expander", "Not found");
-                    var expand = await ExecAsync("POST /execute expand → WPF Expander", exp, "expand", null, ct);
-                    if (!expand.Passed) return expand with { Name = "POST /execute expand/collapse → WPF Expander" };
-                    var collapse = await ExecAsync("POST /execute collapse → WPF Expander", exp, "collapse", null, ct);
-                    return collapse with { Name = "POST /execute expand/collapse → WPF Expander" };
+                    if (exp == null) return Fail("POST /execute expand/collapse -> WPF Expander", "Not found");
+                    var expand = await ExecAsync("POST /execute expand -> WPF Expander", exp, "expand", null, ct);
+                    if (!expand.Passed) return expand with { Name = "POST /execute expand/collapse -> WPF Expander" };
+                    var collapse = await ExecAsync("POST /execute collapse -> WPF Expander", exp, "collapse", null, ct);
+                    return collapse with { Name = "POST /execute expand/collapse -> WPF Expander" };
                 }),
 
             new("wpf-menu-file", "Click File menu (WPF)", "wpf",
                 ct => MenuClickAsync("Click File menu (WPF)", WpfTitle,
                     parentMenu: "File", leafMenu: null, ct)),
 
-            // HTML (browser) — skipped gracefully if no browser window is open ──
+            // HTML (browser) - skipped gracefully if no browser window is open --
             new("html-torture-scan", "SCAN_WINDOW Web (Torture Test)", "html",
                 async ct => { await EnsureBrowserActiveAsync(HtmlTortureTitle, ct); return await ScanAsRootTestAsync("Torture Test", HtmlTortureTitle, ct); }),
 
-            new("html-torture-textbox-type", "POST /execute type → HTML TextBox on Torture Test (verified)", "html",
+            new("html-torture-textbox-type", "POST /execute type -> HTML TextBox on Torture Test (verified)", "html",
                 async ct => { await EnsureBrowserActiveAsync(HtmlTortureTitle, ct);
-                    return await TextBoxEditRetypeAsync("POST /execute type → HTML TextBox on Torture Test (verified)",
+                    return await TextBoxEditRetypeAsync("POST /execute type -> HTML TextBox on Torture Test (verified)",
                         HtmlTortureTitle, ControlTypeEdit, ct, nameHint: "Normal text", focusBeforeType: true); }),
 
             new("html-ecommerce-scan", "SCAN_WINDOW Web (Ecommerce)", "html",
                 async ct => { await EnsureBrowserActiveAsync(HtmlEcommerceTitle, ct); return await ScanAsRootTestAsync("Ecommerce", HtmlEcommerceTitle, ct); }),
 
-            new("html-ecommerce-slider-setrange-verify", "POST /execute setrange 100 → HTML range slider on Ecommerce (verified)", "html",
+            new("html-ecommerce-slider-setrange-verify", "POST /execute setrange 100 -> HTML range slider on Ecommerce (verified)", "html",
                 async ct => { await EnsureBrowserActiveAsync(HtmlEcommerceTitle, ct);
-                    return await SliderSetAndVerifyAsync("POST /execute setrange 100 → HTML range slider on Ecommerce (verified)",
+                    return await SliderSetAndVerifyAsync("POST /execute setrange 100 -> HTML range slider on Ecommerce (verified)",
                         HtmlEcommerceTitle, "100", ct); }),
 
-            // WinForms — Identity tab (additional controls)
-            new("winforms-identity-combo-status", "WinForms Identity: StatusCombo → select Inactive", "winforms",
-                ct => ComboBoxSelectItemAsync("WinForms Identity: StatusCombo → select Inactive",
+            // WinForms - Identity tab (additional controls)
+            new("winforms-identity-combo-status", "WinForms Identity: StatusCombo -> select Inactive", "winforms",
+                ct => ComboBoxSelectItemAsync("WinForms Identity: StatusCombo -> select Inactive",
                     WinFormsTitle, "StatusCombo", "Inactive", ct, tabName: "Identity")),
 
-            new("winforms-identity-numericupdown-salary", "WinForms Identity: SalaryInput → setvalue 75000", "winforms",
-                ct => NumericSetAndVerifyAsync("WinForms Identity: SalaryInput → setvalue 75000",
+            new("winforms-identity-numericupdown-salary", "WinForms Identity: SalaryInput -> setvalue 75000", "winforms",
+                ct => NumericSetAndVerifyAsync("WinForms Identity: SalaryInput -> setvalue 75000",
                     WinFormsTitle, "SalaryInput", "75000", ct, tabName: "Identity")),
 
-            new("winforms-identity-richtext-notes", "WinForms Identity: NotesField → retype", "winforms",
-                ct => TextBoxEditRetypeAsync("WinForms Identity: NotesField → retype",
+            new("winforms-identity-richtext-notes", "WinForms Identity: NotesField -> retype", "winforms",
+                ct => TextBoxEditRetypeAsync("WinForms Identity: NotesField -> retype",
                     WinFormsTitle, ControlTypeEdit, ct, tabName: "Identity", nameHint: "NotesField")),
 
-            // WinForms — Network tab
+            // WinForms - Network tab
             // WinForms TrackBar exposes UIA range 0-100 regardless of actual Minimum/Maximum.
-            // Use UIA-scaled values: actual÷(actualMax/100). UploadSlider max=1000 → scale=10.
-            new("winforms-network-slider-upload", "WinForms Network: UploadSlider → setrange 20 (UIA=actual 200)", "winforms",
-                ct => SliderSetAndVerifyAsync("WinForms Network: UploadSlider → setrange 20 (UIA=actual 200)",
+            // Use UIA-scaled values: actual?(actualMax/100). UploadSlider max=1000 -> scale=10.
+            new("winforms-network-slider-upload", "WinForms Network: UploadSlider -> setrange 20 (UIA=actual 200)", "winforms",
+                ct => SliderSetAndVerifyAsync("WinForms Network: UploadSlider -> setrange 20 (UIA=actual 200)",
                     WinFormsTitle, "20", ct, tabName: "Network", nameHint: "Upload")),
 
-            new("winforms-network-slider-download", "WinForms Network: DownloadSlider → setrange 30 (UIA=actual 300)", "winforms",
-                ct => SliderSetAndVerifyAsync("WinForms Network: DownloadSlider → setrange 30 (UIA=actual 300)",
+            new("winforms-network-slider-download", "WinForms Network: DownloadSlider -> setrange 30 (UIA=actual 300)", "winforms",
+                ct => SliderSetAndVerifyAsync("WinForms Network: DownloadSlider -> setrange 30 (UIA=actual 300)",
                     WinFormsTitle, "30", ct, tabName: "Network", nameHint: "Download")),
 
-            new("winforms-network-checkbox-tls", "WinForms Network: TlsVerify → toggle", "winforms",
-                ct => CheckBoxToggleAsync("WinForms Network: TlsVerify → toggle",
+            new("winforms-network-checkbox-tls", "WinForms Network: TlsVerify -> toggle", "winforms",
+                ct => CheckBoxToggleAsync("WinForms Network: TlsVerify -> toggle",
                     WinFormsTitle, "TlsVerify", ct, tabName: "Network")),
 
-            new("winforms-network-checkedlistbox-toggle", "WinForms Network: FeaturesCheckedList → select-index 3", "winforms",
+            new("winforms-network-checkedlistbox-toggle", "WinForms Network: FeaturesCheckedList -> select-index 3", "winforms",
                 async ct =>
                 {
-                    const string n = "WinForms Network: FeaturesCheckedList → select-index 3";
+                    const string n = "WinForms Network: FeaturesCheckedList -> select-index 3";
                     var (tree, error) = await SelectTabAndScanAsync(WinFormsTitle, "Network", ct);
                     if (tree == null) return Fail(n, error ?? "scan failed");
                     var list = FindNode(tree, n2 => AutomationIdIs(n2, "FeaturesCheckedList"))
@@ -388,52 +388,52 @@ public sealed class TestSuite
                     return new TestResult(n, r.Success, r.Detail, Command: $"POST /execute select-index 3 id={list["id"]}");
                 }),
 
-            // WinForms — Scheduler tab
-            new("winforms-scheduler-textbox", "WinForms Scheduler: JobName → retype", "winforms",
-                ct => TextBoxEditRetypeAsync("WinForms Scheduler: JobName → retype",
+            // WinForms - Scheduler tab
+            new("winforms-scheduler-textbox", "WinForms Scheduler: JobName -> retype", "winforms",
+                ct => TextBoxEditRetypeAsync("WinForms Scheduler: JobName -> retype",
                     WinFormsTitle, ControlTypeEdit, ct, tabName: "Scheduler", nameHint: "JobName")),
 
-            new("winforms-scheduler-combo-type", "WinForms Scheduler: JobType → select Report", "winforms",
-                ct => ComboBoxSelectItemAsync("WinForms Scheduler: JobType → select Report",
+            new("winforms-scheduler-combo-type", "WinForms Scheduler: JobType -> select Report", "winforms",
+                ct => ComboBoxSelectItemAsync("WinForms Scheduler: JobType -> select Report",
                     WinFormsTitle, "JobType", "Report", ct, tabName: "Scheduler")),
 
             // PrioritySlider min=1 max=10: valid UIA snap points are multiples of 11 (=100/9 per tick).
-            // UIA pos 66 = actual 7 (formula: (actual-1)*100÷(max-min) integer = (7-1)*100÷9 = 66).
-            new("winforms-scheduler-slider-priority", "WinForms Scheduler: PrioritySlider → setrange 66 (UIA=actual 7)", "winforms",
-                ct => SliderSetAndVerifyAsync("WinForms Scheduler: PrioritySlider → setrange 66 (UIA=actual 7)",
+            // UIA pos 66 = actual 7 (formula: (actual-1)*100?(max-min) integer = (7-1)*100?9 = 66).
+            new("winforms-scheduler-slider-priority", "WinForms Scheduler: PrioritySlider -> setrange 66 (UIA=actual 7)", "winforms",
+                ct => SliderSetAndVerifyAsync("WinForms Scheduler: PrioritySlider -> setrange 66 (UIA=actual 7)",
                     WinFormsTitle, "66", ct, tabName: "Scheduler", nameHint: "Priority")),
 
-            new("winforms-scheduler-checkbox-enabled", "WinForms Scheduler: JobEnabled → toggle", "winforms",
-                ct => CheckBoxToggleAsync("WinForms Scheduler: JobEnabled → toggle",
+            new("winforms-scheduler-checkbox-enabled", "WinForms Scheduler: JobEnabled -> toggle", "winforms",
+                ct => CheckBoxToggleAsync("WinForms Scheduler: JobEnabled -> toggle",
                     WinFormsTitle, "JobEnabled", ct, tabName: "Scheduler")),
 
-            // WinForms — Layout tab
-            new("winforms-layout-button-apply", "WinForms Layout: Button Apply → click", "winforms",
-                ct => ButtonClickAsync("WinForms Layout: Button Apply → click",
+            // WinForms - Layout tab
+            new("winforms-layout-button-apply", "WinForms Layout: Button Apply -> click", "winforms",
+                ct => ButtonClickAsync("WinForms Layout: Button Apply -> click",
                     WinFormsTitle, "Apply", ct, tabName: "Layout")),
 
-            new("winforms-layout-button-reset", "WinForms Layout: Button Reset → click", "winforms",
-                ct => ButtonClickAsync("WinForms Layout: Button Reset → click",
+            new("winforms-layout-button-reset", "WinForms Layout: Button Reset -> click", "winforms",
+                ct => ButtonClickAsync("WinForms Layout: Button Reset -> click",
                     WinFormsTitle, "Reset", ct, tabName: "Layout")),
 
-            // WinForms — Logs tab
-            new("winforms-logs-combo-level", "WinForms Logs: LogLevelCombo → select ERROR", "winforms",
-                ct => ComboBoxSelectItemAsync("WinForms Logs: LogLevelCombo → select ERROR",
+            // WinForms - Logs tab
+            new("winforms-logs-combo-level", "WinForms Logs: LogLevelCombo -> select ERROR", "winforms",
+                ct => ComboBoxSelectItemAsync("WinForms Logs: LogLevelCombo -> select ERROR",
                     WinFormsTitle, "LogLevelCombo", "ERROR", ct, tabName: "Logs")),
 
-            new("winforms-logs-textbox-filter", "WinForms Logs: LogFilter → retype", "winforms",
-                ct => TextBoxEditRetypeAsync("WinForms Logs: LogFilter → retype",
+            new("winforms-logs-textbox-filter", "WinForms Logs: LogFilter -> retype", "winforms",
+                ct => TextBoxEditRetypeAsync("WinForms Logs: LogFilter -> retype",
                     WinFormsTitle, ControlTypeEdit, ct, tabName: "Logs", nameHint: "LogFilter")),
 
-            new("winforms-logs-checkbox-autoscroll", "WinForms Logs: LogAutoScroll → toggle", "winforms",
-                ct => CheckBoxToggleAsync("WinForms Logs: LogAutoScroll → toggle",
+            new("winforms-logs-checkbox-autoscroll", "WinForms Logs: LogAutoScroll -> toggle", "winforms",
+                ct => CheckBoxToggleAsync("WinForms Logs: LogAutoScroll -> toggle",
                     WinFormsTitle, "LogAutoScroll", ct, tabName: "Logs")),
 
-            // WinForms — Dialogs tab
-            new("winforms-dialogs-domainupdown", "WinForms Dialogs: DomainSpinner → setvalue Beta", "winforms",
+            // WinForms - Dialogs tab
+            new("winforms-dialogs-domainupdown", "WinForms Dialogs: DomainSpinner -> setvalue Beta", "winforms",
                 async ct =>
                 {
-                    const string n = "WinForms Dialogs: DomainSpinner → setvalue Beta";
+                    const string n = "WinForms Dialogs: DomainSpinner -> setvalue Beta";
                     var (tree, error) = await SelectTabAndScanAsync(WinFormsTitle, "Dialogs", ct);
                     if (tree == null) return Fail(n, error ?? "scan failed");
                     var spin = FindNode(tree, n2 => AutomationIdIs(n2, "DomainSpinner"))
@@ -444,100 +444,100 @@ public sealed class TestSuite
                     return new TestResult(n, r.Success, r.Detail, Command: $"POST /execute setvalue Beta id={id}");
                 }),
 
-            new("winforms-dialogs-numericupdown", "WinForms Dialogs: DecimalSpinner → setvalue 42", "winforms",
-                ct => NumericSetAndVerifyAsync("WinForms Dialogs: DecimalSpinner → setvalue 42",
+            new("winforms-dialogs-numericupdown", "WinForms Dialogs: DecimalSpinner -> setvalue 42", "winforms",
+                ct => NumericSetAndVerifyAsync("WinForms Dialogs: DecimalSpinner -> setvalue 42",
                     WinFormsTitle, "DecimalSpinner", "42", ct, tabName: "Dialogs")),
 
-            // WPF — Identity tab
-            new("wpf-identity-slider", "WPF Identity: Slider AccessLevel → setrange 3", "wpf",
-                ct => SliderSetAndVerifyAsync("WPF Identity: Slider AccessLevel → setrange 3",
+            // WPF - Identity tab
+            new("wpf-identity-slider", "WPF Identity: Slider AccessLevel -> setrange 3", "wpf",
+                ct => SliderSetAndVerifyAsync("WPF Identity: Slider AccessLevel -> setrange 3",
                     WpfTitle, "3", ct, tabName: "Identity", nameHint: "AccessLevel")),
 
-            new("wpf-identity-radio-parttime", "WPF Identity: RadioButton EmpPartTime → select", "wpf",
-                ct => RadioSelectAsync("WPF Identity: RadioButton EmpPartTime → select",
+            new("wpf-identity-radio-parttime", "WPF Identity: RadioButton EmpPartTime -> select", "wpf",
+                ct => RadioSelectAsync("WPF Identity: RadioButton EmpPartTime -> select",
                     WpfTitle, "EmpPartTime", ct, tabName: "Identity")),
 
-            new("wpf-identity-checkbox-vpn", "WPF Identity: CheckBox FlagVpn → toggle", "wpf",
-                ct => CheckBoxToggleAsync("WPF Identity: CheckBox FlagVpn → toggle",
+            new("wpf-identity-checkbox-vpn", "WPF Identity: CheckBox FlagVpn -> toggle", "wpf",
+                ct => CheckBoxToggleAsync("WPF Identity: CheckBox FlagVpn -> toggle",
                     WpfTitle, "FlagVpn", ct, tabName: "Identity")),
 
-            new("wpf-identity-combo-location", "WPF Identity: ComboBox Location → select Boston", "wpf",
-                ct => ComboBoxSelectItemAsync("WPF Identity: ComboBox Location → select Boston",
+            new("wpf-identity-combo-location", "WPF Identity: ComboBox Location -> select Boston", "wpf",
+                ct => ComboBoxSelectItemAsync("WPF Identity: ComboBox Location -> select Boston",
                     WpfTitle, "Location", "Boston", ct, tabName: "Identity")),
 
-            new("wpf-identity-textbox-email", "WPF Identity: TextBox Email → retype", "wpf",
-                ct => TextBoxEditRetypeAsync("WPF Identity: TextBox Email → retype",
+            new("wpf-identity-textbox-email", "WPF Identity: TextBox Email -> retype", "wpf",
+                ct => TextBoxEditRetypeAsync("WPF Identity: TextBox Email -> retype",
                     WpfTitle, ControlTypeEdit, ct, tabName: "Identity", nameHint: "Email")),
 
-            // WPF — Network tab
-            new("wpf-network-slider-upload", "WPF Network: Slider UploadLimit → setrange 200", "wpf",
-                ct => SliderSetAndVerifyAsync("WPF Network: Slider UploadLimit → setrange 200",
+            // WPF - Network tab
+            new("wpf-network-slider-upload", "WPF Network: Slider UploadLimit -> setrange 200", "wpf",
+                ct => SliderSetAndVerifyAsync("WPF Network: Slider UploadLimit -> setrange 200",
                     WpfTitle, "200", ct, tabName: "Network", nameHint: "UploadLimit")),
 
-            new("wpf-network-slider-download", "WPF Network: Slider DownloadLimit → setrange 300", "wpf",
-                ct => SliderSetAndVerifyAsync("WPF Network: Slider DownloadLimit → setrange 300",
+            new("wpf-network-slider-download", "WPF Network: Slider DownloadLimit -> setrange 300", "wpf",
+                ct => SliderSetAndVerifyAsync("WPF Network: Slider DownloadLimit -> setrange 300",
                     WpfTitle, "300", ct, tabName: "Network", nameHint: "DownloadLimit")),
 
-            new("wpf-network-checkbox-tls", "WPF Network: CheckBox TlsClientCert → toggle", "wpf",
-                ct => CheckBoxToggleAsync("WPF Network: CheckBox TlsClientCert → toggle",
+            new("wpf-network-checkbox-tls", "WPF Network: CheckBox TlsClientCert -> toggle", "wpf",
+                ct => CheckBoxToggleAsync("WPF Network: CheckBox TlsClientCert -> toggle",
                     WpfTitle, "TlsClientCert", ct, tabName: "Network")),
 
-            new("wpf-network-radio-proxy", "WPF Network: RadioButton ConnProxy → select", "wpf",
-                ct => RadioSelectAsync("WPF Network: RadioButton ConnProxy → select",
+            new("wpf-network-radio-proxy", "WPF Network: RadioButton ConnProxy -> select", "wpf",
+                ct => RadioSelectAsync("WPF Network: RadioButton ConnProxy -> select",
                     WpfTitle, "ConnProxy", ct, tabName: "Network")),
 
-            new("wpf-network-combo-protocol", "WPF Network: ComboBox Protocol → select HTTP", "wpf",
-                ct => ComboBoxSelectItemAsync("WPF Network: ComboBox Protocol → select HTTP",
+            new("wpf-network-combo-protocol", "WPF Network: ComboBox Protocol -> select HTTP", "wpf",
+                ct => ComboBoxSelectItemAsync("WPF Network: ComboBox Protocol -> select HTTP",
                     WpfTitle, "Protocol", "HTTP", ct, tabName: "Network")),
 
-            // WPF — Scheduler tab
-            new("wpf-scheduler-textbox", "WPF Scheduler: TextBox JobName → retype", "wpf",
-                ct => TextBoxEditRetypeAsync("WPF Scheduler: TextBox JobName → retype",
+            // WPF - Scheduler tab
+            new("wpf-scheduler-textbox", "WPF Scheduler: TextBox JobName -> retype", "wpf",
+                ct => TextBoxEditRetypeAsync("WPF Scheduler: TextBox JobName -> retype",
                     WpfTitle, ControlTypeEdit, ct, tabName: "Scheduler", nameHint: "JobName")),
 
-            new("wpf-scheduler-combo-type", "WPF Scheduler: ComboBox JobType → select Report", "wpf",
-                ct => ComboBoxSelectItemAsync("WPF Scheduler: ComboBox JobType → select Report",
+            new("wpf-scheduler-combo-type", "WPF Scheduler: ComboBox JobType -> select Report", "wpf",
+                ct => ComboBoxSelectItemAsync("WPF Scheduler: ComboBox JobType -> select Report",
                     WpfTitle, "JobType", "Report", ct, tabName: "Scheduler")),
 
-            new("wpf-scheduler-slider", "WPF Scheduler: Slider JobPriority → setrange 7", "wpf",
-                ct => SliderSetAndVerifyAsync("WPF Scheduler: Slider JobPriority → setrange 7",
+            new("wpf-scheduler-slider", "WPF Scheduler: Slider JobPriority -> setrange 7", "wpf",
+                ct => SliderSetAndVerifyAsync("WPF Scheduler: Slider JobPriority -> setrange 7",
                     WpfTitle, "7", ct, tabName: "Scheduler", nameHint: "JobPriority")),
 
-            new("wpf-scheduler-checkbox", "WPF Scheduler: CheckBox JobEnabled → toggle", "wpf",
-                ct => CheckBoxToggleAsync("WPF Scheduler: CheckBox JobEnabled → toggle",
+            new("wpf-scheduler-checkbox", "WPF Scheduler: CheckBox JobEnabled -> toggle", "wpf",
+                ct => CheckBoxToggleAsync("WPF Scheduler: CheckBox JobEnabled -> toggle",
                     WpfTitle, "JobEnabled", ct, tabName: "Scheduler")),
 
-            // WPF — Layout tab
-            new("wpf-layout-button-apply", "WPF Layout: Button BtnApply → click", "wpf",
-                ct => ButtonClickAsync("WPF Layout: Button BtnApply → click",
+            // WPF - Layout tab
+            new("wpf-layout-button-apply", "WPF Layout: Button BtnApply -> click", "wpf",
+                ct => ButtonClickAsync("WPF Layout: Button BtnApply -> click",
                     WpfTitle, "BtnApply", ct, tabName: "Layout")),
 
-            new("wpf-layout-button-reset", "WPF Layout: Button BtnReset → click", "wpf",
-                ct => ButtonClickAsync("WPF Layout: Button BtnReset → click",
+            new("wpf-layout-button-reset", "WPF Layout: Button BtnReset -> click", "wpf",
+                ct => ButtonClickAsync("WPF Layout: Button BtnReset -> click",
                     WpfTitle, "BtnReset", ct, tabName: "Layout")),
 
-            // WPF — Logs tab
-            new("wpf-logs-combo-level", "WPF Logs: ComboBox LogLevel → select ERROR", "wpf",
-                ct => ComboBoxSelectItemAsync("WPF Logs: ComboBox LogLevel → select ERROR",
+            // WPF - Logs tab
+            new("wpf-logs-combo-level", "WPF Logs: ComboBox LogLevel -> select ERROR", "wpf",
+                ct => ComboBoxSelectItemAsync("WPF Logs: ComboBox LogLevel -> select ERROR",
                     WpfTitle, "LogLevel", "ERROR", ct, tabName: "Logs")),
 
-            new("wpf-logs-textbox-filter", "WPF Logs: TextBox LogFilter → retype", "wpf",
-                ct => TextBoxEditRetypeAsync("WPF Logs: TextBox LogFilter → retype",
+            new("wpf-logs-textbox-filter", "WPF Logs: TextBox LogFilter -> retype", "wpf",
+                ct => TextBoxEditRetypeAsync("WPF Logs: TextBox LogFilter -> retype",
                     WpfTitle, ControlTypeEdit, ct, tabName: "Logs", nameHint: "LogFilter")),
 
-            new("wpf-logs-checkbox-autoscroll", "WPF Logs: CheckBox LogAutoScroll → toggle", "wpf",
-                ct => CheckBoxToggleAsync("WPF Logs: CheckBox LogAutoScroll → toggle",
+            new("wpf-logs-checkbox-autoscroll", "WPF Logs: CheckBox LogAutoScroll -> toggle", "wpf",
+                ct => CheckBoxToggleAsync("WPF Logs: CheckBox LogAutoScroll -> toggle",
                     WpfTitle, "LogAutoScroll", ct, tabName: "Logs")),
 
-            new("wpf-logs-button-clear", "WPF Logs: Button LogClear → click", "wpf",
-                ct => ButtonClickAsync("WPF Logs: Button LogClear → click",
+            new("wpf-logs-button-clear", "WPF Logs: Button LogClear -> click", "wpf",
+                ct => ButtonClickAsync("WPF Logs: Button LogClear -> click",
                     WpfTitle, "LogClear", ct, tabName: "Logs")),
 
-            // WPF — WPF-specific tab
-            new("wpf-tab-togglebutton", "WPF WPF-tab: ToggleButton Toggle1 → click+restore", "wpf",
+            // WPF - WPF-specific tab
+            new("wpf-tab-togglebutton", "WPF WPF-tab: ToggleButton Toggle1 -> click+restore", "wpf",
                 async ct =>
                 {
-                    const string n = "WPF WPF-tab: ToggleButton Toggle1 → click+restore";
+                    const string n = "WPF WPF-tab: ToggleButton Toggle1 -> click+restore";
                     var (tree, error) = await SelectTabAndScanAsync(WpfTitle, "WPF", ct);
                     if (tree == null) return Fail(n, error ?? "scan failed");
                     var btn = FindNode(tree, n2 => AutomationIdIs(n2, "Toggle1"));
@@ -550,10 +550,10 @@ public sealed class TestSuite
                     return new TestResult(n, true, "clicked+restored Toggle1", Command: $"POST /execute click id={id}");
                 }),
 
-            new("wpf-tab-expander-logging", "WPF WPF-tab: Expander ExpanderLogging → expand/collapse", "wpf",
+            new("wpf-tab-expander-logging", "WPF WPF-tab: Expander ExpanderLogging -> expand/collapse", "wpf",
                 async ct =>
                 {
-                    const string n = "WPF WPF-tab: Expander ExpanderLogging → expand/collapse";
+                    const string n = "WPF WPF-tab: Expander ExpanderLogging -> expand/collapse";
                     var (tree, error) = await SelectTabAndScanAsync(WpfTitle, "WPF", ct);
                     if (tree == null) return Fail(n, error ?? "scan failed");
                     var exp = FindNode(tree, n2 => AutomationIdIs(n2, "ExpanderLogging"));
@@ -566,33 +566,33 @@ public sealed class TestSuite
                     return new TestResult(n, true, "expanded+collapsed ExpanderLogging", Command: $"POST /execute expand/collapse id={id}");
                 }),
 
-            // WPF — Dialogs tab
-            new("wpf-dialogs-slider", "WPF Dialogs: Slider MiscVertSlider → setrange 50", "wpf",
-                ct => SliderSetAndVerifyAsync("WPF Dialogs: Slider MiscVertSlider → setrange 50",
+            // WPF - Dialogs tab
+            new("wpf-dialogs-slider", "WPF Dialogs: Slider MiscVertSlider -> setrange 50", "wpf",
+                ct => SliderSetAndVerifyAsync("WPF Dialogs: Slider MiscVertSlider -> setrange 50",
                     WpfTitle, "50", ct, tabName: "Dialogs", nameHint: "MiscVertSlider")),
 
-            new("wpf-dialogs-radio", "WPF Dialogs: RadioButton MiscRadioB → select", "wpf",
-                ct => RadioSelectAsync("WPF Dialogs: RadioButton MiscRadioB → select",
+            new("wpf-dialogs-radio", "WPF Dialogs: RadioButton MiscRadioB -> select", "wpf",
+                ct => RadioSelectAsync("WPF Dialogs: RadioButton MiscRadioB -> select",
                     WpfTitle, "MiscRadioB", ct, tabName: "Dialogs")),
 
-            new("wpf-dialogs-listbox", "WPF Dialogs: ListBox MiscMultiListBox → select-index 0", "wpf",
-                ct => ListBoxSelectFirstItemAsync("WPF Dialogs: ListBox MiscMultiListBox → select-index 0",
+            new("wpf-dialogs-listbox", "WPF Dialogs: ListBox MiscMultiListBox -> select-index 0", "wpf",
+                ct => ListBoxSelectFirstItemAsync("WPF Dialogs: ListBox MiscMultiListBox -> select-index 0",
                     WpfTitle, ct, tabName: "Dialogs",
                     listSelector: n2 => AutomationIdIs(n2, "MiscMultiListBox"))),
 
-            new("wpf-dialogs-combo", "WPF Dialogs: ComboBox MiscEditCombo → select Option A", "wpf",
-                ct => ComboBoxSelectItemAsync("WPF Dialogs: ComboBox MiscEditCombo → select Option A",
+            new("wpf-dialogs-combo", "WPF Dialogs: ComboBox MiscEditCombo -> select Option A", "wpf",
+                ct => ComboBoxSelectItemAsync("WPF Dialogs: ComboBox MiscEditCombo -> select Option A",
                     WpfTitle, "MiscEditCombo", "Option A", ct, tabName: "Dialogs")),
 
-            new("wpf-dialogs-textbox", "WPF Dialogs: TextBox MiscMultilineTextBox → retype", "wpf",
-                ct => TextBoxEditRetypeAsync("WPF Dialogs: TextBox MiscMultilineTextBox → retype",
+            new("wpf-dialogs-textbox", "WPF Dialogs: TextBox MiscMultilineTextBox -> retype", "wpf",
+                ct => TextBoxEditRetypeAsync("WPF Dialogs: TextBox MiscMultilineTextBox -> retype",
                     WpfTitle, ControlTypeEdit, ct, tabName: "Dialogs", nameHint: "MiscMultilineTextBox")),
 
-            // HTML — TortureTest
-            new("html-torture-checkbox-toggle", "HTML Torture: checkbox check1 → toggle+restore", "html",
+            // HTML - TortureTest
+            new("html-torture-checkbox-toggle", "HTML Torture: checkbox check1 -> toggle+restore", "html",
                 async ct =>
                 {
-                    const string n = "HTML Torture: checkbox check1 → toggle+restore";
+                    const string n = "HTML Torture: checkbox check1 -> toggle+restore";
                     await EnsureBrowserActiveAsync(HtmlTortureTitle, ct);
                     var tree = await GetScanAsync(HtmlTortureTitle, ct);
                     if (tree == null) return Fail(n, "scan failed");
@@ -607,10 +607,10 @@ public sealed class TestSuite
                     return new TestResult(n, true, "toggled+restored check1", Command: $"POST /execute toggle id={id}");
                 }),
 
-            new("html-torture-radio-select", "HTML Torture: radio 'Radio 2' → click", "html",
+            new("html-torture-radio-select", "HTML Torture: radio 'Radio 2' -> click", "html",
                 async ct =>
                 {
-                    const string n = "HTML Torture: radio 'Radio 2' → click";
+                    const string n = "HTML Torture: radio 'Radio 2' -> click";
                     await EnsureBrowserActiveAsync(HtmlTortureTitle, ct);
                     var tree = await GetScanAsync(HtmlTortureTitle, ct);
                     if (tree == null) return Fail(n, "scan failed");
@@ -620,18 +620,18 @@ public sealed class TestSuite
                     return new TestResult(n, r.Success, r.Detail, Command: $"POST /execute click id={rb["id"]}");
                 }),
 
-            new("html-torture-select-single", "HTML Torture: select#single-select → select Option 2", "html",
+            new("html-torture-select-single", "HTML Torture: select#single-select -> select Option 2", "html",
                 async ct =>
                 {
                     await EnsureBrowserActiveAsync(HtmlTortureTitle, ct);
-                    return await ComboBoxSelectItemAsync("HTML Torture: select#single-select → select Option 2",
+                    return await ComboBoxSelectItemAsync("HTML Torture: select#single-select -> select Option 2",
                         HtmlTortureTitle, "single-select", "Option 2", ct);
                 }),
 
-            new("html-torture-select-multi", "HTML Torture: select#multi-select → select-index 0", "html",
+            new("html-torture-select-multi", "HTML Torture: select#multi-select -> select-index 0", "html",
                 async ct =>
                 {
-                    const string n = "HTML Torture: select#multi-select → select-index 0";
+                    const string n = "HTML Torture: select#multi-select -> select-index 0";
                     await EnsureBrowserActiveAsync(HtmlTortureTitle, ct);
                     var tree = await GetScanAsync(HtmlTortureTitle, ct);
                     if (tree == null) return Fail(n, "scan failed");
@@ -642,18 +642,18 @@ public sealed class TestSuite
                     return new TestResult(n, r.Success, r.Detail, Command: $"POST /execute select-index 0 id={sel["id"]}");
                 }),
 
-            new("html-torture-textarea", "HTML Torture: textarea → retype", "html",
+            new("html-torture-textarea", "HTML Torture: textarea -> retype", "html",
                 async ct =>
                 {
                     await EnsureBrowserActiveAsync(HtmlTortureTitle, ct);
-                    return await TextBoxEditRetypeAsync("HTML Torture: textarea → retype",
+                    return await TextBoxEditRetypeAsync("HTML Torture: textarea -> retype",
                         HtmlTortureTitle, ControlTypeEdit, ct, nameHint: "Textarea", focusBeforeType: true);
                 }),
 
-            new("html-torture-button-click", "HTML Torture: button 'Plain button' → click", "html",
+            new("html-torture-button-click", "HTML Torture: button 'Plain button' -> click", "html",
                 async ct =>
                 {
-                    const string n = "HTML Torture: button 'Plain button' → click";
+                    const string n = "HTML Torture: button 'Plain button' -> click";
                     await EnsureBrowserActiveAsync(HtmlTortureTitle, ct);
                     var tree = await GetScanAsync(HtmlTortureTitle, ct);
                     if (tree == null) return Fail(n, "scan failed");
@@ -663,27 +663,27 @@ public sealed class TestSuite
                     return new TestResult(n, r.Success, r.Detail, Command: $"POST /execute click id={btn["id"]}");
                 }),
 
-            // HTML — Ecommerce
-            new("html-ecommerce-search-type", "HTML Ecommerce: searchProducts → retype", "html",
+            // HTML - Ecommerce
+            new("html-ecommerce-search-type", "HTML Ecommerce: searchProducts -> retype", "html",
                 async ct =>
                 {
                     await EnsureBrowserActiveAsync(HtmlEcommerceTitle, ct);
-                    return await TextBoxEditRetypeAsync("HTML Ecommerce: searchProducts → retype",
+                    return await TextBoxEditRetypeAsync("HTML Ecommerce: searchProducts -> retype",
                         HtmlEcommerceTitle, ControlTypeEdit, ct, nameHint: "searchProducts", focusBeforeType: true);
                 }),
 
-            new("html-ecommerce-category-select", "HTML Ecommerce: categoryFilter → select Electronics", "html",
+            new("html-ecommerce-category-select", "HTML Ecommerce: categoryFilter -> select Electronics", "html",
                 async ct =>
                 {
                     await EnsureBrowserActiveAsync(HtmlEcommerceTitle, ct);
-                    return await ComboBoxSelectItemAsync("HTML Ecommerce: categoryFilter → select Electronics",
+                    return await ComboBoxSelectItemAsync("HTML Ecommerce: categoryFilter -> select Electronics",
                         HtmlEcommerceTitle, "categoryFilter", "Electronics", ct);
                 }),
 
-            new("html-ecommerce-checkbox-shipping", "HTML Ecommerce: shipFree → toggle+restore", "html",
+            new("html-ecommerce-checkbox-shipping", "HTML Ecommerce: shipFree -> toggle+restore", "html",
                 async ct =>
                 {
-                    const string n = "HTML Ecommerce: shipFree → toggle+restore";
+                    const string n = "HTML Ecommerce: shipFree -> toggle+restore";
                     await EnsureBrowserActiveAsync(HtmlEcommerceTitle, ct);
                     var tree = await GetScanAsync(HtmlEcommerceTitle, ct);
                     if (tree == null) return Fail(n, "scan failed");
@@ -698,10 +698,10 @@ public sealed class TestSuite
                     return new TestResult(n, true, "toggled+restored shipFree", Command: $"POST /execute toggle id={id}");
                 }),
 
-            new("html-ecommerce-add-to-cart", "HTML Ecommerce: first 'Add to Cart' button → click", "html",
+            new("html-ecommerce-add-to-cart", "HTML Ecommerce: first 'Add to Cart' button -> click", "html",
                 async ct =>
                 {
-                    const string n = "HTML Ecommerce: first 'Add to Cart' button → click";
+                    const string n = "HTML Ecommerce: first 'Add to Cart' button -> click";
                     await EnsureBrowserActiveAsync(HtmlEcommerceTitle, ct);
                     var tree = await GetScanAsync(HtmlEcommerceTitle, ct);
                     if (tree == null) return Fail(n, "scan failed");
@@ -712,8 +712,8 @@ public sealed class TestSuite
                 }),
 
             // Meta
-            new("meta-help", "GET /help — returns content", "meta",
-                ct => CheckAsync("GET /help — returns content", "GET /help",
+            new("meta-help", "GET /help - returns content", "meta",
+                ct => CheckAsync("GET /help - returns content", "GET /help",
                     () => _client.HelpAsync(ct),
                     r => r.Success && !string.IsNullOrWhiteSpace(r.Result), ct)),
         };
@@ -722,7 +722,7 @@ public sealed class TestSuite
 
     private const string ControlTypeEdit = "Edit";
 
-    // ── Higher-level reusable test bodies ─────────────────────────────────────
+    // -- Higher-level reusable test bodies -------------------------------------
 
     /// <summary>Type a deterministic value into an Edit control, read it back, clear, retype, read back again.</summary>
     /// <summary>
@@ -756,7 +756,7 @@ public sealed class TestSuite
 
         if (focusBeforeType)
         {
-            // Browsers accept text only when the element actually has keyboard focus —
+            // Browsers accept text only when the element actually has keyboard focus -
             // otherwise type/keys end up in the address bar or whichever element last had focus.
             _ = await _client.ExecuteAsync(id, "focus", null, ct);
             if (_actionDelayMs > 0) await Task.Delay(_actionDelayMs, ct);
@@ -774,7 +774,7 @@ public sealed class TestSuite
         var clear = await _client.ExecuteAsync(id, "clear", null, ct);
         if (!clear.Success)
         {
-            // Some Edit surfaces lack a "clear" action — fall back to selectall + overwrite.
+            // Some Edit surfaces lack a "clear" action - fall back to selectall + overwrite.
             _ = await _client.ExecuteAsync(id, "selectall", null, ct);
         }
         if (_actionDelayMs > 0) await Task.Delay(_actionDelayMs, ct);
@@ -834,7 +834,7 @@ public sealed class TestSuite
 
         var getr = await _client.ExecuteAsync(id, "getrange", null, ct);
         if (!getr.Success) return Fail(name, $"getrange failed: {getr.Detail}");
-        // getrange reports "value min-max" or similar — just check the numeric target is present.
+        // getrange reports "value min-max" or similar - just check the numeric target is present.
         bool ok = getr.Result != null && getr.Result.Contains(value);
         try
         {
@@ -843,7 +843,7 @@ public sealed class TestSuite
         }
         catch { /* restoration is best-effort only */ }
         return new TestResult(name, ok,
-            ok ? $"setrange→getrange round-trip: {getr.Result}"
+            ok ? $"setrange->getrange round-trip: {getr.Result}"
                : $"getrange did not contain '{value}'. Got: {getr.Result}",
             Command: $"POST /execute setrange/getrange id={id} value={value}");
     }
@@ -897,7 +897,7 @@ public sealed class TestSuite
             var allRadios = CollectNodes(tree, n => ControlTypeIs(n, "RadioButton")).Take(10).ToList();
             var byName    = CollectNodes(tree, n => NameOrIdContains(n, radioName)).Take(5).ToList();
             var ctypes    = CollectNodes(tree, _ => true).GroupBy(n => n["controlType"]?.GetValue<string>() ?? "?")
-                                .Select(g => $"{g.Key}×{g.Count()}").Take(15);
+                                .Select(g => $"{g.Key}?{g.Count()}").Take(15);
             string radioInfo = allRadios.Count > 0
                 ? "RadioButtons: " + string.Join(", ", allRadios.Select(n => $"\"{n["name"]?.GetValue<string>()}\""))
                 : "No RadioButton nodes in tree";
@@ -942,8 +942,8 @@ public sealed class TestSuite
             if (!r.Success) return Fail(name, $"toggle #{i + 1} failed: {r.Detail}");
             if (_actionDelayMs > 0) await Task.Delay(_actionDelayMs, ct);
         }
-        return new TestResult(name, true, "cycled ThreeStateCheckBox 3×",
-            Command: $"POST /execute toggle (×3) id={id}");
+        return new TestResult(name, true, "cycled ThreeStateCheckBox 3?",
+            Command: $"POST /execute toggle (?3) id={id}");
     }
 
     private async Task<TestResult> CheckBoxToggleAsync(string name, string windowTitle, string controlId, CancellationToken ct, string? tabName = null)
@@ -1019,7 +1019,7 @@ public sealed class TestSuite
         var getr = await _client.ExecuteAsync(id, "getvalue", null, ct);
         bool ok = getr.Success;
         return new TestResult(name, ok,
-            ok ? $"setvalue→getvalue: {getr.Result}" : $"getvalue failed: {getr.Detail}",
+            ok ? $"setvalue->getvalue: {getr.Result}" : $"getvalue failed: {getr.Detail}",
             Command: $"POST /execute setvalue/getvalue id={id} value={value}");
     }
 
@@ -1046,7 +1046,7 @@ public sealed class TestSuite
                 Command: $"POST /execute click id={parentId}");
         }
 
-        // The dropdown renders in a popup — re-scan and look for the leaf.
+        // The dropdown renders in a popup - re-scan and look for the leaf.
         await Task.Delay(_uiSettleDelayMs, ct);
         _scanCache.Remove(windowTitle);
         var treeAfter = await GetScanAsync(windowTitle, ct);
@@ -1057,7 +1057,7 @@ public sealed class TestSuite
 
         if (leaf == null)
         {
-            // Some menu popups are a sibling window — this is still a partial success.
+            // Some menu popups are a sibling window - this is still a partial success.
             return new TestResult(name, true,
                 $"opened '{parentMenu}'; leaf '{leafMenu}' was not found in the refreshed tree (popup may be a separate window)",
                 Command: $"POST /execute click id={parentId}");
@@ -1066,7 +1066,7 @@ public sealed class TestSuite
         int leafId = leaf["id"]!.GetValue<int>();
         var leafClick = await _client.ExecuteAsync(leafId, "click", null, ct);
         return new TestResult(name, leafClick.Success,
-            leafClick.Success ? $"clicked '{parentMenu}' → '{leafMenu}'" : leafClick.Detail,
+            leafClick.Success ? $"clicked '{parentMenu}' -> '{leafMenu}'" : leafClick.Detail,
             Command: $"POST /execute click id={leafId}");
     }
 
@@ -1089,13 +1089,13 @@ public sealed class TestSuite
             : (rescanned, null);
     }
 
-    // ── Core runner for a single case ─────────────────────────────────────────
+    // -- Core runner for a single case -----------------------------------------
 
     private async Task<TestResult> RunOneInternalAsync(TestCase tc, CancellationToken ct)
     {
         if (_skipTests.Contains(tc.Name))
         {
-            var skipped = new TestResult(tc.Name, true, "Skipped — previously passed", Skipped: true);
+            var skipped = new TestResult(tc.Name, true, "Skipped - previously passed", Skipped: true);
             _onResult?.Invoke(skipped);
             return skipped;
         }
@@ -1114,7 +1114,7 @@ public sealed class TestSuite
         return r;
     }
 
-    // ── Scan helpers (with short TTL cache) ───────────────────────────────────
+    // -- Scan helpers (with short TTL cache) -----------------------------------
 
     private async Task<JsonNode?> GetScanAsync(string windowTitle, CancellationToken ct)
     {
@@ -1161,10 +1161,10 @@ public sealed class TestSuite
 
         return new TestResult($"SCAN_WINDOW {label}", resp.Success, resp.Detail,
             ElapsedMs: sw.ElapsedMilliseconds,
-            Command: $"POST /find window={windowTitle} → GET /elements");
+            Command: $"POST /find window={windowTitle} -> GET /elements");
     }
 
-    // ── Low-level actions ─────────────────────────────────────────────────────
+    // -- Low-level actions -----------------------------------------------------
 
     private async Task<TestResult> ExecAsync(string name, JsonNode elem,
         string action, string? value, CancellationToken ct)
@@ -1190,7 +1190,7 @@ public sealed class TestSuite
 
     private static TestResult Fail(string name, string detail) => new(name, false, detail);
 
-    // ── Tree-walking helpers ──────────────────────────────────────────────────
+    // -- Tree-walking helpers --------------------------------------------------
 
     private static IEnumerable<JsonObject> CollectNodes(JsonNode root, Func<JsonObject, bool> pred)
     {
@@ -1250,7 +1250,7 @@ public sealed class TestSuite
     }
 }
 
-// ── Result types ───────────────────────────────────────────────────────────────
+// -- Result types ---------------------------------------------------------------
 
 public sealed record TestCase(
     string Id,
@@ -1290,3 +1290,4 @@ public sealed class CycleResult
                         : $"\n       {r.Detail}"))));
     }
 }
+

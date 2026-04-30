@@ -15,7 +15,7 @@ public static class ConsoleUsageExample
         var config = AiSettings.LoadFromFile("ai-settings.json");
         AiSettings.ApplyToEnvironment(config);
 
-        // ── Build a session using the static fluent entry point ─────────────
+        // -- Build a session using the static fluent entry point -------------
         var session = AiSessionBuilder
             .WithProvider("OpenAI")
             .WithModel("gpt-4o")
@@ -37,9 +37,10 @@ public static class ConsoleUsageExample
         Console.WriteLine("\nSerialized context:");
         Console.WriteLine(contextJson);
 
-        // ── Switch provider mid-conversation, history is preserved ──────────
+        // -- Switch provider mid-conversation, history is preserved ----------
         await session.SwitchProviderAsync("Groq", cancellationToken);
 
-        await session.SendAsync("Continue where we left off…", cancellationToken: cancellationToken);
+        await session.SendAsync("Continue where we left off...", cancellationToken: cancellationToken);
     }
 }
+

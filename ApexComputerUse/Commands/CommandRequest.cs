@@ -10,12 +10,12 @@ namespace ApexComputerUse
         public bool    OnscreenOnly { get; set; }   // true = exclude IsOffscreen elements
         public string? Action       { get; set; }
         public string? Value        { get; set; }
-        public string? ModelPath    { get; set; }   // ai init — LLM model .gguf path
-        public string? MmProjPath   { get; set; }   // ai init — mmproj .gguf path
-        public string? Prompt       { get; set; }   // ai describe/ask — question text
-        public int?    Depth        { get; set; }   // elements — max tree depth (null = unlimited)
+        public string? ModelPath    { get; set; }   // ai init - LLM model .gguf path
+        public string? MmProjPath   { get; set; }   // ai init - mmproj .gguf path
+        public string? Prompt       { get; set; }   // ai describe/ask - question text
+        public int?    Depth        { get; set; }   // elements - max tree depth (null = unlimited)
 
-        // ── Browser-friendly tree shaping (opt-in; all default to inert) ──
+        // -- Browser-friendly tree shaping (opt-in; all default to inert) --
 
         public string? Match          { get; set; }
 
@@ -46,3 +46,4 @@ namespace ApexComputerUse
         }
     }
 }
+

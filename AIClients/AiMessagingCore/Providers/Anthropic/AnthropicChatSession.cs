@@ -9,7 +9,7 @@ using AiMessagingCore.Models;
 namespace AiMessagingCore.Providers.Anthropic;
 
 /// <summary>
-/// Anthropic chat session — SSE streaming via <c>/messages</c>.
+/// Anthropic chat session \- SSE streaming via <c>/messages</c>.
 /// System prompt is sent as a separate top-level field per the Anthropic API spec.
 /// Reads ANTHROPIC_API_KEY and ANTHROPIC_BASE_URL from environment.
 /// </summary>

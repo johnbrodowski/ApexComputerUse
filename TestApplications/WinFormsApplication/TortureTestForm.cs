@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -11,7 +11,7 @@ namespace WinFormsApplication
 
         public TortureTestForm()
         {
-            Text = "System Configuration Console — UI Torture Test";
+            Text = "System Configuration Console - UI Torture Test";
             Size = new Size(1150, 850);
             MinimumSize = new Size(900, 700);
             StartPosition = FormStartPosition.CenterScreen;
@@ -51,7 +51,7 @@ namespace WinFormsApplication
             ResumeLayout();
         }
 
-        // ── MENU ─────────────────────────────────────────────────────────────────
+        // -- MENU -----------------------------------------------------------------
         private MenuStrip BuildMenuStrip()
         {
             var ms = new MenuStrip();
@@ -103,9 +103,9 @@ namespace WinFormsApplication
             lang.DropDownItems.AddRange(new ToolStripItem[]
             {
                 new ToolStripMenuItem("English (US)") { Checked = true, CheckOnClick = true },
-                new ToolStripMenuItem("Français") { CheckOnClick = true },
+                new ToolStripMenuItem("Fran?ais") { CheckOnClick = true },
                 new ToolStripMenuItem("Deutsch") { CheckOnClick = true },
-                new ToolStripMenuItem("日本語") { CheckOnClick = true },
+                new ToolStripMenuItem("???") { CheckOnClick = true },
             });
             tools.DropDownItems.AddRange(new ToolStripItem[]
             {
@@ -128,7 +128,7 @@ namespace WinFormsApplication
             return ms;
         }
 
-        // ── TOOLBAR ──────────────────────────────────────────────────────────────
+        // -- TOOLBAR --------------------------------------------------------------
         private ToolStrip BuildToolStrip()
         {
             var ts = new ToolStrip();
@@ -151,7 +151,7 @@ namespace WinFormsApplication
                 new ToolStripMenuItem("Debug Mode"),
             });
             var searchBox = new ToolStripTextBox { Text = "Search...", Size = new Size(160, 25) };
-            var statusLabel = new ToolStripLabel("● Connected") { ForeColor = Color.Green };
+            var statusLabel = new ToolStripLabel("* Connected") { ForeColor = Color.Green };
             var syncProgress = new ToolStripProgressBar { Value = 65, Width = 80 };
             ts.Items.AddRange(new ToolStripItem[]
             {
@@ -173,7 +173,7 @@ namespace WinFormsApplication
             return ts;
         }
 
-        // ── STATUS STRIP ─────────────────────────────────────────────────────────
+        // -- STATUS STRIP ---------------------------------------------------------
         private StatusStrip BuildStatusStrip()
         {
             var ss = new StatusStrip();
@@ -195,7 +195,7 @@ namespace WinFormsApplication
             return ss;
         }
 
-        // ── TAB 1: IDENTITY ───────────────────────────────────────────────────────
+        // -- TAB 1: IDENTITY -------------------------------------------------------
         private TabPage BuildIdentityTab()
         {
             var page = new TabPage("Identity") { AutoScroll = true, Padding = new Padding(8) };
@@ -231,9 +231,9 @@ namespace WinFormsApplication
             tl.Controls.Add(new TextBox { Text = "jdoe", Dock = DockStyle.Fill }, 3, 3);
 
             tl.Controls.Add(Lbl("Password:"), 0, 4);
-            tl.Controls.Add(new TextBox { PasswordChar = '●', Dock = DockStyle.Fill }, 1, 4);
+            tl.Controls.Add(new TextBox { PasswordChar = '*', Dock = DockStyle.Fill }, 1, 4);
             tl.Controls.Add(Lbl("Confirm:"), 2, 4);
-            tl.Controls.Add(new TextBox { PasswordChar = '●', Dock = DockStyle.Fill }, 3, 4);
+            tl.Controls.Add(new TextBox { PasswordChar = '*', Dock = DockStyle.Fill }, 3, 4);
 
             tl.Controls.Add(Lbl("Hire Date:"), 0, 5);
             tl.Controls.Add(new DateTimePicker { Format = DateTimePickerFormat.Short, Dock = DockStyle.Fill }, 1, 5);
@@ -291,13 +291,13 @@ namespace WinFormsApplication
             return page;
         }
 
-        // ── TAB 2: NETWORK ────────────────────────────────────────────────────────
+        // -- TAB 2: NETWORK --------------------------------------------------------
         private TabPage BuildNetworkTab()
         {
             var page = new TabPage("Network") { AutoScroll = true, Padding = new Padding(8) };
             var split = new SplitContainer { Dock = DockStyle.Fill, Orientation = Orientation.Vertical, SplitterDistance = 420 };
 
-            // Left — use Panel (not FlowLayoutPanel) so UIA exposes its children
+            // Left - use Panel (not FlowLayoutPanel) so UIA exposes its children
             var leftFlow = new Panel { Dock = DockStyle.Fill, AutoScroll = true, Padding = new Padding(4) };
 
             var connGroup = new GroupBox { Text = "Primary Connection", Dock = DockStyle.Top, Height = 220, Padding = new Padding(6) };
@@ -318,7 +318,7 @@ namespace WinFormsApplication
             connTable.Controls.Add(Lbl("Retries:"), 0, 4);
             connTable.Controls.Add(new NumericUpDown { Minimum = 0, Maximum = 10, Value = 3, Dock = DockStyle.Fill }, 1, 4);
             connTable.Controls.Add(Lbl("Auth Token:"), 0, 5);
-            connTable.Controls.Add(new TextBox { PasswordChar = '●', Text = "sk-live-abc123", Dock = DockStyle.Fill }, 1, 5);
+            connTable.Controls.Add(new TextBox { PasswordChar = '*', Text = "sk-live-abc123", Dock = DockStyle.Fill }, 1, 5);
             connGroup.Controls.Add(connTable);
             leftFlow.Controls.Add(connGroup);
 
@@ -394,7 +394,7 @@ namespace WinFormsApplication
             return page;
         }
 
-        // ── TAB 3: SCHEDULER ─────────────────────────────────────────────────────
+        // -- TAB 3: SCHEDULER -----------------------------------------------------
         private TabPage BuildSchedulerTab()
         {
             var page = new TabPage("Scheduler") { Padding = new Padding(8) };
@@ -489,20 +489,20 @@ namespace WinFormsApplication
             return page;
         }
 
-        // ── TAB 4: LAYOUT SHOWCASE ────────────────────────────────────────────────
+        // -- TAB 4: LAYOUT SHOWCASE ------------------------------------------------
         private TabPage BuildLayoutTab()
         {
             var page = new TabPage("Layout") { Padding = new Padding(4) };
             var outerSplit = new SplitContainer { Dock = DockStyle.Fill, Orientation = Orientation.Vertical, SplitterDistance = 380 };
 
             // Left: FlowLayoutPanel + TableLayoutPanel
-            var flowGroup = new GroupBox { Text = "FlowLayoutPanel — Action Buttons", Dock = DockStyle.Top, Height = 160 };
+            var flowGroup = new GroupBox { Text = "FlowLayoutPanel - Action Buttons", Dock = DockStyle.Top, Height = 160 };
             var flow = new FlowLayoutPanel { Dock = DockStyle.Fill, WrapContents = true, Padding = new Padding(4) };
             foreach (var label in new[] { "Apply", "Reset", "Preview", "Export", "Import", "Validate", "Deploy", "Rollback", "Restart", "Shutdown", "Refresh", "Cancel" })
                 flow.Controls.Add(new Button { Text = label, Width = 80, Height = 30, Margin = new Padding(3) });
             flowGroup.Controls.Add(flow);
 
-            var tableGroup = new GroupBox { Text = "TableLayoutPanel — Settings Grid", Dock = DockStyle.Fill };
+            var tableGroup = new GroupBox { Text = "TableLayoutPanel - Settings Grid", Dock = DockStyle.Fill };
             var tl = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 3, CellBorderStyle = TableLayoutPanelCellBorderStyle.Single };
             tl.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.3f));
             tl.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.3f));
@@ -576,7 +576,7 @@ namespace WinFormsApplication
             return page;
         }
 
-        // ── TAB 5: DATA ───────────────────────────────────────────────────────────
+        // -- TAB 5: DATA -----------------------------------------------------------
         private TabPage BuildDataTab()
         {
             var page = new TabPage("Data") { Padding = new Padding(4) };
@@ -620,7 +620,7 @@ namespace WinFormsApplication
             }
             split.Panel1.Controls.Add(grid);
 
-            var propLabel = new Label { Text = "PropertyGrid — live configuration object:", Dock = DockStyle.Top, Height = 22, Font = new Font("Segoe UI", 9, FontStyle.Bold) };
+            var propLabel = new Label { Text = "PropertyGrid - live configuration object:", Dock = DockStyle.Top, Height = 22, Font = new Font("Segoe UI", 9, FontStyle.Bold) };
             var propGrid = new PropertyGrid { Dock = DockStyle.Fill, SelectedObject = new SampleConfig() };
             split.Panel2.Controls.Add(propGrid);
             split.Panel2.Controls.Add(propLabel);
@@ -629,7 +629,7 @@ namespace WinFormsApplication
             return page;
         }
 
-        // ── TAB 6: LOGS ───────────────────────────────────────────────────────────
+        // -- TAB 6: LOGS -----------------------------------------------------------
         private TabPage BuildLogsTab()
         {
             var page = new TabPage("Logs") { Padding = new Padding(4) };
@@ -683,13 +683,13 @@ namespace WinFormsApplication
                 {
                     "[2026-03-25 11:00:01.123] [INFO ] [AuthService  ] User jdoe logged in from 10.0.0.5",
                     "[2026-03-25 11:00:01.445] [DEBUG] [AuthService  ] JWT issued, exp=3600s",
-                    "[2026-03-25 11:00:02.001] [INFO ] [UserAPI      ] GET /users/42 → 200 OK (8ms)",
-                    "[2026-03-25 11:00:03.553] [INFO ] [PaymentGateway] Charge $149.99 → txn_abc123 SUCCESS",
+                    "[2026-03-25 11:00:02.001] [INFO ] [UserAPI      ] GET /users/42 -> 200 OK (8ms)",
+                    "[2026-03-25 11:00:03.553] [INFO ] [PaymentGateway] Charge $149.99 -> txn_abc123 SUCCESS",
                     "[2026-03-25 11:00:04.110] [WARN ] [CacheService ] Cache miss rate 42% (threshold: 20%)",
                     "[2026-03-25 11:00:05.230] [ERROR] [NotifySvc    ] AMQP connection refused: 10.0.0.99:5672",
-                    "[2026-03-25 11:00:05.231] [ERROR] [NotifySvc    ] Retry 1/3 failed — backing off 5s",
+                    "[2026-03-25 11:00:05.231] [ERROR] [NotifySvc    ] Retry 1/3 failed - backing off 5s",
                     "[2026-03-25 11:00:06.778] [INFO ] [System       ] Health check passed (5/5 services)",
-                    "[2026-03-25 11:00:07.002] [INFO ] [UserAPI      ] POST /users → 201 Created (22ms)",
+                    "[2026-03-25 11:00:07.002] [INFO ] [UserAPI      ] POST /users -> 201 Created (22ms)",
                     "[2026-03-25 11:00:08.400] [DEBUG] [SearchIndex  ] Indexed 128 docs, 0 errors",
                     "[2026-03-25 11:00:09.001] [INFO ] [ReportEngine ] Scheduled report queued: weekly-summary",
                     "[2026-03-25 11:00:10.339] [WARN ] [PaymentGateway] Latency spike: 445ms (avg: 145ms)",
@@ -706,7 +706,7 @@ namespace WinFormsApplication
             return page;
         }
 
-        // ── TAB 7: DISPLAY ────────────────────────────────────────────────────────
+        // -- TAB 7: DISPLAY --------------------------------------------------------
         private TabPage BuildDisplayTab()
         {
             var page = new TabPage("Display") { AutoScroll = true, Padding = new Padding(8) };
@@ -739,7 +739,7 @@ namespace WinFormsApplication
             // LinkLabel
             var llGroup = new GroupBox { Text = "LinkLabel", Width = 300, Height = 150 };
             var llPanel = new Panel { Dock = DockStyle.Fill };
-            var ll2 = new LinkLabel { Text = "GitHub — ApexUIBridge — MIT License", Left = 8, Top = 50, AutoSize = true };
+            var ll2 = new LinkLabel { Text = "GitHub - ApexUIBridge - MIT License", Left = 8, Top = 50, AutoSize = true };
             ll2.Links.Clear();
             ll2.Links.Add(9, 13);
             llPanel.Controls.AddRange(new Control[]
@@ -799,7 +799,7 @@ namespace WinFormsApplication
             return page;
         }
 
-        // ── TAB 8: DATES & TIMES ──────────────────────────────────────────────────
+        // -- TAB 8: DATES & TIMES --------------------------------------------------
         private TabPage BuildDatesTab()
         {
             var page = new TabPage("Dates & Times") { AutoScroll = true, Padding = new Padding(8) };
@@ -814,7 +814,7 @@ namespace WinFormsApplication
             tl.Controls.Add(Lbl("Time (dropdown):"), 0, 1); tl.Controls.Add(new DateTimePicker { Format = DateTimePickerFormat.Time, Dock = DockStyle.Fill }, 1, 1);
             tl.Controls.Add(Lbl("Time (spinner):"), 2, 1); tl.Controls.Add(new DateTimePicker { Format = DateTimePickerFormat.Time, ShowUpDown = true, Dock = DockStyle.Fill }, 3, 1);
             tl.Controls.Add(Lbl("Custom Format:"), 0, 2);
-            var custom = new DateTimePicker { Format = DateTimePickerFormat.Custom, CustomFormat = "ddd, MMM d yyyy — HH:mm", Dock = DockStyle.Fill };
+            var custom = new DateTimePicker { Format = DateTimePickerFormat.Custom, CustomFormat = "ddd, MMM d yyyy - HH:mm", Dock = DockStyle.Fill };
             tl.SetColumnSpan(custom, 3); tl.Controls.Add(custom, 1, 2);
             tl.Controls.Add(Lbl("Range Start:"), 0, 3); tl.Controls.Add(new DateTimePicker { Format = DateTimePickerFormat.Short, Dock = DockStyle.Fill }, 1, 3);
             tl.Controls.Add(Lbl("Range End:"), 2, 3); tl.Controls.Add(new DateTimePicker { Format = DateTimePickerFormat.Short, Dock = DockStyle.Fill }, 3, 3);
@@ -831,7 +831,7 @@ namespace WinFormsApplication
             return page;
         }
 
-        // ── TAB 9: DIALOGS & MISC ─────────────────────────────────────────────────
+        // -- TAB 9: DIALOGS & MISC -------------------------------------------------
         private TabPage BuildDialogsTab()
         {
             var page = new TabPage("Dialogs") { AutoScroll = true, Padding = new Padding(8) };
@@ -893,7 +893,7 @@ namespace WinFormsApplication
             return page;
         }
 
-        // ── HELPERS ───────────────────────────────────────────────────────────────
+        // -- HELPERS ---------------------------------------------------------------
         private static Label Lbl(string text) =>
             new Label { Text = text, AutoSize = true, TextAlign = ContentAlignment.MiddleLeft, Margin = new Padding(3, 6, 3, 0) };
 
@@ -912,7 +912,7 @@ namespace WinFormsApplication
         }
     }
 
-    // ── SAMPLE CONFIG OBJECT FOR PROPERTYGRID ────────────────────────────────────
+    // -- SAMPLE CONFIG OBJECT FOR PROPERTYGRID ------------------------------------
     [System.ComponentModel.Description("Runtime configuration for the system service.")]
     public class SampleConfig
     {

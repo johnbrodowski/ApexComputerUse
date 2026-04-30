@@ -44,7 +44,7 @@ namespace ApexComputerUse
         private CancellationTokenSource? _cts;
         public bool IsRunning => _cts != null;
 
-        /// <summary>(message, color) — emitted on the caller's thread for the ad-hoc stream callback,
+        /// <summary>(message, color) - emitted on the caller's thread for the ad-hoc stream callback,
         /// or on the UI sync context the caller installed. Form1 routes this into lblDownloadStatus.</summary>
         public event Action<string, Color>? Status;
 
@@ -69,13 +69,13 @@ namespace ApexComputerUse
 
                     if (File.Exists(f.RelPath))
                     {
-                        Status?.Invoke($"{prefix} {f.Label} already exists — skipping.", Color.Gray);
+                        Status?.Invoke($"{prefix} {f.Label} already exists - skipping.", Color.Gray);
                         await Task.Delay(400, ct);
                         continue;
                     }
 
                     Progress?.Invoke(0);
-                    Status?.Invoke($"{prefix} Downloading {f.Label}…", Color.DarkBlue);
+                    Status?.Invoke($"{prefix} Downloading {f.Label}...", Color.DarkBlue);
 
                     await DownloadStreamAsync(
                         f.Url, f.RelPath,
@@ -114,13 +114,13 @@ namespace ApexComputerUse
             try
             {
                 Progress?.Invoke(0);
-                Status?.Invoke("Starting download…", Color.DarkBlue);
+                Status?.Invoke("Starting download...", Color.DarkBlue);
 
                 await DownloadStreamAsync(url, destPath,
                     (msg, col) => Status?.Invoke(msg, col), ct);
 
                 Progress?.Invoke(100);
-                Status?.Invoke($"Done — {destPath}", Color.Green);
+                Status?.Invoke($"Done - {destPath}", Color.Green);
                 return true;
             }
             catch (OperationCanceledException)
@@ -184,3 +184,4 @@ namespace ApexComputerUse
         }
     }
 }
+

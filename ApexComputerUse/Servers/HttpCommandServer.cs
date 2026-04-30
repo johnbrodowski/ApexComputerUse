@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Net;
 using System.Security.Cryptography;
@@ -59,8 +59,8 @@ namespace ApexComputerUse
         /// authenticated callers to execute arbitrary OS commands.
         /// </summary>
         /// <paramref name="bindAll"/> controls the listener prefix:
-        /// false (default) †’ <c>http://localhost:{port}/</c> (loopback only, safer default).
-        /// true †’ <c>http://+:{port}/</c> (all interfaces; set APEX_HTTP_BIND_ALL=true or HttpBindAll in appsettings.json).
+    /// false (default) -> <c>http://localhost:{port}/</c> (loopback only, safer default).
+    /// true -> <c>http://+:{port}/</c> (all interfaces; set APEX_HTTP_BIND_ALL=true or HttpBindAll in appsettings.json).
         public HttpCommandServer(int port, CommandProcessor processor, SceneStore store,
                                  AiChatService? chatService = null,
                                  string? apiKey = null, bool enableShellRun = false,
@@ -123,7 +123,7 @@ namespace ApexComputerUse
                 catch (System.Net.HttpListenerException hex)
                     when (attempt < maxTries - 1 && (hex.ErrorCode == 183 || hex.ErrorCode == 32))
                 {
-                    // address/port already in use — try the next one
+                    // address/port already in use - try the next one
                 }
             }
             IsRunning   = true;
@@ -239,7 +239,7 @@ namespace ApexComputerUse
             if (client != null) return client.Permissions;
 
             // Unknown non-loopback caller: if they have a valid API key, grant full access.
-            // The API key is the authentication — the client list is for per-client restriction only.
+            // The API key is the authentication - the client list is for per-client restriction only.
             if (IsAuthenticated(req)) return _fullPermissions;
 
             return _noPermissions;
@@ -250,7 +250,7 @@ namespace ApexComputerUse
             // /health is unauthenticated (used by load-balancers and uptime monitors).
             if (path == "/health") return true;
 
-            // Diagnostics — gated by AllowDiagnostics; loopback always gets _fullPermissions so
+            // Diagnostics - gated by AllowDiagnostics; loopback always gets _fullPermissions so
             // localhost callers are unaffected.
             if (path is "/ping" or "/metrics" or "/sysinfo" or "/env" or "/ls" or "/help" or "/status" or "/settings")
                 return p.AllowDiagnostics;
@@ -419,7 +419,7 @@ namespace ApexComputerUse
                     return;
                 }
 
-                // Control panel — served directly
+                // Control panel - served directly
                 if (method == "GET" && path == "/settings")
                 {
                     await ServeSettingsPage(res);
@@ -542,7 +542,7 @@ namespace ApexComputerUse
                                 Match          = req.QueryString["match"],                        // text-search Name/AutomationId/Value
                                 CollapseChains = string.Equals(req.QueryString["collapseChains"], "true", StringComparison.OrdinalIgnoreCase),
                                 IncludePath    = string.Equals(req.QueryString["includePath"],    "true", StringComparison.OrdinalIgnoreCase),
-                                Properties     = req.QueryString["properties"],                   // "extra" †’ value + helpText
+            Properties     = req.QueryString["properties"],                   // "extra" -> value + helpText
                                 ChangedSince   = req.QueryString["since"] ?? req.QueryString["changedSince"]
                             })),
                         ("GET", "/uimap")
@@ -626,3 +626,4 @@ namespace ApexComputerUse
         }
     }
 }
+

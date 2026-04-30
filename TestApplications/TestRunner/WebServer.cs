@@ -5,7 +5,7 @@ using System.Net;
 /// <summary>
 /// Minimal static file server backed by HttpListener. Serves files from a root
 /// folder on a given base URL. Only used when the runner launches the local web
-/// test target — remote servers are configured by pointing WebBaseUrl at them
+/// test target - remote servers are configured by pointing WebBaseUrl at them
 /// and leaving WebRootPath empty.
 /// </summary>
 public sealed class WebServer : IAsyncDisposable
@@ -100,3 +100,4 @@ public sealed class WebServer : IAsyncDisposable
         Console.WriteLine("[WebServer] Stopped.");
     }
 }
+

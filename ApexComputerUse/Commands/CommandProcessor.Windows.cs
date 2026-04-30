@@ -1,4 +1,4 @@
-﻿using FlaUI.Core.AutomationElements;
+using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Definitions;
 
 namespace ApexComputerUse
@@ -58,11 +58,11 @@ namespace ApexComputerUse
                 scanRoot         = startEl;
                 rootHashOverride = startHash;
                 rootIdOverride   = startId.Value;
-                // Do NOT clear the map — we want to preserve existing IDs so callers can keep referencing them.
+                // Do NOT clear the map - we want to preserve existing IDs so callers can keep referencing them.
             }
             else
             {
-                // Full-tree scan from the window root — clear the map and start fresh.
+                // Full-tree scan from the window root - clear the map and start fresh.
                 if (hwnd != _mappedWindowHandle)
                 {
                     _elementMap.Clear();
@@ -108,7 +108,7 @@ namespace ApexComputerUse
             if (!string.IsNullOrWhiteSpace(req.Match) && root != null)
                 root = FilterTreeByMatch(root, req.Match!.Trim(), isRoot: true);
 
-            // Single-child wrapper collapse — run last so IDs, paths, and descendant counts are
+            // Single-child wrapper collapse - run last so IDs, paths, and descendant counts are
             // already set before we start hoisting children up through the tree.
             if (req.CollapseChains && root != null)
                 root = CollapseSingleChildChains(root);
@@ -134,7 +134,7 @@ namespace ApexComputerUse
 
         /// <summary>
         /// Deterministic structural hash of the emitted tree. Only identity fields
-        /// (id, controlType, automationId, name, rectangle, descendant counts) participate —
+        /// (id, controlType, automationId, name, rectangle, descendant counts) participate -
         /// the caller can safely pass this back as <see cref="CommandRequest.ChangedSince"/> to
         /// short-circuit unchanged polls. Uses SHA-256 so collisions aren't a concern for
         /// polling-level change detection.
@@ -174,3 +174,4 @@ namespace ApexComputerUse
 
     }
 }
+

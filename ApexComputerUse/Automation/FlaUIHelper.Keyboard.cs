@@ -1,4 +1,4 @@
-﻿using FlaUI.Core;
+using FlaUI.Core;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Capturing;
 using FlaUI.Core.Definitions;
@@ -11,7 +11,7 @@ namespace ApexComputerUse
 {
     public partial class ApexHelper
     {
-        // ── TextBox / PasswordBox ─────────────────────────────────────────
+        // -- TextBox / PasswordBox -----------------------------------------
 
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         private static extern bool SetForegroundWindow(IntPtr hWnd);
@@ -99,7 +99,7 @@ namespace ApexComputerUse
 
         public void EnterText(AutomationElement el, string text)
         {
-            // Prefer Value pattern (same as setvalue) — avoids keyboard/focus issues entirely.
+            // Prefer Value pattern (same as setvalue) - avoids keyboard/focus issues entirely.
             if (el.Patterns.Value.TryGetPattern(out var vp) && !vp.IsReadOnly.ValueOrDefault)
             {
                 vp.SetValue(text);
@@ -177,7 +177,7 @@ namespace ApexComputerUse
             Keyboard.Type(text);
         }
 
-        // ── Keyboard ──────────────────────────────────────────────────────
+        // -- Keyboard ------------------------------------------------------
 
         public void SendKey(VirtualKeyShort key) =>
             Keyboard.Press(key);
@@ -190,10 +190,10 @@ namespace ApexComputerUse
 
         /// <summary>
         /// Focuses the element then sends keys with full notation support:
-        ///   • {KEY} tokens: {CTRL}, {ALT}, {SHIFT}, {ENTER}, {TAB}, {DELETE}, {F5}, etc.
-        ///   • Modifier combos: "Ctrl+A", "Alt+F4", "Shift+Tab"
-        ///   • Single key name: "Enter", "Escape", "Tab", "F5"
-        ///   • Literal text: anything else is typed character by character
+        ///   - {KEY} tokens: {CTRL}, {ALT}, {SHIFT}, {ENTER}, {TAB}, {DELETE}, {F5}, etc.
+        ///   - Modifier combos: "Ctrl+A", "Alt+F4", "Shift+Tab"
+        ///   - Single key name: "Enter", "Escape", "Tab", "F5"
+        ///   - Literal text: anything else is typed character by character
         /// </summary>
         public void SendKeysEnhanced(AutomationElement el, string keys)
         {
@@ -202,7 +202,7 @@ namespace ApexComputerUse
             el.Focus();
             Thread.Sleep(FocusDelayMs);
 
-            // Handle "Modifier+{KEY}" mixed notation — convert to "{MODIFIER}{KEY}" for SendBraceKeys
+            // Handle "Modifier+{KEY}" mixed notation - convert to "{MODIFIER}{KEY}" for SendBraceKeys
             if (keys.Contains('+') && keys.Contains('{'))
             {
                 int plusIdx  = keys.IndexOf('+');
@@ -368,3 +368,4 @@ namespace ApexComputerUse
 
     }
 }
+

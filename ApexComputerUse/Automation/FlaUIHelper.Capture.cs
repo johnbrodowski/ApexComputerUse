@@ -1,4 +1,4 @@
-﻿using FlaUI.Core;
+using FlaUI.Core;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Capturing;
 using FlaUI.Core.Definitions;
@@ -11,7 +11,7 @@ namespace ApexComputerUse
 {
     public partial class ApexHelper
     {
-        // ── Screenshot ────────────────────────────────────────────────────
+        // -- Screenshot ----------------------------------------------------
 
         public string CaptureElement(AutomationElement el, string folder)
         {
@@ -31,7 +31,7 @@ namespace ApexComputerUse
             return path;
         }
 
-        // ── Capture to base64 ─────────────────────────────────────────────
+        // -- Capture to base64 ---------------------------------------------
 
         public string CaptureElementToBase64(AutomationElement el)
         {
@@ -78,3 +78,4 @@ namespace ApexComputerUse
 
     }
 }
+

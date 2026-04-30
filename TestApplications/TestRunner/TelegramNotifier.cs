@@ -5,7 +5,7 @@ using System.Net.Http.Json;
 /// <summary>
 /// Sends messages to a Telegram chat via the Bot API.
 /// If token/chatId are not configured the message is written to stdout instead.
-/// All sends are fire-and-forget safe — errors are logged, never thrown.
+/// All sends are fire-and-forget safe - errors are logged, never thrown.
 /// </summary>
 public sealed class TelegramNotifier : IDisposable
 {
@@ -25,7 +25,7 @@ public sealed class TelegramNotifier : IDisposable
     {
         if (!_enabled)
         {
-            Console.WriteLine($"[Telegram→stdout] {message}");
+            Console.WriteLine($"[Telegram->stdout] {message}");
             return;
         }
         try
@@ -44,3 +44,4 @@ public sealed class TelegramNotifier : IDisposable
 
     public void Dispose() => _http.Dispose();
 }
+

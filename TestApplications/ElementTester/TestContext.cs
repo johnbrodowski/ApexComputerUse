@@ -24,8 +24,8 @@ public sealed class TestContext
         _results.Add((testName, passed, passed ? r.Message : $"{r.Message} | Data: {r.Data ?? "(null)"}"));
 
         var icon = passed ? "PASS" : "FAIL";
-        var color = passed ? "\u001b[32m" : "\u001b[31m";
-        Console.WriteLine($"  {color}[{icon}]\u001b[0m {testName}");
+        var color = passed ? "?[32m" : "?[31m";
+        Console.WriteLine($"  {color}[{icon}]?[0m {testName}");
         if (!passed)
             Console.WriteLine($"         Command:  {command}");
         if (!passed)
@@ -39,8 +39,8 @@ public sealed class TestContext
     {
         _results.Add((testName, passed, detail));
         var icon = passed ? "PASS" : "FAIL";
-        var color = passed ? "\u001b[32m" : "\u001b[31m";
-        Console.WriteLine($"  {color}[{icon}]\u001b[0m {testName}");
+        var color = passed ? "?[32m" : "?[31m";
+        Console.WriteLine($"  {color}[{icon}]?[0m {testName}");
         if (!passed && !string.IsNullOrEmpty(detail))
             Console.WriteLine($"         {detail}");
     }
@@ -49,7 +49,7 @@ public sealed class TestContext
     public void PrintSummary()
     {
         Console.WriteLine();
-        Console.WriteLine(new string('─', 60) + " Summary");
+        Console.WriteLine(new string('-', 60) + " Summary");
         Console.WriteLine($"  Total: {Total}   Passed: {Passed}   Failed: {Failed}");
         if (Failed > 0)
         {
@@ -60,3 +60,4 @@ public sealed class TestContext
         Console.WriteLine();
     }
 }
+

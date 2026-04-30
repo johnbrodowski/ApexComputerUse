@@ -1,4 +1,4 @@
-﻿using FlaUI.Core.AutomationElements;
+using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Definitions;
 
 namespace ApexComputerUse
@@ -103,7 +103,7 @@ namespace ApexComputerUse
             catch (Exception ex)            { return Fail($"Scene error: {ex.Message}"); }
         }
 
-        // ── Scene command parameter POCOs ─────────────────────────────────
+        // -- Scene command parameter POCOs ---------------------------------
 
         private class SceneCreateParams
         {
@@ -130,3 +130,4 @@ namespace ApexComputerUse
 
     }
 }
+

@@ -97,7 +97,7 @@ namespace ApexComputerUse
                 File.WriteAllText(ClientFilePath(client.Id),
                     JsonSerializer.Serialize(client, JsonOpts));
             }
-            catch (Exception ex) { AppLog.Warning($"ClientStore: failed to persist client '{client.Id}' — {ex.Message}"); }
+            catch (Exception ex) { AppLog.Warning($"ClientStore: failed to persist client '{client.Id}' - {ex.Message}"); }
         }
 
         private void LoadAllFromDisk()
@@ -111,7 +111,7 @@ namespace ApexComputerUse
                     if (client != null)
                         _clients[client.Id] = client;
                 }
-                catch (Exception ex) { AppLog.Warning($"ClientStore: skipping corrupt file '{Path.GetFileName(file)}' — {ex.Message}"); }
+                catch (Exception ex) { AppLog.Warning($"ClientStore: skipping corrupt file '{Path.GetFileName(file)}' - {ex.Message}"); }
             }
         }
 
@@ -119,3 +119,4 @@ namespace ApexComputerUse
             Path.Combine(_clientsDir, $"{id}.json");
     }
 }
+

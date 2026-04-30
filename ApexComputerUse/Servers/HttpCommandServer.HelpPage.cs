@@ -7,7 +7,7 @@ namespace ApexComputerUse
 {
     public partial class HttpCommandServer
     {
-        // ── Help data ──────────────────────────────────────────────────────
+        // -- Help data ------------------------------------------------------
 
         private sealed record HelpAction(
             string   Action,
@@ -32,7 +32,7 @@ namespace ApexComputerUse
             new("GET",  "/elements", "[type=ControlType] [id=mapId] [depth=n] [onscreen=true] [match=text] [collapseChains=true] [includePath=true] [properties=extra] [since=hash]",
                 "Element tree for current window; returns treeHash for polling"),
             new("POST", "/find",     "window=<title|id> [id=<automationId|mapId>] [name=<name>] [type=<ControlType>]",
-                "Select a window and optionally an element — sets the current element pointer"),
+                "Select a window and optionally an element - sets the current element pointer"),
             new("POST", "/exec",     "action=<action> [value=<input>]",
                 "Execute an action on the current element"),
             new("POST", "/ocr",      "[value=x,y,w,h]",
@@ -55,7 +55,7 @@ namespace ApexComputerUse
         [
             new("Click / Mouse", "click",
             [
-                new("click",         null,                 null,           "Smart click: Invoke→Toggle→SelectionItem→mouse"),
+                new("click",         null,                 null,           "Smart click: Invoke->Toggle->SelectionItem->mouse"),
                 new("mouse-click",   null,                 null,           "Force mouse left click"),
                 new("right-click",   null,                 null,           "Right mouse click"),
                 new("double-click",  null,                 null,           "Double left click"),
@@ -82,8 +82,8 @@ namespace ApexComputerUse
             new("Focus / State", "focus",
             [
                 new("focus",         null,                 null,           "Set keyboard focus to element"),
-                new("isenabled",     null,                 null,           "Returns true/false — is element enabled"),
-                new("isvisible",     null,                 null,           "Returns true/false — is element visible"),
+                new("isenabled",     null,                 null,           "Returns true/false - is element enabled"),
+                new("isvisible",     null,                 null,           "Returns true/false - is element visible"),
                 new("describe",      null,                 null,           "Full UIA property dump"),
                 new("patterns",      null,                 null,           "List supported UIA patterns"),
                 new("bounds",        null,                 null,           "Bounding rectangle"),
@@ -91,9 +91,9 @@ namespace ApexComputerUse
 
             new("Text / Value", "text",
             [
-                new("gettext",       null,                 null,           "Smart read: Text pattern → Value → Name"),
-                new("getvalue",      null,                 null,           "Smart read: Value → Text → LegacyIAccessible → Name"),
-                new("setvalue",      null,                 "text",         "Smart set: Value pattern → RangeValue → keyboard"),
+                new("gettext",       null,                 null,           "Smart read: Text pattern -> Value -> Name"),
+                new("getvalue",      null,                 null,           "Smart read: Value -> Text -> LegacyIAccessible -> Name"),
+                new("setvalue",      null,                 "text",         "Smart set: Value pattern -> RangeValue -> keyboard"),
                 new("clearvalue",    null,                 null,           "Set value to empty string"),
                 new("appendvalue",   null,                 "text",         "Append text to current value"),
                 new("getselectedtext", null,               null,           "Selected text via Text pattern"),
@@ -159,7 +159,7 @@ namespace ApexComputerUse
                 new("scroll-left",   null,                 "n[,visual]",  "Horizontal scroll left"),
                 new("scroll-right",  null,                 "n[,visual]",  "Horizontal scroll right"),
                 new("scrollinto",    null,                 null,           "Scroll element into view via ScrollItem pattern"),
-                new("scrollpercent", null,                 "h,v",         "Scroll to horizontal/vertical percent (0–100)"),
+                new("scrollpercent", null,                 "h,v",         "Scroll to horizontal/vertical percent (0-100)"),
                 new("getscrollinfo", null,                 null,           "Current scroll position, range, and scrollability flags"),
             ]),
 
@@ -183,7 +183,7 @@ namespace ApexComputerUse
             ]),
         ];
 
-        // ── /help JSON handler ─────────────────────────────────────────────
+        // -- /help JSON handler ---------------------------------------------
 
         private static ApexResult HandleHelp(HttpListenerRequest req)
         {
@@ -255,7 +255,7 @@ namespace ApexComputerUse
             };
         }
 
-        // ── /help HTML page ────────────────────────────────────────────────
+        // -- /help HTML page ------------------------------------------------
 
         private static async Task ServeHelpPage(HttpListenerResponse res)
         {
@@ -266,13 +266,13 @@ namespace ApexComputerUse
                 <html lang="en">
                 <head>
                 <meta charset="utf-8">
-                <title>ApexComputerUse — API Reference</title>
+                <title>ApexComputerUse - API Reference</title>
                 <style>
                   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
                   body { font-family: monospace; font-size: 13px; background: #1e1e1e; color: #d4d4d4;
                          display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
 
-                  /* ── Header ── */
+                  /* -- Header -- */
                   header { background: #252526; border-bottom: 1px solid #3c3c3c;
                            padding: .35em 1em; display: flex; align-items: center; gap: .8em; flex-shrink: 0; }
                   .brand  { color: #9cdcfe; font-size: .82em; }
@@ -285,10 +285,10 @@ namespace ApexComputerUse
                                padding: .18em .5em; border: 1px solid #3c3c3c; border-radius: 3px; }
                   .json-link:hover { background: #2d2d30; }
 
-                  /* ── Layout ── */
+                  /* -- Layout -- */
                   .layout { display: grid; grid-template-columns: 160px 1fr; flex: 1; overflow: hidden; min-height: 0; }
 
-                  /* ── Sidebar nav ── */
+                  /* -- Sidebar nav -- */
                   nav { background: #252526; border-right: 1px solid #3c3c3c; overflow-y: auto; padding: .4em 0; }
                   .nav-item { display: block; padding: .28em .8em; color: #c8c8c8; text-decoration: none;
                               font-size: .78em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -296,7 +296,7 @@ namespace ApexComputerUse
                   .nav-item.active { color: #4ec94e; background: #1e2a1e; }
                   .nav-sep { height: 1px; background: #3c3c3c; margin: .3em 0; }
 
-                  /* ── Main content ── */
+                  /* -- Main content -- */
                   main { overflow-y: auto; padding: 1em 1.5em 3em; scroll-behavior: smooth; }
                   section { margin-bottom: 2.2em; }
                   section.hidden { display: none; }
@@ -305,7 +305,7 @@ namespace ApexComputerUse
                        display: flex; align-items: baseline; gap: .5em; }
                   h2 .count { color: #555; font-size: .85em; font-weight: normal; letter-spacing: 0; text-transform: none; }
 
-                  /* ── Tables ── */
+                  /* -- Tables -- */
                   table { width: 100%; border-collapse: collapse; font-size: .82em; }
                   th    { text-align: left; color: #666; font-weight: normal; font-size: .85em;
                           padding: .15em .6em .3em; border-bottom: 1px solid #3c3c3c; }
@@ -323,7 +323,7 @@ namespace ApexComputerUse
                   td.value      { color: #ce9178; white-space: nowrap; }
                   td.desc       { color: #d4d4d4; }
 
-                  /* ── Highlight on search match ── */
+                  /* -- Highlight on search match -- */
                   mark { background: #2d4a1e; color: inherit; border-radius: 2px; }
                 </style>
                 </head>
@@ -331,9 +331,9 @@ namespace ApexComputerUse
                 <header>
                   <span class="brand">ApexComputerUse</span>
                   <span class="htitle">API Reference</span>
-                  <input id="search" type="text" placeholder="filter…" autocomplete="off" spellcheck="false">
+                  <input id="search" type="text" placeholder="filter..." autocomplete="off" spellcheck="false">
                   <span id="searchCount"></span>
-                  <a id="jsonLink" href="/help.json" class="json-link" title="Machine-readable JSON">JSON ↗</a>
+                  <a id="jsonLink" href="/help.json" class="json-link" title="Machine-readable JSON">JSON ?</a>
                 </header>
                 <div class="layout">
                 <nav id="nav">
@@ -349,7 +349,7 @@ namespace ApexComputerUse
                 <main id="main">
                 """);
 
-            // ── Endpoints section ──
+            // -- Endpoints section --
             sb.Append("""
                 <section id="endpoints">
                 <h2>Endpoints <span class="count">HTTP routes</span></h2>
@@ -372,7 +372,7 @@ namespace ApexComputerUse
 
             sb.Append("</tbody></table></section>\n");
 
-            // ── Action groups ──
+            // -- Action groups --
             foreach (var g in _helpGroups)
             {
                 sb.Append($"""
@@ -410,7 +410,7 @@ namespace ApexComputerUse
                   const sections = Array.from(document.querySelectorAll('section'));
                   const navItems = Array.from(document.querySelectorAll('#nav .nav-item'));
 
-                  // ── Active nav on scroll ──
+                  // -- Active nav on scroll --
                   const observer = new IntersectionObserver(entries => {
                     entries.forEach(e => {
                       if (e.isIntersecting) {
@@ -422,7 +422,7 @@ namespace ApexComputerUse
                   }, { root: document.getElementById('main'), threshold: 0.1 });
                   sections.forEach(s => observer.observe(s));
 
-                  // ── Filter ──
+                  // -- Filter --
                   search.addEventListener('input', function () {
                     const q = this.value.trim().toLowerCase();
                     jsonLink.href = q ? '/help.json?action=' + encodeURIComponent(q) : '/help.json';
@@ -472,3 +472,4 @@ namespace ApexComputerUse
             s.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;").Replace("\"", "&quot;");
     }
 }
+

@@ -14,7 +14,7 @@ namespace ApexComputerUse
     /// </summary>
     internal static class AppLog
     {
-        // ── Configuration ─────────────────────────────────────────────────
+        // -- Configuration -------------------------------------------------
 
         /// <summary>
         /// Configures Serilog with a rolling daily file sink under
@@ -37,7 +37,7 @@ namespace ApexComputerUse
                 .CreateLogger();
         }
 
-        // ── Logging methods ────────────────────────────────────────────────
+        // -- Logging methods ------------------------------------------------
 
         public static void Debug(string msg)                      => Log.Debug(msg);
         public static void Info(string msg)                       => Log.Information(msg);
@@ -54,9 +54,10 @@ namespace ApexComputerUse
         /// </summary>
         public static void FromOnLog(string msg) => Log.Information(msg);
 
-        // ── Lifecycle ─────────────────────────────────────────────────────
+        // -- Lifecycle -----------------------------------------------------
 
         /// <summary>Flushes buffered log entries and closes the file sink.</summary>
         public static void CloseAndFlush() => Log.CloseAndFlush();
     }
 }
+

@@ -1,6 +1,6 @@
 namespace ApexComputerUse
 {
-    // ── Canonical result type ─────────────────────────────────────────────
+    // -- Canonical result type ---------------------------------------------
 
     public sealed class ApexResult
     {
@@ -30,3 +30,4 @@ namespace ApexComputerUse
         }
     }
 }
+

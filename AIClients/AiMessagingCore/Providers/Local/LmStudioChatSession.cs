@@ -8,7 +8,7 @@ using AiMessagingCore.Models;
 namespace AiMessagingCore.Providers.Local;
 
 /// <summary>
-/// LM Studio local model session — OpenAI-compatible endpoint at localhost:1234 by default.
+/// LM Studio local model session \- OpenAI-compatible endpoint at localhost:1234 by default.
 /// Reads LMSTUDIO_BASE_URL from environment.
 /// </summary>
 public sealed class LmStudioChatSession : ChatSessionBase

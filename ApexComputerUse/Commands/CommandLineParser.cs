@@ -7,7 +7,7 @@ namespace ApexComputerUse
     /// <summary>
     /// Single source of truth for the "key=value key2=\"multi word\"" text command format used
     /// by the Form1 GUI console tab, the Telegram controller, and the Windows named-pipe server.
-    /// Each of those sources used to reimplement this verbatim — if you need to add a new
+    /// Each of those sources used to reimplement this verbatim \- if you need to add a new
     /// command verb or flag, add it here once.
     /// </summary>
     public static class CommandLineParser
@@ -53,8 +53,8 @@ namespace ApexComputerUse
 
         /// <summary>
         /// Parses a whole command line ("find window=Notepad name=File") into a CommandRequest.
-        /// Returns null if the verb is unknown — callers decide whether unknown should be an
-        /// error (GUI) or a passthrough (Telegram <c>/foo bar</c> → Command=foo).
+        /// Returns null if the verb is unknown \- callers decide whether unknown should be an
+        /// error (GUI) or a passthrough (Telegram <c>/foo bar</c> \-> Command=foo).
         /// </summary>
         public static CommandRequest? Parse(string input)
         {
@@ -65,7 +65,7 @@ namespace ApexComputerUse
             return Build(cmd, args);
         }
 
-        /// <summary>Pre-split variant — used by Telegram after stripping "/" and the optional @botname.</summary>
+        /// <summary>Pre-split variant \- used by Telegram after stripping "/" and the optional @botname.</summary>
         public static CommandRequest? Build(string cmd, string args)
         {
             cmd = cmd.ToLowerInvariant();

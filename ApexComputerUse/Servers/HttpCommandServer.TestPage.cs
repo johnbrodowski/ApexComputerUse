@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Net;
 using System.Security.Cryptography;
@@ -132,14 +132,14 @@ namespace ApexComputerUse
 
                 <header>
                   <span id="dot"></span>
-                  <span id="statusTxt">connecting¦</span>
+                  <span id="statusTxt">connecting?</span>
                   <span class="spacer"></span>
                   <label style="font-size:.75em;color:#9cdcfe;">API Key
-                    <input id="apiKeyBox" type="password" placeholder="paste key¦" autocomplete="off"
+                    <input id="apiKeyBox" type="password" placeholder="paste key?" autocomplete="off"
                            style="background:#3c3c3c;color:#d4d4d4;border:1px solid #555;border-radius:2px;
                                   padding:.15em .3em;font:inherit;font-size:.76em;width:140px;margin-left:.3em;">
                     <button type="button" id="apiKeyShow" title="Show / hide"
-                            style="background:none;border:none;color:#888;cursor:pointer;font-size:1em;padding:0 .2em;">ðŸ‘</button>
+                              style="background:none;border:none;color:#888;cursor:pointer;font-size:1em;padding:0 .2em;">Show / Hide</button>
                   </label>
                   <span class="fmt-bar">
                     <label>Format</label>
@@ -172,7 +172,7 @@ namespace ApexComputerUse
                     <div class="panel wins">
                       <div class="phead">
                         <span>Windows</span>
-                        <button onclick="loadWindows()" title="Refresh">†º</button>
+                        <button onclick="loadWindows()" title="Refresh">refresh</button>
                       </div>
                       <select class="lst" id="winList" size="8" onchange="onWinSelect()"></select>
                     </div>
@@ -180,7 +180,7 @@ namespace ApexComputerUse
                     <div class="panel elems">
                       <div class="phead">
                         <span>Elements</span>
-                        <button onclick="loadElements()" title="Refresh">†º</button>
+                        <button onclick="loadElements()" title="Refresh">refresh</button>
                       </div>
                       <div class="frow">
                         <label>
@@ -208,7 +208,7 @@ namespace ApexComputerUse
 
                   <!-- Right panel -->
                   <section>
-                    <div id="selInfo">No element selected ” pick a window to start</div>
+                    <div id="selInfo">No element selected - pick a window to start</div>
 
                     <div class="cmdbuild">
                       <h3>Command Builder</h3>
@@ -262,10 +262,10 @@ namespace ApexComputerUse
 
                         <div class="grp">
                           <span class="glabel">Scroll</span>
-                          <button class="a" onclick="act('scroll-up')">†‘</button>
-                          <button class="a" onclick="act('scroll-down')">†“</button>
-                          <button class="a" onclick="act('scroll-left')">†</button>
-                          <button class="a" onclick="act('scroll-right')">†’</button>
+                          <button class="a" onclick="act('scroll-up')">up</button>
+                          <button class="a" onclick="act('scroll-down')">down</button>
+                          <button class="a" onclick="act('scroll-left')">left</button>
+                          <button class="a" onclick="act('scroll-right')">right</button>
                           <button class="a" onclick="act('scrollinto')">into view</button>
                           <button class="a" onclick="act('scrollpercent')">percent</button>
                           <button class="a" onclick="act('getscrollinfo')">info</button>
@@ -335,8 +335,8 @@ namespace ApexComputerUse
                           <button class="a cap" onclick="doCapture('screen')">screen</button>
                           <button class="a cap" onclick="doOcr()">OCR</button>
                           <button class="a cap" onclick="doUiMap()">UI map</button>
-                          <button class="a cap" onclick="doDraw()" title="POST /draw ” Value field must be a JSON DrawRequest (shapes array). Canvas: blank|white|black|screen|window|element">draw</button>
-                          <button class="a cap" onclick="doDrawDemo()" title="GET /draw/demo ” renders the built-in space scene. Add ?overlay=true to also show on screen.">demo</button>
+                          <button class="a cap" onclick="doDraw()" title="POST /draw - Value field must be a JSON DrawRequest (shapes array). Canvas: blank|white|black|screen|window|element">draw</button>
+                          <button class="a cap" onclick="doDrawDemo()" title="GET /draw/demo - renders the built-in space scene. Add ?overlay=true to also show on screen.">demo</button>
                         </div>
 
                         <div class="grp">
@@ -351,10 +351,10 @@ namespace ApexComputerUse
 
                       <div class="vrow">
                         <label>Value</label>
-                        <textarea id="val" rows="1" placeholder="(optional ” text, x,y, JSON, ¦)  Ctrl+Enter to execute"
+                  <textarea id="val" rows="1" placeholder="(optional - text, x,y, JSON, etc.)  Ctrl+Enter to execute"
                                   onkeydown="if(event.key==='Enter'&&(event.ctrlKey||event.metaKey)){event.preventDefault();doExec();}"
                                   oninput="this.rows=Math.min(12,Math.max(1,this.value.split('\n').length))"></textarea>
-                        <button id="go" onclick="doExec()">–¶ Execute</button>
+                        <button id="go" onclick="doExec()">-? Execute</button>
                       </div>
                     </div>
 
@@ -374,7 +374,7 @@ namespace ApexComputerUse
                     const r = await call('GET', '/ping');
                     setDot(true);
                     document.getElementById('statusTxt').textContent =
-                      'ok \u2014 ' + (r.data && r.data.timestamp ? r.data.timestamp : '');
+                      'ok - ' + (r.data && r.data.timestamp ? r.data.timestamp : '');
                   } catch (e) {
                     setDot(false);
                     document.getElementById('statusTxt').textContent = 'server unreachable';
@@ -435,7 +435,7 @@ namespace ApexComputerUse
                     const r   = await call('GET', url);
                     const raw = r.data && r.data.result ? r.data.result : 'null';
                     let root  = null;
-                    try { root = JSON.parse(raw); } catch (_) {}
+                    try { const p = JSON.parse(raw); root = p && p.root ? p.root : p; } catch (_) {}
                     const sel = document.getElementById('elemList');
                     sel.innerHTML = '';
                     if (root) flattenInto(root, 0, sel);
@@ -448,7 +448,7 @@ namespace ApexComputerUse
                 function flattenInto(node, depth, sel) {
                   if (!node) return;
                   const o     = document.createElement('option');
-                  const pad   = '\u00a0\u00a0'.repeat(depth);
+                  const pad   = '  '.repeat(depth);
                   const parts = [node.controlType];
                   if (node.name)         parts.push('"' + node.name + '"');
                   if (node.automationId) parts.push('#' + node.automationId);
@@ -488,7 +488,7 @@ namespace ApexComputerUse
                   if (o.dataset.name) parts.push(o.dataset.name);
                   if (o.dataset.aid)  parts.push('#' + o.dataset.aid);
                   if (curElemId)      parts.push('id:' + curElemId);
-                  el.textContent = parts.join('  \u203a  ');
+                  el.textContent = parts.join('  ?  ');
                 }
 
                 // Command builder 
@@ -517,7 +517,7 @@ namespace ApexComputerUse
                   curAction = name;
                   document.querySelectorAll('button.a').forEach(b => b.classList.remove('on'));
                   if (event && event.currentTarget) event.currentTarget.classList.add('on');
-                  document.getElementById('go').textContent = '\u25b6 ' + name;
+                  document.getElementById('go').textContent = '? ' + name;
                   const vi = document.getElementById('val');
                   vi.placeholder = VALUE_HINTS[name] || '(optional)';
                 }
@@ -559,7 +559,7 @@ namespace ApexComputerUse
 
                 // UI Map
                 async function doUiMap() {
-                  appendLog('uimap', true, 'Rendering UI map\u2026');
+                  appendLog('uimap', true, 'Rendering UI map...');
                   try {
                     const r = await call('GET', '/uimap');
                     logCapture(r, 'uimap');
@@ -570,7 +570,7 @@ namespace ApexComputerUse
 
                 // Draw demo
                 async function doDrawDemo() {
-                  appendLog('draw/demo', true, 'Rendering space scene\u2026');
+                  appendLog('draw/demo', true, 'Rendering space scene...');
                   try {
                     const overlay = document.getElementById('val').value.trim() === 'overlay';
                     const url     = overlay ? '/draw/demo?overlay=true' : '/draw/demo';
@@ -588,7 +588,7 @@ namespace ApexComputerUse
                     appendLog('draw', false, 'Enter a JSON DrawRequest in the Value field. Example: {"canvas":"blank","width":400,"height":300,"shapes":[{"type":"circle","x":200,"y":150,"r":80,"color":"royalblue","fill":true},{"type":"text","x":200,"y":140,"text":"Hello!","color":"white","font_size":20,"font_bold":true,"align":"center"}]}');
                     return;
                   }
-                  appendLog('draw', true, 'Rendering\u2026');
+                  appendLog('draw', true, 'Rendering...');
                   try {
                     // Allow the value to be either a raw JSON object or wrapped in {"value":...}
                     let body;
@@ -614,7 +614,7 @@ namespace ApexComputerUse
                 async function doAiDescribe() {
                   const prompt = document.getElementById('val').value.trim();
                   const body   = prompt ? { prompt } : {};
-                  appendLog('ai/describe', true, 'Running vision model\u2026 (this may take a few seconds)');
+                  appendLog('ai/describe', true, 'Running vision model... (this may take a few seconds)');
                   try {
                     const r = await call('POST', '/ai/describe', body);
                     log(r);
@@ -626,7 +626,7 @@ namespace ApexComputerUse
                 async function doAiAsk() {
                   const prompt = document.getElementById('val').value.trim();
                   if (!prompt) { appendLog('ai/ask', false, 'Enter a question in the Value field first'); return; }
-                  appendLog('ai/ask', true, 'Running vision model\u2026 (this may take a few seconds)');
+                  appendLog('ai/ask', true, 'Running vision model... (this may take a few seconds)');
                   try {
                     const r = await call('POST', '/ai/ask', { prompt });
                     log(r);
@@ -638,7 +638,7 @@ namespace ApexComputerUse
                 async function doAiFile() {
                   const val = document.getElementById('val').value.trim();
                   if (!val) { appendLog('ai/file', false, 'Enter a file path in the Value field first'); return; }
-                  appendLog('ai/file', true, 'Sending file to vision model\u2026');
+                  appendLog('ai/file', true, 'Sending file to vision model...');
                   try {
                     const r = await call('POST', '/ai/file', { value: val });
                     log(r);
@@ -675,11 +675,11 @@ namespace ApexComputerUse
                   ts.textContent = now() + ' ' + (r && r.action ? r.action : '');
                   div.appendChild(ts);
                   if (r._isPdf && r.data?.result) {
-                    // PDF ” show open link (blob URL)
+                    // PDF - show open link (blob URL)
                     const a = document.createElement('a');
                     a.href = r.data.result;
                     a.target = '_blank';
-                    a.textContent = '\u{1F4C4} Open PDF';
+                    a.textContent = 'Open PDF';
                     a.style.cssText = 'color:#4ec94e;font-size:.85em;display:block;margin-top:.3em';
                     div.appendChild(a);
                   } else {
@@ -754,7 +754,7 @@ namespace ApexComputerUse
                       const status = document.getElementById('statusTxt');
                       if (r && r.success) {
                         const pid = r.data && r.data.pid ? r.data.pid : '?';
-                        status.textContent = `TestRunner PID ${pid} started (${mode}) ” bridge will restart mid-run`;
+                        status.textContent = `TestRunner PID ${pid} started (${mode}) - bridge will restart mid-run`;
                       } else {
                         status.textContent = 'Run failed: ' + (r && r.error ? r.error : 'unknown error');
                       }
@@ -813,3 +813,4 @@ namespace ApexComputerUse
 
     }
 }
+

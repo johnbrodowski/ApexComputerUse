@@ -22,7 +22,7 @@ public class SceneStoreTests : IDisposable
             try { Directory.Delete(_scenesDir, recursive: true); } catch { /* best-effort */ }
     }
 
-    // ── CreateScene ───────────────────────────────────────────────────────
+    // -- CreateScene -------------------------------------------------------
 
     [Fact]
     public void CreateScene_DefaultValues_AreCorrect()
@@ -65,7 +65,7 @@ public class SceneStoreTests : IDisposable
         Assert.NotEqual(scene1.Id, scene2.Id);
     }
 
-    // ── GetScene ──────────────────────────────────────────────────────────
+    // -- GetScene ----------------------------------------------------------
 
     [Fact]
     public void GetScene_ExistingId_ReturnsScene()
@@ -84,7 +84,7 @@ public class SceneStoreTests : IDisposable
         Assert.Null(store.GetScene("does-not-exist"));
     }
 
-    // ── ListScenes ────────────────────────────────────────────────────────
+    // -- ListScenes --------------------------------------------------------
 
     [Fact]
     public void ListScenes_OrderedByCreatedAt()
@@ -108,7 +108,7 @@ public class SceneStoreTests : IDisposable
         Assert.Empty(store.ListScenes());
     }
 
-    // ── UpdateSceneMeta ───────────────────────────────────────────────────
+    // -- UpdateSceneMeta ---------------------------------------------------
 
     [Fact]
     public void UpdateSceneMeta_UpdatesOnlySuppliedFields()
@@ -134,7 +134,7 @@ public class SceneStoreTests : IDisposable
             store.UpdateSceneMeta("ghost", "x", null, null, null));
     }
 
-    // ── DeleteScene ───────────────────────────────────────────────────────
+    // -- DeleteScene -------------------------------------------------------
 
     [Fact]
     public void DeleteScene_RemovesFromMemoryAndDisk()
@@ -158,7 +158,7 @@ public class SceneStoreTests : IDisposable
         Assert.Null(ex);
     }
 
-    // ── Layer CRUD ────────────────────────────────────────────────────────
+    // -- Layer CRUD --------------------------------------------------------
 
     [Fact]
     public void AddLayer_AppendsLayerWithIncrementingZIndex()
@@ -205,7 +205,7 @@ public class SceneStoreTests : IDisposable
             store.DeleteLayer(scene.Id, "no-such-layer"));
     }
 
-    // ── Disk persistence round-trip ───────────────────────────────────────
+    // -- Disk persistence round-trip ---------------------------------------
 
     [Fact]
     public void CreateScene_PersistsToDisk_NewStoreLoadsIt()
@@ -236,7 +236,7 @@ public class SceneStoreTests : IDisposable
         Assert.Null(store2.GetScene(scene.Id));
     }
 
-    // ── Concurrent access ─────────────────────────────────────────────────
+    // -- Concurrent access -------------------------------------------------
 
     [Fact]
     public async Task CreateScene_ConcurrentCreates_AllSucceed()
@@ -252,3 +252,4 @@ public class SceneStoreTests : IDisposable
         Assert.Equal(count, list.Select(s => s.Id).Distinct().Count());
     }
 }
+

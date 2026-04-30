@@ -6,7 +6,7 @@ namespace ApexUIBridge.ElementTester;
 /// </summary>
 public static class ElementTests
 {
-    // ── Registry of all element test types ──────────────────────────────────────
+    // -- Registry of all element test types --------------------------------------
     public static readonly Dictionary<string, Func<TestContext, string, string, CancellationToken, Task>> All = new(StringComparer.OrdinalIgnoreCase)
     {
         ["TextBox"]      = TestTextBox,
@@ -30,7 +30,7 @@ public static class ElementTests
         ["ListView"]     = TestListView,
     };
 
-    // ── TextBox ─────────────────────────────────────────────────────────────────
+    // -- TextBox -----------------------------------------------------------------
     static async Task TestTextBox(TestContext ctx, string windowTitle, string scanData, CancellationToken ct)
     {
         var elements = ScanHelper.FindByType(scanData, "TextBox")
@@ -45,18 +45,18 @@ public static class ElementTests
             var label = el.AutomationId ?? el.Name ?? $"ID:{el.Id}";
             var prefix = $"TextBox [{label}]";
 
-            // GET_TEXT — read current value
+            // GET_TEXT - read current value
             var getText = await ctx.TestAsync($"{prefix} GET_TEXT", $"GET_TEXT {el.Id}", r => r.Success, ct);
 
-            // TYPE — write a test value
+            // TYPE - write a test value
             var testVal = $"et_{DateTime.Now:HHmmss}";
             await ctx.TestAsync($"{prefix} TYPE '{testVal}'", $"TYPE {el.Id} {testVal}", r => r.Success, ct);
 
-            // GET_TEXT — verify the typed value
+            // GET_TEXT - verify the typed value
             await ctx.TestAsync($"{prefix} GET_TEXT after TYPE", $"GET_TEXT {el.Id}",
                 r => r.Success && (r.Data?.Contains(testVal) ?? false), ct);
 
-            // SEND_KEYS — append via keyboard simulation
+            // SEND_KEYS - append via keyboard simulation
             await ctx.TestAsync($"{prefix} SEND_KEYS ' extra'", $"SEND_KEYS {el.Id} extra", r => r.Success, ct);
 
             // Restore original value if we had one
@@ -65,7 +65,7 @@ public static class ElementTests
         }
     }
 
-    // ── CheckBox ────────────────────────────────────────────────────────────────
+    // -- CheckBox ----------------------------------------------------------------
     static async Task TestCheckBox(TestContext ctx, string windowTitle, string scanData, CancellationToken ct)
     {
         var elements = ScanHelper.FindByType(scanData, "CheckBox")
@@ -78,18 +78,18 @@ public static class ElementTests
             var label = el.Name ?? el.AutomationId ?? $"ID:{el.Id}";
             var prefix = $"CheckBox [{label}]";
 
-            // TOGGLE — flip state
+            // TOGGLE - flip state
             await ctx.TestAsync($"{prefix} TOGGLE", $"TOGGLE {el.Id}", r => r.Success, ct);
 
-            // TOGGLE — restore
+            // TOGGLE - restore
             await ctx.TestAsync($"{prefix} TOGGLE (restore)", $"TOGGLE {el.Id}", r => r.Success, ct);
 
-            // GET_TEXT — read state
+            // GET_TEXT - read state
             await ctx.TestAsync($"{prefix} GET_TEXT (read state)", $"GET_TEXT {el.Id}", r => r.Success, ct);
         }
     }
 
-    // ── RadioButton ─────────────────────────────────────────────────────────────
+    // -- RadioButton -------------------------------------------------------------
     static async Task TestRadioButton(TestContext ctx, string windowTitle, string scanData, CancellationToken ct)
     {
         var elements = ScanHelper.FindByType(scanData, "RadioButton")
@@ -102,21 +102,21 @@ public static class ElementTests
             var label = el.Name ?? el.AutomationId ?? $"ID:{el.Id}";
             var prefix = $"RadioButton [{label}]";
 
-            // CLICK — select this radio (WPF uses InvokePattern)
+            // CLICK - select this radio (WPF uses InvokePattern)
             await ctx.TestAsync($"{prefix} CLICK", $"CLICK {el.Id}", r => r.Success, ct);
 
-            // TOGGLE — WinForms RadioButton supports TogglePattern
+            // TOGGLE - WinForms RadioButton supports TogglePattern
             await ctx.TestAsync($"{prefix} TOGGLE", $"TOGGLE {el.Id}", r => r.Success, ct);
 
-            // GET_TEXT — read label/state
+            // GET_TEXT - read label/state
             await ctx.TestAsync($"{prefix} GET_TEXT", $"GET_TEXT {el.Id}", r => r.Success, ct);
         }
     }
 
-    // ── Button ──────────────────────────────────────────────────────────────────
+    // -- Button ------------------------------------------------------------------
     static async Task TestButton(TestContext ctx, string windowTitle, string scanData, CancellationToken ct)
     {
-        // Filter to safe buttons — avoid Exit, Shutdown, Close, etc.
+        // Filter to safe buttons - avoid Exit, Shutdown, Close, etc.
         var excluded = new[] { "exit", "close", "shutdown", "stop", "delete", "remove", "clear" };
         var elements = ScanHelper.FindByType(scanData, "Button")
             .Where(e => !excluded.Any(u => (e.Name ?? "").Contains(u, StringComparison.OrdinalIgnoreCase)))
@@ -135,7 +135,7 @@ public static class ElementTests
         }
     }
 
-    // ── ComboBox ────────────────────────────────────────────────────────────────
+    // -- ComboBox ----------------------------------------------------------------
     static async Task TestComboBox(TestContext ctx, string windowTitle, string scanData, CancellationToken ct)
     {
         var elements = ScanHelper.FindByType(scanData, "ComboBox")
@@ -148,7 +148,7 @@ public static class ElementTests
             var label = el.Name ?? el.AutomationId ?? $"ID:{el.Id}";
             var prefix = $"ComboBox [{label}]";
 
-            // GET_TEXT — read current selection
+            // GET_TEXT - read current selection
             await ctx.TestAsync($"{prefix} GET_TEXT", $"GET_TEXT {el.Id}", r => r.Success, ct);
 
             // EXPAND
@@ -158,12 +158,12 @@ public static class ElementTests
             // COLLAPSE
             await ctx.TestAsync($"{prefix} COLLAPSE", $"COLLAPSE {el.Id}", r => r.Success, ct);
 
-            // SET_VALUE — try setting by text (may not be supported on all combos)
+            // SET_VALUE - try setting by text (may not be supported on all combos)
             await ctx.TestAsync($"{prefix} SET_VALUE", $"SET_VALUE {el.Id} 0", r => r.Success, ct);
         }
     }
 
-    // ── Slider / TrackBar ───────────────────────────────────────────────────────
+    // -- Slider / TrackBar -------------------------------------------------------
     static async Task TestSlider(TestContext ctx, string windowTitle, string scanData, CancellationToken ct)
     {
         var elements = ScanHelper.FindByType(scanData, "Slider")
@@ -178,13 +178,13 @@ public static class ElementTests
             var label = el.AutomationId ?? el.Name ?? $"ID:{el.Id}";
             var prefix = $"Slider [{label}]";
 
-            // GET_TEXT — read current value
+            // GET_TEXT - read current value
             var original = await ctx.TestAsync($"{prefix} GET_TEXT", $"GET_TEXT {el.Id}", r => r.Success, ct);
 
-            // SET_VALUE — set to a known value
+            // SET_VALUE - set to a known value
             await ctx.TestAsync($"{prefix} SET_VALUE 5", $"SET_VALUE {el.Id} 5", r => r.Success, ct);
 
-            // GET_TEXT — verify the value changed
+            // GET_TEXT - verify the value changed
             await ctx.TestAsync($"{prefix} GET_TEXT after SET_VALUE", $"GET_TEXT {el.Id}", r => r.Success, ct);
 
             // Restore
@@ -193,7 +193,7 @@ public static class ElementTests
         }
     }
 
-    // ── ProgressBar ─────────────────────────────────────────────────────────────
+    // -- ProgressBar -------------------------------------------------------------
     static async Task TestProgressBar(TestContext ctx, string windowTitle, string scanData, CancellationToken ct)
     {
         var elements = ScanHelper.FindByType(scanData, "ProgressBar")
@@ -206,12 +206,12 @@ public static class ElementTests
             var label = el.AutomationId ?? el.Name ?? $"ID:{el.Id}";
             var prefix = $"ProgressBar [{label}]";
 
-            // GET_TEXT — read the value (usually numeric)
+            // GET_TEXT - read the value (usually numeric)
             await ctx.TestAsync($"{prefix} GET_TEXT", $"GET_TEXT {el.Id}", r => r.Success, ct);
         }
     }
 
-    // ── TabItem / TabPage ───────────────────────────────────────────────────────
+    // -- TabItem / TabPage -------------------------------------------------------
     static async Task TestTabItem(TestContext ctx, string windowTitle, string scanData, CancellationToken ct)
     {
         var elements = ScanHelper.FindByType(scanData, "TabItem")
@@ -228,11 +228,11 @@ public static class ElementTests
             var label = el.Name ?? el.AutomationId ?? $"ID:{el.Id}";
             var prefix = $"TabItem [{label}]";
 
-            // CLICK — switch to this tab
+            // CLICK - switch to this tab
             await ctx.TestAsync($"{prefix} CLICK", $"CLICK {el.Id}", r => r.Success, ct);
             await Task.Delay(300, ct);
 
-            // GET_TEXT — read tab header
+            // GET_TEXT - read tab header
             await ctx.TestAsync($"{prefix} GET_TEXT", $"GET_TEXT {el.Id}", r => r.Success, ct);
         }
 
@@ -241,7 +241,7 @@ public static class ElementTests
             await ctx.Client.SendAsync($"CLICK {firstTabId}", ct);
     }
 
-    // ── Expander ────────────────────────────────────────────────────────────────
+    // -- Expander ----------------------------------------------------------------
     static async Task TestExpander(TestContext ctx, string windowTitle, string scanData, CancellationToken ct)
     {
         var elements = ScanHelper.FindByType(scanData, "Expander")
@@ -261,7 +261,7 @@ public static class ElementTests
         }
     }
 
-    // ── ToggleButton ────────────────────────────────────────────────────────────
+    // -- ToggleButton ------------------------------------------------------------
     static async Task TestToggleButton(TestContext ctx, string windowTitle, string scanData, CancellationToken ct)
     {
         var elements = ScanHelper.FindByType(scanData, "ToggleButton")
@@ -283,7 +283,7 @@ public static class ElementTests
         }
     }
 
-    // ── TreeView / TreeItem ─────────────────────────────────────────────────────
+    // -- TreeView / TreeItem -----------------------------------------------------
     static async Task TestTreeView(TestContext ctx, string windowTitle, string scanData, CancellationToken ct)
     {
         var elements = ScanHelper.FindByType(scanData, "TreeItem")
@@ -303,10 +303,10 @@ public static class ElementTests
         }
     }
 
-    // ── Menu / MenuItem ─────────────────────────────────────────────────────────
+    // -- Menu / MenuItem ---------------------------------------------------------
     static async Task TestMenu(TestContext ctx, string windowTitle, string scanData, CancellationToken ct)
     {
-        // Only test top-level menu items — avoid triggering destructive actions
+        // Only test top-level menu items - avoid triggering destructive actions
         var excluded = new[] { "exit", "close", "quit", "torture" };
         var elements = ScanHelper.FindByType(scanData, "MenuItem")
             .Where(e => !excluded.Any(u => (e.Name ?? "").Contains(u, StringComparison.OrdinalIgnoreCase)))
@@ -329,7 +329,7 @@ public static class ElementTests
         }
     }
 
-    // ── RichTextBox ─────────────────────────────────────────────────────────────
+    // -- RichTextBox -------------------------------------------------------------
     static async Task TestRichTextBox(TestContext ctx, string windowTitle, string scanData, CancellationToken ct)
     {
         var elements = ScanHelper.FindByType(scanData, "RichTextBox")
@@ -350,7 +350,7 @@ public static class ElementTests
         }
     }
 
-    // ── PasswordBox ─────────────────────────────────────────────────────────────
+    // -- PasswordBox -------------------------------------------------------------
     static async Task TestPasswordBox(TestContext ctx, string windowTitle, string scanData, CancellationToken ct)
     {
         var elements = ScanHelper.FindByType(scanData, "PasswordBox")
@@ -365,18 +365,18 @@ public static class ElementTests
             var label = el.AutomationId ?? el.Name ?? $"ID:{el.Id}";
             var prefix = $"PasswordBox [{label}]";
 
-            // TYPE — should work even though value isn't readable
+            // TYPE - should work even though value isn't readable
             await ctx.TestAsync($"{prefix} TYPE", $"TYPE {el.Id} secretpass123", r => r.Success, ct);
 
-            // GET_TEXT — PasswordBox typically blocks read access
-            await ctx.TestAsync($"{prefix} GET_TEXT (may fail — password protected)", $"GET_TEXT {el.Id}", null, ct);
+            // GET_TEXT - PasswordBox typically blocks read access
+            await ctx.TestAsync($"{prefix} GET_TEXT (may fail - password protected)", $"GET_TEXT {el.Id}", null, ct);
 
             // SEND_KEYS
             await ctx.TestAsync($"{prefix} SEND_KEYS", $"SEND_KEYS {el.Id} extra", r => r.Success, ct);
         }
     }
 
-    // ── DatePicker ──────────────────────────────────────────────────────────────
+    // -- DatePicker --------------------------------------------------------------
     static async Task TestDatePicker(TestContext ctx, string windowTitle, string scanData, CancellationToken ct)
     {
         var elements = ScanHelper.FindByType(scanData, "DatePicker")
@@ -399,7 +399,7 @@ public static class ElementTests
         }
     }
 
-    // ── ScrollBar ───────────────────────────────────────────────────────────────
+    // -- ScrollBar ---------------------------------------------------------------
     static async Task TestScrollBar(TestContext ctx, string windowTitle, string scanData, CancellationToken ct)
     {
         var elements = ScanHelper.FindByType(scanData, "ScrollBar")
@@ -417,7 +417,7 @@ public static class ElementTests
         }
     }
 
-    // ── ListBox ─────────────────────────────────────────────────────────────────
+    // -- ListBox -----------------------------------------------------------------
     static async Task TestListBox(TestContext ctx, string windowTitle, string scanData, CancellationToken ct)
     {
         var elements = ScanHelper.FindByType(scanData, "ListBox")
@@ -437,7 +437,7 @@ public static class ElementTests
         }
     }
 
-    // ── DataGrid ────────────────────────────────────────────────────────────────
+    // -- DataGrid ----------------------------------------------------------------
     static async Task TestDataGrid(TestContext ctx, string windowTitle, string scanData, CancellationToken ct)
     {
         var elements = ScanHelper.FindByType(scanData, "DataGrid")
@@ -457,7 +457,7 @@ public static class ElementTests
         }
     }
 
-    // ── ListView ────────────────────────────────────────────────────────────────
+    // -- ListView ----------------------------------------------------------------
     static async Task TestListView(TestContext ctx, string windowTitle, string scanData, CancellationToken ct)
     {
         var elements = ScanHelper.FindByType(scanData, "ListView")
@@ -477,3 +477,4 @@ public static class ElementTests
         }
     }
 }
+

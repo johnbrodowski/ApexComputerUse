@@ -40,14 +40,14 @@ namespace ApexComputerUse
 
             SuspendLayout();
 
-            // ── Tab control ───────────────────────────────────────────────
+            // -- Tab control -----------------------------------------------
             tabControl.Location = new Point(8, 8);
             tabControl.Size     = new Size(368, 270);
             tabControl.TabIndex = 0;
             tabControl.Controls.Add(tabConnection);
             tabControl.Controls.Add(tabPermissions);
 
-            // ── Connection tab ────────────────────────────────────────────
+            // -- Connection tab --------------------------------------------
             tabConnection.Text    = "Connection";
             tabConnection.Padding = new Padding(4);
             tabConnection.Controls.Add(lblName);
@@ -107,7 +107,7 @@ namespace ApexComputerUse
             txtDescription.Size      = new Size(258, 55);
             txtDescription.Multiline = true;
 
-            // ── Permissions tab ───────────────────────────────────────────
+            // -- Permissions tab -------------------------------------------
             tabPermissions.Text    = "Permissions";
             tabPermissions.Padding = new Padding(4);
             tabPermissions.Controls.Add(lblPermNote);
@@ -141,14 +141,14 @@ namespace ApexComputerUse
 
             chkShellRun.AutoSize    = true;
             chkShellRun.Location    = new Point(10, 150);
-            chkShellRun.Text        = "Allow Shell Run  (execute OS commands — use with caution)";
+            chkShellRun.Text        = "Allow Shell Run  (execute OS commands - use with caution)";
             chkShellRun.ForeColor   = System.Drawing.Color.OrangeRed;
 
             chkClients.AutoSize = true;
             chkClients.Location = new Point(10, 178);
             chkClients.Text     = "Allow Client List  (see and manage other connected clients)";
 
-            // ── Buttons ───────────────────────────────────────────────────
+            // -- Buttons ---------------------------------------------------
             btnOk.Location = new Point(216, 288);
             btnOk.Size     = new Size(75, 28);
             btnOk.Text     = "OK";
@@ -159,7 +159,7 @@ namespace ApexComputerUse
             btnCancel.Text     = "Cancel";
             btnCancel.Click   += btnCancel_Click;
 
-            // ── Form ──────────────────────────────────────────────────────
+            // -- Form ------------------------------------------------------
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode       = AutoScaleMode.Font;
             ClientSize          = new Size(384, 328);
@@ -184,3 +184,4 @@ namespace ApexComputerUse
         private Button     btnOk, btnCancel;
     }
 }
+

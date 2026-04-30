@@ -5,7 +5,7 @@ namespace ApexComputerUse
 {
     public partial class HttpCommandServer
     {
-        // ── Control Panel / Settings page ────────────────────────────────────
+        // -- Control Panel / Settings page ------------------------------------
 
         private static AppSettings? TryLoadAppSettings()
         {
@@ -38,12 +38,12 @@ namespace ApexComputerUse
             string shellClass = _enableShellRun ? "warn" : "off";
             string maskedKey  = hasKey
                 ? (_apiKey!.Length > 8
-                    ? _apiKey[..4] + "••••••••" + _apiKey[^4..]
-                    : "••••••••")
-                : "(none — auth disabled)";
+                    ? _apiKey[..4] + "--------" + _apiKey[^4..]
+                    : "--------")
+                : "(none - auth disabled)";
 
             string tgToken   = string.IsNullOrEmpty(cfg.TelegramToken) ? "(not configured)" : "configured";
-            string tgIds     = string.IsNullOrEmpty(effectiveAllowedIds) ? "(none — open to any user)" : H(effectiveAllowedIds);
+            string tgIds     = string.IsNullOrEmpty(effectiveAllowedIds) ? "(none - open to any user)" : H(effectiveAllowedIds);
             string modelPath = string.IsNullOrEmpty(effectiveModelPath) ? "(not set)" : H(effectiveModelPath);
             string mmPath    = string.IsNullOrEmpty(effectiveMmPath)    ? "(not set)" : H(effectiveMmPath);
 
@@ -67,7 +67,7 @@ namespace ApexComputerUse
                 <html lang="en">
                 <head>
                 <meta charset="utf-8">
-                <title>ApexComputerUse — Control Panel</title>
+                <title>ApexComputerUse - Control Panel</title>
                 <style>
                   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
                   body { font-family: monospace; font-size: 13px; background: #1e1e1e; color: #d4d4d4;
@@ -88,7 +88,7 @@ namespace ApexComputerUse
                        margin: 1.5em 0 .6em; padding-bottom: .25em; border-bottom: 1px solid #3c3c3c; }
                   h2:first-child { margin-top: 0; }
 
-                  /* ── Status cards ── */
+                  /* -- Status cards -- */
                   .cards { display: flex; gap: .75em; margin-bottom: .5em; flex-wrap: wrap; }
                   .card { background: #252526; border: 1px solid #3c3c3c; border-radius: 4px;
                           padding: .7em 1em; min-width: 180px; flex: 1; }
@@ -105,7 +105,7 @@ namespace ApexComputerUse
                   .card-detail .warn { color: #e0a852; }
                   .card-detail .off  { color: #555; }
 
-                  /* ── API key row ── */
+                  /* -- API key row -- */
                   .keyrow { display: flex; align-items: center; gap: .5em; margin-bottom: .5em; }
                   .keybox { background: #1e1e1e; border: 1px solid #3c3c3c; border-radius: 3px;
                             padding: .28em .6em; color: #ce9178; font-family: monospace; font-size: .88em;
@@ -115,7 +115,7 @@ namespace ApexComputerUse
                   button:hover { background: #3e3e42; }
                   button.done { color: #4ec94e; border-color: #4ec94e; }
 
-                  /* ── Config table ── */
+                  /* -- Config table -- */
                   table { width: 100%; border-collapse: collapse; font-size: .82em; margin-bottom: .5em; }
                   th { text-align: left; color: #666; font-weight: normal; font-size: .85em;
                        padding: .15em .6em .3em; border-bottom: 1px solid #3c3c3c; }
@@ -129,13 +129,13 @@ namespace ApexComputerUse
                   td.env  { color: #555; font-size: .88em; white-space: nowrap; }
                   td.dsc  { color: #888; font-size: .88em; }
 
-                  /* ── Metrics row ── */
+                  /* -- Metrics row -- */
                   .mrow { display: flex; gap: 2em; flex-wrap: wrap; margin-bottom: .5em; }
                   .mc   { }
                   .mv   { font-size: 1.35em; color: #9cdcfe; }
                   .ml   { font-size: .72em; color: #666; }
 
-                  /* ── Quick links ── */
+                  /* -- Quick links -- */
                   .links { display: flex; gap: .45em; flex-wrap: wrap; }
                   .links a { color: #9cdcfe; font-size: .82em; text-decoration: none;
                              padding: .22em .65em; border: 1px solid #3c3c3c; border-radius: 3px; }
@@ -172,12 +172,12 @@ namespace ApexComputerUse
                   </div>
                   <div class="card">
                     <div class="card-title">Named Pipe</div>
-                    <div class="card-status"><div class="dot off"></div> <span id="pipeLabel">—</span></div>
+                    <div class="card-status"><div class="dot off"></div> <span id="pipeLabel">-</span></div>
                     <div class="card-detail">Name: <span class="v">{{H(cfg.PipeName)}}</span></div>
                   </div>
                   <div class="card">
                     <div class="card-title">Telegram</div>
-                    <div class="card-status"><div class="dot off"></div> <span id="tgLabel">—</span></div>
+                    <div class="card-status"><div class="dot off"></div> <span id="tgLabel">-</span></div>
                     <div class="card-detail">
                       Token: <span class="v">{{tgToken}}</span><br>
                       Allowed IDs: <span class="v">{{tgIds}}</span>
@@ -185,11 +185,11 @@ namespace ApexComputerUse
                   </div>
                   <div class="card">
                     <div class="card-title">Runtime <span id="autoRefresh">auto-refresh 5s</span></div>
-                    <div class="card-status"><div class="dot ok" id="healthDot"></div> <span id="uptime">—</span></div>
+                    <div class="card-status"><div class="dot ok" id="healthDot"></div> <span id="uptime">-</span></div>
                     <div class="card-detail">
-                      Requests: <span id="totalReq" class="v">—</span><br>
-                      Errors: <span id="errReq" class="v">—</span><br>
-                      Active: <span id="activeReq" class="v">—</span>
+                      Requests: <span id="totalReq" class="v">-</span><br>
+                      Errors: <span id="errReq" class="v">-</span><br>
+                      Active: <span id="activeReq" class="v">-</span>
                     </div>
                   </div>
                 </div>
@@ -219,17 +219,17 @@ namespace ApexComputerUse
                   </tbody>
                 </table>
                 <p class="note">
-                  Load order: compiled defaults → appsettings.json → APEX_* env vars → GUI field overrides.
+                  Load order: compiled defaults -> appsettings.json -> APEX_* env vars -> GUI field overrides.
                   Edit appsettings.json or set env vars before launch to persist changes.
                 </p>
 
                 <h2>Runtime Metrics</h2>
                 <div class="mrow">
-                  <div class="mc"><div class="mv" id="m_total">—</div><div class="ml">total requests</div></div>
-                  <div class="mc"><div class="mv" id="m_err">—</div><div class="ml">errors</div></div>
-                  <div class="mc"><div class="mv" id="m_active">—</div><div class="ml">active now</div></div>
-                  <div class="mc"><div class="mv" id="m_up">—</div><div class="ml">uptime</div></div>
-                  <div class="mc"><div class="mv" id="m_model">—</div><div class="ml">model loaded</div></div>
+                  <div class="mc"><div class="mv" id="m_total">-</div><div class="ml">total requests</div></div>
+                  <div class="mc"><div class="mv" id="m_err">-</div><div class="ml">errors</div></div>
+                  <div class="mc"><div class="mv" id="m_active">-</div><div class="ml">active now</div></div>
+                  <div class="mc"><div class="mv" id="m_up">-</div><div class="ml">uptime</div></div>
+                  <div class="mc"><div class="mv" id="m_model">-</div><div class="ml">model loaded</div></div>
                 </div>
 
                 <h2>Quick Links</h2>
@@ -257,8 +257,8 @@ namespace ApexComputerUse
                 }
                 function hideKey() {
                   document.getElementById('keyBox').textContent = document.getElementById('keyBox').textContent.length > 12
-                    ? KEY.slice(0,4) + '••••••••' + KEY.slice(-4)
-                    : '••••••••';
+                    ? KEY.slice(0,4) + '--------' + KEY.slice(-4)
+                    : '--------';
                   const btn = document.getElementById('revealBtn');
                   if (btn) { btn.textContent = 'Reveal'; btn.onclick = revealKey; }
                 }
@@ -280,15 +280,15 @@ namespace ApexComputerUse
                     if (!r.ok) return;
                     const j = await r.json();
                     const d = j.data || {};
-                    document.getElementById('uptime').textContent     = d.uptime          || '—';
+                    document.getElementById('uptime').textContent     = d.uptime          || '-';
                     document.getElementById('totalReq').textContent   = d.total_requests  || '0';
                     document.getElementById('errReq').textContent     = d.error_requests  || '0';
                     document.getElementById('activeReq').textContent  = d.active_requests || '0';
                     document.getElementById('m_total').textContent    = d.total_requests  || '0';
                     document.getElementById('m_err').textContent      = d.error_requests  || '0';
                     document.getElementById('m_active').textContent   = d.active_requests || '0';
-                    document.getElementById('m_up').textContent       = d.uptime          || '—';
-                    document.getElementById('m_model').textContent    = d.model_loaded    || '—';
+                    document.getElementById('m_up').textContent       = d.uptime          || '-';
+                    document.getElementById('m_model').textContent    = d.model_loaded    || '-';
                     document.getElementById('healthDot').className    = 'dot ok';
                   } catch {
                     document.getElementById('healthDot').className = 'dot warn';
@@ -320,7 +320,7 @@ namespace ApexComputerUse
             finally { res.Close(); }
         }
 
-        // ── Helpers ───────────────────────────────────────────────────────────
+        // -- Helpers -----------------------------------------------------------
 
         private static string FirstNonEmpty(string? a, string? b) =>
             !string.IsNullOrWhiteSpace(a) ? a : (b ?? "");
@@ -344,3 +344,4 @@ namespace ApexComputerUse
         }
     }
 }
+

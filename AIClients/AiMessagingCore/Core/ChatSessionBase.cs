@@ -27,7 +27,7 @@ public abstract class ChatSessionBase : IChatSession
             _messages.Add(new ChatMessage(ChatRole.System, options.SystemMessage, DateTimeOffset.UtcNow));
     }
 
-    // ── IChatSession identity ───────────────────────────────────────────────
+    // -- IChatSession identity -----------------------------------------------
 
     public string SessionId { get; }
 
@@ -37,7 +37,7 @@ public abstract class ChatSessionBase : IChatSession
 
     public IReadOnlyList<ChatMessage> Messages => _messages;
 
-    // ── Events ──────────────────────────────────────────────────────────────
+    // -- Events --------------------------------------------------------------
 
     public event EventHandler<ResponseStartedEventArgs>?   OnResponseStarted;
     public event EventHandler<TokenReceivedEventArgs>?     OnTokenReceived;
@@ -45,7 +45,7 @@ public abstract class ChatSessionBase : IChatSession
     public event EventHandler<AiErrorEventArgs>?             OnError;
     public event EventHandler?                             OnCancelled;
 
-    // ── Operations ──────────────────────────────────────────────────────────
+    // -- Operations ----------------------------------------------------------
 
     public async ValueTask<ChatMessage> SendAsync(
         string userMessage,
@@ -149,7 +149,7 @@ public abstract class ChatSessionBase : IChatSession
         => throw new NotSupportedException(
             "SwitchProviderAsync requires a session created via AiSessionBuilder.Build().");
 
-    // ── Helpers ─────────────────────────────────────────────────────────────
+    // -- Helpers -------------------------------------------------------------
 
     /// <summary>
     /// Seeds the session history from an existing message list.
@@ -188,3 +188,4 @@ public abstract class ChatSessionBase : IChatSession
         RequestOverrides? overrides,
         CancellationToken cancellationToken);
 }
+

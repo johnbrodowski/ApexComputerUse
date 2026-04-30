@@ -20,7 +20,7 @@ public static class AiSettings
         PropertyNameCaseInsensitive = true
     };
 
-    // Maps provider name → (API-key env-var, base-URL env-var).
+    // Maps provider name -> (API-key env-var, base-URL env-var).
     // Empty string means the provider has no variable of that type.
     private static readonly Dictionary<string, (string ApiKeyVar, string BaseUrlVar)> EnvVarMap =
         new(StringComparer.OrdinalIgnoreCase)
@@ -208,3 +208,4 @@ public static class AiSettings
         }
     };
 }
+

@@ -17,7 +17,7 @@ namespace ApexComputerUse
         [STAThread]
         private static void Main(string[] args)
         {
-            // ── Command-line overrides (must precede AppConfig.Current) ────
+            // -- Command-line overrides (must precede AppConfig.Current) ----
             // --port <n>   overrides the HTTP listen port (useful for running multiple instances)
             // --pipe <name> overrides the named-pipe name
             // --client      marks this instance as a subordinate client (disables Launch Instance)
@@ -38,7 +38,7 @@ namespace ApexComputerUse
                 }
             }
 
-            // ── Server singleton guard ────────────────────────────────────
+            // -- Server singleton guard ------------------------------------
             // Only one non-client instance may run on this machine at a time.
             if (!IsClientInstance)
             {
@@ -54,7 +54,7 @@ namespace ApexComputerUse
                 }
             }
 
-            // ── Configuration + structured logging ────────────────────────
+            // -- Configuration + structured logging ------------------------
             var cfg = AppConfig.Current;   // loads appsettings.json + APEX_* env vars
             AppLog.Configure(
                 Path.Combine(
@@ -62,7 +62,7 @@ namespace ApexComputerUse
                     "ApexComputerUse", "Logs"),
                 debug: cfg.LogLevel.Equals("Debug", StringComparison.OrdinalIgnoreCase));
 
-            // ── Windows Service mode ──────────────────────────────────────
+            // -- Windows Service mode --------------------------------------
             bool isService = args.Contains("--service", StringComparer.OrdinalIgnoreCase)
                           || !Environment.UserInteractive;
 
@@ -74,7 +74,7 @@ namespace ApexComputerUse
                 return;
             }
 
-            // ── GUI mode ──────────────────────────────────────────────────
+            // -- GUI mode --------------------------------------------------
             AppLog.Info($"ApexComputerUse starting (GUI). HTTP={cfg.HttpPort} BindAll={cfg.HttpBindAll} Pipe={cfg.PipeName}");
             InitNativeLibs(logToConsole: true);
 
@@ -113,3 +113,4 @@ namespace ApexComputerUse
         }
     }
 }
+

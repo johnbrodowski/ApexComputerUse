@@ -17,9 +17,10 @@ public sealed class ChatSessionResult
     /// <summary>Token usage and timing metrics for this turn.</summary>
     public AiUsageMetrics Metrics { get; }
 
-    /// <summary>Convenience accessor — full text of the assistant reply.</summary>
+    /// <summary>Convenience accessor - full text of the assistant reply.</summary>
     public string Content => Message.Content;
 
     /// <summary>True when the response was cut short by a cancellation.</summary>
     public bool WasCancelled { get; init; }
 }
+

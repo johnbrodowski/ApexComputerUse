@@ -6,11 +6,11 @@ namespace ApexComputerUse.Tests;
 
 /// <summary>
 /// Unit tests for <see cref="CommandRequestJsonMapper.FromJsonSelfDescribing"/>.
-/// The method is tested in isolation — no named-pipe connection required.
+/// The method is tested in isolation - no named-pipe connection required.
 /// </summary>
 public class PipeCommandServerTests
 {
-    // ── Happy-path parsing ────────────────────────────────────────────────
+    // -- Happy-path parsing ------------------------------------------------
 
     [Fact]
     public void ParseJson_MinimalCommand_SetsCommand()
@@ -78,7 +78,7 @@ public class PipeCommandServerTests
         Assert.Equal("clip.gguf", req.MmProjPath);
     }
 
-    // ── Error fallback ────────────────────────────────────────────────────
+    // -- Error fallback ----------------------------------------------------
 
     [Fact]
     public void ParseJson_InvalidJson_FallsBackToHelp()
@@ -112,7 +112,7 @@ public class PipeCommandServerTests
         Assert.Null(req.Action);
     }
 
-    // ── Edge cases ────────────────────────────────────────────────────────
+    // -- Edge cases --------------------------------------------------------
 
     [Fact]
     public void ParseJson_ExtraUnknownFields_Ignored()
@@ -158,3 +158,4 @@ public class PipeCommandServerTests
         Assert.Null(ex);
     }
 }
+

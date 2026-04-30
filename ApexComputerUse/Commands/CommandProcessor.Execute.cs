@@ -1,17 +1,17 @@
-﻿using FlaUI.Core.AutomationElements;
+using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Definitions;
 
 namespace ApexComputerUse
 {
     public partial class CommandProcessor
     {
-        // ── Action runner (remote) ────────────────────────────────────────
+        // -- Action runner (remote) ----------------------------------------
 
         private string RunAction(AutomationElement el, Window? win, string action, string input)
         {
             return action.ToLowerInvariant() switch
             {
-                // ── Click / Mouse ─────────────────────────────────────────
+                // -- Click / Mouse -----------------------------------------
                 "click"                              => Do(() => _helper.ClickElement(el)),
                 "mouse-click" or "mouseclick"        => Do(() => _helper.MouseClickElement(el)),
                 "invoke"                             => Do(() => _helper.InvokeButton(el)),
@@ -23,7 +23,7 @@ namespace ApexComputerUse
                 "drag"                               => Do(() => { var p = ParsePair(input); _helper.DragAndDropToPoint(el, p.a, p.b); }),
                 "highlight"                          => Do(() => _helper.HighlightElement(el)),
 
-                // ── Focus / State ─────────────────────────────────────────
+                // -- Focus / State -----------------------------------------
                 "focus"                              => Do(() => _helper.SetFocus(el)),
                 "isenabled"                          => _helper.IsElementEnabled(el),
                 "isvisible"                          => _helper.IsElementVisible(el),
@@ -31,7 +31,7 @@ namespace ApexComputerUse
                 "patterns"                           => _helper.GetSupportedPatterns(el),
                 "bounds"                             => _helper.GetBoundingRect(el),
 
-                // ── Text / Value ──────────────────────────────────────────
+                // -- Text / Value ------------------------------------------
                 "gettext"  or "text"                 => _helper.GetText(el),
                 "getvalue" or "value"                => _helper.GetValue(el),
                 "getselectedtext"                    => _helper.GetSelectedText(el),
@@ -47,49 +47,49 @@ namespace ApexComputerUse
                 "undo"                               => Do(() => _helper.UndoText(el)),
                 "clear"                              => Do(() => _helper.ClearText(el)),
 
-                // ── Keyboard ──────────────────────────────────────────────
+                // -- Keyboard ----------------------------------------------
                 "keys"                               => Do(() => _helper.SendKeysEnhanced(el, input)),
 
-                // ── Range / Slider ────────────────────────────────────────
+                // -- Range / Slider ----------------------------------------
                 "setrange"                           => Do(() => _helper.SetRangeValue(el, ParseDoubleOr(input, 0))),
                 "getrange"                           => _helper.GetRangeValue(el),
                 "rangeinfo"                          => _helper.GetRangeInfo(el),
 
-                // ── Toggle ────────────────────────────────────────────────
+                // -- Toggle ------------------------------------------------
                 "toggle"                             => Do(() => _helper.ToggleCheckBox(el)),
                 "toggle-on"  or "toggleon"           => Do(() => _helper.SetToggleState(el, true)),
                 "toggle-off" or "toggleoff"          => Do(() => _helper.SetToggleState(el, false)),
                 "gettoggle"                          => _helper.GetToggleState(el),
 
-                // ── ExpandCollapse ────────────────────────────────────────
+                // -- ExpandCollapse ----------------------------------------
                 "expand"                             => Do(() => el.Patterns.ExpandCollapse.Pattern.Expand()),
                 "collapse"                           => Do(() => el.Patterns.ExpandCollapse.Pattern.Collapse()),
                 "expandstate"                        => _helper.GetExpandCollapseState(el),
 
-                // ── Selection (SelectionItem) ─────────────────────────────
+                // -- Selection (SelectionItem) -----------------------------
                 "select-item" or "selectitem"        => Do(() => _helper.SelectItem(el)),
                 "addselect"                          => Do(() => _helper.AddToSelection(el)),
                 "removeselect"                       => Do(() => _helper.RemoveFromSelection(el)),
                 "isselected"                         => _helper.IsSelected(el),
                 "getselection"                       => _helper.GetSelectionInfo(el),
 
-                // ── ComboBox / ListBox ────────────────────────────────────
+                // -- ComboBox / ListBox ------------------------------------
                 "select"                             => Do(() => _helper.SelectComboBoxItem(el, input)),
                 "select-index" or "selectindex"      => Do(() => _helper.SelectByIndex(el, ParseIntOr(input, 0))),
                 "getitems"                           => string.Join("\n", _helper.GetComboBoxItems(el)),
                 "getselecteditem"                    => _helper.GetComboBoxSelected(el),
 
-                // ── Window ────────────────────────────────────────────────
+                // -- Window ------------------------------------------------
                 "minimize"   => Do(() => { if (win != null) _helper.MinimizeWindow(win); }),
                 "maximize"   => Do(() => { if (win != null) _helper.MaximizeWindow(win); }),
                 "restore"    => Do(() => { if (win != null) _helper.RestoreWindow(win); }),
                 "windowstate"                        => _helper.GetWindowState(el),
 
-                // ── Transform ────────────────────────────────────────────
+                // -- Transform --------------------------------------------
                 "move"                               => Do(() => { var p = ParsePair(input); _helper.MoveElement(el, p.a, p.b); }),
                 "resize"                             => Do(() => { var p = ParsePair(input); _helper.ResizeElement(el, p.a, p.b); }),
 
-                // ── Scroll ────────────────────────────────────────────────
+                // -- Scroll ------------------------------------------------
                 "scroll-up"   or "scrollup"          => Scroll(el, input, "up"),
                 "scroll-down" or "scrolldown"        => Scroll(el, input, "down"),
                 "scroll-left" or "scrollleft"        => Scroll(el, input, "left"),
@@ -98,15 +98,15 @@ namespace ApexComputerUse
                 "scrollpercent"                      => Do(() => { var p = ParsePairD(input); _helper.ScrollByPercent(el, p.a, p.b); }),
                 "getscrollinfo"                      => _helper.GetScrollInfo(el),
 
-                // ── Grid / Table ──────────────────────────────────────────
+                // -- Grid / Table ------------------------------------------
                 "griditem"                           => _helper.GetGridItem(el, ParsePair(input).a, ParsePair(input).b),
                 "gridinfo"                           => _helper.GetGridInfo(el),
                 "griditeminfo"                       => _helper.GetGridItemInfo(el),
 
-                // ── Screenshot ────────────────────────────────────────────
+                // -- Screenshot --------------------------------------------
                 "screenshot" or "capture"            => _helper.CaptureElement(el, CaptureFolder()),
 
-                // ── Wait ──────────────────────────────────────────────────
+                // -- Wait --------------------------------------------------
                 "wait"                               => WaitFor(input),
                 "wait-page-load" or "waitpageload"   => WaitPageLoad(ParseIntOr(input, 10)),
 
@@ -166,7 +166,7 @@ namespace ApexComputerUse
             public bool    MatchAll        { get; init; }  // scan offscreen elements too when match is set; onscreen pruning skipped
             public int?    MaxDepth        { get; init; }
             public bool    IncludePath     { get; init; }
-            public bool    IncludeExtra    { get; init; }  // properties=extra → value + helpText
+            public bool    IncludeExtra    { get; init; }  // properties=extra -> value + helpText
         }
 
         private ElementNode? ScanElementsIntoMap(
@@ -178,7 +178,7 @@ namespace ApexComputerUse
         {
             if (depth > ScanMaxDepth) return null;
 
-            // Onscreen filter — skip element and its entire subtree if off-viewport.
+            // Onscreen filter - skip element and its entire subtree if off-viewport.
             // depth == 0 is always the scan root (window or expansion target); never filter it out.
             // MatchAll suppresses pruning so match= can find offscreen content; nodes are tagged below.
             bool elementIsOffscreen = depth > 0 && el.Properties.IsOffscreen.ValueOrDefault;
@@ -205,7 +205,7 @@ namespace ApexComputerUse
                               excludeName: isWindowOrPane, siblingIndex: siblingIndex);
                     id = _idGen.GenerateIdFromHash(hash);
                 }
-                // Drop the old reverse entry first — FlaUI hands out a fresh AutomationElement
+                // Drop the old reverse entry first - FlaUI hands out a fresh AutomationElement
                 // instance on each scan even though the resulting hash/id is the same, so the
                 // previously-mapped instance would otherwise leak in _elementReverse forever.
                 if (_elementMap.TryGetValue(id, out var oldEl)) _elementReverse.Remove(oldEl);
@@ -215,7 +215,7 @@ namespace ApexComputerUse
                 _elementReverse[el] = id;
                 if (isNewId) _elementInsertOrder.Enqueue(id);
 
-                // FIFO eviction at the cap — preserves most recently inserted IDs instead of
+                // FIFO eviction at the cap - preserves most recently inserted IDs instead of
                 // wiping the entire map at once (which would invalidate every ID an active
                 // session has cached).
                 while (_elementMap.Count > 50_000 && _elementInsertOrder.Count > 0)
@@ -233,7 +233,7 @@ namespace ApexComputerUse
 
                 string nameProp = el.Properties.Name.ValueOrDefault ?? "";
 
-                // Build the ancestor breadcrumb — each level is "ControlType" if Name is empty,
+                // Build the ancestor breadcrumb - each level is "ControlType" if Name is empty,
                 // otherwise "Name". Root is just the root's label. Only materialised when the
                 // caller asked for IncludePath, so we don't burn string allocations otherwise.
                 string? path = null;
@@ -252,7 +252,7 @@ namespace ApexComputerUse
                     var fetchTask = Task.Run(() => el.FindAllChildren());
                     children = fetchTask.Wait(ScanChildTimeout) ? fetchTask.Result : null;
                 }
-                catch (Exception ex) { AppLog.Debug($"[Scan] FindAllChildren failed — {ex.Message}"); children = null; }
+                catch (Exception ex) { AppLog.Debug($"[Scan] FindAllChildren failed - {ex.Message}"); children = null; }
 
                 List<ElementNode>? childNodes        = null;
                 int?               childCountOut     = null;
@@ -260,7 +260,7 @@ namespace ApexComputerUse
 
                 if (truncate)
                 {
-                    // Depth limit hit — omit children, report their counts so callers know to drill in.
+                    // Depth limit hit - omit children, report their counts so callers know to drill in.
                     if (children != null && children.Length > 0)
                     {
                         childCountOut      = children.Length;
@@ -297,7 +297,7 @@ namespace ApexComputerUse
                     }
                     : null;
 
-                // Opt-in properties — read only when the caller asked for them so default scans
+                // Opt-in properties - read only when the caller asked for them so default scans
                 // keep their existing 4-property budget.
                 string? valueOut    = options.IncludeExtra ? _helper.ReadValuePattern(el) : null;
                 string? helpTextOut = options.IncludeExtra ? _helper.ReadHelpText(el)     : null;
@@ -320,19 +320,19 @@ namespace ApexComputerUse
                     IsOffscreen       = (options.MatchAll && elementIsOffscreen) ? true : null
                 };
             }
-            catch { return null; } // element became stale mid-scan — skip silently
+            catch { return null; } // element became stale mid-scan - skip silently
         }
 
         /// <summary>
         /// Cheap count of all live descendants under <paramref name="el"/>, respecting the
         /// onscreen filter so the number matches what the caller would see if they drilled in
-        /// via <c>/elements?id=&lt;id&gt;</c>. No ID hashing, no node construction, no mapping —
+        /// via <c>/elements?id=&lt;id&gt;</c>. No ID hashing, no node construction, no mapping -
         /// just walks children to produce an integer so the caller can estimate cost.
         /// </summary>
         private static int CountDescendantsBelow(AutomationElement el, bool onscreenOnly, int depth = 0)
         {
             // Cyclic UIA trees (seen in some UWP/WPF apps) would otherwise recurse to stack
-            // overflow — main scanner uses the same ScanMaxDepth ceiling.
+            // overflow - main scanner uses the same ScanMaxDepth ceiling.
             if (depth > ScanMaxDepth) return 0;
 
             AutomationElement[]? children;
@@ -352,7 +352,7 @@ namespace ApexComputerUse
                     if (onscreenOnly && c.Properties.IsOffscreen.ValueOrDefault) continue;
                     total += 1 + CountDescendantsBelow(c, onscreenOnly, depth + 1);
                 }
-                catch { /* stale child — skip */ }
+                catch { /* stale child - skip */ }
             }
             return total;
         }
@@ -367,14 +367,14 @@ namespace ApexComputerUse
             public string              AutomationId      { get; init; } = "";
             public BoundingRect?       BoundingRectangle { get; init; }
             public List<ElementNode>?  Children          { get; init; }
-            public int?                ChildCount        { get; init; }  // set only when children are omitted due to a depth limit — tells the caller it can expand this node via /elements?id=<Id>
+            public int?                ChildCount        { get; init; }  // set only when children are omitted due to a depth limit - tells the caller it can expand this node via /elements?id=<Id>
 
-            // ── Opt-in fields (emitted only when populated; JsonIgnoreCondition.WhenWritingNull keeps payloads small) ──
-            public int?                DescendantCount   { get; init; }  // set alongside ChildCount on truncated nodes — total transitive descendants the caller could still drill into
-            public string?             Path              { get; init; }  // ancestor breadcrumb, e.g. "Chrome > Document > Form" — set only when the caller requested IncludePath
-            public string?             Value             { get; init; }  // Value pattern content — set only when the caller requested properties=extra
-            public string?             HelpText          { get; init; }  // HelpText property — set only when the caller requested properties=extra
-            public bool?               IsOffscreen       { get; init; }  // set only when true — element is off-viewport but included via match= scan
+            // -- Opt-in fields (emitted only when populated; JsonIgnoreCondition.WhenWritingNull keeps payloads small) --
+            public int?                DescendantCount   { get; init; }  // set alongside ChildCount on truncated nodes - total transitive descendants the caller could still drill into
+            public string?             Path              { get; init; }  // ancestor breadcrumb, e.g. "Chrome > Document > Form" - set only when the caller requested IncludePath
+            public string?             Value             { get; init; }  // Value pattern content - set only when the caller requested properties=extra
+            public string?             HelpText          { get; init; }  // HelpText property - set only when the caller requested properties=extra
+            public bool?               IsOffscreen       { get; init; }  // set only when true - element is off-viewport but included via match= scan
         }
 
         internal sealed class BoundingRect
@@ -385,7 +385,7 @@ namespace ApexComputerUse
             public int Height { get; init; }
         }
 
-        // ── Helpers ───────────────────────────────────────────────────────
+        // -- Helpers -------------------------------------------------------
 
         /// <summary>
         /// Recursively prunes an element tree to nodes whose ControlType matches
@@ -429,7 +429,7 @@ namespace ApexComputerUse
 
             bool selfMatches = MatchesNode(node, needle);
 
-            // If this node matches, keep its entire subtree — the agent probably wants
+            // If this node matches, keep its entire subtree - the agent probably wants
             // context below the match. Non-matching siblings beneath a match are fine;
             // they're the siblings of a match, not unrelated noise.
             if (selfMatches) return node;
@@ -464,10 +464,10 @@ namespace ApexComputerUse
         }
 
         /// <summary>
-        /// Folds chains of identity-less single-child wrappers — e.g. the "1-in-1-in-1" Pane/Group
+        /// Folds chains of identity-less single-child wrappers - e.g. the "1-in-1-in-1" Pane/Group
         /// chains browsers emit around every piece of web content. A node is collapsed when it has
         /// exactly one child AND has no Name AND has no AutomationId AND its ControlType is one of
-        /// the generic containers (Pane/Group/Custom). IDs are never rewritten — the hoisted child
+        /// the generic containers (Pane/Group/Custom). IDs are never rewritten - the hoisted child
         /// keeps its original ID so follow-up /elements?id=&lt;id&gt; calls still resolve.
         /// </summary>
         internal static ElementNode? CollapseSingleChildChains(ElementNode? node)
@@ -534,3 +534,4 @@ namespace ApexComputerUse
         }
     }
 }
+

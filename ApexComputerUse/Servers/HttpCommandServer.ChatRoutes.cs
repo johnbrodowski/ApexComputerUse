@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Net;
 using System.Security.Cryptography;
@@ -81,12 +81,12 @@ namespace ApexComputerUse
                 await _chatService.SendAsync(
                     message,
                     onToken:    token => WriteEvent(token),
-                    onComplete: meta  => WriteEvent($"\u200b{meta}"),   // zero-width space prefix = metadata line
-                    onError:    err   => WriteEvent($"\u26a0\ufe0f {err}"));
+                    onComplete: meta  => WriteEvent($"{meta}"),   // zero-width space prefix = metadata line
+                    onError:    err   => WriteEvent($"?? {err}"));
             }
             catch (Exception ex)
             {
-                WriteEvent($"\u26a0\ufe0f {ex.Message}");
+                WriteEvent($"?? {ex.Message}");
             }
 
             sw.Write("data: [DONE]\n\n");
@@ -229,15 +229,15 @@ namespace ApexComputerUse
               #sendBtn:hover { background: var(--accent2); }
               #sendBtn:disabled { opacity: 0.5; cursor: default; }
               #statusBar { font-size: 11px; color: var(--muted); padding: 2px 14px 6px; flex-shrink: 0; }
-              .typing::after { content: "–‹"; animation: blink .7s step-end infinite; }
+              .typing::after { content: "-?"; animation: blink .7s step-end infinite; }
               @keyframes blink { 50% { opacity: 0; } }
             </style>
             </head>
             <body>
             <header>
               <span class="title">AI Chat</span>
-              <span id="badge">”</span>
-              <span id="modelLabel">loading¦</span>
+              <span id="badge">-</span>
+              <span id="modelLabel">loading?</span>
               <button id="resetBtn" title="Clear conversation history on server">New chat</button>
             </header>
             <div id="messages"></div>
@@ -268,7 +268,7 @@ namespace ApexComputerUse
                 const r = await fetch('/chat/status', { headers: headers() });
                 const d = await r.json();
                 if (d.success && d.data) {
-                  $badge.textContent = d.data.provider || '”';
+                  $badge.textContent = d.data.provider || '-';
                   $model.textContent = d.data.model || '';
                 }
               } catch { $model.textContent = 'could not connect'; }
@@ -298,7 +298,7 @@ namespace ApexComputerUse
 
               const bubble = addMessage('asst', '');
               bubble.classList.add('typing');
-              setStatus('Thinking¦');
+              setStatus('Thinking?');
 
               let buffer = '';
               try {
@@ -324,7 +324,7 @@ namespace ApexComputerUse
                     try {
                       const tok = JSON.parse(raw);
                       // zero-width space prefix = metadata line (show in status, not bubble)
-                      if (tok.startsWith('\u200b')) { setStatus(tok.slice(1)); continue; }
+                      if (tok.startsWith('')) { setStatus(tok.slice(1)); continue; }
                       buffer += tok;
                       bubble.textContent = buffer;
                       $messages.scrollTop = $messages.scrollHeight;
@@ -367,3 +367,4 @@ namespace ApexComputerUse
 
     }
 }
+

@@ -64,7 +64,7 @@ namespace ApexComputerUse
                 var cfg = AppConfig.Current;
                 if (cfg.HttpBindAll && string.IsNullOrWhiteSpace(apiKey))
                 {
-                    _log("ERROR: Cannot start — HttpBindAll=true requires an API key. Set one in the API Key field before starting.");
+                    _log("ERROR: Cannot start - HttpBindAll=true requires an API key. Set one in the API Key field before starting.");
                     return;
                 }
                 Http = new HttpCommandServer(port, _processor, _sceneStore, _chatService, apiKey,
@@ -223,3 +223,4 @@ namespace ApexComputerUse
         }
     }
 }
+

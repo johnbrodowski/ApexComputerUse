@@ -11,7 +11,7 @@ namespace ApexComputerUse
     /// Each client connection is handled on its own task; the shared
     /// CommandProcessor serialises access via its internal lock.
     ///
-    /// Protocol: newline-delimited JSON — send one JSON object per line,
+    /// Protocol: newline-delimited JSON - send one JSON object per line,
     /// receive one JSON object per line. Send {"command":"exit"} to close
     /// the connection gracefully.
     ///
@@ -48,7 +48,7 @@ namespace ApexComputerUse
             _dispatcher = new CommandDispatcher(processor);
         }
 
-        // ── Lifecycle ─────────────────────────────────────────────────────
+        // -- Lifecycle -----------------------------------------------------
 
         public void Start()
         {
@@ -80,7 +80,7 @@ namespace ApexComputerUse
             OnLog?.Invoke("Pipe server stopped.");
         }
 
-        // ── Accept loop ───────────────────────────────────────────────────
+        // -- Accept loop ---------------------------------------------------
 
         private async Task AcceptLoop(CancellationToken ct)
         {
@@ -118,7 +118,7 @@ namespace ApexComputerUse
             }
         }
 
-        // ── Per-client handler ────────────────────────────────────────────
+        // -- Per-client handler --------------------------------------------
 
         private async Task HandleClientAsync(NamedPipeServerStream pipe, CancellationToken ct)
         {
@@ -154,7 +154,7 @@ namespace ApexComputerUse
             }
         }
 
-        // ── Security ──────────────────────────────────────────────────────
+        // -- Security ------------------------------------------------------
 
         /// <summary>
         /// Builds a PipeSecurity that grants full access only to the current Windows user.
@@ -185,3 +185,4 @@ namespace ApexComputerUse
         public void Dispose() => Stop();
     }
 }
+

@@ -1,4 +1,4 @@
-﻿using FlaUI.Core;
+using FlaUI.Core;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Capturing;
 using FlaUI.Core.Definitions;
@@ -11,7 +11,7 @@ namespace ApexComputerUse
 {
     public partial class ApexHelper
     {
-        // ── Element info ──────────────────────────────────────────────────
+        // -- Element info --------------------------------------------------
 
         public string Describe(AutomationElement el) =>
             $"Name={el.Properties.Name.ValueOrDefault}  ControlType={el.Properties.ControlType.ValueOrDefault}  " +
@@ -21,7 +21,7 @@ namespace ApexComputerUse
 
         /// <summary>
         /// Reads the Value pattern content if the element supports it; returns null otherwise.
-        /// Safe for tree scans where many elements don't have the pattern — pattern probes
+        /// Safe for tree scans where many elements don't have the pattern - pattern probes
         /// and property reads both throw on unsupported / stale elements, so everything is
         /// wrapped in try/catch.
         /// </summary>
@@ -32,11 +32,11 @@ namespace ApexComputerUse
                 if (el.Patterns.Value.TryGetPattern(out var vp))
                     return vp.Value.ValueOrDefault;
             }
-            catch { /* pattern unsupported or element went stale — treat as "no value" */ }
+            catch { /* pattern unsupported or element went stale - treat as "no value" */ }
             return null;
         }
 
-        /// <summary>Reads the HelpText property safely — returns null if unsupported or empty.</summary>
+        /// <summary>Reads the HelpText property safely - returns null if unsupported or empty.</summary>
         public string? ReadHelpText(AutomationElement el)
         {
             try
@@ -87,7 +87,7 @@ namespace ApexComputerUse
         public string IsElementVisible(AutomationElement el) =>
             (!el.Properties.IsOffscreen.ValueOrDefault).ToString();
 
-        // ── Focus ─────────────────────────────────────────────────────────
+        // -- Focus ---------------------------------------------------------
 
         public void SetFocus(AutomationElement el) => el.Focus();
 
@@ -97,7 +97,7 @@ namespace ApexComputerUse
             return el == null ? "(none)" : Describe(el);
         }
 
-        // ── Click (smart: Invoke → Toggle → SelectionItem → mouse) ────────
+        // -- Click (smart: Invoke -> Toggle -> SelectionItem -> mouse) --------
 
         /// <summary>
         /// Smart click: tries Invoke, then Toggle, then SelectionItem, falls back to mouse click.
@@ -136,7 +136,7 @@ namespace ApexComputerUse
             Mouse.MoveTo(center);
         }
 
-        // ── Button / Hyperlink / MenuItem ─────────────────────────────────
+        // -- Button / Hyperlink / MenuItem ---------------------------------
 
         public void InvokeButton(AutomationElement el) =>
             el.AsButton().Invoke();
@@ -144,7 +144,7 @@ namespace ApexComputerUse
         public void InvokePattern(AutomationElement el) =>
             el.Patterns.Invoke.Pattern.Invoke();
 
-        // ── Invoke/Toggle/SelectionItem pattern direct access ─────────────
+        // -- Invoke/Toggle/SelectionItem pattern direct access -------------
 
         public void SelectItem(AutomationElement el)
         {
@@ -183,3 +183,4 @@ namespace ApexComputerUse
 
     }
 }
+

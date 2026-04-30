@@ -1,4 +1,4 @@
-﻿using FlaUI.Core.AutomationElements;
+using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Definitions;
 
 namespace ApexComputerUse
@@ -22,11 +22,11 @@ namespace ApexComputerUse
                 w,h          size (rect/ellipse)
                 r            radius (circle)
                 x2,y2        end point (line/arrow)
-                points       [x1,y1,x2,y2,…] (polygon)
+                points       [x1,y1,x2,y2,...] (polygon)
                 color        name or #RRGGBB  (default "red")
                 fill         true/false (default false)
                 stroke_width pen width (default 2)
-                opacity      0.0–1.0  (default 1)
+                opacity      0.0-1.0  (default 1)
                 corner_radius rounded corners for rect (default 0)
                 dashed       true/false dashed stroke (default false)
                 text         label string (type=text)
@@ -48,7 +48,7 @@ namespace ApexComputerUse
 
             Actions (for exec):
               --- Click / Mouse ---
-              click                    smart click (Invoke→Toggle→SelectionItem→mouse)
+              click                    smart click (Invoke->Toggle->SelectionItem->mouse)
               mouse-click              force mouse left click
               right-click
               double-click
@@ -73,9 +73,9 @@ namespace ApexComputerUse
               bounds                   bounding rectangle
 
               --- Text / Value ---
-              gettext                  smart: Text pattern→Value→Name
-              getvalue                 smart: Value→Text→LegacyIAccessible→Name
-              setvalue   value=<text>  smart: Value→RangeValue→keyboard
+              gettext                  smart: Text pattern->Value->Name
+              getvalue                 smart: Value->Text->LegacyIAccessible->Name
+              setvalue   value=<text>  smart: Value->RangeValue->keyboard
               clearvalue               set value to empty
               appendvalue value=<text> append to current value
               getselectedtext          selected text via Text pattern
@@ -125,7 +125,7 @@ namespace ApexComputerUse
               scroll-left value=<n>    mouse horizontal scroll left
               scroll-right value=<n>   mouse horizontal scroll right
               scrollinto               scroll element into view (ScrollItem pattern)
-              scrollpercent value=h,v  scroll to h/v percent (0–100)
+              scrollpercent value=h,v  scroll to h/v percent (0-100)
               getscrollinfo            scroll position and range
 
               --- Grid / Table ---
@@ -142,3 +142,4 @@ namespace ApexComputerUse
 
     }
 }
+

@@ -10,7 +10,7 @@ namespace ApexComputerUse.Tests;
 /// </summary>
 public class HttpAuthorizationTests
 {
-    // ── ClientPermissions defaults ────────────────────────────────────────
+    // -- ClientPermissions defaults ----------------------------------------
 
     [Fact]
     public void ClientPermissions_Defaults_AllowCoreFeaturesButNotShellOrClients()
@@ -26,7 +26,7 @@ public class HttpAuthorizationTests
         Assert.False(p.AllowClients);
     }
 
-    // ── IsPathAllowed — /health always allowed (no permission required) ───
+    // -- IsPathAllowed - /health always allowed (no permission required) ---
 
     [Fact]
     public void IsPathAllowed_Health_AlwaysAllowed()
@@ -41,7 +41,7 @@ public class HttpAuthorizationTests
         Assert.True(HttpCommandServer.IsPathAllowed("/health", noPermissions));
     }
 
-    // ── IsPathAllowed — diagnostics require AllowDiagnostics ─────────────
+    // -- IsPathAllowed - diagnostics require AllowDiagnostics -------------
 
     [Theory]
     [InlineData("/ping")]
@@ -60,7 +60,7 @@ public class HttpAuthorizationTests
         Assert.True(HttpCommandServer.IsPathAllowed(path, allowed));
     }
 
-    // ── IsPathAllowed — shell run gated by AllowShellRun ─────────────────
+    // -- IsPathAllowed - shell run gated by AllowShellRun -----------------
 
     [Fact]
     public void IsPathAllowed_Run_RequiresAllowShellRun()
@@ -72,7 +72,7 @@ public class HttpAuthorizationTests
         Assert.True(HttpCommandServer.IsPathAllowed("/run", allowed));
     }
 
-    // ── IsPathAllowed — capture / OCR ────────────────────────────────────
+    // -- IsPathAllowed - capture / OCR ------------------------------------
 
     [Theory]
     [InlineData("/capture")]
@@ -87,7 +87,7 @@ public class HttpAuthorizationTests
         Assert.True(HttpCommandServer.IsPathAllowed(path, allowed));
     }
 
-    // ── IsPathAllowed — AI / chat ─────────────────────────────────────────
+    // -- IsPathAllowed - AI / chat -----------------------------------------
 
     [Theory]
     [InlineData("/ai/init")]
@@ -103,7 +103,7 @@ public class HttpAuthorizationTests
         Assert.True(HttpCommandServer.IsPathAllowed(path, allowed));
     }
 
-    // ── IsPathAllowed — scenes / editor ──────────────────────────────────
+    // -- IsPathAllowed - scenes / editor ----------------------------------
 
     [Theory]
     [InlineData("/scenes")]
@@ -118,7 +118,7 @@ public class HttpAuthorizationTests
         Assert.True(HttpCommandServer.IsPathAllowed(path, allowed));
     }
 
-    // ── IsPathAllowed — clients ───────────────────────────────────────────
+    // -- IsPathAllowed - clients -------------------------------------------
 
     [Theory]
     [InlineData("/clients")]
@@ -132,7 +132,7 @@ public class HttpAuthorizationTests
         Assert.True(HttpCommandServer.IsPathAllowed(path, allowed));
     }
 
-    // ── IsPathAllowed — automation (everything else) ──────────────────────
+    // -- IsPathAllowed - automation (everything else) ----------------------
 
     [Theory]
     [InlineData("/find")]
@@ -150,7 +150,7 @@ public class HttpAuthorizationTests
         Assert.True(HttpCommandServer.IsPathAllowed(path, allowed));
     }
 
-    // ── AppConfig security defaults ───────────────────────────────────────
+    // -- AppConfig security defaults ---------------------------------------
 
     [Fact]
     public void AppConfig_CompiledDefaults_AreSecure()
@@ -163,14 +163,14 @@ public class HttpAuthorizationTests
         Assert.Empty(cfg.ApiKey);        // key is generated at the GUI layer, not baked in
     }
 
-    // ── Bind-all + empty API key guard ────────────────────────────────────
+    // -- Bind-all + empty API key guard ------------------------------------
 
     [Theory]
-    [InlineData(true,  "",      true)]   // bindAll=true + no key → refuse
-    [InlineData(true,  "   ",   true)]   // bindAll=true + whitespace key → refuse
-    [InlineData(true,  "abc",   false)]  // bindAll=true + key → allow
-    [InlineData(false, "",      false)]  // bindAll=false + no key → allow (localhost only)
-    [InlineData(false, "abc",   false)]  // bindAll=false + key → allow
+    [InlineData(true,  "",      true)]   // bindAll=true + no key -> refuse
+    [InlineData(true,  "   ",   true)]   // bindAll=true + whitespace key -> refuse
+    [InlineData(true,  "abc",   false)]  // bindAll=true + key -> allow
+    [InlineData(false, "",      false)]  // bindAll=false + no key -> allow (localhost only)
+    [InlineData(false, "abc",   false)]  // bindAll=false + key -> allow
     public void BindAllGuard_RefusesWhenBindAllAndNoApiKey(bool bindAll, string apiKey, bool expectRefuse)
     {
         // This mirrors the guard condition in ServerTabController.ToggleHttp and ApexService.OnStart.
@@ -178,7 +178,7 @@ public class HttpAuthorizationTests
         Assert.Equal(expectRefuse, shouldRefuse);
     }
 
-    // ── Active-request counter: increment inside lambda ───────────────────
+    // -- Active-request counter: increment inside lambda -------------------
 
     [Fact]
     public async Task ActiveRequestCounter_IncrementInsideLambda_PairsWithDecrement()
@@ -202,3 +202,4 @@ public class HttpAuthorizationTests
         Assert.Equal(0, counter);
     }
 }
+

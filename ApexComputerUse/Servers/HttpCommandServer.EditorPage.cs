@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Net;
 using System.Security.Cryptography;
@@ -18,7 +18,7 @@ namespace ApexComputerUse
                 <html lang="en">
                 <head>
                 <meta charset="utf-8">
-                <title>Scene Editor ” ApexComputerUse</title>
+                <title>Scene Editor - ApexComputerUse</title>
                 <style>
                   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
                   body { font-family: monospace; font-size: 13px; background: #1e1e1e; color: #d4d4d4;
@@ -101,10 +101,10 @@ namespace ApexComputerUse
                 <main>
                   <!-- Scenes sidebar -->
                   <div id="scenePanel">
-                    <div class="ph"><span>Scenes</span><button onclick="loadScenes()" title="Refresh">†º</button></div>
+                    <div class="ph"><span>Scenes</span><button onclick="loadScenes()" title="Refresh">refresh</button></div>
                     <select class="lst" id="sceneList" size="10" onchange="onSceneSelect()"></select>
                     <div class="btnrow">
-                      <input id="newSceneName" placeholder="scene name¦">
+                      <input id="newSceneName" placeholder="scene name?">
                       <button class="sm" onclick="createScene()">+</button>
                     </div>
                     <div class="btnrow">
@@ -152,7 +152,7 @@ namespace ApexComputerUse
                       </div>
                     </div>
                     <div id="statusBar">
-                      <span id="sCursor">x: ” y: ”</span>
+                <span id="sCursor">x: - y: -</span>
                       <span id="sSelected">nothing selected</span>
                       <span id="sScene"></span>
                     </div>
@@ -242,7 +242,7 @@ namespace ApexComputerUse
                 function setScene(scene) {
                   curScene = scene;
                   document.getElementById('hdrScene').textContent = scene.name;
-                  document.getElementById('sScene').textContent   = scene.width + ' Ã— ' + scene.height;
+                  document.getElementById('sScene').textContent   = scene.width + ' ?- ' + scene.height;
                   cv.width  = scene.width;
                   cv.height = scene.height;
                   viewOX = 0; viewOY = 0; viewScale = 1;
@@ -697,9 +697,9 @@ namespace ApexComputerUse
                     ${sel.r!==undefined ? '<div class="prop"><label>r</label><input type="number" value="'+sel.r+'" onchange="patchProp(\'r\',+this.value)"></div>' : ''}
                     ${sel.x2!==undefined ? '<div class="prop"><label>x2</label><input type="number" value="'+sel.x2+'" onchange="patchProp(\'x2\',+this.value)"></div>' : ''}
                     ${sel.y2!==undefined ? '<div class="prop"><label>y2</label><input type="number" value="'+sel.y2+'" onchange="patchProp(\'y2\',+this.value)"></div>' : ''}
-                    ${sel.type==='arc' ? '<div class="prop"><label>start°</label><input type="number" value="'+(sel.start_angle??0)+'" onchange="patchProp(\'start_angle\',+this.value)"></div>' : ''}
-                    ${sel.type==='arc' ? '<div class="prop"><label>sweep°</label><input type="number" value="'+(sel.sweep_angle??90)+'" onchange="patchProp(\'sweep_angle\',+this.value)"></div>' : ''}
-                    <div class="prop"><label>rotate°</label><input type="number" value="${sel.rotation??0}" onchange="patchProp('rotation',+this.value)"></div>`;
+                    ${sel.type==='arc' ? '<div class="prop"><label>start?</label><input type="number" value="'+(sel.start_angle??0)+'" onchange="patchProp(\'start_angle\',+this.value)"></div>' : ''}
+                    ${sel.type==='arc' ? '<div class="prop"><label>sweep?</label><input type="number" value="'+(sel.sweep_angle??90)+'" onchange="patchProp(\'sweep_angle\',+this.value)"></div>' : ''}
+                    <div class="prop"><label>rotate?</label><input type="number" value="${sel.rotation??0}" onchange="patchProp('rotation',+this.value)"></div>`;
                 }
 
                 async function patchProp(field, val) {
@@ -765,3 +765,4 @@ namespace ApexComputerUse
 
     }
 }
+

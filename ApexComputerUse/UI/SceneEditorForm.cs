@@ -8,15 +8,15 @@ namespace ApexComputerUse
     /// </summary>
     public partial class SceneEditorForm : Form
     {
-        // ── Dependencies ──────────────────────────────────────────────────
+        // -- Dependencies --------------------------------------------------
         private readonly SceneStore _store;
 
-        // ── Scene state ───────────────────────────────────────────────────
+        // -- Scene state ---------------------------------------------------
         private Scene?      _scene;
         private string?     _curLayerId;
         private string?     _curShapeId;
 
-        // ── Drag state ────────────────────────────────────────────────────
+        // -- Drag state ----------------------------------------------------
         private enum DragMode { None, Move, Place, Resize, Rotate }
         private DragMode _dragMode = DragMode.None;
         private PointF   _dragStart;
@@ -24,23 +24,23 @@ namespace ApexComputerUse
         private int      _resizeHandle = -1;
         private string   _activeTool = "arrow";
 
-        // ── Rotation drag state ───────────────────────────────────────────
+        // -- Rotation drag state -------------------------------------------
         private float _rotateCenterX;
         private float _rotateCenterY;
 
-        // ── View ──────────────────────────────────────────────────────────
+        // -- View ----------------------------------------------------------
         private float  _scale   = 1f;
         private PointF _offset  = PointF.Empty;
 
-        // ── Render cache ──────────────────────────────────────────────────
+        // -- Render cache --------------------------------------------------
         private Bitmap? _cacheBitmap;
         private bool    _cacheValid = false;
 
-        // ── Live refresh tracking ─────────────────────────────────────────
+        // -- Live refresh tracking -----------------------------------------
         private string _lastSceneUpdate = "";
         private int    _lastSceneCount  = -1;
 
-        // ── Collab diff tracking ──────────────────────────────────────────
+        // -- Collab diff tracking ------------------------------------------
         private readonly HashSet<string> _prevShapeIds = new();
 
         /// <summary>
@@ -50,17 +50,17 @@ namespace ApexComputerUse
         /// </summary>
         public event Action<string, string?>? ChatMessageSubmitted;
 
-        // ── Active drawing color ──────────────────────────────────────────
+        // -- Active drawing color ------------------------------------------
         private Color _activeColor = Color.FromArgb(74, 144, 217);
 
-        // ── Constructor ───────────────────────────────────────────────────
+        // -- Constructor ---------------------------------------------------
         public SceneEditorForm(SceneStore store)
         {
             _store = store;
             InitializeComponent();
         }
 
-        // ── Load ──────────────────────────────────────────────────────────
+        // -- Load ----------------------------------------------------------
         private void SceneEditorForm_Load(object sender, EventArgs e)
         {
             // Enable double-buffering on the canvas panel to eliminate flicker
@@ -88,7 +88,7 @@ namespace ApexComputerUse
             refreshTimer.Start();
         }
 
-        // ── Live refresh ──────────────────────────────────────────────────
+        // -- Live refresh --------------------------------------------------
         private void refreshTimer_Tick(object sender, EventArgs e)
         {
             // Refresh scene list if scenes were added/removed externally
@@ -118,14 +118,14 @@ namespace ApexComputerUse
                     _cacheValid = false;
                     RefreshLayerList();
                     // Skip rebuilding the props panel while the user is typing
-                    // in a prop field — it would steal focus and lose the edit.
+                    // in a prop field - it would steal focus and lose the edit.
                     if (!pnlProps.ContainsFocus) RefreshPropsPanel();
                     canvasPanel.Invalidate();
                 }
             }
         }
 
-        // ── Collab activity log ───────────────────────────────────────────
+        // -- Collab activity log -------------------------------------------
         private void LogExternalSceneDiff(Scene fresh)
         {
             var curIds = new HashSet<string>();
@@ -137,7 +137,7 @@ namespace ApexComputerUse
                     byId[ss.Id] = (l.Name, ss.Shape?.Type ?? "shape");
                 }
 
-            // Nothing to diff against on first load — just seed.
+            // Nothing to diff against on first load - just seed.
             if (_prevShapeIds.Count == 0)
             {
                 foreach (var id in curIds) _prevShapeIds.Add(id);
@@ -189,7 +189,7 @@ namespace ApexComputerUse
         }
 
         /// <summary>
-        /// Begin an AI reply line — writes timestamp + "ai: " prefix. Pair with
+        /// Begin an AI reply line - writes timestamp + "ai: " prefix. Pair with
         /// <see cref="AppendChatStream"/> for each streamed token, then
         /// <see cref="EndChatLine"/> when the response is complete.
         /// </summary>
@@ -199,7 +199,7 @@ namespace ApexComputerUse
             txtChatLog.AppendText($"[{DateTime.Now:HH:mm}] ai: ");
         }
 
-        /// <summary>Append raw text to the log with no prefix or newline — for streaming tokens.</summary>
+        /// <summary>Append raw text to the log with no prefix or newline - for streaming tokens.</summary>
         public void AppendChatStream(string text)
         {
             if (txtChatLog.InvokeRequired) { txtChatLog.BeginInvoke(() => AppendChatStream(text)); return; }
@@ -213,7 +213,7 @@ namespace ApexComputerUse
             txtChatLog.AppendText(Environment.NewLine);
         }
 
-        // ── Chat input handlers ───────────────────────────────────────────
+        // -- Chat input handlers -------------------------------------------
         private void btnChatSend_Click(object? sender, EventArgs e) => SubmitChat();
 
         private void txtChatInput_KeyDown(object? sender, KeyEventArgs e)
@@ -234,7 +234,7 @@ namespace ApexComputerUse
             ChatMessageSubmitted?.Invoke(text, _scene?.Id);
         }
 
-        // ── Scene list ────────────────────────────────────────────────────
+        // -- Scene list ----------------------------------------------------
         private void RefreshSceneList()
         {
             var scenes = _store.ListScenes();
@@ -282,7 +282,7 @@ namespace ApexComputerUse
             RefreshPropsPanel();
         }
 
-        // ── Load scene ────────────────────────────────────────────────────
+        // -- Load scene ----------------------------------------------------
         private void LoadScene(string sceneId)
         {
             _scene = _store.GetScene(sceneId);
@@ -298,8 +298,8 @@ namespace ApexComputerUse
             RefreshPropsPanel();
             canvasPanel.Invalidate();
 
-            Text = $"Scene Editor — {_scene.Name}";
-            lblSceneInfo.Text = $"{_scene.Name}  {_scene.Width} × {_scene.Height}";
+            Text = $"Scene Editor - {_scene.Name}";
+            lblSceneInfo.Text = $"{_scene.Name}  {_scene.Width} ? {_scene.Height}";
 
             // Select first layer
             if (_scene.Layers.Count > 0 && (_curLayerId == null || !_scene.Layers.Any(l => l.Id == _curLayerId)))
@@ -317,7 +317,7 @@ namespace ApexComputerUse
                 (canvasPanel.Height - _scene.Height * _scale) / 2f);
         }
 
-        // ── Layer list ────────────────────────────────────────────────────
+        // -- Layer list ----------------------------------------------------
         private void RefreshLayerList()
         {
             lstLayers.Items.Clear();
@@ -349,7 +349,7 @@ namespace ApexComputerUse
             if (_scene == null) return;
             int idx = lstLayers.IndexFromPoint(e.Location);
             if (idx < 0) return;
-            // Click in the left ~28px = eye icon area → toggle visibility
+            // Click in the left ~28px = eye icon area -> toggle visibility
             if (e.X < 28 && lstLayers.Items[idx] is LayerListItem li)
             {
                 _store.UpdateLayer(_scene.Id, li.Layer.Id, null, !li.Layer.Visible, null, null, null);
@@ -423,7 +423,7 @@ namespace ApexComputerUse
             canvasPanel.Invalidate();
         }
 
-        // ── Tool selection ────────────────────────────────────────────────
+        // -- Tool selection ------------------------------------------------
         private void SetTool(string tool)
         {
             _activeTool = tool;
@@ -484,7 +484,7 @@ namespace ApexComputerUse
         private void btnToolArc_Click(object s, EventArgs e)      => SetTool("arc");
         private void btnDeleteShape_Click(object s, EventArgs e)  => DeleteSelectedShape();
 
-        // ── Canvas painting ───────────────────────────────────────────────
+        // -- Canvas painting -----------------------------------------------
         private void canvasPanel_Paint(object sender, PaintEventArgs e)
         {
             var g = e.Graphics;
@@ -592,7 +592,7 @@ namespace ApexComputerUse
             foreach (var pt in corners)
                 g.FillRectangle(hBrush, pt.X - hsz/2f, pt.Y - hsz/2f, hsz, hsz);
 
-            // Rotation handle — small circle above top-center, connected by a stem line
+            // Rotation handle - small circle above top-center, connected by a stem line
             float rhx  = rect.Left + rect.Width / 2f;
             float rhy  = rect.Top  - 24f / _scale;
             float rhr  = 5f / _scale;
@@ -604,7 +604,7 @@ namespace ApexComputerUse
             g.DrawEllipse(rhPen,   rhx - rhr, rhy - rhr, rhr * 2, rhr * 2);
         }
 
-        // ── Mouse ─────────────────────────────────────────────────────────
+        // -- Mouse ---------------------------------------------------------
         private void canvasPanel_MouseDown(object sender, MouseEventArgs e)
         {
             if (_scene == null || _curLayerId == null) return;
@@ -660,7 +660,7 @@ namespace ApexComputerUse
                 return;
             }
 
-            // Placing a new shape — start drag
+            // Placing a new shape - start drag
             _dragMode  = DragMode.Place;
             _dragStart = sc;
             var newShape = MakeShape(_activeTool, sc);
@@ -827,7 +827,7 @@ namespace ApexComputerUse
             }
         }
 
-        // ── Resize handle hit-test & apply ────────────────────────────────
+        // -- Resize handle hit-test & apply --------------------------------
         private int HitTestHandle(PointF sc)
         {
             var selSs = GetSelectedSceneShape();
@@ -835,7 +835,7 @@ namespace ApexComputerUse
             var s = selSs.Shape;
             float tol = Math.Max(6f, 8f / _scale);
 
-            // Rotation handle (index 8) — check before resize handles
+            // Rotation handle (index 8) - check before resize handles
             var bbRot = ShapeBBox(s);
             if (bbRot.HasValue)
             {
@@ -944,7 +944,7 @@ namespace ApexComputerUse
             canvasPanel.Invalidate();
         }
 
-        // ── Keyboard ──────────────────────────────────────────────────────
+        // -- Keyboard ------------------------------------------------------
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
             switch (keyData)
@@ -986,7 +986,7 @@ namespace ApexComputerUse
             RefreshPropsPanel();
         }
 
-        // ── Properties panel ──────────────────────────────────────────────
+        // -- Properties panel ----------------------------------------------
         private void RefreshPropsPanel()
         {
             pnlProps.Controls.Clear();
@@ -1018,12 +1018,12 @@ namespace ApexComputerUse
             // Arc-specific fields
             if (s.Type == "arc")
             {
-                AddPropField("start°", s.StartAngle.ToString("0"), v => { s.StartAngle = float.Parse(v); CommitGeometry(s); });
-                AddPropField("sweep°", s.SweepAngle.ToString("0"), v => { s.SweepAngle = float.Parse(v); CommitGeometry(s); });
+                AddPropField("start?", s.StartAngle.ToString("0"), v => { s.StartAngle = float.Parse(v); CommitGeometry(s); });
+                AddPropField("sweep?", s.SweepAngle.ToString("0"), v => { s.SweepAngle = float.Parse(v); CommitGeometry(s); });
             }
 
-            // Rotation — shown for all shapes
-            AddPropField("rotate°", s.Rotation.ToString("0.#"), v => { s.Rotation = float.Parse(v); CommitGeometry(s); });
+            // Rotation - shown for all shapes
+            AddPropField("rotate?", s.Rotation.ToString("0.#"), v => { s.Rotation = float.Parse(v); CommitGeometry(s); });
 
             // Color field
             AddColorField(s);
@@ -1117,7 +1117,7 @@ namespace ApexComputerUse
                 sweepAngle: s.SweepAngle);
         }
 
-        // ── Helpers ───────────────────────────────────────────────────────
+        // -- Helpers -------------------------------------------------------
         private PointF ScreenToScene(Point p) =>
             new((p.X - _offset.X) / _scale, (p.Y - _offset.Y) / _scale);
 
@@ -1210,23 +1210,23 @@ namespace ApexComputerUse
         }
     }
 
-    // ── List item wrappers ────────────────────────────────────────────────
+    // -- List item wrappers ------------------------------------------------
 
     internal sealed class SceneListItem
     {
         public Scene Scene { get; }
         public SceneListItem(Scene s) => Scene = s;
-        public override string ToString() => $"{Scene.Name}  ({Scene.Width}×{Scene.Height})";
+        public override string ToString() => $"{Scene.Name}  ({Scene.Width}?{Scene.Height})";
     }
 
     internal sealed class LayerListItem
     {
         public Layer Layer { get; }
         public LayerListItem(Layer l) => Layer = l;
-        public override string ToString() => (Layer.Visible ? "👁 " : "   ") + Layer.Name;
+        public override string ToString() => (Layer.Visible ? "?? " : "   ") + Layer.Name;
     }
 
-    // ── New scene dialog ──────────────────────────────────────────────────
+    // -- New scene dialog --------------------------------------------------
 
     internal sealed class NewSceneDialog : Form
     {
@@ -1287,3 +1287,4 @@ namespace ApexComputerUse
         }
     }
 }
+

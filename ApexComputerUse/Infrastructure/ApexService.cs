@@ -3,7 +3,7 @@ using System.ServiceProcess;
 namespace ApexComputerUse
 {
     /// <summary>
-    /// Windows Service hosting mode — runs the HTTP and named-pipe servers headlessly,
+    /// Windows Service hosting mode - runs the HTTP and named-pipe servers headlessly,
     /// without the WinForms GUI.
     ///
     /// Installation (run as Administrator):
@@ -13,7 +13,7 @@ namespace ApexComputerUse
     ///
     /// All configuration is read from appsettings.json and APEX_* environment variables
     /// (see AppConfig for the full list).  The %APPDATA% user settings file is ignored in
-    /// service mode — use appsettings.json instead.
+    /// service mode - use appsettings.json instead.
     ///
     /// Logs are written to %LOCALAPPDATA%\ApexComputerUse\Logs\ via Serilog (same path as GUI mode).
     /// </summary>
@@ -38,13 +38,13 @@ namespace ApexComputerUse
 
             if (cfg.HttpBindAll && string.IsNullOrWhiteSpace(cfg.ApiKey))
             {
-                AppLog.Error("[Service] FATAL: HttpBindAll=true with no API key — refusing to start network-exposed with no authentication. Set APEX_API_KEY or ApiKey in appsettings.json.");
+                AppLog.Error("[Service] FATAL: HttpBindAll=true with no API key - refusing to start network-exposed with no authentication. Set APEX_API_KEY or ApiKey in appsettings.json.");
                 ExitCode = 1;
                 Stop();
                 return;
             }
 
-            AppLog.Info($"[Service] Starting — HTTP port {cfg.HttpPort}, pipe '{cfg.PipeName}'");
+            AppLog.Info($"[Service] Starting - HTTP port {cfg.HttpPort}, pipe '{cfg.PipeName}'");
 
             _store     = new SceneStore();
             _processor = new CommandProcessor { SceneStore = _store };
@@ -75,7 +75,7 @@ namespace ApexComputerUse
 
         protected override void OnStop()
         {
-            AppLog.Info("[Service] Stopping…");
+            AppLog.Info("[Service] Stopping...");
             _http?.Stop();
             _pipe?.Stop();
             _processor?.Dispose();
@@ -84,3 +84,4 @@ namespace ApexComputerUse
         }
     }
 }
+

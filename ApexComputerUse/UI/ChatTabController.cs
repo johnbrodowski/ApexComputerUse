@@ -9,7 +9,7 @@ namespace ApexComputerUse
             "To perform an action, write the curl command in your response text. " +
             "It will be detected, executed against the real running server, and the actual result shown to you. " +
             "Wait for results before continuing. Never invent or guess results.\n\n" +
-            "Available commands (omit the API key header — it is added automatically):\n\n" +
+            "Available commands (omit the API key header - it is added automatically):\n\n" +
             "  curl http://localhost:8080/windows.json\n" +
             "  curl http://localhost:8080/status.json\n" +
             "  curl \"http://localhost:8080/elements.json?onscreen=true\"\n" +
@@ -117,3 +117,4 @@ namespace ApexComputerUse
         }
     }
 }
+

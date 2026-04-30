@@ -6,11 +6,11 @@ namespace ApexComputerUse.Tests;
 /// <summary>
 /// Unit tests for <see cref="Scene"/>, <see cref="Layer"/>, <see cref="SceneShape"/>,
 /// and the <see cref="SceneIds"/> factory.
-/// All tests are pure-object — no disk I/O, no GDI+.
+/// All tests are pure-object - no disk I/O, no GDI+.
 /// </summary>
 public class SceneModelTests
 {
-    // ── Scene.Touch ───────────────────────────────────────────────────────
+    // -- Scene.Touch -------------------------------------------------------
 
     [Fact]
     public void Touch_UpdatesUpdatedAt()
@@ -21,7 +21,7 @@ public class SceneModelTests
         Assert.NotEqual("2020-01-01T00:00:00.0000000+00:00", scene.UpdatedAt);
     }
 
-    // ── Scene.FlattenForRender ────────────────────────────────────────────
+    // -- Scene.FlattenForRender --------------------------------------------
 
     [Fact]
     public void FlattenForRender_NoLayers_ReturnsEmpty()
@@ -147,7 +147,7 @@ public class SceneModelTests
         Assert.Equal("green", scene.Layers[0].Shapes[0].Shape.Color);
     }
 
-    // ── Scene.ToDrawRequest ───────────────────────────────────────────────
+    // -- Scene.ToDrawRequest -----------------------------------------------
 
     [Fact]
     public void ToDrawRequest_UsesSceneDimensions()
@@ -160,7 +160,7 @@ public class SceneModelTests
         Assert.Equal("blank", req.Canvas);
     }
 
-    // ── SceneIds ──────────────────────────────────────────────────────────
+    // -- SceneIds ----------------------------------------------------------
 
     [Fact]
     public void SceneIds_New_ReturnsEightCharString()
@@ -177,7 +177,7 @@ public class SceneModelTests
         Assert.Equal(50, ids.Count);
     }
 
-    // ── Layer defaults ────────────────────────────────────────────────────
+    // -- Layer defaults ----------------------------------------------------
 
     [Fact]
     public void Layer_DefaultOpacity_IsOne()
@@ -193,7 +193,7 @@ public class SceneModelTests
         Assert.True(l.Visible);
     }
 
-    // ── SceneShape defaults ───────────────────────────────────────────────
+    // -- SceneShape defaults -----------------------------------------------
 
     [Fact]
     public void SceneShape_DefaultVisible_IsTrue()
@@ -209,3 +209,4 @@ public class SceneModelTests
         Assert.False(ss.Locked);
     }
 }
+

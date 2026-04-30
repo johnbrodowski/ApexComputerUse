@@ -255,7 +255,7 @@ namespace ApexComputerUse
             // 
             txtAiApiKey.Location = new Point(90, 53);
             txtAiApiKey.Name = "txtAiApiKey";
-            txtAiApiKey.PasswordChar = '●';
+            txtAiApiKey.PasswordChar = '*';
             txtAiApiKey.Size = new Size(422, 25);
             txtAiApiKey.TabIndex = 5;
             // 
@@ -349,7 +349,7 @@ namespace ApexComputerUse
             // 
             txtCommand.Location = new Point(8, 9);
             txtCommand.Name = "txtCommand";
-            txtCommand.PlaceholderText = "find window=… | exec action=… | ocr | ai … | status | windows | help";
+            txtCommand.PlaceholderText = "find window=... | exec action=... | ocr | ai ... | status | windows | help";
             txtCommand.Size = new Size(447, 25);
             txtCommand.TabIndex = 0;
             txtCommand.KeyDown += txtCommand_KeyDown;
@@ -360,7 +360,7 @@ namespace ApexComputerUse
             btnRun.Name = "btnRun";
             btnRun.Size = new Size(30, 28);
             btnRun.TabIndex = 1;
-            btnRun.Text = "▶";
+            btnRun.Text = "?";
             btnRun.Click += btnRun_Click;
             // 
             // btnClear
@@ -369,7 +369,7 @@ namespace ApexComputerUse
             btnClear.Name = "btnClear";
             btnClear.Size = new Size(26, 28);
             btnClear.TabIndex = 2;
-            btnClear.Text = "×";
+            btnClear.Text = "?";
             btnClear.Click += btnClear_Click;
             // 
             // lblStatus
@@ -1116,7 +1116,7 @@ namespace ApexComputerUse
 
         #endregion
 
-        // ── Always visible ────────────────────────────────────────────────
+        // -- Always visible ------------------------------------------------
         private MenuStrip                      menuStrip1;
         private ToolStripMenuItem              toolsToolStripMenuItem;
         private ToolStripMenuItem              runAIComputerUseToolStripMenuItem;
@@ -1126,14 +1126,14 @@ namespace ApexComputerUse
         private System.Windows.Forms.TabPage    tabPageFind;
         private System.Windows.Forms.TabPage    tabPageRemote;
 
-        // ── Console tab ───────────────────────────────────────────────────
+        // -- Console tab ---------------------------------------------------
         private System.Windows.Forms.TextBox   txtCommand;
         private System.Windows.Forms.Button    btnRun;
         private System.Windows.Forms.Button    btnClear;
         private System.Windows.Forms.Label     lblStatus;
         private System.Windows.Forms.TextBox   txtStatus;
 
-        // ── Find & Execute tab ────────────────────────────────────────────
+        // -- Find & Execute tab --------------------------------------------
         private System.Windows.Forms.Label     lblWindowName;
         private System.Windows.Forms.TextBox   txtWindowName;
         private System.Windows.Forms.Label     lblElementId;
@@ -1151,7 +1151,7 @@ namespace ApexComputerUse
         private System.Windows.Forms.Button    btnFind;
         private System.Windows.Forms.Button    btnExecute;
 
-        // ── Model tab ─────────────────────────────────────────────────────
+        // -- Model tab -----------------------------------------------------
         private System.Windows.Forms.TabPage   tabPageModel;
         private System.Windows.Forms.GroupBox  grpModelPaths;
         private System.Windows.Forms.Label     lblModelPath;
@@ -1170,7 +1170,7 @@ namespace ApexComputerUse
         private System.Windows.Forms.Button    btnDownload;
         private System.Windows.Forms.Button    btnDownloadAll;
 
-        // ── Status strip ──────────────────────────────────────────────────
+        // -- Status strip --------------------------------------------------
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel lblStatCpu;
         private System.Windows.Forms.ToolStripStatusLabel lblStatRam;
@@ -1182,7 +1182,7 @@ namespace ApexComputerUse
         private System.Windows.Forms.Label      lblRemoteLog;
         private System.Windows.Forms.TextBox    txtRemoteLog;
 
-        // ── Remote Control tab ────────────────────────────────────────────
+        // -- Remote Control tab --------------------------------------------
         private System.Windows.Forms.GroupBox  grpRemote;
         private System.Windows.Forms.Label     lblHttpPort;
         private System.Windows.Forms.TextBox   txtHttpPort;
@@ -1220,9 +1220,10 @@ namespace ApexComputerUse
         private GroupBox grpAiSession;
         private Button btnAiOpenChat;
 
-        // ── Clients tab ───────────────────────────────────────────────────────
+        // -- Clients tab -------------------------------------------------------
         private TabPage  tabPageClients;
         private ListView listViewClients;
         private Button   btnAddClient, btnEditClient, btnRemoveClient, btnTestClient, btnOpenWebUiClient, btnLaunchInstance;
     }
 }
+

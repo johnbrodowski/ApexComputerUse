@@ -10,7 +10,7 @@ namespace ApexComputerUse.Tests;
 /// </summary>
 public class CommandResponseTests
 {
-    // ── ToText ────────────────────────────────────────────────────────────
+    // \-\- ToText \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 
     [Fact]
     public void ToText_SuccessNoData_StartsWithOK()
@@ -40,7 +40,7 @@ public class CommandResponseTests
         Assert.DoesNotContain("\n", r.ToText());
     }
 
-    // ── ToJson ────────────────────────────────────────────────────────────
+    // \-\- ToJson \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 
     [Fact]
     public void ToJson_ProducesValidJson()

@@ -12,7 +12,7 @@ namespace ApexComputerUse
 {
     /// <summary>
     /// Reusable multimodal LLM helper using LLamaSharp's MTMD (multimodal) API.
-    /// Every request is fully stateless — no chat history is retained between calls.
+    /// Every request is fully stateless \- no chat history is retained between calls.
     ///
     /// Usage:
     ///   var helper = new MtmdHelper(modelPath, mmProjPath);
@@ -35,7 +35,7 @@ namespace ApexComputerUse
         public bool SupportsVision { get; private set; }
         public bool SupportsAudio  { get; private set; }
 
-        // ── Construction ──────────────────────────────────────────────────
+        // \-\- Construction \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 
         public MtmdHelper(string modelPath, string mmProjPath, MtmdOptions? options = null)
         {
@@ -44,7 +44,7 @@ namespace ApexComputerUse
             _options    = options ?? new MtmdOptions();
         }
 
-        // ── Initialization ────────────────────────────────────────────────
+        // \-\- Initialization \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 
         /// <summary>Loads the model and multimodal projector into memory.</summary>
         public async Task InitializeAsync()
@@ -65,7 +65,7 @@ namespace ApexComputerUse
             IsInitialized = true;
         }
 
-        // ── Image ─────────────────────────────────────────────────────────
+        // \-\- Image \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 
         /// <summary>Loads an image from disk and asks the model about it.</summary>
         public async Task<string> DescribeImageAsync(
@@ -114,7 +114,7 @@ namespace ApexComputerUse
             return await RunInferenceAsync($"{markers}{prompt}", embeds);
         }
 
-        // ── Audio ─────────────────────────────────────────────────────────
+        // \-\- Audio \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 
         /// <summary>Loads an audio file from disk and asks the model about it.</summary>
         public async Task<string> DescribeAudioAsync(
@@ -142,7 +142,7 @@ namespace ApexComputerUse
             return await RunInferenceAsync($"{_mediaMarker} {prompt}", [embed]);
         }
 
-        // ── Video ─────────────────────────────────────────────────────────
+        // \-\- Video \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 
         /// <summary>
         /// Video input is not currently supported by MTMD.
@@ -158,7 +158,7 @@ namespace ApexComputerUse
         public Task<string> DescribeVideoAsync(byte[] videoBytes, string prompt = "")
             => throw new NotSupportedException("Video inputs are not supported by MTMD.");
 
-        // ── FlaUI element capture ─────────────────────────────────────────
+        // \-\- FlaUI element capture \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 
         /// <summary>Captures a UI element via FlaUI and asks the model to describe it.</summary>
         public async Task<string> DescribeElementAsync(
@@ -194,7 +194,7 @@ namespace ApexComputerUse
             return await RunInferenceAsync($"{markers}{prompt}", embeds);
         }
 
-        // ── Core inference ────────────────────────────────────────────────
+        // \-\- Core inference \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 
         private async Task<string> RunInferenceAsync(string userPrompt, List<SafeMtmdEmbed> embeds)
         {
@@ -204,11 +204,11 @@ namespace ApexComputerUse
                 // Clear KV cache so every request starts completely fresh
                 _context!.NativeHandle.MemoryClear();
 
-                // Fresh executor per request — no state carried over
+                // Fresh executor per request \- no state carried over
                 var executor = new InteractiveExecutor(_context, _clipModel!);
                 foreach (var e in embeds) executor.Embeds.Add(e);
 
-                // Single-turn prompt — no history
+                // Single-turn prompt \- no history
                 var singleTurn = new ChatHistory();
                 singleTurn.AddMessage(AuthorRole.User, userPrompt);
                 var formattedPrompt = FormatChatHistory(_model!, singleTurn, addAssistant: true);
@@ -238,7 +238,7 @@ namespace ApexComputerUse
             }
         }
 
-        // ── Helpers ───────────────────────────────────────────────────────
+        // \-\- Helpers \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 
         private static byte[] CaptureElementToPng(AutomationElement element)
         {
@@ -268,7 +268,7 @@ namespace ApexComputerUse
                 throw new InvalidOperationException("This model does not support audio inputs.");
         }
 
-        // ── Chat formatting (unchanged from original) ─────────────────────
+        // \-\- Chat formatting (unchanged from original) \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 
         private static string FormatChatHistory(LLamaWeights model, ChatHistory history, bool addAssistant)
         {
@@ -283,7 +283,7 @@ namespace ApexComputerUse
             return LLamaTemplate.Encoding.GetString(template.Apply());
         }
 
-        // ── IDisposable ───────────────────────────────────────────────────
+        // \-\- IDisposable \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 
         public void Dispose()
         {

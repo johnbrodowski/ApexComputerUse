@@ -2,29 +2,29 @@ namespace ApexUIBridge.TestRunner;
 
 public sealed class RunnerConfig
 {
-    // ── Loop control ──────────────────────────────────────────────────────────
+    // -- Loop control ----------------------------------------------------------
 
-    // ── Runner mode ───────────────────────────────────────────────────────────
+    // -- Runner mode -----------------------------------------------------------
     /// <summary>
     /// Optional runner mode: "demo" or "benchmark".
     /// CLI --mode overrides this value.
     /// </summary>
     public string? Mode { get; init; }
 
-    /// <summary>Total number of build → launch → test → stop cycles to run.</summary>
+    /// <summary>Total number of build -> launch -> test -> stop cycles to run.</summary>
     public int MaxCycles { get; init; } = 10;
 
     /// <summary>Send a Telegram progress report every N cycles. 0 = only on completion.</summary>
     public int ReportEveryN { get; init; } = 3;
 
-    // ── Build ─────────────────────────────────────────────────────────────────
+    // -- Build -----------------------------------------------------------------
     /// <summary>
     /// When true, skip the dotnet build step and use the already-compiled executables.
     /// Useful for iterative test runs where the code hasn't changed.
     /// </summary>
     public bool SkipBuild { get; init; } = false;
 
-    // ── Paths ─────────────────────────────────────────────────────────────────
+    // -- Paths -----------------------------------------------------------------
     /// <summary>Path to the ApexUIBridge .sln file (used for dotnet build).</summary>
     public string SolutionPath { get; init; } = "";
 
@@ -55,7 +55,7 @@ public sealed class RunnerConfig
     /// </summary>
     public string WebBrowserExe { get; init; } = "";
 
-    // ── Bridge API ────────────────────────────────────────────────────────────
+    // -- Bridge API ------------------------------------------------------------
     public string BridgeBaseUrl      { get; init; } = "http://localhost:8765";
     public int    ApiReadyTimeoutSec { get; init; } = 30;
     /// <summary>
@@ -66,11 +66,11 @@ public sealed class RunnerConfig
 
     public string BuildConfiguration { get; init; } = "Debug";
 
-    // ── Telegram ──────────────────────────────────────────────────────────────
+    // -- Telegram --------------------------------------------------------------
     public string TelegramBotToken { get; init; } = "";
     public long   TelegramChatId   { get; init; } = 0;
 
-    // ── Test filtering ───────────────────────────────────────────────────────
+    // -- Test filtering -------------------------------------------------------
     /// <summary>When true, skip tests that passed in the previous run.</summary>
     public bool RunOnlyFailed { get; init; } = false;
 
@@ -84,7 +84,7 @@ public sealed class RunnerConfig
     public string BenchmarkResultsPath { get; init; } =
         Path.Combine(Path.GetTempPath(), "ApexUIBridge_benchmark_results.jsonl");
 
-    // ── Pacing ────────────────────────────────────────────────────────────────
+    // -- Pacing ----------------------------------------------------------------
     /// <summary>
     /// Pacing preset: "fast", "normal", or "human".
     /// Explicit delay values override the selected profile when greater than 0.
@@ -92,7 +92,7 @@ public sealed class RunnerConfig
     /// </summary>
     public string SpeedProfile { get; init; } = "human";
 
-    // ── Stop coordination ─────────────────────────────────────────────────────
+    // -- Stop coordination -----------------------------------------------------
     /// <summary>
     /// If this file exists the runner cancels immediately.
     /// ApexUIBridge writes it when /stop-tests is received via Telegram.
@@ -110,3 +110,4 @@ public sealed class RunnerConfig
     /// </summary>
     public int UiSettleDelayMs { get; init; } = 0;
 }
+

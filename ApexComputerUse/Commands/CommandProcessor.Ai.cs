@@ -1,11 +1,11 @@
-﻿using FlaUI.Core.AutomationElements;
+using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Definitions;
 
 namespace ApexComputerUse
 {
     public partial class CommandProcessor
     {
-        // ── AI (Multimodal) commands ──────────────────────────────────────
+        // -- AI (Multimodal) commands --------------------------------------
 
         // NOTE: describe/ask/file/init are intercepted in Process() and dispatched outside
         // _stateLock. Only "status" reaches this method through the locked code path.
@@ -40,7 +40,7 @@ namespace ApexComputerUse
                 var helper = new MtmdHelper(modelPath, projPath);
                 await helper.InitializeAsync();
                 _mtmd = helper;
-                OnLog?.Invoke($"[AI Init] OK — Vision={_mtmd.SupportsVision} Audio={_mtmd.SupportsAudio}");
+                OnLog?.Invoke($"[AI Init] OK - Vision={_mtmd.SupportsVision} Audio={_mtmd.SupportsAudio}");
                 return Ok($"AI ready. Vision={_mtmd.SupportsVision} Audio={_mtmd.SupportsAudio}");
             }
             catch (Exception ex)
@@ -141,3 +141,4 @@ namespace ApexComputerUse
 
     }
 }
+

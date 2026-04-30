@@ -37,7 +37,7 @@ namespace ApexComputerUse
             _engine = new TesseractEngine(TessDataPath, language, EngineMode.Default);
         }
 
-        // ── Core OCR ──────────────────────────────────────────────────────
+        // -- Core OCR ------------------------------------------------------
 
         /// <summary>Captures the element and returns the recognised text.</summary>
         public OcrResult OcrElement(AutomationElement element)
@@ -63,11 +63,11 @@ namespace ApexComputerUse
             return RunOcr(bitmap);
         }
 
-        // ── Capture + save + OCR ──────────────────────────────────────────
+        // -- Capture + save + OCR ------------------------------------------
 
         /// <summary>
         /// Captures the element, saves the image to disk, runs OCR, and returns the result.
-        /// Useful for debugging — you can open the saved image to see exactly what was fed to Tesseract.
+        /// Useful for debugging - you can open the saved image to see exactly what was fed to Tesseract.
         /// </summary>
         public OcrResult OcrElementAndSave(AutomationElement element, string saveFolder)
         {
@@ -83,7 +83,7 @@ namespace ApexComputerUse
             return result;
         }
 
-        // ── Helpers ───────────────────────────────────────────────────────
+        // -- Helpers -------------------------------------------------------
 
         private OcrResult RunOcr(Bitmap bitmap)
         {
@@ -112,7 +112,7 @@ namespace ApexComputerUse
 
         private static Pix BitmapToPix(Bitmap bitmap)
         {
-            // Save to a MemoryStream then load via Tesseract — avoids temp files
+            // Save to a MemoryStream then load via Tesseract - avoids temp files
             using var ms = new MemoryStream();
             bitmap.Save(ms, SysImaging.ImageFormat.Png);
             ms.Position = 0;
@@ -133,3 +133,4 @@ namespace ApexComputerUse
             $"Confidence: {Confidence:P1}\n{Text}";
     }
 }
+

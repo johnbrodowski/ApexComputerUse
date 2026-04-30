@@ -10,7 +10,7 @@ using System.Text.Json;
 /// execution, bridge lifecycle, and a /shutdown endpoint so an external agent
 /// (Claude, CI, a dashboard) can drive the runner without touching the CLI.
 ///
-/// All state access is serialized through a single semaphore — the underlying
+/// All state access is serialized through a single semaphore - the underlying
 /// BridgeClient and TestSuite are not built for concurrent callers.
 /// </summary>
 public sealed class ControlServer : IAsyncDisposable
@@ -133,7 +133,7 @@ public sealed class ControlServer : IAsyncDisposable
         }
     }
 
-    // ── Handlers ──────────────────────────────────────────────────────────────
+    // -- Handlers --------------------------------------------------------------
 
     private async Task HandleListTests(HttpListenerResponse res)
     {
@@ -157,7 +157,7 @@ public sealed class ControlServer : IAsyncDisposable
                     if (doc.RootElement.TryGetProperty("id", out var idEl))
                         id = idEl.GetString();
                 }
-                catch { /* fall through — empty id handled below */ }
+                catch { /* fall through - empty id handled below */ }
             }
         }
 
@@ -295,7 +295,7 @@ public sealed class ControlServer : IAsyncDisposable
         });
     }
 
-    // ── Persistence ───────────────────────────────────────────────────────────
+    // -- Persistence -----------------------------------------------------------
 
     private void PersistCycle(CycleResult cycle, long elapsedMs)
     {
@@ -352,7 +352,7 @@ public sealed class ControlServer : IAsyncDisposable
         return Path.Combine(dir!, "ApexUIBridge_latest_cycle.json");
     }
 
-    // ── Shape helpers ─────────────────────────────────────────────────────────
+    // -- Shape helpers ---------------------------------------------------------
 
     private static object ResultShape(TestResult r) => new
     {
@@ -378,7 +378,7 @@ public sealed class ControlServer : IAsyncDisposable
         }).ToArray()
     };
 
-    // ── Plumbing ──────────────────────────────────────────────────────────────
+    // -- Plumbing --------------------------------------------------------------
 
     private bool IsAuthed(HttpListenerRequest req)
     {
@@ -419,3 +419,4 @@ public sealed class ControlServer : IAsyncDisposable
         Console.WriteLine("[ControlServer] Stopped.");
     }
 }
+

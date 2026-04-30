@@ -13,7 +13,7 @@ namespace WpfApplication
             DataContext = new TortureTestViewModel();
         }
 
-        // ── Identity tab ─────────────────────────────────────────────────────────
+        // \-\- Identity tab \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
         private void OnYearsUp(object sender, RoutedEventArgs e)
         {
             if (int.TryParse(YearsBox.Text, out int v))
@@ -26,22 +26,22 @@ namespace WpfApplication
                 YearsBox.Text = Math.Max(v - 1, 0).ToString();
         }
 
-        // ── Logs tab ─────────────────────────────────────────────────────────────
+        // \-\- Logs tab \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
         private void OnClearLog(object sender, RoutedEventArgs e)
         {
             LogBox.Document.Blocks.Clear();
         }
 
-        // ── WPF tab ──────────────────────────────────────────────────────────────
+        // \-\- WPF tab \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
         private void OnClearInk(object sender, RoutedEventArgs e)
         {
             TortureInkCanvas.Strokes.Clear();
         }
 
-        // ── Menu ─────────────────────────────────────────────────────────────────
+        // \-\- Menu \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
         private void OnExit(object sender, RoutedEventArgs e) => Close();
 
-        // ── Dialogs tab ──────────────────────────────────────────────────────────
+        // \-\- Dialogs tab \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
         private void OnOpenFile(object sender, RoutedEventArgs e)
         {
             var dlg = new OpenFileDialog { Filter = "All files|*.*|Text files|*.txt" };

@@ -17,7 +17,7 @@ public interface IChatSession
 
     IReadOnlyList<ChatMessage> Messages { get; }
 
-    // ── Events (standard EventHandler pattern) ─────────────────────────────
+    // -- Events (standard EventHandler pattern) -----------------------------
 
     event EventHandler<ResponseStartedEventArgs>?   OnResponseStarted;
 
@@ -29,7 +29,7 @@ public interface IChatSession
 
     event EventHandler?                             OnCancelled;
 
-    // ── Operations ──────────────────────────────────────────────────────────
+    // -- Operations ----------------------------------------------------------
 
     /// <summary>Sends a user message and returns the final assembled assistant reply.</summary>
     ValueTask<ChatMessage> SendAsync(
@@ -49,3 +49,4 @@ public interface IChatSession
     /// <summary>Switches to a different provider while preserving message history.</summary>
     ValueTask SwitchProviderAsync(string providerName, CancellationToken cancellationToken = default);
 }
+

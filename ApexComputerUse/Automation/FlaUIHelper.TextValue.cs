@@ -1,4 +1,4 @@
-﻿using FlaUI.Core;
+using FlaUI.Core;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Capturing;
 using FlaUI.Core.Definitions;
@@ -11,10 +11,10 @@ namespace ApexComputerUse
 {
     public partial class ApexHelper
     {
-        // ── Text / Value reading (smart fallback chains) ──────────────────
+        // -- Text / Value reading (smart fallback chains) ------------------
 
         /// <summary>
-        /// Gets element text: Text pattern → Value pattern → Name property.
+        /// Gets element text: Text pattern -> Value pattern -> Name property.
         /// </summary>
         public string GetText(AutomationElement el)
         {
@@ -31,7 +31,7 @@ namespace ApexComputerUse
         }
 
         /// <summary>
-        /// Gets element value: Value pattern → Text pattern → LegacyIAccessible → Name.
+        /// Gets element value: Value pattern -> Text pattern -> LegacyIAccessible -> Name.
         /// </summary>
         public string GetValue(AutomationElement el)
         {
@@ -58,10 +58,10 @@ namespace ApexComputerUse
                 : "";
         }
 
-        // ── Value writing (smart fallback chains) ─────────────────────────
+        // -- Value writing (smart fallback chains) -------------------------
 
         /// <summary>
-        /// Sets element value: Value pattern → RangeValue (if numeric) → keyboard fallback.
+        /// Sets element value: Value pattern -> RangeValue (if numeric) -> keyboard fallback.
         /// </summary>
         public void SetValue(AutomationElement el, string value)
         {
@@ -112,17 +112,17 @@ namespace ApexComputerUse
             Keyboard.Type(value);
         }
 
-        // ── RangeValue pattern ────────────────────────────────────────────
-        // NOTE: WinForms TrackBar always exposes UIA RangeValue in the range 0–100,
+        // -- RangeValue pattern --------------------------------------------
+        // NOTE: WinForms TrackBar always exposes UIA RangeValue in the range 0-100,
         // regardless of the control's actual Minimum/Maximum. Callers must use UIA-scaled
-        // values (e.g. UIA=20 ≈ actual 200 for a slider with actual max=1000).
-        // Valid snap points for non-unit TickFrequency are multiples of (100÷(max-min)).
+        // values (e.g. UIA=20 ? actual 200 for a slider with actual max=1000).
+        // Valid snap points for non-unit TickFrequency are multiples of (100?(max-min)).
 
         public void SetRangeValue(AutomationElement el, double value)
         {
             if (el.Patterns.RangeValue.TryGetPattern(out var p))
             {
-                // WinForms TrackBar: SetValue throws for large ranges, or silently no-ops — verify.
+                // WinForms TrackBar: SetValue throws for large ranges, or silently no-ops - verify.
                 try
                 {
                     p.SetValue(value);
@@ -145,7 +145,7 @@ namespace ApexComputerUse
                 }
                 catch { /* fall through */ }
             }
-            // Fallback: WinForms NumericUpDown — set value via child Edit element
+            // Fallback: WinForms NumericUpDown - set value via child Edit element
             var childEdit = el.FindAllChildren()
                 .FirstOrDefault(c => c.Properties.ControlType.ValueOrDefault == FlaUI.Core.Definitions.ControlType.Edit);
             if (childEdit != null && childEdit.Patterns.Value.TryGetPattern(out var cvp) && !cvp.IsReadOnly.ValueOrDefault)
@@ -185,7 +185,7 @@ namespace ApexComputerUse
         {
             if (el.Patterns.RangeValue.TryGetPattern(out var p)) return p.Value.ValueOrDefault.ToString("G");
             if (el.Patterns.Value.TryGetPattern(out var vp)) return vp.Value.ValueOrDefault ?? "";
-            // Fallback: WinForms NumericUpDown — read value from child Edit element
+            // Fallback: WinForms NumericUpDown - read value from child Edit element
             var childEdit = el.FindAllChildren()
                 .FirstOrDefault(c => c.Properties.ControlType.ValueOrDefault == FlaUI.Core.Definitions.ControlType.Edit);
             if (childEdit != null && childEdit.Patterns.Value.TryGetPattern(out var cvp))
@@ -215,7 +215,7 @@ namespace ApexComputerUse
             return "RangeValue pattern not supported";
         }
 
-        // ── Toggle pattern ────────────────────────────────────────────────
+        // -- Toggle pattern ------------------------------------------------
 
         public void ToggleCheckBox(AutomationElement el)
         {
@@ -266,7 +266,7 @@ namespace ApexComputerUse
             catch { return null; }
         }
 
-        // ── ExpandCollapse pattern ────────────────────────────────────────
+        // -- ExpandCollapse pattern ----------------------------------------
 
         public string GetExpandCollapseState(AutomationElement el)
         {
@@ -277,3 +277,4 @@ namespace ApexComputerUse
 
     }
 }
+

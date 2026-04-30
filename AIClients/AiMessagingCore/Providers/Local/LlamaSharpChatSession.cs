@@ -16,7 +16,7 @@ namespace AiMessagingCore.Providers.Local;
 /// LlamaSharp in-process GGUF inference session with streaming and channel-format detection.
 ///
 /// Model resolution order:
-///   1. Absolute path — used as-is.
+///   1. Absolute path \- used as-is.
 ///   2. LLAMASHARP_MODEL_DIR env var + filename.
 ///   3. &lt;AppBase&gt;/models/ + filename.
 ///
@@ -107,7 +107,7 @@ public sealed class LlamaSharpChatSession : ChatSessionBase, IDisposable
                     }
                 }
 
-                // Fallback: model does not use channel format — emit everything buffered.
+                // Fallback: model does not use channel format \- emit everything buffered.
                 if (!inFinalChannel && pending.Length > 0)
                     channel.Writer.TryWrite(pending.ToString());
             }
@@ -158,7 +158,7 @@ public sealed class LlamaSharpChatSession : ChatSessionBase, IDisposable
                 _llamaSession = new LLama.ChatSession(executor, history);
                 _llamaSession.WithHistoryTransform(new PromptTemplateTransformer(_weights, withAssistant: true));
                 _llamaSession.WithOutputTransform(new LLamaTransforms.KeywordTextOutputStreamTransform(
-                    ["User:", "\ufffd"], redundancyLength: 5));
+                    ["User:", "?"], redundancyLength: 5));
             }, cancellationToken);
 
             await _localModelManager.LoadAsync(Model, modelPath, cancellationToken);

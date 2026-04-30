@@ -1,6 +1,6 @@
 using ApexUIBridge.ElementTester;
 
-// ── Usage ─────────────────────────────────────────────────────────────────────
+// -- Usage ---------------------------------------------------------------------
 // dotnet run -- TextBox                  Test TextBox in all torture windows
 // dotnet run -- CheckBox wpf             Test CheckBox in WPF torture window only
 // dotnet run -- CheckBox winforms        Test CheckBox in WinForms torture window only
@@ -17,7 +17,7 @@ var windowFilter = args.Length > 1 ? args[1].ToLowerInvariant() : "both";
 using var client = new BridgeClient();
 var ct = CancellationToken.None;
 
-// ── Check bridge is running ─────────────────────────────────────────────────
+// -- Check bridge is running -------------------------------------------------
 if (!await client.IsReadyAsync(ct))
 {
     Console.Error.WriteLine("ERROR: Bridge is not running at http://localhost:8765");
@@ -26,7 +26,7 @@ if (!await client.IsReadyAsync(ct))
 }
 Console.WriteLine("[ElementTester] Bridge is ready.\n");
 
-// ── List command ────────────────────────────────────────────────────────────
+// -- List command ------------------------------------------------------------
 if (elementType.Equals("list", StringComparison.OrdinalIgnoreCase))
 {
     Console.WriteLine("Available element types:");
@@ -38,7 +38,7 @@ if (elementType.Equals("list", StringComparison.OrdinalIgnoreCase))
     return 0;
 }
 
-// ── Scan command ────────────────────────────────────────────────────────────
+// -- Scan command ------------------------------------------------------------
 if (elementType.Equals("scan", StringComparison.OrdinalIgnoreCase))
 {
     if (windowFilter != "both")
@@ -51,7 +51,7 @@ if (elementType.Equals("scan", StringComparison.OrdinalIgnoreCase))
         {
             Console.WriteLine(scanResult.Data);
             var parsed = ScanHelper.ParseAll(scanResult.Data!);
-            Console.WriteLine($"\n── {parsed.Count} elements found ──");
+            Console.WriteLine($"\n-- {parsed.Count} elements found --");
             var byType = parsed.GroupBy(e => e.ControlType ?? "Unknown").OrderBy(g => g.Key);
             foreach (var g in byType)
                 Console.WriteLine($"  {g.Key}: {g.Count()}");
@@ -70,10 +70,10 @@ if (elementType.Equals("scan", StringComparison.OrdinalIgnoreCase))
     return 0;
 }
 
-// ── Resolve target windows ──────────────────────────────────────────────────
+// -- Resolve target windows --------------------------------------------------
 // The torture test windows have these titles:
-//   WinForms: "System Configuration Console — UI Torture Test"
-//   WPF:      "System Configuration Console — WPF Torture Test"
+//   WinForms: "System Configuration Console - UI Torture Test"
+//   WPF:      "System Configuration Console - WPF Torture Test"
 var targets = new List<(string Label, string TitleSearch)>();
 if (windowFilter is "both" or "winforms" or "wf")
     targets.Add(("WinForms Torture", "UI Torture Test"));
@@ -86,7 +86,7 @@ if (targets.Count == 0)
     return 1;
 }
 
-// ── Determine which element types to test ───────────────────────────────────
+// -- Determine which element types to test -----------------------------------
 var typesToTest = new List<string>();
 if (elementType.Equals("all", StringComparison.OrdinalIgnoreCase))
 {
@@ -103,14 +103,14 @@ else
     return 1;
 }
 
-// ── Run tests ───────────────────────────────────────────────────────────────
+// -- Run tests ---------------------------------------------------------------
 var ctx = new TestContext(client);
 
 foreach (var (label, titleSearch) in targets)
 {
-    Console.WriteLine($"\n{"═",60}");
+    Console.WriteLine($"\n{"?",60}");
     Console.WriteLine($"  {label}");
-    Console.WriteLine($"{"═",60}");
+    Console.WriteLine($"{"?",60}");
 
     var scan = await client.SendAsync($"SCAN_WINDOW {titleSearch}", ct);
     if (!scan.Success || scan.Data == null)
@@ -121,11 +121,11 @@ foreach (var (label, titleSearch) in targets)
         continue;
     }
 
-    Console.WriteLine($"  Scan OK — {ScanHelper.ParseAll(scan.Data).Count} elements found\n");
+    Console.WriteLine($"  Scan OK - {ScanHelper.ParseAll(scan.Data).Count} elements found\n");
 
     foreach (var type in typesToTest)
     {
-        Console.WriteLine($"── {type} ────────────────────────────────────────");
+        Console.WriteLine($"-- {type} ----------------------------------------");
         var testFn = ElementTests.All[type];
         try
         {
@@ -149,3 +149,4 @@ foreach (var (label, titleSearch) in targets)
 
 ctx.PrintSummary();
 return ctx.Failed > 0 ? 1 : 0;
+

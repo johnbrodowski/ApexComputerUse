@@ -5,7 +5,7 @@
   "Nodes": [
     {
       "Id": "global::AppConfig::AppConfig.Parse(string[])",
-      "Namespace": "\u003Cglobal namespace\u003E",
+      "Namespace": "<global namespace>",
       "TypeName": "AppConfig",
       "MethodName": "Parse",
       "Signature": "AppConfig.Parse(string[])",
@@ -16,7 +16,7 @@
     },
     {
       "Id": "global::CallEdgeComparer::CallEdgeComparer.Equals(CallEdge?, CallEdge?)",
-      "Namespace": "\u003Cglobal namespace\u003E",
+      "Namespace": "<global namespace>",
       "TypeName": "CallEdgeComparer",
       "MethodName": "Equals",
       "Signature": "CallEdgeComparer.Equals(CallEdge?, CallEdge?)",
@@ -27,7 +27,7 @@
     },
     {
       "Id": "global::CallEdgeComparer::CallEdgeComparer.GetHashCode(CallEdge)",
-      "Namespace": "\u003Cglobal namespace\u003E",
+      "Namespace": "<global namespace>",
       "TypeName": "CallEdgeComparer",
       "MethodName": "GetHashCode",
       "Signature": "CallEdgeComparer.GetHashCode(CallEdge)",
@@ -202,11 +202,11 @@
       "IsStatic": false
     },
     {
-      "Id": "global::AiMessagingCore.Abstractions.IChatSerializer::AiMessagingCore.Abstractions.IChatSerializer.Serialize(IReadOnlyList\u003CAiMessagingCore.Models.ChatMessage\u003E)",
+      "Id": "global::AiMessagingCore.Abstractions.IChatSerializer::AiMessagingCore.Abstractions.IChatSerializer.Serialize(IReadOnlyList<AiMessagingCore.Models.ChatMessage>)",
       "Namespace": "AiMessagingCore.Abstractions",
       "TypeName": "IChatSerializer",
       "MethodName": "Serialize",
-      "Signature": "AiMessagingCore.Abstractions.IChatSerializer.Serialize(IReadOnlyList\u003CAiMessagingCore.Models.ChatMessage\u003E)",
+      "Signature": "AiMessagingCore.Abstractions.IChatSerializer.Serialize(IReadOnlyList<AiMessagingCore.Models.ChatMessage>)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\AIClients\\AiMessagingCore\\Abstractions\\IChatSerializer.cs",
       "Line": 10,
       "Accessibility": "Public",
@@ -411,11 +411,11 @@
       "IsStatic": false
     },
     {
-      "Id": "global::AiMessagingCore.Core.AiProviderFactory::AiMessagingCore.Core.AiProviderFactory.AiProviderFactory(IEnumerable\u003CAiMessagingCore.Abstractions.IAiProvider\u003E)",
+      "Id": "global::AiMessagingCore.Core.AiProviderFactory::AiMessagingCore.Core.AiProviderFactory.AiProviderFactory(IEnumerable<AiMessagingCore.Abstractions.IAiProvider>)",
       "Namespace": "AiMessagingCore.Core",
       "TypeName": "AiProviderFactory",
       "MethodName": ".ctor",
-      "Signature": "AiMessagingCore.Core.AiProviderFactory.AiProviderFactory(IEnumerable\u003CAiMessagingCore.Abstractions.IAiProvider\u003E)",
+      "Signature": "AiMessagingCore.Core.AiProviderFactory.AiProviderFactory(IEnumerable<AiMessagingCore.Abstractions.IAiProvider>)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\AIClients\\AiMessagingCore\\Core\\AiProviderFactory.cs",
       "Line": 12,
       "Accessibility": "Public",
@@ -741,11 +741,11 @@
       "IsStatic": false
     },
     {
-      "Id": "global::AiMessagingCore.Core.ChatSessionBase::AiMessagingCore.Core.ChatSessionBase.ExecuteStreamAsync(IReadOnlyList\u003CAiMessagingCore.Models.ChatMessage\u003E, AiMessagingCore.Configuration.RequestOverrides?, CancellationToken)",
+      "Id": "global::AiMessagingCore.Core.ChatSessionBase::AiMessagingCore.Core.ChatSessionBase.ExecuteStreamAsync(IReadOnlyList<AiMessagingCore.Models.ChatMessage>, AiMessagingCore.Configuration.RequestOverrides?, CancellationToken)",
       "Namespace": "AiMessagingCore.Core",
       "TypeName": "ChatSessionBase",
       "MethodName": "ExecuteStreamAsync",
-      "Signature": "AiMessagingCore.Core.ChatSessionBase.ExecuteStreamAsync(IReadOnlyList\u003CAiMessagingCore.Models.ChatMessage\u003E, AiMessagingCore.Configuration.RequestOverrides?, CancellationToken)",
+      "Signature": "AiMessagingCore.Core.ChatSessionBase.ExecuteStreamAsync(IReadOnlyList<AiMessagingCore.Models.ChatMessage>, AiMessagingCore.Configuration.RequestOverrides?, CancellationToken)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\AIClients\\AiMessagingCore\\Core\\ChatSessionBase.cs",
       "Line": 186,
       "Accessibility": "Protected",
@@ -763,11 +763,11 @@
       "IsStatic": false
     },
     {
-      "Id": "global::AiMessagingCore.Core.ChatSessionBase::AiMessagingCore.Core.ChatSessionBase.SeedHistory(IEnumerable\u003CAiMessagingCore.Models.ChatMessage\u003E)",
+      "Id": "global::AiMessagingCore.Core.ChatSessionBase::AiMessagingCore.Core.ChatSessionBase.SeedHistory(IEnumerable<AiMessagingCore.Models.ChatMessage>)",
       "Namespace": "AiMessagingCore.Core",
       "TypeName": "ChatSessionBase",
       "MethodName": "SeedHistory",
-      "Signature": "AiMessagingCore.Core.ChatSessionBase.SeedHistory(IEnumerable\u003CAiMessagingCore.Models.ChatMessage\u003E)",
+      "Signature": "AiMessagingCore.Core.ChatSessionBase.SeedHistory(IEnumerable<AiMessagingCore.Models.ChatMessage>)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\AIClients\\AiMessagingCore\\Core\\ChatSessionBase.cs",
       "Line": 158,
       "Accessibility": "Internal",
@@ -961,11 +961,11 @@
       "IsStatic": false
     },
     {
-      "Id": "global::AiMessagingCore.Providers.Anthropic.AnthropicChatSession::AiMessagingCore.Providers.Anthropic.AnthropicChatSession.ExecuteStreamAsync(IReadOnlyList\u003CAiMessagingCore.Models.ChatMessage\u003E, AiMessagingCore.Configuration.RequestOverrides?, CancellationToken)",
+      "Id": "global::AiMessagingCore.Providers.Anthropic.AnthropicChatSession::AiMessagingCore.Providers.Anthropic.AnthropicChatSession.ExecuteStreamAsync(IReadOnlyList<AiMessagingCore.Models.ChatMessage>, AiMessagingCore.Configuration.RequestOverrides?, CancellationToken)",
       "Namespace": "AiMessagingCore.Providers.Anthropic",
       "TypeName": "AnthropicChatSession",
       "MethodName": "ExecuteStreamAsync",
-      "Signature": "AiMessagingCore.Providers.Anthropic.AnthropicChatSession.ExecuteStreamAsync(IReadOnlyList\u003CAiMessagingCore.Models.ChatMessage\u003E, AiMessagingCore.Configuration.RequestOverrides?, CancellationToken)",
+      "Signature": "AiMessagingCore.Providers.Anthropic.AnthropicChatSession.ExecuteStreamAsync(IReadOnlyList<AiMessagingCore.Models.ChatMessage>, AiMessagingCore.Configuration.RequestOverrides?, CancellationToken)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\AIClients\\AiMessagingCore\\Providers\\Anthropic\\AnthropicChatSession.cs",
       "Line": 27,
       "Accessibility": "Protected",
@@ -1016,11 +1016,11 @@
       "IsStatic": false
     },
     {
-      "Id": "global::AiMessagingCore.Providers.DeepSeek.DeepSeekChatSession::AiMessagingCore.Providers.DeepSeek.DeepSeekChatSession.ExecuteStreamAsync(IReadOnlyList\u003CAiMessagingCore.Models.ChatMessage\u003E, AiMessagingCore.Configuration.RequestOverrides?, CancellationToken)",
+      "Id": "global::AiMessagingCore.Providers.DeepSeek.DeepSeekChatSession::AiMessagingCore.Providers.DeepSeek.DeepSeekChatSession.ExecuteStreamAsync(IReadOnlyList<AiMessagingCore.Models.ChatMessage>, AiMessagingCore.Configuration.RequestOverrides?, CancellationToken)",
       "Namespace": "AiMessagingCore.Providers.DeepSeek",
       "TypeName": "DeepSeekChatSession",
       "MethodName": "ExecuteStreamAsync",
-      "Signature": "AiMessagingCore.Providers.DeepSeek.DeepSeekChatSession.ExecuteStreamAsync(IReadOnlyList\u003CAiMessagingCore.Models.ChatMessage\u003E, AiMessagingCore.Configuration.RequestOverrides?, CancellationToken)",
+      "Signature": "AiMessagingCore.Providers.DeepSeek.DeepSeekChatSession.ExecuteStreamAsync(IReadOnlyList<AiMessagingCore.Models.ChatMessage>, AiMessagingCore.Configuration.RequestOverrides?, CancellationToken)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\AIClients\\AiMessagingCore\\Providers\\DeepSeek\\DeepSeekChatSession.cs",
       "Line": 16,
       "Accessibility": "Protected",
@@ -1082,11 +1082,11 @@
       "IsStatic": false
     },
     {
-      "Id": "global::AiMessagingCore.Providers.Duck.DuckChatSession::AiMessagingCore.Providers.Duck.DuckChatSession.ExecuteStreamAsync(IReadOnlyList\u003CAiMessagingCore.Models.ChatMessage\u003E, AiMessagingCore.Configuration.RequestOverrides?, CancellationToken)",
+      "Id": "global::AiMessagingCore.Providers.Duck.DuckChatSession::AiMessagingCore.Providers.Duck.DuckChatSession.ExecuteStreamAsync(IReadOnlyList<AiMessagingCore.Models.ChatMessage>, AiMessagingCore.Configuration.RequestOverrides?, CancellationToken)",
       "Namespace": "AiMessagingCore.Providers.Duck",
       "TypeName": "DuckChatSession",
       "MethodName": "ExecuteStreamAsync",
-      "Signature": "AiMessagingCore.Providers.Duck.DuckChatSession.ExecuteStreamAsync(IReadOnlyList\u003CAiMessagingCore.Models.ChatMessage\u003E, AiMessagingCore.Configuration.RequestOverrides?, CancellationToken)",
+      "Signature": "AiMessagingCore.Providers.Duck.DuckChatSession.ExecuteStreamAsync(IReadOnlyList<AiMessagingCore.Models.ChatMessage>, AiMessagingCore.Configuration.RequestOverrides?, CancellationToken)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\AIClients\\AiMessagingCore\\Providers\\Duck\\DuckChatSession.cs",
       "Line": 20,
       "Accessibility": "Protected",
@@ -1148,11 +1148,11 @@
       "IsStatic": false
     },
     {
-      "Id": "global::AiMessagingCore.Providers.Grok.GrokChatSession::AiMessagingCore.Providers.Grok.GrokChatSession.ExecuteStreamAsync(IReadOnlyList\u003CAiMessagingCore.Models.ChatMessage\u003E, AiMessagingCore.Configuration.RequestOverrides?, CancellationToken)",
+      "Id": "global::AiMessagingCore.Providers.Grok.GrokChatSession::AiMessagingCore.Providers.Grok.GrokChatSession.ExecuteStreamAsync(IReadOnlyList<AiMessagingCore.Models.ChatMessage>, AiMessagingCore.Configuration.RequestOverrides?, CancellationToken)",
       "Namespace": "AiMessagingCore.Providers.Grok",
       "TypeName": "GrokChatSession",
       "MethodName": "ExecuteStreamAsync",
-      "Signature": "AiMessagingCore.Providers.Grok.GrokChatSession.ExecuteStreamAsync(IReadOnlyList\u003CAiMessagingCore.Models.ChatMessage\u003E, AiMessagingCore.Configuration.RequestOverrides?, CancellationToken)",
+      "Signature": "AiMessagingCore.Providers.Grok.GrokChatSession.ExecuteStreamAsync(IReadOnlyList<AiMessagingCore.Models.ChatMessage>, AiMessagingCore.Configuration.RequestOverrides?, CancellationToken)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\AIClients\\AiMessagingCore\\Providers\\Grok\\GrokChatSession.cs",
       "Line": 16,
       "Accessibility": "Protected",
@@ -1214,11 +1214,11 @@
       "IsStatic": false
     },
     {
-      "Id": "global::AiMessagingCore.Providers.Groq.GroqChatSession::AiMessagingCore.Providers.Groq.GroqChatSession.ExecuteStreamAsync(IReadOnlyList\u003CAiMessagingCore.Models.ChatMessage\u003E, AiMessagingCore.Configuration.RequestOverrides?, CancellationToken)",
+      "Id": "global::AiMessagingCore.Providers.Groq.GroqChatSession::AiMessagingCore.Providers.Groq.GroqChatSession.ExecuteStreamAsync(IReadOnlyList<AiMessagingCore.Models.ChatMessage>, AiMessagingCore.Configuration.RequestOverrides?, CancellationToken)",
       "Namespace": "AiMessagingCore.Providers.Groq",
       "TypeName": "GroqChatSession",
       "MethodName": "ExecuteStreamAsync",
-      "Signature": "AiMessagingCore.Providers.Groq.GroqChatSession.ExecuteStreamAsync(IReadOnlyList\u003CAiMessagingCore.Models.ChatMessage\u003E, AiMessagingCore.Configuration.RequestOverrides?, CancellationToken)",
+      "Signature": "AiMessagingCore.Providers.Groq.GroqChatSession.ExecuteStreamAsync(IReadOnlyList<AiMessagingCore.Models.ChatMessage>, AiMessagingCore.Configuration.RequestOverrides?, CancellationToken)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\AIClients\\AiMessagingCore\\Providers\\Groq\\GroqChatSession.cs",
       "Line": 16,
       "Accessibility": "Protected",
@@ -1302,22 +1302,22 @@
       "IsStatic": false
     },
     {
-      "Id": "global::AiMessagingCore.Providers.Local.LlamaSharpChatSession::AiMessagingCore.Providers.Local.LlamaSharpChatSession.EnsureModelLoadedAsync(string, IReadOnlyList\u003CAiMessagingCore.Models.ChatMessage\u003E, CancellationToken)",
+      "Id": "global::AiMessagingCore.Providers.Local.LlamaSharpChatSession::AiMessagingCore.Providers.Local.LlamaSharpChatSession.EnsureModelLoadedAsync(string, IReadOnlyList<AiMessagingCore.Models.ChatMessage>, CancellationToken)",
       "Namespace": "AiMessagingCore.Providers.Local",
       "TypeName": "LlamaSharpChatSession",
       "MethodName": "EnsureModelLoadedAsync",
-      "Signature": "AiMessagingCore.Providers.Local.LlamaSharpChatSession.EnsureModelLoadedAsync(string, IReadOnlyList\u003CAiMessagingCore.Models.ChatMessage\u003E, CancellationToken)",
+      "Signature": "AiMessagingCore.Providers.Local.LlamaSharpChatSession.EnsureModelLoadedAsync(string, IReadOnlyList<AiMessagingCore.Models.ChatMessage>, CancellationToken)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\AIClients\\AiMessagingCore\\Providers\\Local\\LlamaSharpChatSession.cs",
       "Line": 128,
       "Accessibility": "Private",
       "IsStatic": false
     },
     {
-      "Id": "global::AiMessagingCore.Providers.Local.LlamaSharpChatSession::AiMessagingCore.Providers.Local.LlamaSharpChatSession.ExecuteStreamAsync(IReadOnlyList\u003CAiMessagingCore.Models.ChatMessage\u003E, AiMessagingCore.Configuration.RequestOverrides?, CancellationToken)",
+      "Id": "global::AiMessagingCore.Providers.Local.LlamaSharpChatSession::AiMessagingCore.Providers.Local.LlamaSharpChatSession.ExecuteStreamAsync(IReadOnlyList<AiMessagingCore.Models.ChatMessage>, AiMessagingCore.Configuration.RequestOverrides?, CancellationToken)",
       "Namespace": "AiMessagingCore.Providers.Local",
       "TypeName": "LlamaSharpChatSession",
       "MethodName": "ExecuteStreamAsync",
-      "Signature": "AiMessagingCore.Providers.Local.LlamaSharpChatSession.ExecuteStreamAsync(IReadOnlyList\u003CAiMessagingCore.Models.ChatMessage\u003E, AiMessagingCore.Configuration.RequestOverrides?, CancellationToken)",
+      "Signature": "AiMessagingCore.Providers.Local.LlamaSharpChatSession.ExecuteStreamAsync(IReadOnlyList<AiMessagingCore.Models.ChatMessage>, AiMessagingCore.Configuration.RequestOverrides?, CancellationToken)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\AIClients\\AiMessagingCore\\Providers\\Local\\LlamaSharpChatSession.cs",
       "Line": 42,
       "Accessibility": "Protected",
@@ -1379,11 +1379,11 @@
       "IsStatic": false
     },
     {
-      "Id": "global::AiMessagingCore.Providers.Local.LmStudioChatSession::AiMessagingCore.Providers.Local.LmStudioChatSession.ExecuteStreamAsync(IReadOnlyList\u003CAiMessagingCore.Models.ChatMessage\u003E, AiMessagingCore.Configuration.RequestOverrides?, CancellationToken)",
+      "Id": "global::AiMessagingCore.Providers.Local.LmStudioChatSession::AiMessagingCore.Providers.Local.LmStudioChatSession.ExecuteStreamAsync(IReadOnlyList<AiMessagingCore.Models.ChatMessage>, AiMessagingCore.Configuration.RequestOverrides?, CancellationToken)",
       "Namespace": "AiMessagingCore.Providers.Local",
       "TypeName": "LmStudioChatSession",
       "MethodName": "ExecuteStreamAsync",
-      "Signature": "AiMessagingCore.Providers.Local.LmStudioChatSession.ExecuteStreamAsync(IReadOnlyList\u003CAiMessagingCore.Models.ChatMessage\u003E, AiMessagingCore.Configuration.RequestOverrides?, CancellationToken)",
+      "Signature": "AiMessagingCore.Providers.Local.LmStudioChatSession.ExecuteStreamAsync(IReadOnlyList<AiMessagingCore.Models.ChatMessage>, AiMessagingCore.Configuration.RequestOverrides?, CancellationToken)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\AIClients\\AiMessagingCore\\Providers\\Local\\LmStudioChatSession.cs",
       "Line": 25,
       "Accessibility": "Protected",
@@ -1445,11 +1445,11 @@
       "IsStatic": false
     },
     {
-      "Id": "global::AiMessagingCore.Providers.OpenAI.OpenAiChatSession::AiMessagingCore.Providers.OpenAI.OpenAiChatSession.ExecuteStreamAsync(IReadOnlyList\u003CAiMessagingCore.Models.ChatMessage\u003E, AiMessagingCore.Configuration.RequestOverrides?, CancellationToken)",
+      "Id": "global::AiMessagingCore.Providers.OpenAI.OpenAiChatSession::AiMessagingCore.Providers.OpenAI.OpenAiChatSession.ExecuteStreamAsync(IReadOnlyList<AiMessagingCore.Models.ChatMessage>, AiMessagingCore.Configuration.RequestOverrides?, CancellationToken)",
       "Namespace": "AiMessagingCore.Providers.OpenAI",
       "TypeName": "OpenAiChatSession",
       "MethodName": "ExecuteStreamAsync",
-      "Signature": "AiMessagingCore.Providers.OpenAI.OpenAiChatSession.ExecuteStreamAsync(IReadOnlyList\u003CAiMessagingCore.Models.ChatMessage\u003E, AiMessagingCore.Configuration.RequestOverrides?, CancellationToken)",
+      "Signature": "AiMessagingCore.Providers.OpenAI.OpenAiChatSession.ExecuteStreamAsync(IReadOnlyList<AiMessagingCore.Models.ChatMessage>, AiMessagingCore.Configuration.RequestOverrides?, CancellationToken)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\AIClients\\AiMessagingCore\\Providers\\OpenAI\\OpenAiChatSession.cs",
       "Line": 20,
       "Accessibility": "Protected",
@@ -1511,11 +1511,11 @@
       "IsStatic": false
     },
     {
-      "Id": "global::AiMessagingCore.Serialization.SystemTextJsonChatSerializer::AiMessagingCore.Serialization.SystemTextJsonChatSerializer.Serialize(IReadOnlyList\u003CAiMessagingCore.Models.ChatMessage\u003E)",
+      "Id": "global::AiMessagingCore.Serialization.SystemTextJsonChatSerializer::AiMessagingCore.Serialization.SystemTextJsonChatSerializer.Serialize(IReadOnlyList<AiMessagingCore.Models.ChatMessage>)",
       "Namespace": "AiMessagingCore.Serialization",
       "TypeName": "SystemTextJsonChatSerializer",
       "MethodName": "Serialize",
-      "Signature": "AiMessagingCore.Serialization.SystemTextJsonChatSerializer.Serialize(IReadOnlyList\u003CAiMessagingCore.Models.ChatMessage\u003E)",
+      "Signature": "AiMessagingCore.Serialization.SystemTextJsonChatSerializer.Serialize(IReadOnlyList<AiMessagingCore.Models.ChatMessage>)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\AIClients\\AiMessagingCore\\Serialization\\SystemTextJsonChatSerializer.cs",
       "Line": 17,
       "Accessibility": "Public",
@@ -1742,11 +1742,11 @@
       "IsStatic": false
     },
     {
-      "Id": "global::ApexComputerUse.AiChatService::ApexComputerUse.AiChatService.SendAsync(string, Action\u003Cstring\u003E, Action\u003Cstring\u003E, Action\u003Cstring\u003E, CancellationToken)",
+      "Id": "global::ApexComputerUse.AiChatService::ApexComputerUse.AiChatService.SendAsync(string, Action<string>, Action<string>, Action<string>, CancellationToken)",
       "Namespace": "ApexComputerUse",
       "TypeName": "AiChatService",
       "MethodName": "SendAsync",
-      "Signature": "ApexComputerUse.AiChatService.SendAsync(string, Action\u003Cstring\u003E, Action\u003Cstring\u003E, Action\u003Cstring\u003E, CancellationToken)",
+      "Signature": "ApexComputerUse.AiChatService.SendAsync(string, Action<string>, Action<string>, Action<string>, CancellationToken)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\ApexComputerUse\\AI\\AiChatService.cs",
       "Line": 109,
       "Accessibility": "Public",
@@ -3348,11 +3348,11 @@
       "IsStatic": false
     },
     {
-      "Id": "global::ApexComputerUse.ApexHelper::ApexComputerUse.ApexHelper.StitchElementsToBase64(IList\u003CAutomationElement\u003E)",
+      "Id": "global::ApexComputerUse.ApexHelper::ApexComputerUse.ApexHelper.StitchElementsToBase64(IList<AutomationElement>)",
       "Namespace": "ApexComputerUse",
       "TypeName": "ApexHelper",
       "MethodName": "StitchElementsToBase64",
-      "Signature": "ApexComputerUse.ApexHelper.StitchElementsToBase64(IList\u003CAutomationElement\u003E)",
+      "Signature": "ApexComputerUse.ApexHelper.StitchElementsToBase64(IList<AutomationElement>)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\ApexComputerUse\\Automation\\FlaUIHelper.cs",
       "Line": 1291,
       "Accessibility": "Public",
@@ -3546,11 +3546,11 @@
       "IsStatic": true
     },
     {
-      "Id": "global::ApexComputerUse.ChatTabController::ApexComputerUse.ChatTabController.ChatTabController(ApexComputerUse.AiChatService, Func\u003CApexComputerUse.HttpCommandServer?\u003E, Func\u003Cstring\u003E, Action\u003Cstring\u003E, ComboBox, TextBox, TextBox, TextBox, Label, Label)",
+      "Id": "global::ApexComputerUse.ChatTabController::ApexComputerUse.ChatTabController.ChatTabController(ApexComputerUse.AiChatService, Func<ApexComputerUse.HttpCommandServer?>, Func<string>, Action<string>, ComboBox, TextBox, TextBox, TextBox, Label, Label)",
       "Namespace": "ApexComputerUse",
       "TypeName": "ChatTabController",
       "MethodName": ".ctor",
-      "Signature": "ApexComputerUse.ChatTabController.ChatTabController(ApexComputerUse.AiChatService, Func\u003CApexComputerUse.HttpCommandServer?\u003E, Func\u003Cstring\u003E, Action\u003Cstring\u003E, ComboBox, TextBox, TextBox, TextBox, Label, Label)",
+      "Signature": "ApexComputerUse.ChatTabController.ChatTabController(ApexComputerUse.AiChatService, Func<ApexComputerUse.HttpCommandServer?>, Func<string>, Action<string>, ComboBox, TextBox, TextBox, TextBox, Label, Label)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\ApexComputerUse\\UI\\ChatTabController.cs",
       "Line": 14,
       "Accessibility": "Internal",
@@ -3623,11 +3623,11 @@
       "IsStatic": false
     },
     {
-      "Id": "global::ApexComputerUse.CommandArgDictExtensions::ApexComputerUse.CommandArgDictExtensions.Get(System.Collections.Generic.Dictionary\u003Cstring, string\u003E, params string[])",
+      "Id": "global::ApexComputerUse.CommandArgDictExtensions::ApexComputerUse.CommandArgDictExtensions.Get(System.Collections.Generic.Dictionary<string, string>, params string[])",
       "Namespace": "ApexComputerUse",
       "TypeName": "CommandArgDictExtensions",
       "MethodName": "Get",
-      "Signature": "ApexComputerUse.CommandArgDictExtensions.Get(System.Collections.Generic.Dictionary\u003Cstring, string\u003E, params string[])",
+      "Signature": "ApexComputerUse.CommandArgDictExtensions.Get(System.Collections.Generic.Dictionary<string, string>, params string[])",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\ApexComputerUse\\Commands\\CommandLineParser.cs",
       "Line": 129,
       "Accessibility": "Public",
@@ -3722,11 +3722,11 @@
       "IsStatic": true
     },
     {
-      "Id": "global::ApexComputerUse.CommandProcessor::ApexComputerUse.CommandProcessor.CloneWithChildren(ApexComputerUse.CommandProcessor.ElementNode, List\u003CApexComputerUse.CommandProcessor.ElementNode\u003E?)",
+      "Id": "global::ApexComputerUse.CommandProcessor::ApexComputerUse.CommandProcessor.CloneWithChildren(ApexComputerUse.CommandProcessor.ElementNode, List<ApexComputerUse.CommandProcessor.ElementNode>?)",
       "Namespace": "ApexComputerUse",
       "TypeName": "CommandProcessor",
       "MethodName": "CloneWithChildren",
-      "Signature": "ApexComputerUse.CommandProcessor.CloneWithChildren(ApexComputerUse.CommandProcessor.ElementNode, List\u003CApexComputerUse.CommandProcessor.ElementNode\u003E?)",
+      "Signature": "ApexComputerUse.CommandProcessor.CloneWithChildren(ApexComputerUse.CommandProcessor.ElementNode, List<ApexComputerUse.CommandProcessor.ElementNode>?)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\ApexComputerUse\\Commands\\CommandProcessor.cs",
       "Line": 1519,
       "Accessibility": "Private",
@@ -4283,11 +4283,11 @@
       "IsStatic": false
     },
     {
-      "Id": "global::ApexComputerUse.DownloadManager::ApexComputerUse.DownloadManager.DownloadStreamAsync(string, string, System.Action\u003Cstring, System.Drawing.Color\u003E, System.Threading.CancellationToken)",
+      "Id": "global::ApexComputerUse.DownloadManager::ApexComputerUse.DownloadManager.DownloadStreamAsync(string, string, System.Action<string, System.Drawing.Color>, System.Threading.CancellationToken)",
       "Namespace": "ApexComputerUse",
       "TypeName": "DownloadManager",
       "MethodName": "DownloadStreamAsync",
-      "Signature": "ApexComputerUse.DownloadManager.DownloadStreamAsync(string, string, System.Action\u003Cstring, System.Drawing.Color\u003E, System.Threading.CancellationToken)",
+      "Signature": "ApexComputerUse.DownloadManager.DownloadStreamAsync(string, string, System.Action<string, System.Drawing.Color>, System.Threading.CancellationToken)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\ApexComputerUse\\Infrastructure\\DownloadManager.cs",
       "Line": 144,
       "Accessibility": "Private",
@@ -4437,11 +4437,11 @@
       "IsStatic": false
     },
     {
-      "Id": "global::ApexComputerUse.ElementIdGenerator::ApexComputerUse.ElementIdGenerator.SafeGetProperty\u003CT\u003E(System.Func\u003CT\u003E, T)",
+      "Id": "global::ApexComputerUse.ElementIdGenerator::ApexComputerUse.ElementIdGenerator.SafeGetProperty<T>(System.Func<T>, T)",
       "Namespace": "ApexComputerUse",
       "TypeName": "ElementIdGenerator",
       "MethodName": "SafeGetProperty",
-      "Signature": "ApexComputerUse.ElementIdGenerator.SafeGetProperty\u003CT\u003E(System.Func\u003CT\u003E, T)",
+      "Signature": "ApexComputerUse.ElementIdGenerator.SafeGetProperty<T>(System.Func<T>, T)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\ApexComputerUse\\Automation\\ElementIdGenerator.cs",
       "Line": 236,
       "Accessibility": "Private",
@@ -4811,11 +4811,11 @@
       "IsStatic": false
     },
     {
-      "Id": "global::ApexComputerUse.Form1::ApexComputerUse.Form1.SafeRun(Func\u003CTask\u003E, string?)",
+      "Id": "global::ApexComputerUse.Form1::ApexComputerUse.Form1.SafeRun(Func<Task>, string?)",
       "Namespace": "ApexComputerUse",
       "TypeName": "Form1",
       "MethodName": "SafeRun",
-      "Signature": "ApexComputerUse.Form1.SafeRun(Func\u003CTask\u003E, string?)",
+      "Signature": "ApexComputerUse.Form1.SafeRun(Func<Task>, string?)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\ApexComputerUse\\UI\\Form1.cs",
       "Line": 423,
       "Accessibility": "Private",
@@ -5295,11 +5295,11 @@
       "IsStatic": false
     },
     {
-      "Id": "global::ApexComputerUse.ModelTabController::ApexComputerUse.ModelTabController.ModelTabController(ApexComputerUse.CommandProcessor, ApexComputerUse.DownloadManager, Action, Action\u003Cstring\u003E, TextBox, TextBox, TextBox, Button, Button, Button, Label, Label, ProgressBar, TabControl, TabPage)",
+      "Id": "global::ApexComputerUse.ModelTabController::ApexComputerUse.ModelTabController.ModelTabController(ApexComputerUse.CommandProcessor, ApexComputerUse.DownloadManager, Action, Action<string>, TextBox, TextBox, TextBox, Button, Button, Button, Label, Label, ProgressBar, TabControl, TabPage)",
       "Namespace": "ApexComputerUse",
       "TypeName": "ModelTabController",
       "MethodName": ".ctor",
-      "Signature": "ApexComputerUse.ModelTabController.ModelTabController(ApexComputerUse.CommandProcessor, ApexComputerUse.DownloadManager, Action, Action\u003Cstring\u003E, TextBox, TextBox, TextBox, Button, Button, Button, Label, Label, ProgressBar, TabControl, TabPage)",
+      "Signature": "ApexComputerUse.ModelTabController.ModelTabController(ApexComputerUse.CommandProcessor, ApexComputerUse.DownloadManager, Action, Action<string>, TextBox, TextBox, TextBox, Button, Button, Button, Label, Label, ProgressBar, TabControl, TabPage)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\ApexComputerUse\\UI\\ModelTabController.cs",
       "Line": 17,
       "Accessibility": "Internal",
@@ -5438,11 +5438,11 @@
       "IsStatic": false
     },
     {
-      "Id": "global::ApexComputerUse.MtmdHelper::ApexComputerUse.MtmdHelper.DescribeElementsAsync(IEnumerable\u003CAutomationElement\u003E, string)",
+      "Id": "global::ApexComputerUse.MtmdHelper::ApexComputerUse.MtmdHelper.DescribeElementsAsync(IEnumerable<AutomationElement>, string)",
       "Namespace": "ApexComputerUse",
       "TypeName": "MtmdHelper",
       "MethodName": "DescribeElementsAsync",
-      "Signature": "ApexComputerUse.MtmdHelper.DescribeElementsAsync(IEnumerable\u003CAutomationElement\u003E, string)",
+      "Signature": "ApexComputerUse.MtmdHelper.DescribeElementsAsync(IEnumerable<AutomationElement>, string)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\ApexComputerUse\\AI\\MtmdHelper.cs",
       "Line": 177,
       "Accessibility": "Public",
@@ -5471,11 +5471,11 @@
       "IsStatic": false
     },
     {
-      "Id": "global::ApexComputerUse.MtmdHelper::ApexComputerUse.MtmdHelper.DescribeImagesAsync(IEnumerable\u003Cstring\u003E, string)",
+      "Id": "global::ApexComputerUse.MtmdHelper::ApexComputerUse.MtmdHelper.DescribeImagesAsync(IEnumerable<string>, string)",
       "Namespace": "ApexComputerUse",
       "TypeName": "MtmdHelper",
       "MethodName": "DescribeImagesAsync",
-      "Signature": "ApexComputerUse.MtmdHelper.DescribeImagesAsync(IEnumerable\u003Cstring\u003E, string)",
+      "Signature": "ApexComputerUse.MtmdHelper.DescribeImagesAsync(IEnumerable<string>, string)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\ApexComputerUse\\AI\\MtmdHelper.cs",
       "Line": 97,
       "Accessibility": "Public",
@@ -5570,11 +5570,11 @@
       "IsStatic": false
     },
     {
-      "Id": "global::ApexComputerUse.MtmdHelper::ApexComputerUse.MtmdHelper.RunInferenceAsync(string, List\u003CSafeMtmdEmbed\u003E)",
+      "Id": "global::ApexComputerUse.MtmdHelper::ApexComputerUse.MtmdHelper.RunInferenceAsync(string, List<SafeMtmdEmbed>)",
       "Namespace": "ApexComputerUse",
       "TypeName": "MtmdHelper",
       "MethodName": "RunInferenceAsync",
-      "Signature": "ApexComputerUse.MtmdHelper.RunInferenceAsync(string, List\u003CSafeMtmdEmbed\u003E)",
+      "Signature": "ApexComputerUse.MtmdHelper.RunInferenceAsync(string, List<SafeMtmdEmbed>)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\ApexComputerUse\\AI\\MtmdHelper.cs",
       "Line": 199,
       "Accessibility": "Private",
@@ -5746,11 +5746,11 @@
       "IsStatic": false
     },
     {
-      "Id": "global::ApexComputerUse.UiMapRenderer.OverlayForm::ApexComputerUse.UiMapRenderer.OverlayForm.OverlayForm(System.Collections.Generic.List\u003CApexComputerUse.UiMapRenderer.UiElement\u003E?, System.Collections.Generic.HashSet\u003Cstring\u003E, System.Collections.Generic.Dictionary\u003Cstring, System.Drawing.Color\u003E, System.Func\u003Cstring, System.Drawing.Color\u003E, int)",
+      "Id": "global::ApexComputerUse.UiMapRenderer.OverlayForm::ApexComputerUse.UiMapRenderer.OverlayForm.OverlayForm(System.Collections.Generic.List<ApexComputerUse.UiMapRenderer.UiElement>?, System.Collections.Generic.HashSet<string>, System.Collections.Generic.Dictionary<string, System.Drawing.Color>, System.Func<string, System.Drawing.Color>, int)",
       "Namespace": "ApexComputerUse",
       "TypeName": "OverlayForm",
       "MethodName": ".ctor",
-      "Signature": "ApexComputerUse.UiMapRenderer.OverlayForm.OverlayForm(System.Collections.Generic.List\u003CApexComputerUse.UiMapRenderer.UiElement\u003E?, System.Collections.Generic.HashSet\u003Cstring\u003E, System.Collections.Generic.Dictionary\u003Cstring, System.Drawing.Color\u003E, System.Func\u003Cstring, System.Drawing.Color\u003E, int)",
+      "Signature": "ApexComputerUse.UiMapRenderer.OverlayForm.OverlayForm(System.Collections.Generic.List<ApexComputerUse.UiMapRenderer.UiElement>?, System.Collections.Generic.HashSet<string>, System.Collections.Generic.Dictionary<string, System.Drawing.Color>, System.Func<string, System.Drawing.Color>, int)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\ApexComputerUse\\Automation\\UiMapRenderer.cs",
       "Line": 193,
       "Accessibility": "Public",
@@ -5823,11 +5823,11 @@
       "IsStatic": true
     },
     {
-      "Id": "global::ApexComputerUse.PdfWriter::ApexComputerUse.PdfWriter.GenerateTextPdf(List\u003Cstring\u003E)",
+      "Id": "global::ApexComputerUse.PdfWriter::ApexComputerUse.PdfWriter.GenerateTextPdf(List<string>)",
       "Namespace": "ApexComputerUse",
       "TypeName": "PdfWriter",
       "MethodName": "GenerateTextPdf",
-      "Signature": "ApexComputerUse.PdfWriter.GenerateTextPdf(List\u003Cstring\u003E)",
+      "Signature": "ApexComputerUse.PdfWriter.GenerateTextPdf(List<string>)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\ApexComputerUse\\Servers\\HttpCommandServer.cs",
       "Line": 2744,
       "Accessibility": "Public",
@@ -6076,11 +6076,11 @@
       "IsStatic": false
     },
     {
-      "Id": "global::ApexComputerUse.SceneEditorForm::ApexComputerUse.SceneEditorForm.AddPropField(string, string, Action\u003Cstring\u003E)",
+      "Id": "global::ApexComputerUse.SceneEditorForm::ApexComputerUse.SceneEditorForm.AddPropField(string, string, Action<string>)",
       "Namespace": "ApexComputerUse",
       "TypeName": "SceneEditorForm",
       "MethodName": "AddPropField",
-      "Signature": "ApexComputerUse.SceneEditorForm.AddPropField(string, string, Action\u003Cstring\u003E)",
+      "Signature": "ApexComputerUse.SceneEditorForm.AddPropField(string, string, Action<string>)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\ApexComputerUse\\UI\\SceneEditorForm.cs",
       "Line": 1090,
       "Accessibility": "Private",
@@ -7110,11 +7110,11 @@
       "IsStatic": false
     },
     {
-      "Id": "global::ApexComputerUse.ServerTabController::ApexComputerUse.ServerTabController.ServerTabController(ApexComputerUse.CommandProcessor, ApexComputerUse.SceneStore, ApexComputerUse.AiChatService, Action\u003Cstring\u003E, Action\u003Cstring\u003E, TextBox, TextBox, TextBox, TextBox, TextBox, Button, Button, Button, Label, Label, Label)",
+      "Id": "global::ApexComputerUse.ServerTabController::ApexComputerUse.ServerTabController.ServerTabController(ApexComputerUse.CommandProcessor, ApexComputerUse.SceneStore, ApexComputerUse.AiChatService, Action<string>, Action<string>, TextBox, TextBox, TextBox, TextBox, TextBox, Button, Button, Button, Label, Label, Label)",
       "Namespace": "ApexComputerUse",
       "TypeName": "ServerTabController",
       "MethodName": ".ctor",
-      "Signature": "ApexComputerUse.ServerTabController.ServerTabController(ApexComputerUse.CommandProcessor, ApexComputerUse.SceneStore, ApexComputerUse.AiChatService, Action\u003Cstring\u003E, Action\u003Cstring\u003E, TextBox, TextBox, TextBox, TextBox, TextBox, Button, Button, Button, Label, Label, Label)",
+      "Signature": "ApexComputerUse.ServerTabController.ServerTabController(ApexComputerUse.CommandProcessor, ApexComputerUse.SceneStore, ApexComputerUse.AiChatService, Action<string>, Action<string>, TextBox, TextBox, TextBox, TextBox, TextBox, Button, Button, Button, Label, Label, Label)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\ApexComputerUse\\UI\\ServerTabController.cs",
       "Line": 19,
       "Accessibility": "Internal",
@@ -7231,11 +7231,11 @@
       "IsStatic": false
     },
     {
-      "Id": "global::ApexComputerUse.TelegramController::ApexComputerUse.TelegramController.TelegramController(string, ApexComputerUse.CommandProcessor, IReadOnlyCollection\u003Clong\u003E?)",
+      "Id": "global::ApexComputerUse.TelegramController::ApexComputerUse.TelegramController.TelegramController(string, ApexComputerUse.CommandProcessor, IReadOnlyCollection<long>?)",
       "Namespace": "ApexComputerUse",
       "TypeName": "TelegramController",
       "MethodName": ".ctor",
-      "Signature": "ApexComputerUse.TelegramController.TelegramController(string, ApexComputerUse.CommandProcessor, IReadOnlyCollection\u003Clong\u003E?)",
+      "Signature": "ApexComputerUse.TelegramController.TelegramController(string, ApexComputerUse.CommandProcessor, IReadOnlyCollection<long>?)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\ApexComputerUse\\Servers\\TelegramController.cs",
       "Line": 38,
       "Accessibility": "Public",
@@ -7308,11 +7308,11 @@
       "IsStatic": false
     },
     {
-      "Id": "global::ApexComputerUse.UiMapRenderer::ApexComputerUse.UiMapRenderer.UiMapRenderer(System.Collections.Generic.IEnumerable\u003Cstring\u003E)",
+      "Id": "global::ApexComputerUse.UiMapRenderer::ApexComputerUse.UiMapRenderer.UiMapRenderer(System.Collections.Generic.IEnumerable<string>)",
       "Namespace": "ApexComputerUse",
       "TypeName": "UiMapRenderer",
       "MethodName": ".ctor",
-      "Signature": "ApexComputerUse.UiMapRenderer.UiMapRenderer(System.Collections.Generic.IEnumerable\u003Cstring\u003E)",
+      "Signature": "ApexComputerUse.UiMapRenderer.UiMapRenderer(System.Collections.Generic.IEnumerable<string>)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\ApexComputerUse\\Automation\\UiMapRenderer.cs",
       "Line": 22,
       "Accessibility": "Public",
@@ -7627,11 +7627,11 @@
       "IsStatic": false
     },
     {
-      "Id": "global::ApexComputerUse.Tests.CommandProcessorTreeTests::ApexComputerUse.Tests.CommandProcessorTreeTests.Node(int, string, string, string, System.Collections.Generic.IEnumerable\u003CApexComputerUse.CommandProcessor.ElementNode\u003E?, int?, int?, string?, string?)",
+      "Id": "global::ApexComputerUse.Tests.CommandProcessorTreeTests::ApexComputerUse.Tests.CommandProcessorTreeTests.Node(int, string, string, string, System.Collections.Generic.IEnumerable<ApexComputerUse.CommandProcessor.ElementNode>?, int?, int?, string?, string?)",
       "Namespace": "ApexComputerUse.Tests",
       "TypeName": "CommandProcessorTreeTests",
       "MethodName": "Node",
-      "Signature": "ApexComputerUse.Tests.CommandProcessorTreeTests.Node(int, string, string, string, System.Collections.Generic.IEnumerable\u003CApexComputerUse.CommandProcessor.ElementNode\u003E?, int?, int?, string?, string?)",
+      "Signature": "ApexComputerUse.Tests.CommandProcessorTreeTests.Node(int, string, string, string, System.Collections.Generic.IEnumerable<ApexComputerUse.CommandProcessor.ElementNode>?, int?, int?, string?, string?)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\ApexComputerUse.Tests\\CommandProcessorTreeTests.cs",
       "Line": 20,
       "Accessibility": "Private",
@@ -9288,11 +9288,11 @@
       "IsStatic": false
     },
     {
-      "Id": "global::ApexUIBridge.ElementTester.TestContext::ApexUIBridge.ElementTester.TestContext.TestAsync(string, string, Func\u003CApexUIBridge.ElementTester.BridgeResponse, bool\u003E?, CancellationToken)",
+      "Id": "global::ApexUIBridge.ElementTester.TestContext::ApexUIBridge.ElementTester.TestContext.TestAsync(string, string, Func<ApexUIBridge.ElementTester.BridgeResponse, bool>?, CancellationToken)",
       "Namespace": "ApexUIBridge.ElementTester",
       "TypeName": "TestContext",
       "MethodName": "TestAsync",
-      "Signature": "ApexUIBridge.ElementTester.TestContext.TestAsync(string, string, Func\u003CApexUIBridge.ElementTester.BridgeResponse, bool\u003E?, CancellationToken)",
+      "Signature": "ApexUIBridge.ElementTester.TestContext.TestAsync(string, string, Func<ApexUIBridge.ElementTester.BridgeResponse, bool>?, CancellationToken)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\TestApplications\\ElementTester\\TestContext.cs",
       "Line": 19,
       "Accessibility": "Public",
@@ -9365,11 +9365,11 @@
       "IsStatic": false
     },
     {
-      "Id": "global::ApexUIBridge.TestRunner.CycleResult::ApexUIBridge.TestRunner.CycleResult.CycleResult(IEnumerable\u003CApexUIBridge.TestRunner.TestResult\u003E)",
+      "Id": "global::ApexUIBridge.TestRunner.CycleResult::ApexUIBridge.TestRunner.CycleResult.CycleResult(IEnumerable<ApexUIBridge.TestRunner.TestResult>)",
       "Namespace": "ApexUIBridge.TestRunner",
       "TypeName": "CycleResult",
       "MethodName": ".ctor",
-      "Signature": "ApexUIBridge.TestRunner.CycleResult.CycleResult(IEnumerable\u003CApexUIBridge.TestRunner.TestResult\u003E)",
+      "Signature": "ApexUIBridge.TestRunner.CycleResult.CycleResult(IEnumerable<ApexUIBridge.TestRunner.TestResult>)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\TestApplications\\TestRunner\\TestSuite.cs",
       "Line": 506,
       "Accessibility": "Public",
@@ -9464,11 +9464,11 @@
       "IsStatic": false
     },
     {
-      "Id": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.TestSuite(ApexUIBridge.TestRunner.BridgeClient, HashSet\u003Cstring\u003E?)",
+      "Id": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.TestSuite(ApexUIBridge.TestRunner.BridgeClient, HashSet<string>?)",
       "Namespace": "ApexUIBridge.TestRunner",
       "TypeName": "TestSuite",
       "MethodName": ".ctor",
-      "Signature": "ApexUIBridge.TestRunner.TestSuite.TestSuite(ApexUIBridge.TestRunner.BridgeClient, HashSet\u003Cstring\u003E?)",
+      "Signature": "ApexUIBridge.TestRunner.TestSuite.TestSuite(ApexUIBridge.TestRunner.BridgeClient, HashSet<string>?)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\TestApplications\\TestRunner\\TestSuite.cs",
       "Line": 14,
       "Accessibility": "Public",
@@ -9519,66 +9519,66 @@
       "IsStatic": false
     },
     {
-      "Id": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.RunWinFormsTortureTests(List\u003CApexUIBridge.TestRunner.TestResult\u003E, CancellationToken)",
+      "Id": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.RunWinFormsTortureTests(List<ApexUIBridge.TestRunner.TestResult>, CancellationToken)",
       "Namespace": "ApexUIBridge.TestRunner",
       "TypeName": "TestSuite",
       "MethodName": "RunWinFormsTortureTests",
-      "Signature": "ApexUIBridge.TestRunner.TestSuite.RunWinFormsTortureTests(List\u003CApexUIBridge.TestRunner.TestResult\u003E, CancellationToken)",
+      "Signature": "ApexUIBridge.TestRunner.TestSuite.RunWinFormsTortureTests(List<ApexUIBridge.TestRunner.TestResult>, CancellationToken)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\TestApplications\\TestRunner\\TestSuite.cs",
       "Line": 210,
       "Accessibility": "Private",
       "IsStatic": false
     },
     {
-      "Id": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.RunWpfTortureTests(List\u003CApexUIBridge.TestRunner.TestResult\u003E, CancellationToken)",
+      "Id": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.RunWpfTortureTests(List<ApexUIBridge.TestRunner.TestResult>, CancellationToken)",
       "Namespace": "ApexUIBridge.TestRunner",
       "TypeName": "TestSuite",
       "MethodName": "RunWpfTortureTests",
-      "Signature": "ApexUIBridge.TestRunner.TestSuite.RunWpfTortureTests(List\u003CApexUIBridge.TestRunner.TestResult\u003E, CancellationToken)",
+      "Signature": "ApexUIBridge.TestRunner.TestSuite.RunWpfTortureTests(List<ApexUIBridge.TestRunner.TestResult>, CancellationToken)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\TestApplications\\TestRunner\\TestSuite.cs",
       "Line": 277,
       "Accessibility": "Private",
       "IsStatic": false
     },
     {
-      "Id": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.Test(List\u003CApexUIBridge.TestRunner.TestResult\u003E, string, string, Func\u003CApexUIBridge.TestRunner.BridgeResponse, bool\u003E, CancellationToken)",
+      "Id": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.Test(List<ApexUIBridge.TestRunner.TestResult>, string, string, Func<ApexUIBridge.TestRunner.BridgeResponse, bool>, CancellationToken)",
       "Namespace": "ApexUIBridge.TestRunner",
       "TypeName": "TestSuite",
       "MethodName": "Test",
-      "Signature": "ApexUIBridge.TestRunner.TestSuite.Test(List\u003CApexUIBridge.TestRunner.TestResult\u003E, string, string, Func\u003CApexUIBridge.TestRunner.BridgeResponse, bool\u003E, CancellationToken)",
+      "Signature": "ApexUIBridge.TestRunner.TestSuite.Test(List<ApexUIBridge.TestRunner.TestResult>, string, string, Func<ApexUIBridge.TestRunner.BridgeResponse, bool>, CancellationToken)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\TestApplications\\TestRunner\\TestSuite.cs",
       "Line": 454,
       "Accessibility": "Private",
       "IsStatic": false
     },
     {
-      "Id": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.Torture_ClickTab(List\u003CApexUIBridge.TestRunner.TestResult\u003E, string, string, string, CancellationToken)",
+      "Id": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.Torture_ClickTab(List<ApexUIBridge.TestRunner.TestResult>, string, string, string, CancellationToken)",
       "Namespace": "ApexUIBridge.TestRunner",
       "TypeName": "TestSuite",
       "MethodName": "Torture_ClickTab",
-      "Signature": "ApexUIBridge.TestRunner.TestSuite.Torture_ClickTab(List\u003CApexUIBridge.TestRunner.TestResult\u003E, string, string, string, CancellationToken)",
+      "Signature": "ApexUIBridge.TestRunner.TestSuite.Torture_ClickTab(List<ApexUIBridge.TestRunner.TestResult>, string, string, string, CancellationToken)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\TestApplications\\TestRunner\\TestSuite.cs",
       "Line": 444,
       "Accessibility": "Private",
       "IsStatic": false
     },
     {
-      "Id": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.Torture_Toggle(List\u003CApexUIBridge.TestRunner.TestResult\u003E, string, string, string, CancellationToken, bool)",
+      "Id": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.Torture_Toggle(List<ApexUIBridge.TestRunner.TestResult>, string, string, string, CancellationToken, bool)",
       "Namespace": "ApexUIBridge.TestRunner",
       "TypeName": "TestSuite",
       "MethodName": "Torture_Toggle",
-      "Signature": "ApexUIBridge.TestRunner.TestSuite.Torture_Toggle(List\u003CApexUIBridge.TestRunner.TestResult\u003E, string, string, string, CancellationToken, bool)",
+      "Signature": "ApexUIBridge.TestRunner.TestSuite.Torture_Toggle(List<ApexUIBridge.TestRunner.TestResult>, string, string, string, CancellationToken, bool)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\TestApplications\\TestRunner\\TestSuite.cs",
       "Line": 422,
       "Accessibility": "Private",
       "IsStatic": false
     },
     {
-      "Id": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.Torture_Type(List\u003CApexUIBridge.TestRunner.TestResult\u003E, string, string, string, string, CancellationToken)",
+      "Id": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.Torture_Type(List<ApexUIBridge.TestRunner.TestResult>, string, string, string, string, CancellationToken)",
       "Namespace": "ApexUIBridge.TestRunner",
       "TypeName": "TestSuite",
       "MethodName": "Torture_Type",
-      "Signature": "ApexUIBridge.TestRunner.TestSuite.Torture_Type(List\u003CApexUIBridge.TestRunner.TestResult\u003E, string, string, string, string, CancellationToken)",
+      "Signature": "ApexUIBridge.TestRunner.TestSuite.Torture_Type(List<ApexUIBridge.TestRunner.TestResult>, string, string, string, string, CancellationToken)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\TestApplications\\TestRunner\\TestSuite.cs",
       "Line": 434,
       "Accessibility": "Private",
@@ -10146,44 +10146,44 @@
       "IsStatic": false
     },
     {
-      "Id": "global::WpfApplication.Infrastructure.ObservableObject::WpfApplication.Infrastructure.ObservableObject.GetNameFromExpression\u003CT\u003E(System.Linq.Expressions.Expression\u003CSystem.Func\u003CT\u003E\u003E)",
+      "Id": "global::WpfApplication.Infrastructure.ObservableObject::WpfApplication.Infrastructure.ObservableObject.GetNameFromExpression<T>(System.Linq.Expressions.Expression<System.Func<T>>)",
       "Namespace": "WpfApplication.Infrastructure",
       "TypeName": "ObservableObject",
       "MethodName": "GetNameFromExpression",
-      "Signature": "WpfApplication.Infrastructure.ObservableObject.GetNameFromExpression\u003CT\u003E(System.Linq.Expressions.Expression\u003CSystem.Func\u003CT\u003E\u003E)",
+      "Signature": "WpfApplication.Infrastructure.ObservableObject.GetNameFromExpression<T>(System.Linq.Expressions.Expression<System.Func<T>>)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\TestApplications\\WpfApplication\\Infrastructure\\ObservableObject.cs",
       "Line": 76,
       "Accessibility": "Private",
       "IsStatic": false
     },
     {
-      "Id": "global::WpfApplication.Infrastructure.ObservableObject::WpfApplication.Infrastructure.ObservableObject.GetProperty\u003CT\u003E(string)",
+      "Id": "global::WpfApplication.Infrastructure.ObservableObject::WpfApplication.Infrastructure.ObservableObject.GetProperty<T>(string)",
       "Namespace": "WpfApplication.Infrastructure",
       "TypeName": "ObservableObject",
       "MethodName": "GetProperty",
-      "Signature": "WpfApplication.Infrastructure.ObservableObject.GetProperty\u003CT\u003E(string)",
+      "Signature": "WpfApplication.Infrastructure.ObservableObject.GetProperty<T>(string)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\TestApplications\\WpfApplication\\Infrastructure\\ObservableObject.cs",
       "Line": 20,
       "Accessibility": "Protected",
       "IsStatic": false
     },
     {
-      "Id": "global::WpfApplication.Infrastructure.ObservableObject::WpfApplication.Infrastructure.ObservableObject.IsEqual\u003CT\u003E(T, T)",
+      "Id": "global::WpfApplication.Infrastructure.ObservableObject::WpfApplication.Infrastructure.ObservableObject.IsEqual<T>(T, T)",
       "Namespace": "WpfApplication.Infrastructure",
       "TypeName": "ObservableObject",
       "MethodName": "IsEqual",
-      "Signature": "WpfApplication.Infrastructure.ObservableObject.IsEqual\u003CT\u003E(T, T)",
+      "Signature": "WpfApplication.Infrastructure.ObservableObject.IsEqual<T>(T, T)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\TestApplications\\WpfApplication\\Infrastructure\\ObservableObject.cs",
       "Line": 70,
       "Accessibility": "Private",
       "IsStatic": false
     },
     {
-      "Id": "global::WpfApplication.Infrastructure.ObservableObject::WpfApplication.Infrastructure.ObservableObject.OnPropertyChanged\u003CT\u003E(System.Linq.Expressions.Expression\u003CSystem.Func\u003CT\u003E\u003E)",
+      "Id": "global::WpfApplication.Infrastructure.ObservableObject::WpfApplication.Infrastructure.ObservableObject.OnPropertyChanged<T>(System.Linq.Expressions.Expression<System.Func<T>>)",
       "Namespace": "WpfApplication.Infrastructure",
       "TypeName": "ObservableObject",
       "MethodName": "OnPropertyChanged",
-      "Signature": "WpfApplication.Infrastructure.ObservableObject.OnPropertyChanged\u003CT\u003E(System.Linq.Expressions.Expression\u003CSystem.Func\u003CT\u003E\u003E)",
+      "Signature": "WpfApplication.Infrastructure.ObservableObject.OnPropertyChanged<T>(System.Linq.Expressions.Expression<System.Func<T>>)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\TestApplications\\WpfApplication\\Infrastructure\\ObservableObject.cs",
       "Line": 60,
       "Accessibility": "Protected",
@@ -10201,44 +10201,44 @@
       "IsStatic": false
     },
     {
-      "Id": "global::WpfApplication.Infrastructure.ObservableObject::WpfApplication.Infrastructure.ObservableObject.SetProperty\u003CT\u003E(T, string)",
+      "Id": "global::WpfApplication.Infrastructure.ObservableObject::WpfApplication.Infrastructure.ObservableObject.SetProperty<T>(T, string)",
       "Namespace": "WpfApplication.Infrastructure",
       "TypeName": "ObservableObject",
       "MethodName": "SetProperty",
-      "Signature": "WpfApplication.Infrastructure.ObservableObject.SetProperty\u003CT\u003E(T, string)",
+      "Signature": "WpfApplication.Infrastructure.ObservableObject.SetProperty<T>(T, string)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\TestApplications\\WpfApplication\\Infrastructure\\ObservableObject.cs",
       "Line": 37,
       "Accessibility": "Protected",
       "IsStatic": false
     },
     {
-      "Id": "global::WpfApplication.Infrastructure.ObservableObject::WpfApplication.Infrastructure.ObservableObject.SetProperty\u003CT\u003E(ref T, T, string)",
+      "Id": "global::WpfApplication.Infrastructure.ObservableObject::WpfApplication.Infrastructure.ObservableObject.SetProperty<T>(ref T, T, string)",
       "Namespace": "WpfApplication.Infrastructure",
       "TypeName": "ObservableObject",
       "MethodName": "SetProperty",
-      "Signature": "WpfApplication.Infrastructure.ObservableObject.SetProperty\u003CT\u003E(ref T, T, string)",
+      "Signature": "WpfApplication.Infrastructure.ObservableObject.SetProperty<T>(ref T, T, string)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\TestApplications\\WpfApplication\\Infrastructure\\ObservableObject.cs",
       "Line": 52,
       "Accessibility": "Protected",
       "IsStatic": false
     },
     {
-      "Id": "global::WpfApplication.Infrastructure.RelayCommand::WpfApplication.Infrastructure.RelayCommand.RelayCommand(System.Action\u003Cobject\u003E)",
+      "Id": "global::WpfApplication.Infrastructure.RelayCommand::WpfApplication.Infrastructure.RelayCommand.RelayCommand(System.Action<object>)",
       "Namespace": "WpfApplication.Infrastructure",
       "TypeName": "RelayCommand",
       "MethodName": ".ctor",
-      "Signature": "WpfApplication.Infrastructure.RelayCommand.RelayCommand(System.Action\u003Cobject\u003E)",
+      "Signature": "WpfApplication.Infrastructure.RelayCommand.RelayCommand(System.Action<object>)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\TestApplications\\WpfApplication\\Infrastructure\\RelayCommand.cs",
       "Line": 12,
       "Accessibility": "Public",
       "IsStatic": false
     },
     {
-      "Id": "global::WpfApplication.Infrastructure.RelayCommand::WpfApplication.Infrastructure.RelayCommand.RelayCommand(System.Action\u003Cobject\u003E, System.Func\u003Cobject, bool\u003E)",
+      "Id": "global::WpfApplication.Infrastructure.RelayCommand::WpfApplication.Infrastructure.RelayCommand.RelayCommand(System.Action<object>, System.Func<object, bool>)",
       "Namespace": "WpfApplication.Infrastructure",
       "TypeName": "RelayCommand",
       "MethodName": ".ctor",
-      "Signature": "WpfApplication.Infrastructure.RelayCommand.RelayCommand(System.Action\u003Cobject\u003E, System.Func\u003Cobject, bool\u003E)",
+      "Signature": "WpfApplication.Infrastructure.RelayCommand.RelayCommand(System.Action<object>, System.Func<object, bool>)",
       "FilePath": "C:\\Users\\johnb\\source\\repos\\ApexComputerUse\\TestApplications\\WpfApplication\\Infrastructure\\RelayCommand.cs",
       "Line": 15,
       "Accessibility": "Public",
@@ -10581,7 +10581,7 @@
     },
     {
       "From": "global::AiMessagingCore.Examples.ConsoleUsageExample::AiMessagingCore.Examples.ConsoleUsageExample.RunAsync(CancellationToken)",
-      "To": "global::AiMessagingCore.Serialization.SystemTextJsonChatSerializer::AiMessagingCore.Serialization.SystemTextJsonChatSerializer.Serialize(IReadOnlyList\u003CAiMessagingCore.Models.ChatMessage\u003E)",
+      "To": "global::AiMessagingCore.Serialization.SystemTextJsonChatSerializer::AiMessagingCore.Serialization.SystemTextJsonChatSerializer.Serialize(IReadOnlyList<AiMessagingCore.Models.ChatMessage>)",
       "Kind": "invoke"
     },
     {
@@ -10615,22 +10615,22 @@
       "Kind": "invoke"
     },
     {
-      "From": "global::AiMessagingCore.Providers.Local.LlamaSharpChatSession::AiMessagingCore.Providers.Local.LlamaSharpChatSession.EnsureModelLoadedAsync(string, IReadOnlyList\u003CAiMessagingCore.Models.ChatMessage\u003E, CancellationToken)",
+      "From": "global::AiMessagingCore.Providers.Local.LlamaSharpChatSession::AiMessagingCore.Providers.Local.LlamaSharpChatSession.EnsureModelLoadedAsync(string, IReadOnlyList<AiMessagingCore.Models.ChatMessage>, CancellationToken)",
       "To": "global::AiMessagingCore.Abstractions.ILocalModelManager::AiMessagingCore.Abstractions.ILocalModelManager.LoadAsync(string, string, CancellationToken)",
       "Kind": "invoke"
     },
     {
-      "From": "global::AiMessagingCore.Providers.Local.LlamaSharpChatSession::AiMessagingCore.Providers.Local.LlamaSharpChatSession.EnsureModelLoadedAsync(string, IReadOnlyList\u003CAiMessagingCore.Models.ChatMessage\u003E, CancellationToken)",
+      "From": "global::AiMessagingCore.Providers.Local.LlamaSharpChatSession::AiMessagingCore.Providers.Local.LlamaSharpChatSession.EnsureModelLoadedAsync(string, IReadOnlyList<AiMessagingCore.Models.ChatMessage>, CancellationToken)",
       "To": "global::AiMessagingCore.Providers.Local.LlamaSharpChatSession::AiMessagingCore.Providers.Local.LlamaSharpChatSession.DisposeModel()",
       "Kind": "invoke"
     },
     {
-      "From": "global::AiMessagingCore.Providers.Local.LlamaSharpChatSession::AiMessagingCore.Providers.Local.LlamaSharpChatSession.ExecuteStreamAsync(IReadOnlyList\u003CAiMessagingCore.Models.ChatMessage\u003E, AiMessagingCore.Configuration.RequestOverrides?, CancellationToken)",
-      "To": "global::AiMessagingCore.Providers.Local.LlamaSharpChatSession::AiMessagingCore.Providers.Local.LlamaSharpChatSession.EnsureModelLoadedAsync(string, IReadOnlyList\u003CAiMessagingCore.Models.ChatMessage\u003E, CancellationToken)",
+      "From": "global::AiMessagingCore.Providers.Local.LlamaSharpChatSession::AiMessagingCore.Providers.Local.LlamaSharpChatSession.ExecuteStreamAsync(IReadOnlyList<AiMessagingCore.Models.ChatMessage>, AiMessagingCore.Configuration.RequestOverrides?, CancellationToken)",
+      "To": "global::AiMessagingCore.Providers.Local.LlamaSharpChatSession::AiMessagingCore.Providers.Local.LlamaSharpChatSession.EnsureModelLoadedAsync(string, IReadOnlyList<AiMessagingCore.Models.ChatMessage>, CancellationToken)",
       "Kind": "invoke"
     },
     {
-      "From": "global::AiMessagingCore.Providers.Local.LlamaSharpChatSession::AiMessagingCore.Providers.Local.LlamaSharpChatSession.ExecuteStreamAsync(IReadOnlyList\u003CAiMessagingCore.Models.ChatMessage\u003E, AiMessagingCore.Configuration.RequestOverrides?, CancellationToken)",
+      "From": "global::AiMessagingCore.Providers.Local.LlamaSharpChatSession::AiMessagingCore.Providers.Local.LlamaSharpChatSession.ExecuteStreamAsync(IReadOnlyList<AiMessagingCore.Models.ChatMessage>, AiMessagingCore.Configuration.RequestOverrides?, CancellationToken)",
       "To": "global::AiMessagingCore.Providers.Local.LlamaSharpChatSession::AiMessagingCore.Providers.Local.LlamaSharpChatSession.ResolveModelPath(string)",
       "Kind": "invoke"
     },
@@ -10640,12 +10640,12 @@
       "Kind": "new"
     },
     {
-      "From": "global::AiMessagingCore.Providers.Local.LmStudioChatSession::AiMessagingCore.Providers.Local.LmStudioChatSession.ExecuteStreamAsync(IReadOnlyList\u003CAiMessagingCore.Models.ChatMessage\u003E, AiMessagingCore.Configuration.RequestOverrides?, CancellationToken)",
+      "From": "global::AiMessagingCore.Providers.Local.LmStudioChatSession::AiMessagingCore.Providers.Local.LmStudioChatSession.ExecuteStreamAsync(IReadOnlyList<AiMessagingCore.Models.ChatMessage>, AiMessagingCore.Configuration.RequestOverrides?, CancellationToken)",
       "To": "global::AiMessagingCore.Abstractions.ILocalModelManager::AiMessagingCore.Abstractions.ILocalModelManager.IsLoaded(string)",
       "Kind": "invoke"
     },
     {
-      "From": "global::AiMessagingCore.Providers.Local.LmStudioChatSession::AiMessagingCore.Providers.Local.LmStudioChatSession.ExecuteStreamAsync(IReadOnlyList\u003CAiMessagingCore.Models.ChatMessage\u003E, AiMessagingCore.Configuration.RequestOverrides?, CancellationToken)",
+      "From": "global::AiMessagingCore.Providers.Local.LmStudioChatSession::AiMessagingCore.Providers.Local.LmStudioChatSession.ExecuteStreamAsync(IReadOnlyList<AiMessagingCore.Models.ChatMessage>, AiMessagingCore.Configuration.RequestOverrides?, CancellationToken)",
       "To": "global::AiMessagingCore.Abstractions.ILocalModelManager::AiMessagingCore.Abstractions.ILocalModelManager.LoadAsync(string, string, CancellationToken)",
       "Kind": "invoke"
     },
@@ -11175,12 +11175,12 @@
       "Kind": "invoke"
     },
     {
-      "From": "global::ApexComputerUse.AiChatService::ApexComputerUse.AiChatService.SendAsync(string, Action\u003Cstring\u003E, Action\u003Cstring\u003E, Action\u003Cstring\u003E, CancellationToken)",
+      "From": "global::ApexComputerUse.AiChatService::ApexComputerUse.AiChatService.SendAsync(string, Action<string>, Action<string>, Action<string>, CancellationToken)",
       "To": "global::AiMessagingCore.Abstractions.IChatSession::AiMessagingCore.Abstractions.IChatSession.SendAsync(string, AiMessagingCore.Configuration.RequestOverrides?, CancellationToken)",
       "Kind": "invoke"
     },
     {
-      "From": "global::ApexComputerUse.AiChatService::ApexComputerUse.AiChatService.SendAsync(string, Action\u003Cstring\u003E, Action\u003Cstring\u003E, Action\u003Cstring\u003E, CancellationToken)",
+      "From": "global::ApexComputerUse.AiChatService::ApexComputerUse.AiChatService.SendAsync(string, Action<string>, Action<string>, Action<string>, CancellationToken)",
       "To": "global::ApexComputerUse.AiChatService::ApexComputerUse.AiChatService.CreateSession()",
       "Kind": "invoke"
     },
@@ -11430,7 +11430,7 @@
       "Kind": "invoke"
     },
     {
-      "From": "global::ApexComputerUse.ApexHelper::ApexComputerUse.ApexHelper.StitchElementsToBase64(IList\u003CAutomationElement\u003E)",
+      "From": "global::ApexComputerUse.ApexHelper::ApexComputerUse.ApexHelper.StitchElementsToBase64(IList<AutomationElement>)",
       "To": "global::ApexComputerUse.ApexHelper::ApexComputerUse.ApexHelper.BitmapToBase64(System.Drawing.Bitmap)",
       "Kind": "invoke"
     },
@@ -11781,7 +11781,7 @@
     },
     {
       "From": "global::ApexComputerUse.CommandProcessor::ApexComputerUse.CommandProcessor.CmdRenderMap()",
-      "To": "global::ApexComputerUse.UiMapRenderer::ApexComputerUse.UiMapRenderer.UiMapRenderer(System.Collections.Generic.IEnumerable\u003Cstring\u003E)",
+      "To": "global::ApexComputerUse.UiMapRenderer::ApexComputerUse.UiMapRenderer.UiMapRenderer(System.Collections.Generic.IEnumerable<string>)",
       "Kind": "new"
     },
     {
@@ -11841,7 +11841,7 @@
     },
     {
       "From": "global::ApexComputerUse.CommandProcessor::ApexComputerUse.CommandProcessor.CollapseSingleChildChains(ApexComputerUse.CommandProcessor.ElementNode?)",
-      "To": "global::ApexComputerUse.CommandProcessor::ApexComputerUse.CommandProcessor.CloneWithChildren(ApexComputerUse.CommandProcessor.ElementNode, List\u003CApexComputerUse.CommandProcessor.ElementNode\u003E?)",
+      "To": "global::ApexComputerUse.CommandProcessor::ApexComputerUse.CommandProcessor.CloneWithChildren(ApexComputerUse.CommandProcessor.ElementNode, List<ApexComputerUse.CommandProcessor.ElementNode>?)",
       "Kind": "invoke"
     },
     {
@@ -11876,7 +11876,7 @@
     },
     {
       "From": "global::ApexComputerUse.CommandProcessor::ApexComputerUse.CommandProcessor.FilterTreeByMatch(ApexComputerUse.CommandProcessor.ElementNode, string, bool)",
-      "To": "global::ApexComputerUse.CommandProcessor::ApexComputerUse.CommandProcessor.CloneWithChildren(ApexComputerUse.CommandProcessor.ElementNode, List\u003CApexComputerUse.CommandProcessor.ElementNode\u003E?)",
+      "To": "global::ApexComputerUse.CommandProcessor::ApexComputerUse.CommandProcessor.CloneWithChildren(ApexComputerUse.CommandProcessor.ElementNode, List<ApexComputerUse.CommandProcessor.ElementNode>?)",
       "Kind": "invoke"
     },
     {
@@ -11886,7 +11886,7 @@
     },
     {
       "From": "global::ApexComputerUse.CommandProcessor::ApexComputerUse.CommandProcessor.FilterTreeByType(ApexComputerUse.CommandProcessor.ElementNode, ControlType, bool)",
-      "To": "global::ApexComputerUse.CommandProcessor::ApexComputerUse.CommandProcessor.CloneWithChildren(ApexComputerUse.CommandProcessor.ElementNode, List\u003CApexComputerUse.CommandProcessor.ElementNode\u003E?)",
+      "To": "global::ApexComputerUse.CommandProcessor::ApexComputerUse.CommandProcessor.CloneWithChildren(ApexComputerUse.CommandProcessor.ElementNode, List<ApexComputerUse.CommandProcessor.ElementNode>?)",
       "Kind": "invoke"
     },
     {
@@ -12401,7 +12401,7 @@
     },
     {
       "From": "global::ApexComputerUse.DownloadManager::ApexComputerUse.DownloadManager.DownloadAsync(string, string)",
-      "To": "global::ApexComputerUse.DownloadManager::ApexComputerUse.DownloadManager.DownloadStreamAsync(string, string, System.Action\u003Cstring, System.Drawing.Color\u003E, System.Threading.CancellationToken)",
+      "To": "global::ApexComputerUse.DownloadManager::ApexComputerUse.DownloadManager.DownloadStreamAsync(string, string, System.Action<string, System.Drawing.Color>, System.Threading.CancellationToken)",
       "Kind": "invoke"
     },
     {
@@ -12411,7 +12411,7 @@
     },
     {
       "From": "global::ApexComputerUse.DownloadManager::ApexComputerUse.DownloadManager.RunSetupAsync()",
-      "To": "global::ApexComputerUse.DownloadManager::ApexComputerUse.DownloadManager.DownloadStreamAsync(string, string, System.Action\u003Cstring, System.Drawing.Color\u003E, System.Threading.CancellationToken)",
+      "To": "global::ApexComputerUse.DownloadManager::ApexComputerUse.DownloadManager.DownloadStreamAsync(string, string, System.Action<string, System.Drawing.Color>, System.Threading.CancellationToken)",
       "Kind": "invoke"
     },
     {
@@ -12690,12 +12690,12 @@
       "Kind": "invoke"
     },
     {
-      "From": "global::ApexComputerUse.Form1::ApexComputerUse.Form1.SafeRun(Func\u003CTask\u003E, string?)",
+      "From": "global::ApexComputerUse.Form1::ApexComputerUse.Form1.SafeRun(Func<Task>, string?)",
       "To": "global::ApexComputerUse.AppLog::ApexComputerUse.AppLog.FromOnLog(string)",
       "Kind": "invoke"
     },
     {
-      "From": "global::ApexComputerUse.Form1::ApexComputerUse.Form1.SafeRun(Func\u003CTask\u003E, string?)",
+      "From": "global::ApexComputerUse.Form1::ApexComputerUse.Form1.SafeRun(Func<Task>, string?)",
       "To": "global::ApexComputerUse.Form1::ApexComputerUse.Form1.Log(string)",
       "Kind": "invoke"
     },
@@ -12746,7 +12746,7 @@
     },
     {
       "From": "global::ApexComputerUse.FormatAdapter::ApexComputerUse.FormatAdapter.RenderPdf(ApexComputerUse.ApexResult)",
-      "To": "global::ApexComputerUse.PdfWriter::ApexComputerUse.PdfWriter.GenerateTextPdf(List\u003Cstring\u003E)",
+      "To": "global::ApexComputerUse.PdfWriter::ApexComputerUse.PdfWriter.GenerateTextPdf(List<string>)",
       "Kind": "invoke"
     },
     {
@@ -13030,18 +13030,18 @@
       "Kind": "invoke"
     },
     {
-      "From": "global::ApexComputerUse.MtmdHelper::ApexComputerUse.MtmdHelper.DescribeElementsAsync(IEnumerable\u003CAutomationElement\u003E, string)",
+      "From": "global::ApexComputerUse.MtmdHelper::ApexComputerUse.MtmdHelper.DescribeElementsAsync(IEnumerable<AutomationElement>, string)",
       "To": "global::ApexComputerUse.MtmdHelper::ApexComputerUse.MtmdHelper.EnsureInitialized()",
       "Kind": "invoke"
     },
     {
-      "From": "global::ApexComputerUse.MtmdHelper::ApexComputerUse.MtmdHelper.DescribeElementsAsync(IEnumerable\u003CAutomationElement\u003E, string)",
+      "From": "global::ApexComputerUse.MtmdHelper::ApexComputerUse.MtmdHelper.DescribeElementsAsync(IEnumerable<AutomationElement>, string)",
       "To": "global::ApexComputerUse.MtmdHelper::ApexComputerUse.MtmdHelper.EnsureVision()",
       "Kind": "invoke"
     },
     {
-      "From": "global::ApexComputerUse.MtmdHelper::ApexComputerUse.MtmdHelper.DescribeElementsAsync(IEnumerable\u003CAutomationElement\u003E, string)",
-      "To": "global::ApexComputerUse.MtmdHelper::ApexComputerUse.MtmdHelper.RunInferenceAsync(string, List\u003CSafeMtmdEmbed\u003E)",
+      "From": "global::ApexComputerUse.MtmdHelper::ApexComputerUse.MtmdHelper.DescribeElementsAsync(IEnumerable<AutomationElement>, string)",
+      "To": "global::ApexComputerUse.MtmdHelper::ApexComputerUse.MtmdHelper.RunInferenceAsync(string, List<SafeMtmdEmbed>)",
       "Kind": "invoke"
     },
     {
@@ -13065,18 +13065,18 @@
       "Kind": "invoke"
     },
     {
-      "From": "global::ApexComputerUse.MtmdHelper::ApexComputerUse.MtmdHelper.DescribeImagesAsync(IEnumerable\u003Cstring\u003E, string)",
+      "From": "global::ApexComputerUse.MtmdHelper::ApexComputerUse.MtmdHelper.DescribeImagesAsync(IEnumerable<string>, string)",
       "To": "global::ApexComputerUse.MtmdHelper::ApexComputerUse.MtmdHelper.EnsureInitialized()",
       "Kind": "invoke"
     },
     {
-      "From": "global::ApexComputerUse.MtmdHelper::ApexComputerUse.MtmdHelper.DescribeImagesAsync(IEnumerable\u003Cstring\u003E, string)",
+      "From": "global::ApexComputerUse.MtmdHelper::ApexComputerUse.MtmdHelper.DescribeImagesAsync(IEnumerable<string>, string)",
       "To": "global::ApexComputerUse.MtmdHelper::ApexComputerUse.MtmdHelper.EnsureVision()",
       "Kind": "invoke"
     },
     {
-      "From": "global::ApexComputerUse.MtmdHelper::ApexComputerUse.MtmdHelper.DescribeImagesAsync(IEnumerable\u003Cstring\u003E, string)",
-      "To": "global::ApexComputerUse.MtmdHelper::ApexComputerUse.MtmdHelper.RunInferenceAsync(string, List\u003CSafeMtmdEmbed\u003E)",
+      "From": "global::ApexComputerUse.MtmdHelper::ApexComputerUse.MtmdHelper.DescribeImagesAsync(IEnumerable<string>, string)",
+      "To": "global::ApexComputerUse.MtmdHelper::ApexComputerUse.MtmdHelper.RunInferenceAsync(string, List<SafeMtmdEmbed>)",
       "Kind": "invoke"
     },
     {
@@ -13290,7 +13290,7 @@
       "Kind": "invoke"
     },
     {
-      "From": "global::ApexComputerUse.SceneEditorForm::ApexComputerUse.SceneEditorForm.AddPropField(string, string, Action\u003Cstring\u003E)",
+      "From": "global::ApexComputerUse.SceneEditorForm::ApexComputerUse.SceneEditorForm.AddPropField(string, string, Action<string>)",
       "To": "global::ApexComputerUse.SceneEditorForm::ApexComputerUse.SceneEditorForm.RefreshPropsPanel()",
       "Kind": "invoke"
     },
@@ -14160,7 +14160,7 @@
       "Kind": "invoke"
     },
     {
-      "From": "global::ApexComputerUse.TelegramController::ApexComputerUse.TelegramController.TelegramController(string, ApexComputerUse.CommandProcessor, IReadOnlyCollection\u003Clong\u003E?)",
+      "From": "global::ApexComputerUse.TelegramController::ApexComputerUse.TelegramController.TelegramController(string, ApexComputerUse.CommandProcessor, IReadOnlyCollection<long>?)",
       "To": "global::ApexComputerUse.CommandDispatcher::ApexComputerUse.CommandDispatcher.CommandDispatcher(ApexComputerUse.CommandProcessor)",
       "Kind": "new"
     },
@@ -14276,7 +14276,7 @@
     },
     {
       "From": "global::ApexComputerUse.Tests.CommandProcessorTreeTests::ApexComputerUse.Tests.CommandProcessorTreeTests.CollapseChains_DoesNotCollapse_WhenParentHasMultipleChildren()",
-      "To": "global::ApexComputerUse.Tests.CommandProcessorTreeTests::ApexComputerUse.Tests.CommandProcessorTreeTests.Node(int, string, string, string, System.Collections.Generic.IEnumerable\u003CApexComputerUse.CommandProcessor.ElementNode\u003E?, int?, int?, string?, string?)",
+      "To": "global::ApexComputerUse.Tests.CommandProcessorTreeTests::ApexComputerUse.Tests.CommandProcessorTreeTests.Node(int, string, string, string, System.Collections.Generic.IEnumerable<ApexComputerUse.CommandProcessor.ElementNode>?, int?, int?, string?, string?)",
       "Kind": "invoke"
     },
     {
@@ -14291,7 +14291,7 @@
     },
     {
       "From": "global::ApexComputerUse.Tests.CommandProcessorTreeTests::ApexComputerUse.Tests.CommandProcessorTreeTests.CollapseChains_PreservesElementIdsThroughCollapse()",
-      "To": "global::ApexComputerUse.Tests.CommandProcessorTreeTests::ApexComputerUse.Tests.CommandProcessorTreeTests.Node(int, string, string, string, System.Collections.Generic.IEnumerable\u003CApexComputerUse.CommandProcessor.ElementNode\u003E?, int?, int?, string?, string?)",
+      "To": "global::ApexComputerUse.Tests.CommandProcessorTreeTests::ApexComputerUse.Tests.CommandProcessorTreeTests.Node(int, string, string, string, System.Collections.Generic.IEnumerable<ApexComputerUse.CommandProcessor.ElementNode>?, int?, int?, string?, string?)",
       "Kind": "invoke"
     },
     {
@@ -14306,12 +14306,12 @@
     },
     {
       "From": "global::ApexComputerUse.Tests.CommandProcessorTreeTests::ApexComputerUse.Tests.CommandProcessorTreeTests.CollapseChains_SkipsIdentitylessPaneGroupCustom_ButPreservesNamedContainers()",
-      "To": "global::ApexComputerUse.Tests.CommandProcessorTreeTests::ApexComputerUse.Tests.CommandProcessorTreeTests.Node(int, string, string, string, System.Collections.Generic.IEnumerable\u003CApexComputerUse.CommandProcessor.ElementNode\u003E?, int?, int?, string?, string?)",
+      "To": "global::ApexComputerUse.Tests.CommandProcessorTreeTests::ApexComputerUse.Tests.CommandProcessorTreeTests.Node(int, string, string, string, System.Collections.Generic.IEnumerable<ApexComputerUse.CommandProcessor.ElementNode>?, int?, int?, string?, string?)",
       "Kind": "invoke"
     },
     {
       "From": "global::ApexComputerUse.Tests.CommandProcessorTreeTests::ApexComputerUse.Tests.CommandProcessorTreeTests.ElementNode_OptionalFields_AreOmittedWhenNull_AndIncludedWhenPopulated()",
-      "To": "global::ApexComputerUse.Tests.CommandProcessorTreeTests::ApexComputerUse.Tests.CommandProcessorTreeTests.Node(int, string, string, string, System.Collections.Generic.IEnumerable\u003CApexComputerUse.CommandProcessor.ElementNode\u003E?, int?, int?, string?, string?)",
+      "To": "global::ApexComputerUse.Tests.CommandProcessorTreeTests::ApexComputerUse.Tests.CommandProcessorTreeTests.Node(int, string, string, string, System.Collections.Generic.IEnumerable<ApexComputerUse.CommandProcessor.ElementNode>?, int?, int?, string?, string?)",
       "Kind": "invoke"
     },
     {
@@ -14326,7 +14326,7 @@
     },
     {
       "From": "global::ApexComputerUse.Tests.CommandProcessorTreeTests::ApexComputerUse.Tests.CommandProcessorTreeTests.MatchFilter_IsCaseInsensitive_AndSearchesAutomationIdAndValue()",
-      "To": "global::ApexComputerUse.Tests.CommandProcessorTreeTests::ApexComputerUse.Tests.CommandProcessorTreeTests.Node(int, string, string, string, System.Collections.Generic.IEnumerable\u003CApexComputerUse.CommandProcessor.ElementNode\u003E?, int?, int?, string?, string?)",
+      "To": "global::ApexComputerUse.Tests.CommandProcessorTreeTests::ApexComputerUse.Tests.CommandProcessorTreeTests.Node(int, string, string, string, System.Collections.Generic.IEnumerable<ApexComputerUse.CommandProcessor.ElementNode>?, int?, int?, string?, string?)",
       "Kind": "invoke"
     },
     {
@@ -14341,7 +14341,7 @@
     },
     {
       "From": "global::ApexComputerUse.Tests.CommandProcessorTreeTests::ApexComputerUse.Tests.CommandProcessorTreeTests.MatchFilter_KeepsOnlyBranchesContainingMatches()",
-      "To": "global::ApexComputerUse.Tests.CommandProcessorTreeTests::ApexComputerUse.Tests.CommandProcessorTreeTests.Node(int, string, string, string, System.Collections.Generic.IEnumerable\u003CApexComputerUse.CommandProcessor.ElementNode\u003E?, int?, int?, string?, string?)",
+      "To": "global::ApexComputerUse.Tests.CommandProcessorTreeTests::ApexComputerUse.Tests.CommandProcessorTreeTests.Node(int, string, string, string, System.Collections.Generic.IEnumerable<ApexComputerUse.CommandProcessor.ElementNode>?, int?, int?, string?, string?)",
       "Kind": "invoke"
     },
     {
@@ -15096,7 +15096,7 @@
     },
     {
       "From": "global::ApexComputerUse.UiMapRenderer::ApexComputerUse.UiMapRenderer.ShowOverlay(string, int)",
-      "To": "global::ApexComputerUse.UiMapRenderer.OverlayForm::ApexComputerUse.UiMapRenderer.OverlayForm.OverlayForm(System.Collections.Generic.List\u003CApexComputerUse.UiMapRenderer.UiElement\u003E?, System.Collections.Generic.HashSet\u003Cstring\u003E, System.Collections.Generic.Dictionary\u003Cstring, System.Drawing.Color\u003E, System.Func\u003Cstring, System.Drawing.Color\u003E, int)",
+      "To": "global::ApexComputerUse.UiMapRenderer.OverlayForm::ApexComputerUse.UiMapRenderer.OverlayForm.OverlayForm(System.Collections.Generic.List<ApexComputerUse.UiMapRenderer.UiElement>?, System.Collections.Generic.HashSet<string>, System.Collections.Generic.Dictionary<string, System.Drawing.Color>, System.Func<string, System.Drawing.Color>, int)",
       "Kind": "new"
     },
     {
@@ -15211,7 +15211,7 @@
     },
     {
       "From": "global::ApexUIBridge.ElementTester.ElementTests::ApexUIBridge.ElementTester.ElementTests.TestPasswordBox(ApexUIBridge.ElementTester.TestContext, string, string, CancellationToken)",
-      "To": "global::ApexUIBridge.ElementTester.TestContext::ApexUIBridge.ElementTester.TestContext.TestAsync(string, string, Func\u003CApexUIBridge.ElementTester.BridgeResponse, bool\u003E?, CancellationToken)",
+      "To": "global::ApexUIBridge.ElementTester.TestContext::ApexUIBridge.ElementTester.TestContext.TestAsync(string, string, Func<ApexUIBridge.ElementTester.BridgeResponse, bool>?, CancellationToken)",
       "Kind": "invoke"
     },
     {
@@ -15325,7 +15325,7 @@
       "Kind": "invoke"
     },
     {
-      "From": "global::ApexUIBridge.ElementTester.TestContext::ApexUIBridge.ElementTester.TestContext.TestAsync(string, string, Func\u003CApexUIBridge.ElementTester.BridgeResponse, bool\u003E?, CancellationToken)",
+      "From": "global::ApexUIBridge.ElementTester.TestContext::ApexUIBridge.ElementTester.TestContext.TestAsync(string, string, Func<ApexUIBridge.ElementTester.BridgeResponse, bool>?, CancellationToken)",
       "To": "global::ApexUIBridge.ElementTester.BridgeClient::ApexUIBridge.ElementTester.BridgeClient.SendAsync(string, CancellationToken)",
       "Kind": "invoke"
     },
@@ -15346,66 +15346,66 @@
     },
     {
       "From": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.RunAsync(CancellationToken)",
-      "To": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.RunWinFormsTortureTests(List\u003CApexUIBridge.TestRunner.TestResult\u003E, CancellationToken)",
+      "To": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.RunWinFormsTortureTests(List<ApexUIBridge.TestRunner.TestResult>, CancellationToken)",
       "Kind": "invoke"
     },
     {
       "From": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.RunAsync(CancellationToken)",
-      "To": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.RunWpfTortureTests(List\u003CApexUIBridge.TestRunner.TestResult\u003E, CancellationToken)",
+      "To": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.RunWpfTortureTests(List<ApexUIBridge.TestRunner.TestResult>, CancellationToken)",
       "Kind": "invoke"
     },
     {
-      "From": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.RunWinFormsTortureTests(List\u003CApexUIBridge.TestRunner.TestResult\u003E, CancellationToken)",
+      "From": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.RunWinFormsTortureTests(List<ApexUIBridge.TestRunner.TestResult>, CancellationToken)",
       "To": "global::ApexUIBridge.TestRunner.BridgeClient::ApexUIBridge.TestRunner.BridgeClient.SendAsync(string, CancellationToken)",
       "Kind": "invoke"
     },
     {
-      "From": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.RunWinFormsTortureTests(List\u003CApexUIBridge.TestRunner.TestResult\u003E, CancellationToken)",
+      "From": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.RunWinFormsTortureTests(List<ApexUIBridge.TestRunner.TestResult>, CancellationToken)",
       "To": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.Result(string, bool, string)",
       "Kind": "invoke"
     },
     {
-      "From": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.RunWpfTortureTests(List\u003CApexUIBridge.TestRunner.TestResult\u003E, CancellationToken)",
+      "From": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.RunWpfTortureTests(List<ApexUIBridge.TestRunner.TestResult>, CancellationToken)",
       "To": "global::ApexUIBridge.TestRunner.BridgeClient::ApexUIBridge.TestRunner.BridgeClient.SendAsync(string, CancellationToken)",
       "Kind": "invoke"
     },
     {
-      "From": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.RunWpfTortureTests(List\u003CApexUIBridge.TestRunner.TestResult\u003E, CancellationToken)",
+      "From": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.RunWpfTortureTests(List<ApexUIBridge.TestRunner.TestResult>, CancellationToken)",
       "To": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.Result(string, bool, string)",
       "Kind": "invoke"
     },
     {
-      "From": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.Test(List\u003CApexUIBridge.TestRunner.TestResult\u003E, string, string, Func\u003CApexUIBridge.TestRunner.BridgeResponse, bool\u003E, CancellationToken)",
+      "From": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.Test(List<ApexUIBridge.TestRunner.TestResult>, string, string, Func<ApexUIBridge.TestRunner.BridgeResponse, bool>, CancellationToken)",
       "To": "global::ApexUIBridge.TestRunner.BridgeClient::ApexUIBridge.TestRunner.BridgeClient.SendAsync(string, CancellationToken)",
       "Kind": "invoke"
     },
     {
-      "From": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.Torture_ClickTab(List\u003CApexUIBridge.TestRunner.TestResult\u003E, string, string, string, CancellationToken)",
+      "From": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.Torture_ClickTab(List<ApexUIBridge.TestRunner.TestResult>, string, string, string, CancellationToken)",
       "To": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.FindId(string, string)",
       "Kind": "invoke"
     },
     {
-      "From": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.Torture_ClickTab(List\u003CApexUIBridge.TestRunner.TestResult\u003E, string, string, string, CancellationToken)",
+      "From": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.Torture_ClickTab(List<ApexUIBridge.TestRunner.TestResult>, string, string, string, CancellationToken)",
       "To": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.Result(string, bool, string)",
       "Kind": "invoke"
     },
     {
-      "From": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.Torture_Toggle(List\u003CApexUIBridge.TestRunner.TestResult\u003E, string, string, string, CancellationToken, bool)",
+      "From": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.Torture_Toggle(List<ApexUIBridge.TestRunner.TestResult>, string, string, string, CancellationToken, bool)",
       "To": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.FindId(string, string)",
       "Kind": "invoke"
     },
     {
-      "From": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.Torture_Toggle(List\u003CApexUIBridge.TestRunner.TestResult\u003E, string, string, string, CancellationToken, bool)",
+      "From": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.Torture_Toggle(List<ApexUIBridge.TestRunner.TestResult>, string, string, string, CancellationToken, bool)",
       "To": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.Result(string, bool, string)",
       "Kind": "invoke"
     },
     {
-      "From": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.Torture_Type(List\u003CApexUIBridge.TestRunner.TestResult\u003E, string, string, string, string, CancellationToken)",
+      "From": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.Torture_Type(List<ApexUIBridge.TestRunner.TestResult>, string, string, string, string, CancellationToken)",
       "To": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.FindId(string, string)",
       "Kind": "invoke"
     },
     {
-      "From": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.Torture_Type(List\u003CApexUIBridge.TestRunner.TestResult\u003E, string, string, string, string, CancellationToken)",
+      "From": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.Torture_Type(List<ApexUIBridge.TestRunner.TestResult>, string, string, string, string, CancellationToken)",
       "To": "global::ApexUIBridge.TestRunner.TestSuite::ApexUIBridge.TestRunner.TestSuite.Result(string, bool, string)",
       "Kind": "invoke"
     },
@@ -15535,38 +15535,38 @@
       "Kind": "invoke"
     },
     {
-      "From": "global::WpfApplication.Infrastructure.ObservableObject::WpfApplication.Infrastructure.ObservableObject.OnPropertyChanged\u003CT\u003E(System.Linq.Expressions.Expression\u003CSystem.Func\u003CT\u003E\u003E)",
-      "To": "global::WpfApplication.Infrastructure.ObservableObject::WpfApplication.Infrastructure.ObservableObject.GetNameFromExpression\u003CT\u003E(System.Linq.Expressions.Expression\u003CSystem.Func\u003CT\u003E\u003E)",
+      "From": "global::WpfApplication.Infrastructure.ObservableObject::WpfApplication.Infrastructure.ObservableObject.OnPropertyChanged<T>(System.Linq.Expressions.Expression<System.Func<T>>)",
+      "To": "global::WpfApplication.Infrastructure.ObservableObject::WpfApplication.Infrastructure.ObservableObject.GetNameFromExpression<T>(System.Linq.Expressions.Expression<System.Func<T>>)",
       "Kind": "invoke"
     },
     {
-      "From": "global::WpfApplication.Infrastructure.ObservableObject::WpfApplication.Infrastructure.ObservableObject.SetProperty\u003CT\u003E(ref T, T, string)",
-      "To": "global::WpfApplication.Infrastructure.ObservableObject::WpfApplication.Infrastructure.ObservableObject.IsEqual\u003CT\u003E(T, T)",
+      "From": "global::WpfApplication.Infrastructure.ObservableObject::WpfApplication.Infrastructure.ObservableObject.SetProperty<T>(ref T, T, string)",
+      "To": "global::WpfApplication.Infrastructure.ObservableObject::WpfApplication.Infrastructure.ObservableObject.IsEqual<T>(T, T)",
       "Kind": "invoke"
     },
     {
-      "From": "global::WpfApplication.Infrastructure.ObservableObject::WpfApplication.Infrastructure.ObservableObject.SetProperty\u003CT\u003E(ref T, T, string)",
+      "From": "global::WpfApplication.Infrastructure.ObservableObject::WpfApplication.Infrastructure.ObservableObject.SetProperty<T>(ref T, T, string)",
       "To": "global::WpfApplication.Infrastructure.ObservableObject::WpfApplication.Infrastructure.ObservableObject.OnPropertyChanged(string)",
       "Kind": "invoke"
     },
     {
-      "From": "global::WpfApplication.Infrastructure.ObservableObject::WpfApplication.Infrastructure.ObservableObject.SetProperty\u003CT\u003E(T, string)",
-      "To": "global::WpfApplication.Infrastructure.ObservableObject::WpfApplication.Infrastructure.ObservableObject.GetProperty\u003CT\u003E(string)",
+      "From": "global::WpfApplication.Infrastructure.ObservableObject::WpfApplication.Infrastructure.ObservableObject.SetProperty<T>(T, string)",
+      "To": "global::WpfApplication.Infrastructure.ObservableObject::WpfApplication.Infrastructure.ObservableObject.GetProperty<T>(string)",
       "Kind": "invoke"
     },
     {
-      "From": "global::WpfApplication.Infrastructure.ObservableObject::WpfApplication.Infrastructure.ObservableObject.SetProperty\u003CT\u003E(T, string)",
-      "To": "global::WpfApplication.Infrastructure.ObservableObject::WpfApplication.Infrastructure.ObservableObject.IsEqual\u003CT\u003E(T, T)",
+      "From": "global::WpfApplication.Infrastructure.ObservableObject::WpfApplication.Infrastructure.ObservableObject.SetProperty<T>(T, string)",
+      "To": "global::WpfApplication.Infrastructure.ObservableObject::WpfApplication.Infrastructure.ObservableObject.IsEqual<T>(T, T)",
       "Kind": "invoke"
     },
     {
-      "From": "global::WpfApplication.Infrastructure.ObservableObject::WpfApplication.Infrastructure.ObservableObject.SetProperty\u003CT\u003E(T, string)",
+      "From": "global::WpfApplication.Infrastructure.ObservableObject::WpfApplication.Infrastructure.ObservableObject.SetProperty<T>(T, string)",
       "To": "global::WpfApplication.Infrastructure.ObservableObject::WpfApplication.Infrastructure.ObservableObject.OnPropertyChanged(string)",
       "Kind": "invoke"
     },
     {
       "From": "global::WpfApplication.MainViewModel::WpfApplication.MainViewModel.MainViewModel()",
-      "To": "global::WpfApplication.Infrastructure.RelayCommand::WpfApplication.Infrastructure.RelayCommand.RelayCommand(System.Action\u003Cobject\u003E)",
+      "To": "global::WpfApplication.Infrastructure.RelayCommand::WpfApplication.Infrastructure.RelayCommand.RelayCommand(System.Action<object>)",
       "Kind": "new"
     },
     {

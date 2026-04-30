@@ -7,8 +7,8 @@ namespace ApexComputerUse
 {
     /// <summary>
     /// Bridges the SceneEditorForm's collab chat dock to the AI.
-    /// User message → AI (with scene JSON context) → streamed tokens back to the log.
-    /// Any ```json fenced block of the form <c>{"ops":[…]}</c> in the reply is
+    /// User message \-> AI (with scene JSON context) \-> streamed tokens back to the log.
+    /// Any ```json fenced block of the form <c>{"ops":[\...]}</c> in the reply is
     /// parsed and applied to the SceneStore, so the canvas updates live.
     /// </summary>
     public sealed class SceneChatAgent
@@ -77,13 +77,13 @@ namespace ApexComputerUse
                 _editor.AppendChatLog("sys", $"applied {applied} scene op{(applied == 1 ? "" : "s")}");
         }
 
-        // ── Prompt ────────────────────────────────────────────────────────
+        // \-\- Prompt \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 
         private string BuildPrompt(string userText, string? sceneId)
         {
             var sb = new StringBuilder();
 
-            // Schema preamble only on the first turn — session retains context.
+            // Schema preamble only on the first turn \- session retains context.
             if (_turn == 0)
             {
                 sb.AppendLine(
@@ -92,7 +92,7 @@ namespace ApexComputerUse
                 sb.AppendLine("```json");
                 sb.AppendLine("{\"ops\":[");
                 sb.AppendLine("  {\"action\":\"add-shape\",   \"layer_id\":\"<id>\", \"shape\":{\"type\":\"rect|ellipse|circle|line|arrow|text|triangle|arc\",\"x\":0,\"y\":0,\"w\":100,\"h\":80,\"color\":\"#rrggbb\",\"fill\":true}},");
-                sb.AppendLine("  {\"action\":\"update-shape\",\"layer_id\":\"<id>\",\"shape_id\":\"<id>\",\"shape\":{…full replacement…}},");
+                sb.AppendLine("  {\"action\":\"update-shape\",\"layer_id\":\"<id>\",\"shape_id\":\"<id>\",\"shape\":{...full replacement...}},");
                 sb.AppendLine("  {\"action\":\"delete-shape\",\"layer_id\":\"<id>\",\"shape_id\":\"<id>\"},");
                 sb.AppendLine("  {\"action\":\"add-layer\",   \"name\":\"<name>\"}");
                 sb.AppendLine("]}");
@@ -118,7 +118,7 @@ namespace ApexComputerUse
             return sb.ToString();
         }
 
-        // ── Op application ────────────────────────────────────────────────
+        // \-\- Op application \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 
         private int ApplyOps(string reply, string sceneId)
         {
@@ -185,7 +185,7 @@ namespace ApexComputerUse
             return scene.Layers.OrderBy(l => l.ZIndex).First().Id;
         }
 
-        // ── Op envelope ───────────────────────────────────────────────────
+        // \-\- Op envelope \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 
         private sealed class Envelope
         {

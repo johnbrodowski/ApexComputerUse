@@ -4,7 +4,7 @@ namespace ApexComputerUse
 {
     /// <summary>
     /// Maps a JSON object into a <see cref="CommandRequest"/>. Used by both the HTTP server
-    /// (POST bodies) and the named-pipe server (newline-delimited JSON lines) — those two
+    /// (POST bodies) and the named-pipe server (newline-delimited JSON lines) - those two
     /// hand-rolled the same field mapping with subtly different subsets before. Adding a new
     /// <see cref="CommandRequest"/> property now means exactly one edit here, not two.
     /// </summary>
@@ -12,7 +12,7 @@ namespace ApexComputerUse
     {
         /// <summary>Parses <paramref name="json"/> into a CommandRequest with the given
         /// <paramref name="command"/> verb and optional default <paramref name="action"/>.
-        /// Malformed JSON returns a request with just the command filled in — callers decide
+        /// Malformed JSON returns a request with just the command filled in - callers decide
         /// whether to fail hard or forward it to the processor for an "ERR" response.</summary>
         public static CommandRequest FromJson(string? json, string command, string? action = null)
         {
@@ -23,7 +23,7 @@ namespace ApexComputerUse
                 using var doc = JsonDocument.Parse(json);
                 Populate(r, doc.RootElement);
             }
-            catch (Exception ex) { AppLog.Debug($"[JsonMapper] Malformed JSON — {ex.Message}"); }
+            catch (Exception ex) { AppLog.Debug($"[JsonMapper] Malformed JSON - {ex.Message}"); }
             return r;
         }
 
@@ -31,7 +31,7 @@ namespace ApexComputerUse
         /// command verb lives inside the JSON object rather than coming from a URL route.</summary>
         public static CommandRequest FromJsonSelfDescribing(string json)
         {
-            // Empty or malformed input maps to "help" — the pipe client gets a useful
+            // Empty or malformed input maps to "help" - the pipe client gets a useful
             // response rather than an "Unknown command ''" error. Valid JSON that
             // simply omits "command" leaves it blank; the processor surfaces that.
             if (string.IsNullOrWhiteSpace(json))
@@ -47,7 +47,7 @@ namespace ApexComputerUse
             }
             catch (Exception ex)
             {
-                AppLog.Debug($"[JsonMapper] Malformed JSON — {ex.Message}");
+                AppLog.Debug($"[JsonMapper] Malformed JSON - {ex.Message}");
                 r.Command = "help";
             }
             return r;
@@ -79,3 +79,4 @@ namespace ApexComputerUse
         }
     }
 }
+

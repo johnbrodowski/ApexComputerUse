@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace ApexComputerUse
 {
-    // ── Shape wrapper (adds editor metadata around ShapeCommand) ──────────
+    // \-\- Shape wrapper (adds editor metadata around ShapeCommand) \-\-\-\-\-\-\-\-\-\-
 
     public sealed class SceneShape
     {
@@ -15,7 +15,7 @@ namespace ApexComputerUse
         [JsonPropertyName("shape")]   public AIDrawingCommand.ShapeCommand Shape { get; set; } = new();
     }
 
-    // ── Layer ─────────────────────────────────────────────────────────────
+    // \-\- Layer \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 
     public sealed class Layer
     {
@@ -28,7 +28,7 @@ namespace ApexComputerUse
         [JsonPropertyName("shapes")]  public List<SceneShape>  Shapes  { get; set; } = [];
     }
 
-    // ── Scene ─────────────────────────────────────────────────────────────
+    // \-\- Scene \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 
     public sealed class Scene
     {
@@ -42,9 +42,9 @@ namespace ApexComputerUse
         [JsonPropertyName("updated_at")] public string      UpdatedAt  { get; set; } = DateTimeOffset.UtcNow.ToString("O");
 
         /// <summary>
-        /// Returns all visible shapes in render order (layer z_index asc → shape z_index asc)
+        /// Returns all visible shapes in render order (layer z_index asc \-> shape z_index asc)
         /// with opacity multiplied by the containing layer's opacity.
-        /// The returned ShapeCommands are clones — safe to mutate without affecting the scene.
+        /// The returned ShapeCommands are clones \- safe to mutate without affecting the scene.
         /// </summary>
         public List<AIDrawingCommand.ShapeCommand> FlattenForRender()
         {
@@ -55,7 +55,7 @@ namespace ApexComputerUse
             {
                 foreach (var ss in layer.Shapes.Where(s => s.Visible).OrderBy(s => s.ZIndex))
                 {
-                    // JSON round-trip clone — maintenance-free as new fields are added
+                    // JSON round-trip clone \- maintenance-free as new fields are added
                     var json  = JsonSerializer.Serialize(ss.Shape, opts);
                     var clone = JsonSerializer.Deserialize<AIDrawingCommand.ShapeCommand>(json, opts)!;
                     clone.Opacity = clone.Opacity * layer.Opacity;
@@ -78,7 +78,7 @@ namespace ApexComputerUse
         public void Touch() => UpdatedAt = DateTimeOffset.UtcNow.ToString("O");
     }
 
-    // ── Shared ID generator ───────────────────────────────────────────────
+    // \-\- Shared ID generator \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 
     internal static class SceneIds
     {

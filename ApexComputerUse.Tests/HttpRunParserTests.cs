@@ -4,12 +4,12 @@ using Xunit;
 namespace ApexComputerUse.Tests;
 
 /// <summary>
-/// Tests for /run command extraction — backward-compat "value" field and new "command" alias.
+/// Tests for /run command extraction - backward-compat "value" field and new "command" alias.
 /// ParseJsonString is internal (InternalsVisibleTo).
 /// </summary>
 public class HttpRunParserTests
 {
-    // ── ParseJsonString helper ────────────────────────────────────────────
+    // -- ParseJsonString helper --------------------------------------------
 
     [Fact]
     public void ParseJsonString_CommandField_ReturnsValue()
@@ -38,7 +38,7 @@ public class HttpRunParserTests
         Assert.Null(HttpCommandServer.ParseJsonString("{not valid json", "command"));
     }
 
-    // ── CommandRequestJsonMapper — "value" field backward compat ─────────
+    // -- CommandRequestJsonMapper - "value" field backward compat ---------
 
     [Fact]
     public void FromJson_ValueField_MapsToValue()
@@ -54,3 +54,4 @@ public class HttpRunParserTests
         Assert.Null(req.Value);
     }
 }
+

@@ -1,4 +1,4 @@
-﻿using FlaUI.Core;
+using FlaUI.Core;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Capturing;
 using FlaUI.Core.Definitions;
@@ -11,10 +11,10 @@ namespace ApexComputerUse
 {
     public partial class ApexHelper
     {
-        // ── ComboBox / ListBox (multi-strategy) ───────────────────────────
+        // -- ComboBox / ListBox (multi-strategy) ---------------------------
 
         /// <summary>
-        /// Selects by text: tries SelectionItem on list children → ComboBox.Select → ListBox.Select.
+        /// Selects by text: tries SelectionItem on list children -> ComboBox.Select -> ListBox.Select.
         /// </summary>
         public void SelectComboBoxItem(AutomationElement el, string text)
         {
@@ -108,7 +108,7 @@ namespace ApexComputerUse
             var combo = el.AsComboBox();
             if (combo != null)
             {
-                // Expand manually to populate children — avoids FlaUI's Items getter which
+                // Expand manually to populate children - avoids FlaUI's Items getter which
                 // calls Expand() internally and throws NullReferenceException on WinForms combos.
                 try
                 {
@@ -152,7 +152,7 @@ namespace ApexComputerUse
 
         public string GetComboBoxSelected(AutomationElement el)
         {
-            // Value pattern is the most reliable for WinForms combos — check it first
+            // Value pattern is the most reliable for WinForms combos - check it first
             // to avoid triggering FlaUI's ComboBox.Expand() which throws NullReferenceException
             // when the ExpandCollapse pattern is absent.
             if (el.Patterns.Value.TryGetPattern(out var vpEarly))
@@ -168,7 +168,7 @@ namespace ApexComputerUse
                     string? sel = combo.SelectedItem?.Text;
                     if (sel != null) return sel;
                 }
-                catch { /* SelectionItem pattern not supported — fall through */ }
+                catch { /* SelectionItem pattern not supported - fall through */ }
             }
             var listBox = el.AsListBox();
             if (listBox != null)
@@ -186,7 +186,7 @@ namespace ApexComputerUse
         public string[] GetComboBoxItems(AutomationElement el)
         {
             // Fast path for plain List elements (e.g. WinForms ListBox / multi-select ListBox)
-            // whose ControlType is List rather than ComboBox — scan children directly.
+            // whose ControlType is List rather than ComboBox - scan children directly.
             var ct = el.Properties.ControlType.ValueOrDefault;
             if (ct == FlaUI.Core.Definitions.ControlType.List)
             {
@@ -218,7 +218,7 @@ namespace ApexComputerUse
                 catch { }
                 Thread.Sleep(500); // give UIA time to populate children after expand
 
-                // Strategy 1: SelectionItem children (direct child scan — avoids FlaUI's
+                // Strategy 1: SelectionItem children (direct child scan - avoids FlaUI's
                 // ComboBox.Items getter which calls Expand() internally and throws
                 // NullReferenceException on WinForms combos that lack the pattern).
                 string[] items = Array.Empty<string>();
@@ -298,14 +298,14 @@ namespace ApexComputerUse
             if (el.Patterns.ExpandCollapse.TryGetPattern(out var p)) p.Collapse();
         }
 
-        // ── CheckBox / RadioButton ────────────────────────────────────────
+        // -- CheckBox / RadioButton ----------------------------------------
 
         public void SelectRadioButton(AutomationElement el) => el.Click();
 
         public bool IsRadioButtonSelected(AutomationElement el) =>
             el.AsRadioButton().IsChecked;
 
-        // ── ListBox ───────────────────────────────────────────────────────
+        // -- ListBox -------------------------------------------------------
 
         public void SelectListBoxByIndex(AutomationElement el, int index) =>
             el.AsListBox().Select(index);
@@ -319,7 +319,7 @@ namespace ApexComputerUse
         public string[] GetListBoxItems(AutomationElement el) =>
             el.AsListBox().Items.Select(i => i.Text).ToArray();
 
-        // ── ListView / DataGrid ───────────────────────────────────────────
+        // -- ListView / DataGrid -------------------------------------------
 
         public string GetGridCell(AutomationElement el, int row, int col) =>
             el.AsGrid().Rows[row].Cells[col].Value;
@@ -344,8 +344,8 @@ namespace ApexComputerUse
         {
             if (!el.Patterns.Grid.TryGetPattern(out var p))
                 return "Grid pattern not supported";
-            if (row < 0 || row >= p.RowCount) return $"Row {row} out of range (0–{p.RowCount - 1})";
-            if (col < 0 || col >= p.ColumnCount) return $"Column {col} out of range (0–{p.ColumnCount - 1})";
+            if (row < 0 || row >= p.RowCount) return $"Row {row} out of range (0-{p.RowCount - 1})";
+            if (col < 0 || col >= p.ColumnCount) return $"Column {col} out of range (0-{p.ColumnCount - 1})";
             var item = p.GetItem(row, col);
             return Describe(item);
         }
@@ -362,7 +362,7 @@ namespace ApexComputerUse
             return $"Row={p.Row}  Column={p.Column}  RowSpan={p.RowSpan}  ColumnSpan={p.ColumnSpan}";
         }
 
-        // ── TreeView ──────────────────────────────────────────────────────
+        // -- TreeView ------------------------------------------------------
 
         public void ExpandTreeNode(AutomationElement el, int index) =>
             el.AsTree().Items[index].Expand();
@@ -379,20 +379,20 @@ namespace ApexComputerUse
         public int GetTreeNodeCount(AutomationElement el) =>
             el.AsTree().Items.Length;
 
-        // ── Menu / MenuItem ───────────────────────────────────────────────
+        // -- Menu / MenuItem -----------------------------------------------
 
         public void InvokeMenuItem(AutomationElement el) => el.AsMenuItem().Invoke();
         public void ExpandMenuItem(AutomationElement el) => el.AsMenuItem().Expand();
         public void OpenContextMenu(AutomationElement el) => el.RightClick();
 
-        // ── TabControl ────────────────────────────────────────────────────
+        // -- TabControl ----------------------------------------------------
 
         public void SelectTab(AutomationElement el, int index)  => el.AsTab().SelectTabItem(index);
         public void SelectTabByName(AutomationElement el, string name) => el.AsTab().SelectTabItem(name);
         public string GetSelectedTabName(AutomationElement el) => el.AsTab().SelectedTabItem?.Name ?? string.Empty;
         public int GetTabCount(AutomationElement el) => el.AsTab().TabItems.Length;
 
-        // ── Slider / Spinner (RangeValue) ─────────────────────────────────
+        // -- Slider / Spinner (RangeValue) ---------------------------------
 
         public void SetSliderValue(AutomationElement el, double value) =>
             el.AsSlider().Value = value;
@@ -405,13 +405,14 @@ namespace ApexComputerUse
         public double GetSmallChange(AutomationElement el) => el.Patterns.RangeValue.Pattern.SmallChange;
         public double GetLargeChange(AutomationElement el) => el.Patterns.RangeValue.Pattern.LargeChange;
 
-        // ── ProgressBar ───────────────────────────────────────────────────
+        // -- ProgressBar ---------------------------------------------------
 
         public double GetProgressBarValue(AutomationElement el) => el.AsProgressBar().Value;
 
-        // ── Label ─────────────────────────────────────────────────────────
+        // -- Label ---------------------------------------------------------
 
         public string GetLabelText(AutomationElement el) => el.AsLabel().Text;
 
     }
 }
+

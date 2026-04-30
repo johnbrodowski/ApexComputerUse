@@ -107,7 +107,7 @@ namespace ApexComputerUse
             if (_list.SelectedItems.Count == 0) return;
 
             var item = _list.SelectedItems[0];
-            SetStatus(item, "Testing…", Color.Gray);
+            SetStatus(item, "Testing...", Color.Gray);
             await PingOneAsync(item, client).ConfigureAwait(false);
         }
 
@@ -150,7 +150,7 @@ namespace ApexComputerUse
                 foreach (var item in rows)
                 {
                     if (item.Tag is not string id) continue;
-                    if (item.SubItems[5].Text == "Testing…") continue;
+                    if (item.SubItems[5].Text == "Testing...") continue;
                     if (_store.Get(id) is not RemoteClient client) continue;
                     await PingOneAsync(item, client).ConfigureAwait(false);
                 }
@@ -160,7 +160,7 @@ namespace ApexComputerUse
                 _pingInFlight = false;
                 if (_updateClientsStatus != null)
                 {
-                    // Form may have closed while the ping batch was in flight — Dispose stops
+                    // Form may have closed while the ping batch was in flight - Dispose stops
                     // the timer but doesn't await this task, so the Invoke can race with
                     // teardown. Swallow the disposal exceptions exactly like Form1's _logHandler.
                     try
@@ -307,3 +307,4 @@ namespace ApexComputerUse
         }
     }
 }
+

@@ -11,7 +11,7 @@ namespace ApexComputerUse.Tests;
 /// </summary>
 public class AIDrawingCommandTests
 {
-    // ── ParseRequest ──────────────────────────────────────────────────────
+    // -- ParseRequest ------------------------------------------------------
 
     [Fact]
     public void ParseRequest_ValidJson_ReturnsDrawRequest()
@@ -63,7 +63,7 @@ public class AIDrawingCommandTests
     [Fact]
     public void ParseRequest_InvalidJson_ThrowsJsonException()
     {
-        // ParseRequest has no try/catch — invalid JSON propagates as JsonException.
+        // ParseRequest has no try/catch - invalid JSON propagates as JsonException.
         Assert.ThrowsAny<System.Text.Json.JsonException>(
             () => AIDrawingCommand.ParseRequest("not json at all {{{"));
     }
@@ -97,7 +97,7 @@ public class AIDrawingCommandTests
         Assert.Equal(45f,      s.Rotation);
     }
 
-    // ── Render — canvas sources ───────────────────────────────────────────
+    // -- Render - canvas sources -------------------------------------------
 
     [Fact]
     public void Render_BlankCanvas_ReturnsNonEmptyBase64()
@@ -194,7 +194,7 @@ public class AIDrawingCommandTests
         Assert.Null(ex);
     }
 
-    // ── Render — shape types ──────────────────────────────────────────────
+    // -- Render - shape types ----------------------------------------------
 
     [Theory]
     [InlineData("rect")]
@@ -265,7 +265,7 @@ public class AIDrawingCommandTests
         Assert.Equal(255, px.B);
     }
 
-    // ── BuildSpaceScene ───────────────────────────────────────────────────
+    // -- BuildSpaceScene ---------------------------------------------------
 
     [Fact]
     public void BuildSpaceScene_ReturnsNonEmptyRequest()
@@ -285,7 +285,7 @@ public class AIDrawingCommandTests
         Assert.Null(ex);
     }
 
-    // ── Helper ────────────────────────────────────────────────────────────
+    // -- Helper ------------------------------------------------------------
 
     private static Bitmap Base64ToBitmap(string b64)
     {
@@ -294,3 +294,4 @@ public class AIDrawingCommandTests
         return new Bitmap(Image.FromStream(ms));
     }
 }
+

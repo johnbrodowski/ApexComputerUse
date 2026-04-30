@@ -45,7 +45,7 @@ namespace ApexComputerUse
                                 : null;
         }
 
-        // ── Lifecycle ─────────────────────────────────────────────────────
+        // -- Lifecycle -----------------------------------------------------
 
         public void Start()
         {
@@ -72,7 +72,7 @@ namespace ApexComputerUse
             OnLog?.Invoke("Telegram bot stopped.");
         }
 
-        // ── Update handler ────────────────────────────────────────────────
+        // -- Update handler ------------------------------------------------
 
         private async Task HandleUpdateAsync(ITelegramBotClient bot, Update update, CancellationToken ct)
         {
@@ -118,7 +118,7 @@ namespace ApexComputerUse
 
             string reply = response.ToText();
 
-            // Telegram caps messages at 4096 characters — split into numbered pages if needed.
+            // Telegram caps messages at 4096 characters - split into numbered pages if needed.
             const int MaxLen = 4000;
             if (reply.Length <= MaxLen)
             {
@@ -144,7 +144,7 @@ namespace ApexComputerUse
             return Task.CompletedTask;
         }
 
-        // ── Command parser ────────────────────────────────────────────────
+        // -- Command parser ------------------------------------------------
 
         internal static CommandRequest? ParseCommand(string text)
         {
@@ -164,3 +164,4 @@ namespace ApexComputerUse
         public void Dispose() => Stop();
     }
 }
+

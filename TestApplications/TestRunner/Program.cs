@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Text.Json;
 
 int _MaxCycles = 1;
-// ── Config ─────────────────────────────────────────────────────────────────────
+// -- Config ---------------------------------------------------------------------
 string? cliMode = null;
 string? cliConfigPath = null;
 bool    cliServe = false;
@@ -116,7 +116,7 @@ if (cliList)
     using var listClient = new BridgeClient(config.BridgeBaseUrl, config.BridgeApiKey);
     var listSuite = new TestSuite(listClient);
     Console.WriteLine($"{"ID",-55} {"GROUP",-18} NAME");
-    Console.WriteLine(new string('─', 120));
+    Console.WriteLine(new string('-', 120));
     foreach (var tc in listSuite.Catalog)
         Console.WriteLine($"{tc.Id,-55} {tc.Group,-18} {tc.Name}");
     return 0;
@@ -147,13 +147,13 @@ if (filtered)
 var speedProfile = mode == "benchmark" ? "fast" : "human";
 var richConsole = mode == "demo";
 
-// ── Cancellation: Ctrl+C OR stop-flag file written by Telegram /stop-tests ────
+// -- Cancellation: Ctrl+C OR stop-flag file written by Telegram /stop-tests ----
 var cts = new CancellationTokenSource();
 
 Console.CancelKeyPress += (_, e) =>
 {
     e.Cancel = true;
-    Console.WriteLine("\n[Runner] Ctrl+C — cancelling...");
+    Console.WriteLine("\n[Runner] Ctrl+C - cancelling...");
     cts.Cancel();
 };
 
@@ -164,7 +164,7 @@ _ = Task.Run(async () =>
     {
         if (File.Exists(config.StopFlagPath))
         {
-            Console.WriteLine("[Runner] Stop flag detected — cancelling.");
+            Console.WriteLine("[Runner] Stop flag detected - cancelling.");
             try { File.Delete(config.StopFlagPath); } catch { }
             cts.Cancel();
             return;
@@ -210,7 +210,7 @@ var uiSettleDelayMs = config.UiSettleDelayMs > 0 ? config.UiSettleDelayMs : defa
 if (richConsole)
     Console.WriteLine($"[Runner] Speed profile: {effectiveSpeedProfile} (ActionDelayMs={actionDelayMs}, UiSettleDelayMs={uiSettleDelayMs})");
 
-// ── Load previous test results for skip-passed logic ────────────────────────
+// -- Load previous test results for skip-passed logic ------------------------
 var previouslyPassed = new HashSet<string>();
 if (runOnlyFailed && File.Exists(config.TestResultsPath))
 {
@@ -223,7 +223,7 @@ if (runOnlyFailed && File.Exists(config.TestResultsPath))
             foreach (var kv in saved.Where(kv => kv.Value))
                 previouslyPassed.Add(kv.Key);
         if (richConsole)
-            Console.WriteLine($"[Runner] RunOnlyFailed=true — {previouslyPassed.Count} previously-passed tests will be skipped.");
+            Console.WriteLine($"[Runner] RunOnlyFailed=true - {previouslyPassed.Count} previously-passed tests will be skipped.");
     }
     catch (Exception ex)
     {
@@ -233,10 +233,10 @@ if (runOnlyFailed && File.Exists(config.TestResultsPath))
 }
 else if (runOnlyFailed && richConsole)
 {
-    Console.WriteLine("[Runner] RunOnlyFailed=true but no previous results file found — running all tests.");
+    Console.WriteLine("[Runner] RunOnlyFailed=true but no previous results file found - running all tests.");
 }
 
-// ── Launch the 3rd-party test-target apps once — they stay running the whole time
+// -- Launch the 3rd-party test-target apps once - they stay running the whole time
 await using var winFormsApp = new ProcessManager("WinForms Test App", config.WinFormsExePath, isGui: true);
 await using var wpfApp = new ProcessManager("WPF Test App", config.WpfExePath, isGui: true);
 
@@ -256,7 +256,7 @@ if (!string.IsNullOrWhiteSpace(config.WebBaseUrl))
     var pages = config.WebPagePaths.Length > 0 ? config.WebPagePaths : new[] { "/" };
     // Resolve a Chromium-based browser so each page can be opened in its own
     // window (--new-window). Without this, default-shell launches collapse all
-    // pages into tabs of the same browser window — meaning /find by tab title
+    // pages into tabs of the same browser window - meaning /find by tab title
     // only ever activates whichever tab is foreground, and type/keys land on
     // the wrong document (or the address bar).
     var browserExe = ResolveBrowserExe(config.WebBrowserExe);
@@ -285,7 +285,7 @@ if (!string.IsNullOrWhiteSpace(config.WebBaseUrl))
                 psi = new ProcessStartInfo { FileName = url, UseShellExecute = true };
             }
             Process.Start(psi);
-            if (richConsole) Console.WriteLine($"[Runner] Opened browser → {url}{(isChromium ? " (--new-window)" : "")}");
+            if (richConsole) Console.WriteLine($"[Runner] Opened browser -> {url}{(isChromium ? " (--new-window)" : "")}");
             // Stagger window creation so the OS gives each one a distinct HWND
             // and the browser doesn't merge them into a single window.
             Thread.Sleep(800);
@@ -299,7 +299,7 @@ if (!string.IsNullOrWhiteSpace(config.WebBaseUrl))
 
 await Task.Delay(3000, ct);  // give GUIs time to render before scanning
 
-// ── Serve mode ────────────────────────────────────────────────────────────────
+// -- Serve mode ----------------------------------------------------------------
 // When --serve is set, replace the cycle loop with a long-running HTTP control
 // surface (see ControlServer.cs). External callers drive per-test execution,
 // bridge lifecycle, and shutdown.
@@ -313,7 +313,7 @@ if (cliServe)
         var build = await builder.BuildAsync(ct);
         if (!build.Success)
         {
-            var snippet = build.Output.Length > 600 ? "…" + build.Output[^600..] : build.Output;
+            var snippet = build.Output.Length > 600 ? "..." + build.Output[^600..] : build.Output;
             Console.Error.WriteLine($"[Runner] Build FAILED (exit {build.ExitCode}):\n{snippet}");
             return 1;
         }
@@ -345,7 +345,7 @@ var bridgeEnvServe = string.IsNullOrWhiteSpace(config.BridgeApiKey)
     Console.WriteLine("[Runner] Waiting for Bridge API...");
     var servedReady = await currentClient.WaitForReadyAsync(config.ApiReadyTimeoutSec, ct);
     if (!servedReady)
-        Console.WriteLine("[Runner] Bridge did not become ready in time — continuing anyway; /bridge/restart can recover.");
+        Console.WriteLine("[Runner] Bridge did not become ready in time - continuing anyway; /bridge/restart can recover.");
     currentSuite = new TestSuite(currentClient, actionDelayMs, uiSettleDelayMs);
 
     var control = new ControlServer(
@@ -379,13 +379,13 @@ var bridgeEnvServe = string.IsNullOrWhiteSpace(config.BridgeApiKey)
 }
 
 await telegram.SendAsync(
-    $"🚀 <b>TestRunner started</b>\n" +
+    $"?? <b>TestRunner started</b>\n" +
     $"Mode: <b>{mode}</b>   Speed profile: <b>{speedProfile}</b>\n" +
     $"Cycles: <b>{maxCycles}</b>   Config: <b>{config.BuildConfiguration}</b>\n" +
     $"Reports every: <b>{reportEveryN}</b> cycle(s)\n" +
     $"Send /stop-tests to cancel at any time.", ct);
 
-// ── Main loop ──────────────────────────────────────────────────────────────────
+// -- Main loop ------------------------------------------------------------------
 var history = new List<(int Cycle, CycleResult Result)>();
 int cycle = 0;
 
@@ -445,7 +445,7 @@ while (cycle < maxCycles && !ct.IsCancellationRequested)
     long suiteMs = 0;
     if (richConsole)
     {
-        var divider = new string('─', 60);
+        var divider = new string('-', 60);
         Console.WriteLine($"\n{divider}");
         Console.WriteLine($"[Runner] Cycle {cycle}/{maxCycles}");
         Console.WriteLine(divider);
@@ -461,7 +461,7 @@ while (cycle < maxCycles && !ct.IsCancellationRequested)
     if (!build.Success)
     {
         var snippet = build.Output.Length > 600
-            ? "…" + build.Output[^600..]
+            ? "..." + build.Output[^600..]
             : build.Output;
         if (richConsole)
         {
@@ -478,7 +478,7 @@ while (cycle < maxCycles && !ct.IsCancellationRequested)
             }));
         }
         await telegram.SendAsync(
-            $"❌ <b>Cycle {cycle} — Build FAILED</b>\n<pre>{snippet}</pre>", ct);
+            $"? <b>Cycle {cycle} - Build FAILED</b>\n<pre>{snippet}</pre>", ct);
         cycleTimer.Stop();
         AppendBenchmarkRecord(
             cycleNumber: cycle,
@@ -490,13 +490,13 @@ while (cycle < maxCycles && !ct.IsCancellationRequested)
             buildMs: buildMs,
             bridgeReadyMs: bridgeReadyMs,
             suiteMs: suiteMs);
-        // A build failure is fatal — no point retrying without a code change
+        // A build failure is fatal - no point retrying without a code change
         break;
     }
     if (richConsole) Console.WriteLine("[Runner] Build OK.");
     } // end if (!config.SkipBuild)
 
-    // 2. Launch ApexComputerUse ───────────────────────────────────────────────────
+    // 2. Launch ApexComputerUse ---------------------------------------------------
     await using var bridge = new ProcessManager("ApexComputerUse", config.BridgeExePath, isGui: true);
     var bridgeEnv = string.IsNullOrWhiteSpace(config.BridgeApiKey)
         ? new Dictionary<string, string> { ["APEX_HTTP_AUTOSTART"] = "true" }
@@ -519,7 +519,7 @@ while (cycle < maxCycles && !ct.IsCancellationRequested)
     {
         if (richConsole)
         {
-            Console.WriteLine("[Runner] Bridge API did not become ready in time — skipping cycle.");
+            Console.WriteLine("[Runner] Bridge API did not become ready in time - skipping cycle.");
         }
         else
         {
@@ -531,7 +531,7 @@ while (cycle < maxCycles && !ct.IsCancellationRequested)
             }));
         }
         await telegram.SendAsync(
-            $"⚠️ <b>Cycle {cycle}</b> — Bridge API not ready after {config.ApiReadyTimeoutSec}s", ct);
+            $"?? <b>Cycle {cycle}</b> - Bridge API not ready after {config.ApiReadyTimeoutSec}s", ct);
         await bridge.StopAsync();
         cycleTimer.Stop();
         AppendBenchmarkRecord(
@@ -548,7 +548,7 @@ while (cycle < maxCycles && !ct.IsCancellationRequested)
     }
     if (richConsole) Console.WriteLine("[Runner] Bridge API ready.");
 
-    // 2b. Ensure web targets are reachable before discovery/interactions ───────
+    // 2b. Ensure web targets are reachable before discovery/interactions -------
     if (!string.IsNullOrWhiteSpace(config.WebBaseUrl))
     {
         if (richConsole) Console.WriteLine("[Runner] Waiting for web target pages...");
@@ -557,7 +557,7 @@ while (cycle < maxCycles && !ct.IsCancellationRequested)
         {
             if (richConsole)
             {
-                Console.WriteLine("[Runner] Web target did not become ready in time — skipping cycle.");
+                Console.WriteLine("[Runner] Web target did not become ready in time - skipping cycle.");
             }
             else
             {
@@ -569,7 +569,7 @@ while (cycle < maxCycles && !ct.IsCancellationRequested)
                 }));
             }
             await telegram.SendAsync(
-                $"⚠️ <b>Cycle {cycle}</b> — Web target not ready after {config.ApiReadyTimeoutSec}s", ct);
+                $"?? <b>Cycle {cycle}</b> - Web target not ready after {config.ApiReadyTimeoutSec}s", ct);
             await bridge.StopAsync();
             cycleTimer.Stop();
             AppendBenchmarkRecord(
@@ -587,7 +587,7 @@ while (cycle < maxCycles && !ct.IsCancellationRequested)
         if (richConsole) Console.WriteLine("[Runner] Web target pages ready.");
     }
 
-    // 3. Run test suite ────────────────────────────────────────────────────────
+    // 3. Run test suite --------------------------------------------------------
     var suiteTimer = Stopwatch.StartNew();
     var currentCycle = cycle;
     Action<TestResult> onResult = richConsole
@@ -682,7 +682,7 @@ while (cycle < maxCycles && !ct.IsCancellationRequested)
         }));
     }
 
-    // Persist test results — merge with existing so passed tests stay recorded
+    // Persist test results - merge with existing so passed tests stay recorded
     try
     {
         var savedResults = new Dictionary<string, bool>();
@@ -703,9 +703,9 @@ while (cycle < maxCycles && !ct.IsCancellationRequested)
             Console.WriteLine($"[Runner] Warning: could not save results: {ex.Message}");
     }
 
-    // 4. Stop Bridge before next cycle (fresh build will produce new binary) ───
+    // 4. Stop Bridge before next cycle (fresh build will produce new binary) ---
     await bridge.StopAsync();
-    await Task.Delay(500, ct);  // brief gap — no blocking, just lets OS release ports
+    await Task.Delay(500, ct);  // brief gap - no blocking, just lets OS release ports
 
     cycleTimer.Stop();
     AppendBenchmarkRecord(
@@ -719,17 +719,17 @@ while (cycle < maxCycles && !ct.IsCancellationRequested)
         bridgeReadyMs: bridgeReadyMs,
         suiteMs: suiteMs);
 
-    // 5. Telegram progress report ──────────────────────────────────────────────
+    // 5. Telegram progress report ----------------------------------------------
     bool isLast = cycle == maxCycles;
     bool reportNow = reportEveryN > 0 && (cycle % reportEveryN == 0 || isLast);
     if (reportNow)
     {
         await telegram.SendAsync(
-            $"📊 <b>Cycle {cycle}/{maxCycles}</b>\n{result.Summary()}", ct);
+            $"?? <b>Cycle {cycle}/{maxCycles}</b>\n{result.Summary()}", ct);
     }
 }
 
-// ── Final summary ──────────────────────────────────────────────────────────────
+// -- Final summary --------------------------------------------------------------
 if (history.Count > 0)
 {
     var totalPass = history.Sum(h => h.Result.Passed);
@@ -780,14 +780,14 @@ if (history.Count > 0)
         }));
     }
 
-    // Use CancellationToken.None for the final send — we always want this to go through
+    // Use CancellationToken.None for the final send - we always want this to go through
     await telegram.SendAsync(summary, CancellationToken.None);
 }
 
 if (ct.IsCancellationRequested && history.Count < maxCycles)
 {
     await telegram.SendAsync(
-        $"🛑 <b>TestRunner cancelled</b> after {history.Count}/{maxCycles} cycles.",
+        $"?? <b>TestRunner cancelled</b> after {history.Count}/{maxCycles} cycles.",
         CancellationToken.None);
 }
 
@@ -869,3 +869,4 @@ static string BuildWebUrl(string webBaseUrl, string pagePath)
 
     return $"{baseUrl}/{pagePath.TrimStart('/')}";
 }
+

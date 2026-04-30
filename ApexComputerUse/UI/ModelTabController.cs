@@ -45,7 +45,7 @@ namespace ApexComputerUse
             if (!DownloadManager.SetupFiles.Any(f => !File.Exists(f.RelPath))) return;
             _tabMain.SelectedTab = _tabPageModel;
             _lblDownloadStatus.ForeColor = Color.DarkBlue;
-            _lblDownloadStatus.Text = "First launch — click \"Download All\" to set up models and tessdata.";
+            _lblDownloadStatus.Text = "First launch - click \"Download All\" to set up models and tessdata.";
         }
 
         internal void BrowseModel()
@@ -101,7 +101,7 @@ namespace ApexComputerUse
             if (string.IsNullOrWhiteSpace(proj))  { _log("Enter a projector path."); return; }
 
             _btnLoadModel.Enabled = false;
-            _lblModelStatus.Text = "Loading…";
+            _lblModelStatus.Text = "Loading...";
             _lblModelStatus.ForeColor = Color.DarkOrange;
 
             try
@@ -110,20 +110,20 @@ namespace ApexComputerUse
                 _log(resp.ToText());
                 if (resp.Success)
                 {
-                    _lblModelStatus.Text = "Loaded ✓";
+                    _lblModelStatus.Text = "Loaded ?";
                     _lblModelStatus.ForeColor = Color.Green;
                     _saveSettings();
                 }
                 else
                 {
-                    _lblModelStatus.Text = "Failed — see Console tab";
+                    _lblModelStatus.Text = "Failed - see Console tab";
                     _lblModelStatus.ForeColor = Color.Red;
                 }
             }
             catch (Exception ex)
             {
                 _log($"[Load Model] Unhandled: {ex}");
-                _lblModelStatus.Text = "Failed — see Console tab";
+                _lblModelStatus.Text = "Failed - see Console tab";
                 _lblModelStatus.ForeColor = Color.Red;
             }
             finally
@@ -175,3 +175,4 @@ namespace ApexComputerUse
         }
     }
 }
+

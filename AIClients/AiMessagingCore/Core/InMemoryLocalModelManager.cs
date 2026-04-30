@@ -5,7 +5,7 @@ namespace AiMessagingCore.Core;
 
 /// <summary>
 /// Thread-safe in-memory model lifecycle tracker.
-/// Does not perform actual loading — use as a lightweight registry.
+/// Does not perform actual loading - use as a lightweight registry.
 /// </summary>
 public sealed class InMemoryLocalModelManager : ILocalModelManager
 {
@@ -34,3 +34,4 @@ public sealed class InMemoryLocalModelManager : ILocalModelManager
 
     public bool IsLoaded(string modelId) => _loadedModels.ContainsKey(modelId);
 }
+

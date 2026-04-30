@@ -4,7 +4,7 @@ namespace ApexComputerUse
     /// Shared entry point for every transport (Form1, Telegram, Pipe, HTTP). Wraps
     /// <see cref="CommandProcessor.Process"/> with a single error boundary so a failure
     /// in a processor path cannot tear down a transport handler. Transports still own
-    /// their own input parsing and output formatting — that variance is legitimate —
+    /// their own input parsing and output formatting \- that variance is legitimate \-
     /// but command semantics live in exactly one place.
     /// </summary>
     public sealed class CommandDispatcher

@@ -1,4 +1,4 @@
-﻿using FlaUI.Core;
+using FlaUI.Core;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Capturing;
 using FlaUI.Core.Definitions;
@@ -11,7 +11,7 @@ namespace ApexComputerUse
 {
     public partial class ApexHelper
     {
-        // ── Mouse ─────────────────────────────────────────────────────────
+        // -- Mouse ---------------------------------------------------------
 
         private static void MoveToCenterOf(AutomationElement el)
         {
@@ -78,7 +78,7 @@ namespace ApexComputerUse
             Mouse.Drag(from, new System.Drawing.Point(x, y));
         }
 
-        // ── Scroll pattern ────────────────────────────────────────────────
+        // -- Scroll pattern ------------------------------------------------
 
         public void ScrollIntoView(AutomationElement el) =>
             el.Patterns.ScrollItem.Pattern.ScrollIntoView();
@@ -87,7 +87,7 @@ namespace ApexComputerUse
             ScrollAmount vertical, ScrollAmount horizontal = ScrollAmount.NoAmount) =>
             el.Patterns.Scroll.Pattern.Scroll(horizontal, vertical);
 
-        /// <summary>Scrolls an element to a horizontal and vertical percent (0–100).</summary>
+        /// <summary>Scrolls an element to a horizontal and vertical percent (0-100).</summary>
         public void ScrollByPercent(AutomationElement el, double hPercent, double vPercent)
         {
             if (!el.Patterns.Scroll.TryGetPattern(out var p))
@@ -105,7 +105,7 @@ namespace ApexComputerUse
                    $"VScrollable={p.VerticallyScrollable.ValueOrDefault}";
         }
 
-        // ── Transform pattern ─────────────────────────────────────────────
+        // -- Transform pattern ---------------------------------------------
 
         /// <summary>Moves an element using the Transform pattern.</summary>
         public void MoveElement(AutomationElement el, double x, double y)
@@ -125,7 +125,7 @@ namespace ApexComputerUse
             p.Resize(width, height);
         }
 
-        // ── Highlight ─────────────────────────────────────────────────────
+        // -- Highlight -----------------------------------------------------
 
         public void HighlightElement(AutomationElement el)
         {
@@ -138,3 +138,4 @@ namespace ApexComputerUse
 
     }
 }
+

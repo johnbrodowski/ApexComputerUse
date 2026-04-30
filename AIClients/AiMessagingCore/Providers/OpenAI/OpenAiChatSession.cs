@@ -8,7 +8,7 @@ using AiMessagingCore.Models;
 namespace AiMessagingCore.Providers.OpenAI;
 
 /// <summary>
-/// OpenAI chat session — SSE streaming via <c>/chat/completions</c>.
+/// OpenAI chat session \- SSE streaming via <c>/chat/completions</c>.
 /// Reads OPENAI_API_KEY and OPENAI_BASE_URL from environment.
 /// </summary>
 public sealed class OpenAiChatSession : ChatSessionBase

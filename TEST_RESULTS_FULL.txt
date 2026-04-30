@@ -45,7 +45,7 @@ Send /stop-tests to cancel at any time.
   PASS GET /windows - WPF app visible  (87ms)
 [API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
   "controlType": "Window",
-  "name": "System Configuration Console \u2014 UI Torture Test",
+  "name": "System Configuration Console - UI Torture Test",
   "automationId": "",
   "className": "WindowsForms10.Window.8.. (145ms)
 [API] GET /elements → OK 129 element(s) | {
@@ -58,7 +58,7 @@ Send /stop-tests to cancel at any time.
 [API] POST /execute {"id":"1706579215","action":"select","value":"Identity"} → OK 'select' executed. (35ms)
 [API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
   "controlType": "Window",
-  "name": "System Configuration Console \u2014 UI Torture Test",
+  "name": "System Configuration Console - UI Torture Test",
   "automationId": "",
   "className": "WindowsForms10.Window.8.. (120ms)
 [API] GET /elements → OK 129 element(s) | {
@@ -72,7 +72,7 @@ Send /stop-tests to cancel at any time.
 [API] POST /execute {"id":"1706579215","action":"select","value":"Identity"} → OK 'select' executed. (14ms)
 [API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
   "controlType": "Window",
-  "name": "System Configuration Console \u2014 UI Torture Test",
+  "name": "System Configuration Console - UI Torture Test",
   "automationId": "",
   "className": "WindowsForms10.Window.8.. (121ms)
 [API] GET /elements → OK 129 element(s) | {
@@ -87,7 +87,7 @@ Send /stop-tests to cancel at any time.
 [API] POST /execute {"id":"1706579215","action":"select","value":"Identity"} → OK 'select' executed. (22ms)
 [API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
   "controlType": "Window",
-  "name": "System Configuration Console \u2014 UI Torture Test",
+  "name": "System Configuration Console - UI Torture Test",
   "automationId": "",
   "className": "WindowsForms10.Window.8.. (149ms)
 [API] GET /elements → OK 129 element(s) | {
@@ -106,7 +106,7 @@ Send /stop-tests to cancel at any time.
 [API] POST /execute {"id":"1706579215","action":"select","value":"Identity"} → OK 'select' executed. (24ms)
 [API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
   "controlType": "Window",
-  "name": "System Configuration Console \u2014 UI Torture Test",
+  "name": "System Configuration Console - UI Torture Test",
   "automationId": "",
   "className": "WindowsForms10.Window.8.. (121ms)
 [API] GET /elements → OK 129 element(s) | {
@@ -201,7 +201,7 @@ Send /stop-tests to cancel at any time.
   PASS POST /execute setrange 4 → WPF Slider (verified)
 [API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
   "controlType": "Window",
-  "name": "System Configuration Console \u2014 UI Torture Test",
+  "name": "System Configuration Console - UI Torture Test",
   "automationId": "",
   "className": "WindowsForms10.Window.8.. (114ms)
 [API] GET /elements → OK 129 element(s) | {
@@ -213,7 +213,7 @@ Send /stop-tests to cancel at any time.
 [API] POST /execute {"id":"1706579215","action":"select","value":"Identity"} → OK 'select' executed. (12ms)
 [API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
   "controlType": "Window",
-  "name": "System Configuration Console \u2014 UI Torture Test",
+  "name": "System Configuration Console - UI Torture Test",
   "automationId": "",
   "className": "WindowsForms10.Window.8.. (119ms)
 [API] GET /elements → OK 129 element(s) | {
@@ -232,7 +232,7 @@ Send /stop-tests to cancel at any time.
 [API] POST /execute {"id":"1706579215","action":"select","value":"Identity"} → OK 'select' executed. (27ms)
 [API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
   "controlType": "Window",
-  "name": "System Configuration Console \u2014 UI Torture Test",
+  "name": "System Configuration Console - UI Torture Test",
   "automationId": "",
   "className": "WindowsForms10.Window.8.. (164ms)
 [API] GET /elements → OK 129 element(s) | {
@@ -249,7 +249,7 @@ Send /stop-tests to cancel at any time.
 [API] POST /execute {"id":"1706579215","action":"select","value":"Dialogs"} → OK 'select' executed. (81ms)
 [API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
   "controlType": "Window",
-  "name": "System Configuration Console \u2014 UI Torture Test",
+  "name": "System Configuration Console - UI Torture Test",
   "automationId": "",
   "className": "WindowsForms10.Window.8.. (118ms)
 [API] GET /elements → OK 104 element(s) | {
@@ -263,7 +263,7 @@ Send /stop-tests to cancel at any time.
 [API] POST /execute {"id":"1706579215","action":"select","value":"Network"} → OK 'select' executed. (100ms)
 [API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
   "controlType": "Window",
-  "name": "System Configuration Console \u2014 UI Torture Test",
+  "name": "System Configuration Console - UI Torture Test",
   "automationId": "",
   "className": "WindowsForms10.Window.8.. (120ms)
 [API] GET /elements → OK 129 element(s) | {
@@ -278,7 +278,7 @@ Send /stop-tests to cancel at any time.
 [API] POST /execute {"id":"1706579215","action":"select","value":"Dialogs"} → OK 'select' executed. (39ms)
 [API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
   "controlType": "Window",
-  "name": "System Configuration Console \u2014 UI Torture Test",
+  "name": "System Configuration Console - UI Torture Test",
   "automationId": "",
   "className": "WindowsForms10.Window.8.. (105ms)
 [API] GET /elements → OK 104 element(s) | {
@@ -294,7 +294,7 @@ Send /stop-tests to cancel at any time.
 [API] POST /execute {"id":"1055040310","action":"click","value":""} → OK 'click' executed. (36ms)
 [API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
   "controlType": "Window",
-  "name": "System Configuration Console \u2014 UI Torture Test",
+  "name": "System Configuration Console - UI Torture Test",
   "automationId": "",
   "className": "WindowsForms10.Window.8.. (104ms)
 [API] GET /elements → OK 113 element(s) | {
@@ -351,11 +351,11 @@ Send /stop-tests to cancel at any time.
   PASS Click File menu (WPF)
 [API] POST /find {"window":"Browser Torture Test 2026"} → OK Window: Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft? Edge (fuzzy for 'Browser Torture Test 2026') | {
   "controlType": "Window",
-  "name": "Browser Torture Test 2026 \u2014 Single-File HTML UI Torture Chamber - Personal - Microsoft\u200B Edge",
+  "name": "Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft Edge",
   "automatio. (120ms)
 [API] POST /find {"window":"Browser Torture Test 2026"} → OK Window: Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft? Edge (fuzzy for 'Browser Torture Test 2026') | {
   "controlType": "Window",
-  "name": "Browser Torture Test 2026 \u2014 Single-File HTML UI Torture Chamber - Personal - Microsoft\u200B Edge",
+  "name": "Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft Edge",
   "automatio. (109ms)
 [API] GET /elements → OK 53 element(s) | {
   "treeHash": "715795f1bf4932b2f197e8e9ec5dc3ff14ead310b65c694bc38c07e12d7b9c97",
@@ -366,11 +366,11 @@ Send /stop-tests to cancel at any time.
   PASS SCAN_WINDOW Torture Test  (268ms)
 [API] POST /find {"window":"Browser Torture Test 2026"} → OK Window: Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft? Edge (fuzzy for 'Browser Torture Test 2026') | {
   "controlType": "Window",
-  "name": "Browser Torture Test 2026 \u2014 Single-File HTML UI Torture Chamber - Personal - Microsoft\u200B Edge",
+  "name": "Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft Edge",
   "automatio. (100ms)
 [API] POST /find {"window":"Browser Torture Test 2026"} → OK Window: Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft? Edge (fuzzy for 'Browser Torture Test 2026') | {
   "controlType": "Window",
-  "name": "Browser Torture Test 2026 \u2014 Single-File HTML UI Torture Chamber - Personal - Microsoft\u200B Edge",
+  "name": "Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft Edge",
   "automatio. (109ms)
 [API] GET /elements → OK 325 element(s) | {
   "treeHash": "410bf048942f314e69a3c25a4d88a298d1fd8eb8cbaf3d148aa06af9174a73bd",
@@ -387,12 +387,12 @@ Send /stop-tests to cancel at any time.
   PASS POST /execute type → HTML TextBox on Torture Test (verified)
 [API] POST /find {"window":"AGPA E-Commerce Test App"} → OK Window: AGPA E-Commerce Test App - Personal - Microsoft? Edge (fuzzy for 'AGPA E-Commerce Test App') | {
   "controlType": "Window",
-  "name": "AGPA E-Commerce Test App - Personal - Microsoft\u200B Edge",
+  "name": "AGPA E-Commerce Test App - Personal - Microsoft Edge",
   "automationId": "",
   "className": "Chrome_WidgetWin_. (132ms)
 [API] POST /find {"window":"AGPA E-Commerce Test App"} → OK Window: AGPA E-Commerce Test App - Personal - Microsoft? Edge (fuzzy for 'AGPA E-Commerce Test App') | {
   "controlType": "Window",
-  "name": "AGPA E-Commerce Test App - Personal - Microsoft\u200B Edge",
+  "name": "AGPA E-Commerce Test App - Personal - Microsoft Edge",
   "automationId": "",
   "className": "Chrome_WidgetWin_. (119ms)
 [API] GET /elements → OK 116 element(s) | {
@@ -404,13 +404,13 @@ Send /stop-tests to cancel at any time.
   PASS SCAN_WINDOW Ecommerce  (377ms)
 [API] POST /find {"window":"AGPA E-Commerce Test App"} → OK Window: AGPA E-Commerce Test App - Personal - Microsoft? Edge (fuzzy for 'AGPA E-Commerce Test App') | {
   "controlType": "Window",
-  "name": "AGPA E-Commerce Test App - Personal - Microsoft\u200B Edge",
+  "name": "AGPA E-Commerce Test App - Personal - Microsoft Edge",
   "automationId": "",
   "className": "Chrome_WidgetWin_. (118ms)
 [Slider] begin 'POST /execute setrange 100 → HTML range slider on Ecommerce (verified)' window='AGPA E-Commerce Test App' tab='<none>' nameHint='<none>' target=100
 [API] POST /find {"window":"AGPA E-Commerce Test App"} → OK Window: AGPA E-Commerce Test App - Personal - Microsoft? Edge (fuzzy for 'AGPA E-Commerce Test App') | {
   "controlType": "Window",
-  "name": "AGPA E-Commerce Test App - Personal - Microsoft\u200B Edge",
+  "name": "AGPA E-Commerce Test App - Personal - Microsoft Edge",
   "automationId": "",
   "className": "Chrome_WidgetWin_. (116ms)
 [API] GET /elements → OK 129 element(s) | {
@@ -426,7 +426,7 @@ Send /stop-tests to cancel at any time.
   PASS POST /execute setrange 100 → HTML range slider on Ecommerce (verified)
 [API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
   "controlType": "Window",
-  "name": "System Configuration Console \u2014 UI Torture Test",
+  "name": "System Configuration Console - UI Torture Test",
   "automationId": "",
   "className": "WindowsForms10.Window.8.. (114ms)
 [API] GET /elements → OK 104 element(s) | {
@@ -438,7 +438,7 @@ Send /stop-tests to cancel at any time.
 [API] POST /execute {"id":"1706579215","action":"select","value":"Identity"} → OK 'select' executed. (58ms)
 [API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
   "controlType": "Window",
-  "name": "System Configuration Console \u2014 UI Torture Test",
+  "name": "System Configuration Console - UI Torture Test",
   "automationId": "",
   "className": "WindowsForms10.Window.8.. (106ms)
 [API] GET /elements → OK 129 element(s) | {
@@ -453,7 +453,7 @@ Send /stop-tests to cancel at any time.
 [API] POST /execute {"id":"1706579215","action":"select","value":"Identity"} → OK 'select' executed. (15ms)
 [API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
   "controlType": "Window",
-  "name": "System Configuration Console \u2014 UI Torture Test",
+  "name": "System Configuration Console - UI Torture Test",
   "automationId": "",
   "className": "WindowsForms10.Window.8.. (121ms)
 [API] GET /elements → OK 134 element(s) | {
@@ -468,7 +468,7 @@ Send /stop-tests to cancel at any time.
 [API] POST /execute {"id":"1706579215","action":"select","value":"Identity"} → OK 'select' executed. (20ms)
 [API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
   "controlType": "Window",
-  "name": "System Configuration Console \u2014 UI Torture Test",
+  "name": "System Configuration Console - UI Torture Test",
   "automationId": "",
   "className": "WindowsForms10.Window.8.. (121ms)
 [API] GET /elements → OK 129 element(s) | {
@@ -487,7 +487,7 @@ Send /stop-tests to cancel at any time.
 [API] POST /execute {"id":"1706579215","action":"select","value":"Network"} → OK 'select' executed. (44ms)
 [API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
   "controlType": "Window",
-  "name": "System Configuration Console \u2014 UI Torture Test",
+  "name": "System Configuration Console - UI Torture Test",
   "automationId": "",
   "className": "WindowsForms10.Window.8.. (119ms)
 [API] GET /elements → OK 129 element(s) | {
@@ -505,7 +505,7 @@ Send /stop-tests to cancel at any time.
 [API] POST /execute {"id":"1706579215","action":"select","value":"Network"} → OK 'select' executed. (20ms)
 [API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
   "controlType": "Window",
-  "name": "System Configuration Console \u2014 UI Torture Test",
+  "name": "System Configuration Console - UI Torture Test",
   "automationId": "",
   "className": "WindowsForms10.Window.8.. (105ms)
 [API] GET /elements → OK 129 element(s) | {
@@ -522,7 +522,7 @@ Send /stop-tests to cancel at any time.
 [API] POST /execute {"id":"1706579215","action":"select","value":"Network"} → OK 'select' executed. (20ms)
 [API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
   "controlType": "Window",
-  "name": "System Configuration Console \u2014 UI Torture Test",
+  "name": "System Configuration Console - UI Torture Test",
   "automationId": "",
   "className": "WindowsForms10.Window.8.. (105ms)
 [API] GET /elements → OK 129 element(s) | {
@@ -537,7 +537,7 @@ Send /stop-tests to cancel at any time.
 [API] POST /execute {"id":"1706579215","action":"select","value":"Network"} → OK 'select' executed. (20ms)
 [API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
   "controlType": "Window",
-  "name": "System Configuration Console \u2014 UI Torture Test",
+  "name": "System Configuration Console - UI Torture Test",
   "automationId": "",
   "className": "WindowsForms10.Window.8.. (121ms)
 [API] GET /elements → OK 129 element(s) | {
@@ -551,7 +551,7 @@ Send /stop-tests to cancel at any time.
 [API] POST /execute {"id":"1706579215","action":"select","value":"Scheduler"} → OK 'select' executed. (141ms)
 [API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
   "controlType": "Window",
-  "name": "System Configuration Console \u2014 UI Torture Test",
+  "name": "System Configuration Console - UI Torture Test",
   "automationId": "",
   "className": "WindowsForms10.Window.8.. (104ms)
 [API] GET /elements → OK 222 element(s) | {
@@ -569,7 +569,7 @@ Send /stop-tests to cancel at any time.
 [API] POST /execute {"id":"1706579215","action":"select","value":"Scheduler"} → OK 'select' executed. (20ms)
 [API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
   "controlType": "Window",
-  "name": "System Configuration Console \u2014 UI Torture Test",
+  "name": "System Configuration Console - UI Torture Test",
   "automationId": "",
   "className": "WindowsForms10.Window.8.. (104ms)
 [API] GET /elements → OK 222 element(s) | {
@@ -585,7 +585,7 @@ Send /stop-tests to cancel at any time.
 [API] POST /execute {"id":"1706579215","action":"select","value":"Scheduler"} → OK 'select' executed. (20ms)
 [API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
   "controlType": "Window",
-  "name": "System Configuration Console \u2014 UI Torture Test",
+  "name": "System Configuration Console - UI Torture Test",
   "automationId": "",
   "className": "WindowsForms10.Window.8.. (106ms)
 [API] GET /elements → OK 222 element(s) | {
@@ -602,7 +602,7 @@ Send /stop-tests to cancel at any time.
 [API] POST /execute {"id":"1706579215","action":"select","value":"Scheduler"} → OK 'select' executed. (23ms)
 [API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
   "controlType": "Window",
-  "name": "System Configuration Console \u2014 UI Torture Test",
+  "name": "System Configuration Console - UI Torture Test",
   "automationId": "",
   "className": "WindowsForms10.Window.8.. (104ms)
 [API] GET /elements → OK 222 element(s) | {
@@ -617,7 +617,7 @@ Send /stop-tests to cancel at any time.
 [API] POST /execute {"id":"1706579215","action":"select","value":"Layout"} → OK 'select' executed. (164ms)
 [API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
   "controlType": "Window",
-  "name": "System Configuration Console \u2014 UI Torture Test",
+  "name": "System Configuration Console - UI Torture Test",
   "automationId": "",
   "className": "WindowsForms10.Window.8.. (120ms)
 [API] GET /elements → OK 178 element(s) | {
@@ -631,7 +631,7 @@ Send /stop-tests to cancel at any time.
 [API] POST /execute {"id":"1706579215","action":"select","value":"Layout"} → OK 'select' executed. (21ms)
 [API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
   "controlType": "Window",
-  "name": "System Configuration Console \u2014 UI Torture Test",
+  "name": "System Configuration Console - UI Torture Test",
   "automationId": "",
   "className": "WindowsForms10.Window.8.. (121ms)
 [API] GET /elements → OK 178 element(s) | {
@@ -645,7 +645,7 @@ Send /stop-tests to cancel at any time.
 [API] POST /execute {"id":"1706579215","action":"select","value":"Logs"} → OK 'select' executed. (102ms)
 [API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
   "controlType": "Window",
-  "name": "System Configuration Console \u2014 UI Torture Test",
+  "name": "System Configuration Console - UI Torture Test",
   "automationId": "",
   "className": "WindowsForms10.Window.8.. (105ms)
 [API] GET /elements → OK 91 element(s) | {
@@ -660,7 +660,7 @@ Send /stop-tests to cancel at any time.
 [API] POST /execute {"id":"1706579215","action":"select","value":"Logs"} → OK 'select' executed. (24ms)
 [API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
   "controlType": "Window",
-  "name": "System Configuration Console \u2014 UI Torture Test",
+  "name": "System Configuration Console - UI Torture Test",
   "automationId": "",
   "className": "WindowsForms10.Window.8.. (122ms)
 [API] GET /elements → OK 91 element(s) | {
@@ -678,7 +678,7 @@ Send /stop-tests to cancel at any time.
 [API] POST /execute {"id":"1706579215","action":"select","value":"Logs"} → OK 'select' executed. (27ms)
 [API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
   "controlType": "Window",
-  "name": "System Configuration Console \u2014 UI Torture Test",
+  "name": "System Configuration Console - UI Torture Test",
   "automationId": "",
   "className": "WindowsForms10.Window.8.. (104ms)
 [API] GET /elements → OK 91 element(s) | {
@@ -693,7 +693,7 @@ Send /stop-tests to cancel at any time.
 [API] POST /execute {"id":"1706579215","action":"select","value":"Dialogs"} → OK 'select' executed. (41ms)
 [API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
   "controlType": "Window",
-  "name": "System Configuration Console \u2014 UI Torture Test",
+  "name": "System Configuration Console - UI Torture Test",
   "automationId": "",
   "className": "WindowsForms10.Window.8.. (120ms)
 [API] GET /elements → OK 104 element(s) | {
@@ -707,7 +707,7 @@ Send /stop-tests to cancel at any time.
 [API] POST /execute {"id":"1706579215","action":"select","value":"Dialogs"} → OK 'select' executed. (25ms)
 [API] POST /find {"window":"System Configuration Console"} → OK Window: System Configuration Console - UI Torture Test (fuzzy for 'System Configuration Console') | {
   "controlType": "Window",
-  "name": "System Configuration Console \u2014 UI Torture Test",
+  "name": "System Configuration Console - UI Torture Test",
   "automationId": "",
   "className": "WindowsForms10.Window.8.. (103ms)
 [API] GET /elements → OK 104 element(s) | {
@@ -1185,11 +1185,11 @@ Send /stop-tests to cancel at any time.
   PASS WPF Dialogs: TextBox MiscMultilineTextBox → retype
 [API] POST /find {"window":"Browser Torture Test 2026"} → OK Window: Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft? Edge (fuzzy for 'Browser Torture Test 2026') | {
   "controlType": "Window",
-  "name": "Browser Torture Test 2026 \u2014 Single-File HTML UI Torture Chamber - Personal - Microsoft\u200B Edge",
+  "name": "Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft Edge",
   "automatio. (132ms)
 [API] POST /find {"window":"Browser Torture Test 2026"} → OK Window: Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft? Edge (fuzzy for 'Browser Torture Test 2026') | {
   "controlType": "Window",
-  "name": "Browser Torture Test 2026 \u2014 Single-File HTML UI Torture Chamber - Personal - Microsoft\u200B Edge",
+  "name": "Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft Edge",
   "automatio. (115ms)
 [API] GET /elements → OK 312 element(s) | {
   "treeHash": "196de3968833cd7e890f5b9c2d8cae19f2d9cfe0c95e3a29cfb327a434db5d21",
@@ -1202,11 +1202,11 @@ Send /stop-tests to cancel at any time.
   PASS HTML Torture: checkbox check1 → toggle+restore
 [API] POST /find {"window":"Browser Torture Test 2026"} → OK Window: Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft? Edge (fuzzy for 'Browser Torture Test 2026') | {
   "controlType": "Window",
-  "name": "Browser Torture Test 2026 \u2014 Single-File HTML UI Torture Chamber - Personal - Microsoft\u200B Edge",
+  "name": "Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft Edge",
   "automatio. (108ms)
 [API] POST /find {"window":"Browser Torture Test 2026"} → OK Window: Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft? Edge (fuzzy for 'Browser Torture Test 2026') | {
   "controlType": "Window",
-  "name": "Browser Torture Test 2026 \u2014 Single-File HTML UI Torture Chamber - Personal - Microsoft\u200B Edge",
+  "name": "Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft Edge",
   "automatio. (109ms)
 [API] GET /elements → OK 312 element(s) | {
   "treeHash": "ee8513560ca5a571f5af293cf3ad6b579077df6197d60d73e30b9d167de34738",
@@ -1218,11 +1218,11 @@ Send /stop-tests to cancel at any time.
   PASS HTML Torture: radio 'Radio 2' → click
 [API] POST /find {"window":"Browser Torture Test 2026"} → OK Window: Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft? Edge (fuzzy for 'Browser Torture Test 2026') | {
   "controlType": "Window",
-  "name": "Browser Torture Test 2026 \u2014 Single-File HTML UI Torture Chamber - Personal - Microsoft\u200B Edge",
+  "name": "Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft Edge",
   "automatio. (108ms)
 [API] POST /find {"window":"Browser Torture Test 2026"} → OK Window: Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft? Edge (fuzzy for 'Browser Torture Test 2026') | {
   "controlType": "Window",
-  "name": "Browser Torture Test 2026 \u2014 Single-File HTML UI Torture Chamber - Personal - Microsoft\u200B Edge",
+  "name": "Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft Edge",
   "automatio. (110ms)
 [API] GET /elements → OK 312 element(s) | {
   "treeHash": "9170d6b02a4be727776497ae65d24c6c0919121ebb8e912af36cf84809f0bdea",
@@ -1235,11 +1235,11 @@ Send /stop-tests to cancel at any time.
   PASS HTML Torture: select#single-select → select Option 2
 [API] POST /find {"window":"Browser Torture Test 2026"} → OK Window: Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft? Edge (fuzzy for 'Browser Torture Test 2026') | {
   "controlType": "Window",
-  "name": "Browser Torture Test 2026 \u2014 Single-File HTML UI Torture Chamber - Personal - Microsoft\u200B Edge",
+  "name": "Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft Edge",
   "automatio. (127ms)
 [API] POST /find {"window":"Browser Torture Test 2026"} → OK Window: Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft? Edge (fuzzy for 'Browser Torture Test 2026') | {
   "controlType": "Window",
-  "name": "Browser Torture Test 2026 \u2014 Single-File HTML UI Torture Chamber - Personal - Microsoft\u200B Edge",
+  "name": "Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft Edge",
   "automatio. (127ms)
 [API] GET /elements → OK 316 element(s) | {
   "treeHash": "5a3fd77720c9ccc12c9bad7d6c180378f95c1564780c926dc985bfc4560f2c73",
@@ -1251,11 +1251,11 @@ Send /stop-tests to cancel at any time.
   PASS HTML Torture: select#multi-select → select-index 0
 [API] POST /find {"window":"Browser Torture Test 2026"} → OK Window: Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft? Edge (fuzzy for 'Browser Torture Test 2026') | {
   "controlType": "Window",
-  "name": "Browser Torture Test 2026 \u2014 Single-File HTML UI Torture Chamber - Personal - Microsoft\u200B Edge",
+  "name": "Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft Edge",
   "automatio. (119ms)
 [API] POST /find {"window":"Browser Torture Test 2026"} → OK Window: Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft? Edge (fuzzy for 'Browser Torture Test 2026') | {
   "controlType": "Window",
-  "name": "Browser Torture Test 2026 \u2014 Single-File HTML UI Torture Chamber - Personal - Microsoft\u200B Edge",
+  "name": "Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft Edge",
   "automatio. (128ms)
 [API] GET /elements → OK 312 element(s) | {
   "treeHash": "2c944343298e4a39e7c15e47c494861fb3de23d456bd10bea09f32e55eed0ba7",
@@ -1272,11 +1272,11 @@ Send /stop-tests to cancel at any time.
   PASS HTML Torture: textarea → retype
 [API] POST /find {"window":"Browser Torture Test 2026"} → OK Window: Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft? Edge (fuzzy for 'Browser Torture Test 2026') | {
   "controlType": "Window",
-  "name": "Browser Torture Test 2026 \u2014 Single-File HTML UI Torture Chamber - Personal - Microsoft\u200B Edge",
+  "name": "Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft Edge",
   "automatio. (108ms)
 [API] POST /find {"window":"Browser Torture Test 2026"} → OK Window: Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft? Edge (fuzzy for 'Browser Torture Test 2026') | {
   "controlType": "Window",
-  "name": "Browser Torture Test 2026 \u2014 Single-File HTML UI Torture Chamber - Personal - Microsoft\u200B Edge",
+  "name": "Browser Torture Test 2026 - Single-File HTML UI Torture Chamber - Personal - Microsoft Edge",
   "automatio. (106ms)
 [API] GET /elements → OK 312 element(s) | {
   "treeHash": "fb3260b0274156a76406746dc25552465fb9a49956380e42f2bfac71d48892b5",
@@ -1288,12 +1288,12 @@ Send /stop-tests to cancel at any time.
   PASS HTML Torture: button 'Plain button' → click
 [API] POST /find {"window":"AGPA E-Commerce Test App"} → OK Window: AGPA E-Commerce Test App - Personal - Microsoft? Edge (fuzzy for 'AGPA E-Commerce Test App') | {
   "controlType": "Window",
-  "name": "AGPA E-Commerce Test App - Personal - Microsoft\u200B Edge",
+  "name": "AGPA E-Commerce Test App - Personal - Microsoft Edge",
   "automationId": "",
   "className": "Chrome_WidgetWin_. (142ms)
 [API] POST /find {"window":"AGPA E-Commerce Test App"} → OK Window: AGPA E-Commerce Test App - Personal - Microsoft? Edge (fuzzy for 'AGPA E-Commerce Test App') | {
   "controlType": "Window",
-  "name": "AGPA E-Commerce Test App - Personal - Microsoft\u200B Edge",
+  "name": "AGPA E-Commerce Test App - Personal - Microsoft Edge",
   "automationId": "",
   "className": "Chrome_WidgetWin_. (122ms)
 [API] GET /elements → OK 116 element(s) | {
@@ -1311,12 +1311,12 @@ Send /stop-tests to cancel at any time.
   PASS HTML Ecommerce: searchProducts → retype
 [API] POST /find {"window":"AGPA E-Commerce Test App"} → OK Window: AGPA E-Commerce Test App - Personal - Microsoft? Edge (fuzzy for 'AGPA E-Commerce Test App') | {
   "controlType": "Window",
-  "name": "AGPA E-Commerce Test App - Personal - Microsoft\u200B Edge",
+  "name": "AGPA E-Commerce Test App - Personal - Microsoft Edge",
   "automationId": "",
   "className": "Chrome_WidgetWin_. (123ms)
 [API] POST /find {"window":"AGPA E-Commerce Test App"} → OK Window: AGPA E-Commerce Test App - Personal - Microsoft? Edge (fuzzy for 'AGPA E-Commerce Test App') | {
   "controlType": "Window",
-  "name": "AGPA E-Commerce Test App - Personal - Microsoft\u200B Edge",
+  "name": "AGPA E-Commerce Test App - Personal - Microsoft Edge",
   "automationId": "",
   "className": "Chrome_WidgetWin_. (104ms)
 [API] GET /elements → OK 116 element(s) | {
@@ -1330,12 +1330,12 @@ Send /stop-tests to cancel at any time.
   PASS HTML Ecommerce: categoryFilter → select Electronics
 [API] POST /find {"window":"AGPA E-Commerce Test App"} → OK Window: AGPA E-Commerce Test App - Personal - Microsoft? Edge (fuzzy for 'AGPA E-Commerce Test App') | {
   "controlType": "Window",
-  "name": "AGPA E-Commerce Test App - Personal - Microsoft\u200B Edge",
+  "name": "AGPA E-Commerce Test App - Personal - Microsoft Edge",
   "automationId": "",
   "className": "Chrome_WidgetWin_. (115ms)
 [API] POST /find {"window":"AGPA E-Commerce Test App"} → OK Window: AGPA E-Commerce Test App - Personal - Microsoft? Edge (fuzzy for 'AGPA E-Commerce Test App') | {
   "controlType": "Window",
-  "name": "AGPA E-Commerce Test App - Personal - Microsoft\u200B Edge",
+  "name": "AGPA E-Commerce Test App - Personal - Microsoft Edge",
   "automationId": "",
   "className": "Chrome_WidgetWin_. (120ms)
 [API] GET /elements → OK 120 element(s) | {
@@ -1349,12 +1349,12 @@ Send /stop-tests to cancel at any time.
   PASS HTML Ecommerce: shipFree → toggle+restore
 [API] POST /find {"window":"AGPA E-Commerce Test App"} → OK Window: AGPA E-Commerce Test App - Personal - Microsoft? Edge (fuzzy for 'AGPA E-Commerce Test App') | {
   "controlType": "Window",
-  "name": "AGPA E-Commerce Test App - Personal - Microsoft\u200B Edge",
+  "name": "AGPA E-Commerce Test App - Personal - Microsoft Edge",
   "automationId": "",
   "className": "Chrome_WidgetWin_. (106ms)
 [API] POST /find {"window":"AGPA E-Commerce Test App"} → OK Window: AGPA E-Commerce Test App - Personal - Microsoft? Edge (fuzzy for 'AGPA E-Commerce Test App') | {
   "controlType": "Window",
-  "name": "AGPA E-Commerce Test App - Personal - Microsoft\u200B Edge",
+  "name": "AGPA E-Commerce Test App - Personal - Microsoft Edge",
   "automationId": "",
   "className": "Chrome_WidgetWin_. (124ms)
 [API] GET /elements → OK 116 element(s) | {

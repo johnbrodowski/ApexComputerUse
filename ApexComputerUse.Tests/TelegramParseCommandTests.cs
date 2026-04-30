@@ -6,11 +6,11 @@ namespace ApexComputerUse.Tests;
 /// <summary>
 /// Unit tests for <see cref="TelegramController.ParseCommand"/> and
 /// <see cref="CommandLineParser.Tokenize"/>.
-/// Both methods are tested in isolation — no Telegram bot connection required.
+/// Both methods are tested in isolation - no Telegram bot connection required.
 /// </summary>
 public class TelegramParseCommandTests
 {
-    // ── ParseCommand — gating rules ───────────────────────────────────────
+    // -- ParseCommand - gating rules ---------------------------------------
 
     [Fact]
     public void ParseCommand_NoSlashPrefix_ReturnsNull()
@@ -24,7 +24,7 @@ public class TelegramParseCommandTests
         Assert.Null(TelegramController.ParseCommand(""));
     }
 
-    // ── /find ─────────────────────────────────────────────────────────────
+    // -- /find -------------------------------------------------------------
 
     [Fact]
     public void ParseCommand_Find_SetsWindowAndName()
@@ -54,7 +54,7 @@ public class TelegramParseCommandTests
         Assert.Equal("textBox1", req!.AutomationId);
     }
 
-    // ── /execute / /exec ──────────────────────────────────────────────────
+    // -- /execute / /exec --------------------------------------------------
 
     [Fact]
     public void ParseCommand_Execute_SetsActionAndValue()
@@ -76,7 +76,7 @@ public class TelegramParseCommandTests
         Assert.Equal("hello",   req.Value);
     }
 
-    // ── /ocr ─────────────────────────────────────────────────────────────
+    // -- /ocr -------------------------------------------------------------
 
     [Fact]
     public void ParseCommand_Ocr_ValueFromKeyedArg()
@@ -96,7 +96,7 @@ public class TelegramParseCommandTests
         Assert.Equal("10,20,300,100", req!.Value);
     }
 
-    // ── /capture ─────────────────────────────────────────────────────────
+    // -- /capture ---------------------------------------------------------
 
     [Fact]
     public void ParseCommand_Capture_SetsActionAndValue()
@@ -108,7 +108,7 @@ public class TelegramParseCommandTests
         Assert.Equal("7",       req.Value);
     }
 
-    // ── /status, /windows, /elements ─────────────────────────────────────
+    // -- /status, /windows, /elements -------------------------------------
 
     [Fact]
     public void ParseCommand_Status_ReturnsStatusCommand()
@@ -142,7 +142,7 @@ public class TelegramParseCommandTests
         Assert.Equal("Button", req!.SearchType);
     }
 
-    // ── /ai ──────────────────────────────────────────────────────────────
+    // -- /ai --------------------------------------------------------------
 
     [Fact]
     public void ParseCommand_Ai_SetsActionModelAndPrompt()
@@ -163,7 +163,7 @@ public class TelegramParseCommandTests
         Assert.Equal("describe", req!.Action);
     }
 
-    // ── /help / /start ───────────────────────────────────────────────────
+    // -- /help / /start ---------------------------------------------------
 
     [Fact]
     public void ParseCommand_Help_ReturnsHelpCommand()
@@ -177,7 +177,7 @@ public class TelegramParseCommandTests
         Assert.Equal("help", TelegramController.ParseCommand("/start")!.Command);
     }
 
-    // ── @botname suffix stripping ─────────────────────────────────────────
+    // -- @botname suffix stripping -----------------------------------------
 
     [Fact]
     public void ParseCommand_WithBotnameSuffix_Stripped()
@@ -187,7 +187,7 @@ public class TelegramParseCommandTests
         Assert.Equal("status", req!.Command);
     }
 
-    // ── Unknown command fall-through ──────────────────────────────────────
+    // -- Unknown command fall-through --------------------------------------
 
     [Fact]
     public void ParseCommand_UnknownCommand_ReturnsCommandNameAndArgs()
@@ -198,7 +198,7 @@ public class TelegramParseCommandTests
         Assert.Equal("some args", req.Value);
     }
 
-    // ── ParseKeyValues ────────────────────────────────────────────────────
+    // -- ParseKeyValues ----------------------------------------------------
 
     [Fact]
     public void ParseKeyValues_SimpleKeyValue_Parsed()
@@ -246,7 +246,7 @@ public class TelegramParseCommandTests
         Assert.Equal("", d["flagonly"]);
     }
 
-    // ── DictExtensions.Get ────────────────────────────────────────────────
+    // -- DictExtensions.Get ------------------------------------------------
 
     [Fact]
     public void DictGet_FirstMatchingKey_Returned()
@@ -280,9 +280,10 @@ public class TelegramParseCommandTests
     {
         var d = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["a"] = "   ",  // whitespace-only — treated as missing
+            ["a"] = "   ",  // whitespace-only - treated as missing
             ["b"] = "beta"
         };
         Assert.Equal("beta", d.Get("a", "b"));
     }
 }
+

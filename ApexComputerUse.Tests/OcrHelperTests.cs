@@ -6,12 +6,12 @@ namespace ApexComputerUse.Tests;
 
 /// <summary>
 /// Unit tests for the pure-logic helpers in <see cref="OcrHelper"/>.
-/// Tests that require a Tesseract engine (tessdata files) are excluded — only the
+/// Tests that require a Tesseract engine (tessdata files) are excluded - only the
 /// bitmap utility methods that carry no external dependency are covered here.
 /// </summary>
 public class OcrHelperTests
 {
-    // ── CropBitmap ────────────────────────────────────────────────────────
+    // -- CropBitmap --------------------------------------------------------
 
     [Fact]
     public void CropBitmap_RegionInsideBounds_ReturnsCroppedSize()
@@ -27,13 +27,13 @@ public class OcrHelperTests
     [Fact]
     public void CropBitmap_RegionFullyOutsideBounds_ThrowsOrReturnsEmpty()
     {
-        // Rectangle.Intersect of a non-overlapping region returns Rectangle.Empty (0×0).
+        // Rectangle.Intersect of a non-overlapping region returns Rectangle.Empty (0?0).
         // GDI+ Bitmap.Clone with a zero-area rectangle throws ArgumentException.
         // This test documents the current behaviour without constraining the error path.
         using var source = new Bitmap(50, 50);
         var       region = new Rectangle(200, 200, 10, 10);  // entirely outside
         // Either the implementation clamps gracefully (no throw) or throws ArgumentException.
-        // Either is acceptable — what matters is it doesn't crash the process.
+        // Either is acceptable - what matters is it doesn't crash the process.
         try
         {
             using var cropped = OcrHelper.CropBitmap(source, region);
@@ -51,11 +51,11 @@ public class OcrHelperTests
     public void CropBitmap_RegionExceedsBounds_ClampedToIntersection()
     {
         using var source  = new Bitmap(60, 40);
-        // Region extends past right/bottom edge — must be clipped to 60×40.
+        // Region extends past right/bottom edge - must be clipped to 60?40.
         var       region  = new Rectangle(50, 30, 100, 100);
         using var cropped = OcrHelper.CropBitmap(source, region);
 
-        // Intersection: x=50..60, y=30..40 → 10×10
+        // Intersection: x=50..60, y=30..40 -> 10?10
         Assert.Equal(10, cropped.Width);
         Assert.Equal(10, cropped.Height);
     }
@@ -81,14 +81,14 @@ public class OcrHelperTests
         var       region  = new Rectangle(15, 15, 20, 20);
         using var cropped = OcrHelper.CropBitmap(source, region);
 
-        // The red pixel at (20,20) in source → (5,5) in cropped (offset 15,15)
+        // The red pixel at (20,20) in source -> (5,5) in cropped (offset 15,15)
         var px = cropped.GetPixel(5, 5);
         Assert.Equal(255, px.R);
         Assert.Equal(0,   px.G);
         Assert.Equal(0,   px.B);
     }
 
-    // ── OcrResult ─────────────────────────────────────────────────────────
+    // -- OcrResult ---------------------------------------------------------
 
     [Fact]
     public void OcrResult_ToString_IncludesConfidenceAndText()
@@ -106,3 +106,4 @@ public class OcrHelperTests
         Assert.Equal("", r.Text);
     }
 }
+

@@ -1,11 +1,11 @@
-﻿using FlaUI.Core.AutomationElements;
+using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Definitions;
 
 namespace ApexComputerUse
 {
     public partial class CommandProcessor
     {
-        // ── Commands ──────────────────────────────────────────────────────
+        // -- Commands ------------------------------------------------------
 
         private CommandResponse CmdFind(CommandRequest req)
         {
@@ -35,7 +35,7 @@ namespace ApexComputerUse
 
             bool includeExtra = string.Equals(req.Properties, "extra", StringComparison.OrdinalIgnoreCase);
 
-            // No element search — target the window itself, unless a type filter was
+            // No element search - target the window itself, unless a type filter was
             // given, in which case find the first descendant of that ControlType.
             if (string.IsNullOrWhiteSpace(req.AutomationId) && string.IsNullOrWhiteSpace(req.ElementName))
             {
@@ -48,7 +48,7 @@ namespace ApexComputerUse
                         var t = Task.Run(() => window.FindFirstDescendant(cf => cf.ByControlType(typeOnly.Value)));
                         byType = t.Wait(5000) ? t.Result : null;
                     }
-                    catch { /* stale window — fall through to null check */ }
+                    catch { /* stale window - fall through to null check */ }
 
                     if (byType == null)
                         return Fail($"No element of type '{req.SearchType}' found in '{wTitle}'.");
@@ -73,7 +73,7 @@ namespace ApexComputerUse
             if (byId && int.TryParse(searchVal, out int mappedId) && _elementMap.TryGetValue(mappedId, out var mappedEl))
             {
                 if (!IsElementValid(mappedEl))
-                    return Fail($"Element [map:{mappedId}] is stale — the target app has changed state. Run 'find' again.");
+                    return Fail($"Element [map:{mappedId}] is stale - the target app has changed state. Run 'find' again.");
                 try
                 {
                     CurrentElement = mappedEl;
@@ -91,7 +91,7 @@ namespace ApexComputerUse
 
             CurrentElement = el;
             _elementDesc   = _helper.Describe(el);
-            string eNote   = eExact ? "" : $" (fuzzy '{searchVal}' → '{eValue}')";
+            string eNote   = eExact ? "" : $" (fuzzy '{searchVal}' -> '{eValue}')";
 
             return Ok($"Window: {wTitle}{wNote} | Element{eNote}",
                       BuildFindElementJson(el, includeExtra));
@@ -111,13 +111,13 @@ namespace ApexComputerUse
         /// </param>
         private string BuildFindElementJson(AutomationElement el, bool includeExtra, int? preferredId = null)
         {
-            // Recover the stable numeric ID if the caller previously ran /elements — reference
+            // Recover the stable numeric ID if the caller previously ran /elements - reference
             // equality against the live AutomationElement handles the common "scan then find"
             // workflow. First-time /find without a prior scan simply omits `id`.
             int? id = preferredId;
             if (id == null)
             {
-                // Fast path — reverse index is O(1) average. Falls back to the linear scan
+                // Fast path - reverse index is O(1) average. Falls back to the linear scan
                 // below if the dictionary misses (e.g. FlaUI returned a new instance with a
                 // different hash code), which is still correct via Equals (UIA CompareElements).
                 if (_elementReverse.TryGetValue(el, out int mapped)) id = mapped;
@@ -137,7 +137,7 @@ namespace ApexComputerUse
                 if (b.Width > 0 || b.Height > 0)
                     rect = new BoundingRect { X = (int)b.X, Y = (int)b.Y, Width = (int)b.Width, Height = (int)b.Height };
             }
-            catch { /* stale — leave rect null */ }
+            catch { /* stale - leave rect null */ }
 
             string ct       = "Unknown";
             string name     = "";
@@ -187,7 +187,7 @@ namespace ApexComputerUse
             }
 
             if (target == null) return Fail("No element selected. Use 'find' first or pass element=<id>.");
-            if (!IsElementValid(target)) return Fail("The selected element is stale — the target app has changed state. Run 'find' again.");
+            if (!IsElementValid(target)) return Fail("The selected element is stale - the target app has changed state. Run 'find' again.");
 
             string result = RunAction(target, CurrentWindow, req.Action!, req.Value ?? "");
             return string.IsNullOrEmpty(result)
@@ -197,3 +197,4 @@ namespace ApexComputerUse
 
     }
 }
+

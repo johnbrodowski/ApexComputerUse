@@ -1,6 +1,6 @@
 @echo off
 ::
-:: apex.cmd — cmd.exe helper for ApexComputerUse
+:: apex.cmd - cmd.exe helper for ApexComputerUse
 ::
 :: Sends commands to the HTTP server via curl (built-in on Windows 10+).
 :: Start the HTTP server in the app's Remote Control group first.
@@ -56,7 +56,7 @@ if /I "%CMD%"=="capture"  goto :do_capture
 echo Unknown command: %CMD%
 goto :usage
 
-:: ── Simple GETs ──────────────────────────────────────────────────────────────
+:: -- Simple GETs --------------------------------------------------------------
 
 :do_windows
 curl -s %BASE%/windows
@@ -82,7 +82,7 @@ if "%~2"=="" (
 echo.
 goto :eof
 
-:: ── find ─────────────────────────────────────────────────────────────────────
+:: -- find ---------------------------------------------------------------------
 :: apex find <window> [id=X] [name=X] [type=X]
 
 :do_find
@@ -107,7 +107,7 @@ curl -s -X POST %BASE%/find -H "Content-Type: application/json" -d "%FIND_JSON%"
 echo.
 goto :eof
 
-:: ── exec ─────────────────────────────────────────────────────────────────────
+:: -- exec ---------------------------------------------------------------------
 :: apex exec <action> [value=X]
 
 :do_exec
@@ -127,7 +127,7 @@ if "%EXEC_VAL%"=="" (
 echo.
 goto :eof
 
-:: ── ocr ──────────────────────────────────────────────────────────────────────
+:: -- ocr ----------------------------------------------------------------------
 :: apex ocr [x,y,w,h]
 
 :do_ocr
@@ -139,7 +139,7 @@ if "%~2"=="" (
 echo.
 goto :eof
 
-:: ── ai ───────────────────────────────────────────────────────────────────────
+:: -- ai -----------------------------------------------------------------------
 :: apex ai <sub> [key=value ...]
 
 :do_ai
@@ -185,7 +185,7 @@ curl -s -X POST %BASE%/ai/%SUB% -H "Content-Type: application/json" -d "%AI_JSON
 echo.
 goto :eof
 
-:: ── capture ───────────────────────────────────────────────────────────────────
+:: -- capture -------------------------------------------------------------------
 :: apex capture [action=screen|window|element|elements] [value=id1,id2,...]
 
 :do_capture
@@ -211,11 +211,11 @@ if "%CAP_ACTION%"=="" if "%CAP_VALUE%"=="" (
 echo.
 goto :eof
 
-:: ── usage ─────────────────────────────────────────────────────────────────────
+:: -- usage ---------------------------------------------------------------------
 
 :usage
 echo.
-echo  ApexComputerUse — AI computer use automation via cmd.exe
+echo  ApexComputerUse - AI computer use automation via cmd.exe
 echo  Requires the HTTP server to be running (default port 8080).
 echo  Set APEX_PORT to override.
 echo.
@@ -235,3 +235,4 @@ echo    apex capture [action=screen^|window^|element^|elements] [value=id1,id2,.
 echo    apex help
 echo.
 goto :eof
+

@@ -4,12 +4,12 @@ namespace ApexComputerUse
     {
         private System.ComponentModel.IContainer components = null;
 
-        // ── Toolbar ───────────────────────────────────────────────────────
+        // -- Toolbar -------------------------------------------------------
         private System.Windows.Forms.FlowLayoutPanel toolFlow;
         private System.Windows.Forms.Label lblFillLabel;
         private System.Windows.Forms.Button btnFillColor;
 
-        // ── Toolbox ───────────────────────────────────────────────────────
+        // -- Toolbox -------------------------------------------------------
         private System.Windows.Forms.Panel toolboxPanel;
         private System.Windows.Forms.Button btnToolArrow;
         private System.Windows.Forms.Button btnToolRect;
@@ -21,20 +21,20 @@ namespace ApexComputerUse
         private System.Windows.Forms.Button btnToolArc;
         private System.Windows.Forms.Button btnDeleteShape;
 
-        // ── Scene list ────────────────────────────────────────────────────
+        // -- Scene list ----------------------------------------------------
         private System.Windows.Forms.Panel scenePanel;
         private System.Windows.Forms.Label sceneHeader;
         private System.Windows.Forms.ListBox lstScenes;
         private System.Windows.Forms.Button btnNewScene;
         private System.Windows.Forms.Button btnDeleteScene;
 
-        // ── Splits ────────────────────────────────────────────────────────
+        // -- Splits --------------------------------------------------------
         private System.Windows.Forms.SplitContainer splitOuter;
         private System.Windows.Forms.SplitContainer splitInner;
         private System.Windows.Forms.SplitContainer splitRight;
         private System.Windows.Forms.SplitContainer splitChat;
 
-        // ── Collab / chat dock ────────────────────────────────────────────
+        // -- Collab / chat dock --------------------------------------------
         private System.Windows.Forms.Panel chatPanel;
         private System.Windows.Forms.Label chatHeader;
         private System.Windows.Forms.TextBox txtChatLog;
@@ -42,10 +42,10 @@ namespace ApexComputerUse
         private System.Windows.Forms.TextBox txtChatInput;
         private System.Windows.Forms.Button btnChatSend;
 
-        // ── Canvas ────────────────────────────────────────────────────────
+        // -- Canvas --------------------------------------------------------
         private System.Windows.Forms.Panel canvasPanel;
 
-        // ── Layers ────────────────────────────────────────────────────────
+        // -- Layers --------------------------------------------------------
         private System.Windows.Forms.Panel layersPanel;
         private System.Windows.Forms.Label layersHeader;
         private System.Windows.Forms.ListBox lstLayers;
@@ -55,21 +55,21 @@ namespace ApexComputerUse
         private System.Windows.Forms.Button btnAddLayer;
         private System.Windows.Forms.Button btnDeleteLayer;
 
-        // ── Properties ────────────────────────────────────────────────────
+        // -- Properties ----------------------------------------------------
         private System.Windows.Forms.Panel rightBottom;
         private System.Windows.Forms.Label propsHeader;
         private System.Windows.Forms.FlowLayoutPanel pnlProps;
 
-        // ── Status strip ──────────────────────────────────────────────────
+        // -- Status strip --------------------------------------------------
         private System.Windows.Forms.StatusStrip statusStrip;
         private System.Windows.Forms.ToolStripStatusLabel lblCursor;
         private System.Windows.Forms.ToolStripStatusLabel lblSelected;
         private System.Windows.Forms.ToolStripStatusLabel lblSceneInfo;
 
-        // ── Tooltip ───────────────────────────────────────────────────────
+        // -- Tooltip -------------------------------------------------------
         private System.Windows.Forms.ToolTip toolTip1;
 
-        // ── Refresh timer ─────────────────────────────────────────────────
+        // -- Refresh timer -------------------------------------------------
         private System.Windows.Forms.Timer refreshTimer;
 
         protected override void Dispose(bool disposing)
@@ -194,7 +194,7 @@ namespace ApexComputerUse
             btnFillColor.Name = "btnFillColor";
             btnFillColor.Size = new Size(24, 24);
             btnFillColor.TabIndex = 0;
-            toolTip1.SetToolTip(btnFillColor, "Fill color — click to change");
+            toolTip1.SetToolTip(btnFillColor, "Fill color - click to change");
             btnFillColor.UseVisualStyleBackColor = false;
             btnFillColor.Click += btnFillColor_Click;
             // 
@@ -231,7 +231,7 @@ namespace ApexComputerUse
             btnToolArrow.Name = "btnToolArrow";
             btnToolArrow.Size = new Size(60, 50);
             btnToolArrow.TabIndex = 0;
-            btnToolArrow.Text = "↖";
+            btnToolArrow.Text = "?";
             toolTip1.SetToolTip(btnToolArrow, "Select / Move (V)");
             btnToolArrow.UseVisualStyleBackColor = false;
             btnToolArrow.Click += btnToolArrow_Click;
@@ -249,7 +249,7 @@ namespace ApexComputerUse
             btnToolRect.Name = "btnToolRect";
             btnToolRect.Size = new Size(60, 50);
             btnToolRect.TabIndex = 1;
-            btnToolRect.Text = "▭";
+            btnToolRect.Text = "?";
             toolTip1.SetToolTip(btnToolRect, "Rectangle (R)");
             btnToolRect.UseVisualStyleBackColor = false;
             btnToolRect.Click += btnToolRect_Click;
@@ -267,7 +267,7 @@ namespace ApexComputerUse
             btnToolEllipse.Name = "btnToolEllipse";
             btnToolEllipse.Size = new Size(60, 50);
             btnToolEllipse.TabIndex = 2;
-            btnToolEllipse.Text = "◯";
+            btnToolEllipse.Text = "?";
             toolTip1.SetToolTip(btnToolEllipse, "Ellipse (E)");
             btnToolEllipse.UseVisualStyleBackColor = false;
             btnToolEllipse.Click += btnToolEllipse_Click;
@@ -285,7 +285,7 @@ namespace ApexComputerUse
             btnToolCircle.Name = "btnToolCircle";
             btnToolCircle.Size = new Size(60, 50);
             btnToolCircle.TabIndex = 3;
-            btnToolCircle.Text = "○";
+            btnToolCircle.Text = "?";
             toolTip1.SetToolTip(btnToolCircle, "Circle (C)");
             btnToolCircle.UseVisualStyleBackColor = false;
             btnToolCircle.Click += btnToolCircle_Click;
@@ -303,7 +303,7 @@ namespace ApexComputerUse
             btnToolLine.Name = "btnToolLine";
             btnToolLine.Size = new Size(60, 50);
             btnToolLine.TabIndex = 4;
-            btnToolLine.Text = "╱";
+            btnToolLine.Text = "?";
             toolTip1.SetToolTip(btnToolLine, "Line (L)");
             btnToolLine.UseVisualStyleBackColor = false;
             btnToolLine.Click += btnToolLine_Click;
@@ -339,7 +339,7 @@ namespace ApexComputerUse
             btnToolTriangle.Name = "btnToolTriangle";
             btnToolTriangle.Size = new Size(60, 50);
             btnToolTriangle.TabIndex = 6;
-            btnToolTriangle.Text = "△";
+            btnToolTriangle.Text = "?";
             toolTip1.SetToolTip(btnToolTriangle, "Triangle (G)");
             btnToolTriangle.UseVisualStyleBackColor = false;
             btnToolTriangle.Click += btnToolTriangle_Click;
@@ -357,7 +357,7 @@ namespace ApexComputerUse
             btnToolArc.Name = "btnToolArc";
             btnToolArc.Size = new Size(60, 50);
             btnToolArc.TabIndex = 7;
-            btnToolArc.Text = "⌒";
+            btnToolArc.Text = "?";
             toolTip1.SetToolTip(btnToolArc, "Arc (A)");
             btnToolArc.UseVisualStyleBackColor = false;
             btnToolArc.Click += btnToolArc_Click;
@@ -375,7 +375,7 @@ namespace ApexComputerUse
             btnDeleteShape.Name = "btnDeleteShape";
             btnDeleteShape.Size = new Size(60, 50);
             btnDeleteShape.TabIndex = 8;
-            btnDeleteShape.Text = "🗑";
+            btnDeleteShape.Text = "??";
             toolTip1.SetToolTip(btnDeleteShape, "Delete selected (Del)");
             btnDeleteShape.UseVisualStyleBackColor = false;
             btnDeleteShape.Click += btnDeleteShape_Click;
@@ -590,7 +590,7 @@ namespace ApexComputerUse
             btnLayerUp.Name = "btnLayerUp";
             btnLayerUp.Size = new Size(28, 22);
             btnLayerUp.TabIndex = 2;
-            btnLayerUp.Text = "▲";
+            btnLayerUp.Text = "?";
             toolTip1.SetToolTip(btnLayerUp, "Move layer up");
             btnLayerUp.UseVisualStyleBackColor = false;
             btnLayerUp.Click += btnLayerUp_Click;
@@ -605,7 +605,7 @@ namespace ApexComputerUse
             btnLayerDown.Name = "btnLayerDown";
             btnLayerDown.Size = new Size(28, 22);
             btnLayerDown.TabIndex = 3;
-            btnLayerDown.Text = "▼";
+            btnLayerDown.Text = "?";
             toolTip1.SetToolTip(btnLayerDown, "Move layer down");
             btnLayerDown.UseVisualStyleBackColor = false;
             btnLayerDown.Click += btnLayerDown_Click;
@@ -634,7 +634,7 @@ namespace ApexComputerUse
             btnDeleteLayer.Name = "btnDeleteLayer";
             btnDeleteLayer.Size = new Size(28, 22);
             btnDeleteLayer.TabIndex = 1;
-            btnDeleteLayer.Text = "✕";
+            btnDeleteLayer.Text = "?";
             btnDeleteLayer.UseVisualStyleBackColor = false;
             btnDeleteLayer.Click += btnDeleteLayer_Click;
             // 
@@ -690,7 +690,7 @@ namespace ApexComputerUse
             lblCursor.ForeColor = Color.Gray;
             lblCursor.Name = "lblCursor";
             lblCursor.Size = new Size(60, 17);
-            lblCursor.Text = "x: —  y: —";
+            lblCursor.Text = "x: -  y: -";
             // 
             // lblSelected
             // 
@@ -860,3 +860,4 @@ namespace ApexComputerUse
         #endregion
     }
 }
+

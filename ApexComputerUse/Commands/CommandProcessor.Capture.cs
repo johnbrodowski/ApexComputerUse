@@ -1,4 +1,4 @@
-﻿using FlaUI.Core.AutomationElements;
+using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Definitions;
 
 namespace ApexComputerUse
@@ -100,7 +100,7 @@ namespace ApexComputerUse
                 int ms = drawReq.OverlayMs;
                 string overlayNote = drawReq.Overlay
                     ? (ms > 0 ? $" Overlay showing for {ms / 1000.0:0.#}s (Esc to dismiss)."
-                               : " Overlay showing — press Esc to dismiss.")
+                               : " Overlay showing - press Esc to dismiss.")
                     : "";
                 return Ok($"Drawing rendered ({drawReq.Shapes.Count} shape(s)).{overlayNote}", base64);
             }
@@ -149,3 +149,4 @@ namespace ApexComputerUse
 
     }
 }
+

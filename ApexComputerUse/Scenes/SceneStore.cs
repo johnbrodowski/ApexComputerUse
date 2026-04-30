@@ -10,7 +10,7 @@ namespace ApexComputerUse
     /// </summary>
     public sealed class SceneStore
     {
-        // ── Storage paths ─────────────────────────────────────────────────
+        // -- Storage paths -------------------------------------------------
 
         private static readonly string DefaultScenesDir =
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -24,12 +24,12 @@ namespace ApexComputerUse
             PropertyNameCaseInsensitive = true
         };
 
-        // ── In-memory state ───────────────────────────────────────────────
+        // -- In-memory state -----------------------------------------------
 
         private readonly Dictionary<string, Scene> _scenes = new();
         private readonly object _lock = new();
 
-        // ── Lifecycle ─────────────────────────────────────────────────────
+        // -- Lifecycle -----------------------------------------------------
 
         public SceneStore(string? scenesDir = null)
         {
@@ -49,7 +49,7 @@ namespace ApexComputerUse
                 File.Copy(file, Path.Combine(_scenesDir, Path.GetFileName(file)), overwrite: false);
         }
 
-        // ── Scene CRUD ────────────────────────────────────────────────────
+        // -- Scene CRUD ----------------------------------------------------
 
         public Scene CreateScene(string name, int width = 800, int height = 600,
                                  string background = "white")
@@ -110,7 +110,7 @@ namespace ApexComputerUse
             }
         }
 
-        // ── Layer CRUD ────────────────────────────────────────────────────
+        // -- Layer CRUD ----------------------------------------------------
 
         public Layer AddLayer(string sceneId, string name)
         {
@@ -167,7 +167,7 @@ namespace ApexComputerUse
             }
         }
 
-        // ── Shape CRUD ────────────────────────────────────────────────────
+        // -- Shape CRUD ----------------------------------------------------
 
         public SceneShape AddShape(string sceneId, string layerId,
                                     AIDrawingCommand.ShapeCommand shape, string? name = null)
@@ -287,7 +287,7 @@ namespace ApexComputerUse
             }
         }
 
-        // ── Render ────────────────────────────────────────────────────────
+        // -- Render --------------------------------------------------------
 
         /// <summary>Render the scene to a base-64 PNG string.</summary>
         public string RenderScene(string sceneId)
@@ -303,17 +303,17 @@ namespace ApexComputerUse
             return AIDrawingCommand.Render(drawReq);
         }
 
-        // ── Disk persistence ──────────────────────────────────────────────
+        // -- Disk persistence ----------------------------------------------
 
         private void SaveToDisk(Scene scene)
         {
-            // Called inside _lock — small JSON files, negligible I/O time.
+            // Called inside _lock - small JSON files, negligible I/O time.
             try
             {
                 File.WriteAllText(SceneFilePath(scene.Id),
                     JsonSerializer.Serialize(scene, JsonOpts));
             }
-            catch (Exception ex) { AppLog.Warning($"SceneStore: failed to persist scene '{scene.Id}' to disk — {ex.Message}"); }
+            catch (Exception ex) { AppLog.Warning($"SceneStore: failed to persist scene '{scene.Id}' to disk - {ex.Message}"); }
         }
 
         private void LoadAllFromDisk()
@@ -327,14 +327,14 @@ namespace ApexComputerUse
                     if (scene != null)
                         _scenes[scene.Id] = scene;
                 }
-                catch (Exception ex) { AppLog.Warning($"SceneStore: skipping corrupt scene file '{Path.GetFileName(file)}' — {ex.Message}"); }
+                catch (Exception ex) { AppLog.Warning($"SceneStore: skipping corrupt scene file '{Path.GetFileName(file)}' - {ex.Message}"); }
             }
         }
 
         private string SceneFilePath(string id) =>
             Path.Combine(_scenesDir, $"{id}.json");
 
-        // ── Internal helpers ──────────────────────────────────────────────
+        // -- Internal helpers ----------------------------------------------
 
         private Scene Require(string id) =>
             _scenes.TryGetValue(id, out var s) ? s
@@ -363,3 +363,4 @@ namespace ApexComputerUse
         }
     }
 }
+

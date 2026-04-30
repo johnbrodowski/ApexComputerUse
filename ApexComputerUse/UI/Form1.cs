@@ -22,13 +22,13 @@ namespace ApexComputerUse
 
         /// <summary>
         /// Shared log-forwarding delegate for processor + all I/O servers.
-        /// Captured as a field so it can be unsubscribed symmetrically on Stop / FormClosed —
+        /// Captured as a field so it can be unsubscribed symmetrically on Stop / FormClosed -
         /// if a server outlives the form and fires OnLog, BeginInvoke on a disposed form would throw.
         /// Self-guards against a disposed form as a belt-and-suspenders against race windows.
         /// </summary>
         private readonly Action<string> _logHandler;
 
-        // ── Persistent settings ───────────────────────────────────────────
+        // -- Persistent settings -------------------------------------------
         private static readonly string SettingsDir =
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ApexComputerUse");
         private static readonly string SettingsFile = Path.Combine(SettingsDir, "settings.json");
@@ -241,11 +241,11 @@ namespace ApexComputerUse
                     }
                 }
             }
-            catch (Exception ex) { AppLog.Warning($"LoadSettings: settings file appears corrupt and was ignored — {ex.Message}"); }
+            catch (Exception ex) { AppLog.Warning($"LoadSettings: settings file appears corrupt and was ignored - {ex.Message}"); }
 
             if (string.IsNullOrWhiteSpace(txtApiKey.Text)) EnsureApiKey();
 
-            // Layer 2: deployment config / env vars (APEX_*) — highest priority, applied last
+            // Layer 2: deployment config / env vars (APEX_*) - highest priority, applied last
             var cfg = AppConfig.Current;
             if (cfg.HttpPort != 8080) txtHttpPort.Text = cfg.HttpPort.ToString();
             if (!string.IsNullOrWhiteSpace(cfg.PipeName) &&
@@ -272,13 +272,13 @@ namespace ApexComputerUse
                     NetshPort        = _netshPort
                 };
                 // Atomic write: a crash mid-write would otherwise corrupt settings.json,
-                // and a corrupt file is treated as missing — wiping out the saved API key.
+                // and a corrupt file is treated as missing - wiping out the saved API key.
                 string tmp = SettingsFile + ".tmp";
                 File.WriteAllText(tmp,
                     JsonSerializer.Serialize(s, new JsonSerializerOptions { WriteIndented = true }));
                 File.Move(tmp, SettingsFile, overwrite: true);
             }
-            catch (Exception ex) { AppLog.Warning($"SaveSettings: failed to write settings — {ex.Message}"); }
+            catch (Exception ex) { AppLog.Warning($"SaveSettings: failed to write settings - {ex.Message}"); }
         }
 
         private void EnsureApiKey()
@@ -295,7 +295,7 @@ namespace ApexComputerUse
             return Convert.ToBase64String(bytes).Replace('+', '-').Replace('/', '_').TrimEnd('=');
         }
 
-        // ── First-run netsh setup ─────────────────────────────────────────
+        // -- First-run netsh setup -----------------------------------------
 
         private async Task SetupNetshIfNeededAsync()
         {
@@ -478,7 +478,7 @@ namespace ApexComputerUse
             catch { return false; }
         }
 
-        // ── Model auto-load ───────────────────────────────────────────────
+        // -- Model auto-load -----------------------------------------------
 
         private void AutoLoadModelIfConfigured()
         {
@@ -497,7 +497,7 @@ namespace ApexComputerUse
             }, TaskContinuationOptions.OnlyOnFaulted);
         }
 
-        // ── Control-type picker ───────────────────────────────────────────
+        // -- Control-type picker -------------------------------------------
 
         private void cmbControlType_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -508,7 +508,7 @@ namespace ApexComputerUse
                 cmbAction.SelectedIndex = 0;
         }
 
-        // ── Command input ─────────────────────────────────────────────────
+        // -- Command input -------------------------------------------------
 
         private void txtCommand_KeyDown(object sender, KeyEventArgs e)
         {
@@ -527,7 +527,7 @@ namespace ApexComputerUse
             catch (Exception ex) { Log($"Error: {ex.Message}"); }
         }
 
-        // ── Find ──────────────────────────────────────────────────────────
+        // -- Find ----------------------------------------------------------
 
         private void btnFind_Click(object sender, EventArgs e)
         {
@@ -597,7 +597,7 @@ namespace ApexComputerUse
             catch (Exception ex) { Log($"Error: {ex.Message}"); }
         }
 
-        // ── Execute ───────────────────────────────────────────────────────
+        // -- Execute -------------------------------------------------------
 
         private void btnExecute_Click(object sender, EventArgs e)
         {
@@ -619,20 +619,20 @@ namespace ApexComputerUse
             catch (Exception ex) { Log($"Error: {ex.Message}"); }
         }
 
-        // ── Server tab ────────────────────────────────────────────────────
+        // -- Server tab ----------------------------------------------------
 
         private void btnStartHttp_Click(object sender, EventArgs e)      => _servers.ToggleHttp();
         private void btnStartPipe_Click(object sender, EventArgs e)      => _servers.TogglePipe();
         private void btnStartTelegram_Click(object sender, EventArgs e)  => _servers.ToggleTelegram();
         private void btnCopyApiKey_Click(object sender, EventArgs e)     => _servers.CopyApiKey();
 
-        // ── Chat tab ──────────────────────────────────────────────────────
+        // -- Chat tab ------------------------------------------------------
 
         private void cboAiProvider_SelectedIndexChanged(object sender, EventArgs e) => _chat.ProviderChanged();
         private void btnAiSaveSettings_Click(object sender, EventArgs e) => _chat.SaveSettings();
         private void btnAiOpenChat_Click(object sender, EventArgs e)     => _chat.OpenChat();
 
-        // ── Model tab ─────────────────────────────────────────────────────
+        // -- Model tab -----------------------------------------------------
 
         private void btnBrowseModel_Click(object sender, EventArgs e)    => _model.BrowseModel();
         private void btnBrowseProj_Click(object sender, EventArgs e)     => _model.BrowseProj();
@@ -643,7 +643,7 @@ namespace ApexComputerUse
         private async void btnDownload_Click(object sender, EventArgs e)    =>
             await SafeRun(() => _model.Download(), "Download");
 
-        // ── Misc ──────────────────────────────────────────────────────────
+        // -- Misc ----------------------------------------------------------
 
         private void btnClear_Click(object sender, EventArgs e) => txtStatus.Clear();
 
@@ -664,7 +664,7 @@ namespace ApexComputerUse
             tb.SelectionStart  = tb.TextLength;
             tb.SelectionLength = 0;
             // Setting Text resets the scroll position; SelectionStart alone doesn't move the
-            // viewport on a multiline TextBox — ScrollToCaret keeps the user pinned to the tail.
+            // viewport on a multiline TextBox - ScrollToCaret keeps the user pinned to the tail.
             tb.ScrollToCaret();
         }
 
@@ -676,7 +676,7 @@ namespace ApexComputerUse
         private async Task SafeRun(Func<Task> fn, string? context = null)
         {
             try { await fn(); }
-            catch (OperationCanceledException) { /* user cancellation — not an error */ }
+            catch (OperationCanceledException) { /* user cancellation - not an error */ }
             catch (Exception ex)
             {
                 string tag = context ?? "handler";
@@ -699,7 +699,7 @@ namespace ApexComputerUse
             base.OnFormClosed(e);
         }
 
-        // ── Menu items ────────────────────────────────────────────────────
+        // -- Menu items ----------------------------------------------------
 
         private async void runAIComputerUseToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -737,7 +737,7 @@ namespace ApexComputerUse
             var response = _dispatcher.Dispatch(new CommandRequest { Command = "elements" });
             if (!response.Success || string.IsNullOrWhiteSpace(response.Data))
             {
-                Log("Render UI Map: no elements — select a window first.");
+                Log("Render UI Map: no elements - select a window first.");
                 return;
             }
 
@@ -772,3 +772,4 @@ namespace ApexComputerUse
 
     }
 }
+

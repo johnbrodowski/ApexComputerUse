@@ -44,7 +44,7 @@ public sealed class AiSessionBuilder
     private string? _systemMessage;
     private TimeSpan _timeout = TimeSpan.FromSeconds(120);
 
-    // ── Constructors ────────────────────────────────────────────────────────
+    // -- Constructors --------------------------------------------------------
 
     /// <summary>
     /// Creates a builder wired to an explicit factory (DI / testing).
@@ -59,7 +59,7 @@ public sealed class AiSessionBuilder
 
     private AiSessionBuilder() { }
 
-    // ── Static entry point ──────────────────────────────────────────────────
+    // -- Static entry point --------------------------------------------------
 
     /// <summary>
     /// Creates a builder pre-configured with the named provider.
@@ -68,7 +68,7 @@ public sealed class AiSessionBuilder
     public static AiSessionBuilder WithProvider(string provider)
         => new AiSessionBuilder { _provider = provider };
 
-    // ── Fluent configuration ────────────────────────────────────────────────
+    // -- Fluent configuration ------------------------------------------------
 
     public AiSessionBuilder WithModel(string model)
     {
@@ -121,7 +121,7 @@ public sealed class AiSessionBuilder
         return this;
     }
 
-    // ── Build ───────────────────────────────────────────────────────────────
+    // -- Build ---------------------------------------------------------------
 
     /// <summary>Constructs the <see cref="AiSession"/>.</summary>
     public AiSession Build()
@@ -150,7 +150,7 @@ public sealed class AiSessionBuilder
         return new AiSession(inner, factory, options);
     }
 
-    // ── Default factory ─────────────────────────────────────────────────────
+    // -- Default factory -----------------------------------------------------
 
     private static IAiProviderFactory BuildDefaultFactory()
     {
@@ -169,3 +169,4 @@ public sealed class AiSessionBuilder
         return new AiProviderFactory(providers);
     }
 }
+

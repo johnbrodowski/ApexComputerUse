@@ -9,13 +9,13 @@ namespace ApexComputerUse.Tests;
 
 /// <summary>
 /// Tree-shape post-processor tests. These verify the pure-logic pieces of the
-/// browser-friendly /elements features — <c>FilterTreeByMatch</c> and
-/// <c>CollapseSingleChildChains</c> — and that opt-in node fields round-trip
+/// browser-friendly /elements features \- <c>FilterTreeByMatch</c> and
+/// <c>CollapseSingleChildChains</c> \- and that opt-in node fields round-trip
 /// through JSON serialisation intact. No live UI / FlaUI / UIA involvement.
 /// </summary>
 public class CommandProcessorTreeTests
 {
-    // ── Helpers ──────────────────────────────────────────────────────────
+    // \-\- Helpers \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 
     private static ElementNode Node(
         int id, string controlType, string name = "", string automationId = "",
@@ -50,17 +50,17 @@ public class CommandProcessorTreeTests
         }
     }
 
-    // ── MatchFilter ──────────────────────────────────────────────────────
+    // \-\- MatchFilter \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 
     [Fact]
     public void MatchFilter_KeepsOnlyBranchesContainingMatches()
     {
         // Tree:
         //   Window
-        //   ├── Button "Save"
-        //   ├── Pane
-        //   │   └── Button "Add to Cart"   ← match
-        //   └── Button "Cancel"
+        //   \+\-\- Button "Save"
+        //   \+\-\- Pane
+        //   \|   \+\-\- Button "Add to Cart"   \? match
+        //   \+\-\- Button "Cancel"
         var tree = Node(1, "Window", name: "App", children: new[]
         {
             Node(2, "Button", name: "Save"),
@@ -75,12 +75,12 @@ public class CommandProcessorTreeTests
         Assert.NotNull(filtered);
 
         var ids = Flatten(filtered).ConvertAll(n => n.Id);
-        // Window (root) kept as skeleton, path Pane → Button kept, siblings Save/Cancel pruned.
+        // Window (root) kept as skeleton, path Pane \-> Button kept, siblings Save/Cancel pruned.
         Assert.Contains(1, ids);
         Assert.Contains(3, ids);
         Assert.Contains(4, ids);
-        Assert.DoesNotContain(2, ids); // "Save" — unrelated sibling
-        Assert.DoesNotContain(5, ids); // "Cancel" — unrelated sibling
+        Assert.DoesNotContain(2, ids); // "Save" \- unrelated sibling
+        Assert.DoesNotContain(5, ids); // "Cancel" \- unrelated sibling
     }
 
     [Fact]
@@ -98,24 +98,24 @@ public class CommandProcessorTreeTests
         Assert.Contains(2, ids1);
         Assert.DoesNotContain(3, ids1);
 
-        // Value substring match — picks up the filled-in email.
+        // Value substring match \- picks up the filled-in email.
         var byValue = CommandProcessor.FilterTreeByMatch(tree, "alice@", isRoot: true);
         var ids2 = Flatten(byValue).ConvertAll(n => n.Id);
         Assert.Contains(2, ids2);
     }
 
-    // ── CollapseSingleChildChains ────────────────────────────────────────
+    // \-\- CollapseSingleChildChains \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 
     [Fact]
     public void CollapseChains_SkipsIdentitylessPaneGroupCustom_ButPreservesNamedContainers()
     {
         // Tree:
         //   Window
-        //   └── Pane (no name, no id)        ← collapsible
-        //       └── Group (no name, no id)   ← collapsible
-        //           └── Custom (no name, no id) ← collapsible
-        //               └── Pane  name="Main" ← IDENTIFIED — must NOT collapse
-        //                   └── Button "Go"
+        //   \+\-\- Pane (no name, no id)        \? collapsible
+        //       \+\-\- Group (no name, no id)   \? collapsible
+        //           \+\-\- Custom (no name, no id) \? collapsible
+        //               \+\-\- Pane  name="Main" \? IDENTIFIED \- must NOT collapse
+        //                   \+\-\- Button "Go"
         var tree = Node(1, "Window", name: "App", children: new[]
         {
             Node(2, "Pane", children: new[]
@@ -141,7 +141,7 @@ public class CommandProcessorTreeTests
         Assert.DoesNotContain(2, ids); // identity-less Pane skipped
         Assert.DoesNotContain(3, ids); // identity-less Group skipped
         Assert.DoesNotContain(4, ids); // identity-less Custom skipped
-        Assert.Contains(5, ids); // NAMED Pane "Main" kept — has identity
+        Assert.Contains(5, ids); // NAMED Pane "Main" kept \- has identity
         Assert.Contains(6, ids); // leaf Button kept
 
         // Button's ID is unchanged (stability).
@@ -154,7 +154,7 @@ public class CommandProcessorTreeTests
     [Fact]
     public void CollapseChains_DoesNotCollapse_WhenParentHasMultipleChildren()
     {
-        // Two children → parent must survive even if identity-less, because
+        // Two children \-> parent must survive even if identity-less, because
         // "1-in-1-in-1" is the only shape we target.
         var tree = Node(1, "Window", name: "App", children: new[]
         {
@@ -191,13 +191,13 @@ public class CommandProcessorTreeTests
         Assert.Equal("btnClick", btn!.AutomationId);
     }
 
-    // ── ElementNode JSON shape ───────────────────────────────────────────
+    // \-\- ElementNode JSON shape \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 
     [Fact]
     public void ElementNode_OptionalFields_AreOmittedWhenNull_AndIncludedWhenPopulated()
     {
         // ChildCount + DescendantCount on a truncated node are the primary
-        // new emission — verify they survive serialisation.
+        // new emission \- verify they survive serialisation.
         var truncated = Node(42, "Pane", name: "Outer",
             childCount: 3, descendantCount: 17,
             path: "Window > Pane",

@@ -16,13 +16,14 @@ namespace ApexComputerUse
         /// <summary>scenes/*, editor</summary>
         [JsonPropertyName("allow_scenes")]     public bool AllowScenes     { get; set; } = true;
 
-        /// <summary>/run shell execution — off by default (dangerous)</summary>
+        /// <summary>/run shell execution - off by default (dangerous)</summary>
         [JsonPropertyName("allow_shell_run")]  public bool AllowShellRun   { get; set; } = false;
 
-        /// <summary>access to client list and cross-client control — off by default (isolation)</summary>
+        /// <summary>access to client list and cross-client control - off by default (isolation)</summary>
         [JsonPropertyName("allow_clients")]    public bool AllowClients    { get; set; } = false;
 
-        /// <summary>ping, metrics, sysinfo, env, ls — on by default for all registered clients</summary>
+        /// <summary>ping, metrics, sysinfo, env, ls - on by default for all registered clients</summary>
         [JsonPropertyName("allow_diagnostics")] public bool AllowDiagnostics { get; set; } = true;
     }
 }
+

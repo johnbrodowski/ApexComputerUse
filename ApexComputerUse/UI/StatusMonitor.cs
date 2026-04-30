@@ -55,7 +55,7 @@ namespace ApexComputerUse
 
             // Model state
             if (_processor.IsProcessing)
-                _lblModel.Text = "Model: ⚙ Processing";
+                _lblModel.Text = "Model: ? Processing";
             else if (_processor.IsModelLoaded)
                 _lblModel.Text = "Model: Loaded";
             else
@@ -90,7 +90,7 @@ namespace ApexComputerUse
         {
             try { _cachedNics = NetworkInterface.GetAllNetworkInterfaces(); }
             catch { _cachedNics = Array.Empty<NetworkInterface>(); }
-            // Force recalc of the bytes delta — counters on the new adapter set aren't
+            // Force recalc of the bytes delta - counters on the new adapter set aren't
             // comparable to the old totals, so skip this tick's kbps display.
             _netBytesPrev = -1;
         }
@@ -104,3 +104,4 @@ namespace ApexComputerUse
         }
     }
 }
+

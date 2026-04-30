@@ -60,7 +60,7 @@ public class SceneChatAgentConcurrencyTests
             await gate.WaitAsync();
             try
             {
-                // Each turn has its own local buffer — no shared mutable state.
+                // Each turn has its own local buffer - no shared mutable state.
                 var localBuffer = new System.Text.StringBuilder();
                 localBuffer.Append(token);
                 await Task.Delay(2);
@@ -75,8 +75,9 @@ public class SceneChatAgentConcurrencyTests
         await Task.WhenAll(
             SimulateTurn("x"), SimulateTurn("y"), SimulateTurn("z"));
 
-        // Each buffer should contain exactly one token — no cross-contamination.
+        // Each buffer should contain exactly one token - no cross-contamination.
         Assert.All(captured, s => Assert.Equal(1, s.Length));
         Assert.Equal(3, captured.Count);
     }
 }
+

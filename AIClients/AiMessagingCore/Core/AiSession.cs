@@ -25,7 +25,7 @@ public sealed class AiSession : IChatSession
         WireEvents();
     }
 
-    // ── IChatSession ────────────────────────────────────────────────────────
+    // -- IChatSession --------------------------------------------------------
 
     public string SessionId    => _inner.SessionId;
     public string ProviderName => _inner.ProviderName;
@@ -74,7 +74,7 @@ public sealed class AiSession : IChatSession
             MaxTokens        = _baseOptions.MaxTokens,
             TopP             = _baseOptions.TopP,
             EnableReasoning  = _baseOptions.EnableReasoning
-            // SystemMessage intentionally omitted — already seeded into history
+            // SystemMessage intentionally omitted - already seeded into history
         };
 
         var newSession = _factory.Create(providerName).CreateSession(newOptions);
@@ -87,7 +87,7 @@ public sealed class AiSession : IChatSession
         return ValueTask.CompletedTask;
     }
 
-    // ── Event forwarding ────────────────────────────────────────────────────
+    // -- Event forwarding ----------------------------------------------------
 
     private void WireEvents()
     {
@@ -113,3 +113,4 @@ public sealed class AiSession : IChatSession
     private void ForwardError(object? s, AiErrorEventArgs e)                        => OnError?.Invoke(this, e);
     private void ForwardCancelled(object? s, EventArgs e)                         => OnCancelled?.Invoke(this, e);
 }
+

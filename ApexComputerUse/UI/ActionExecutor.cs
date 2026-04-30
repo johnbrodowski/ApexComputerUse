@@ -19,13 +19,13 @@ namespace ApexComputerUse
         {
             return action switch
             {
-                // ── Info ──────────────────────────────────────────────
+                // -- Info ----------------------------------------------
                 "Describe" => _helper.Describe(el),
                 "Get Bounding Rect" => _helper.GetBoundingRect(el),
                 "Get Supported Patterns" => _helper.GetSupportedPatterns(el),
                 "Get Focused Element" => _helper.GetFocusedElement(),
 
-                // ── Window ────────────────────────────────────────────
+                // -- Window --------------------------------------------
                 "Minimize" => Do(() => _helper.MinimizeWindow(el.AsWindow())),
                 "Maximize" => Do(() => _helper.MaximizeWindow(el.AsWindow())),
                 "Restore" => Do(() => _helper.RestoreWindow(el.AsWindow())),
@@ -33,21 +33,21 @@ namespace ApexComputerUse
                 "Move (x,y)" => Do(() => { var p = ParsePair(input); _helper.MoveWindow(el.AsWindow(), (int)p.x, (int)p.y); }),
                 "Resize (w,h)" => Do(() => { var p = ParsePair(input); _helper.ResizeWindow(el.AsWindow(), p.x, p.y); }),
 
-                // ── Mouse ─────────────────────────────────────────────
+                // -- Mouse ---------------------------------------------
                 "Click" => Do(() => _helper.ClickElement(el)),
                 "Right-Click" => Do(() => _helper.RightClickElement(el)),
                 "Double-Click" => Do(() => _helper.DoubleClickElement(el)),
                 "Hover" => Do(() => _helper.HoverElement(el)),
                 "Set Focus" => Do(() => _helper.SetFocus(el)),
 
-                // ── Invoke / patterns ─────────────────────────────────
+                // -- Invoke / patterns ---------------------------------
                 "Invoke" => Do(() => _helper.InvokeButton(el)),
                 "Invoke (pattern)" => Do(() => _helper.InvokePattern(el)),
                 "Expand" => Do(() => el.Patterns.ExpandCollapse.Pattern.Expand()),
                 "Collapse" => Do(() => el.Patterns.ExpandCollapse.Pattern.Collapse()),
                 "Open Context Menu" => Do(() => _helper.OpenContextMenu(el)),
 
-                // ── Text ──────────────────────────────────────────────
+                // -- Text ----------------------------------------------
                 "Get Text" => _helper.GetText(el),
                 "Enter Text" => Do(() => _helper.EnterText(el, input)),
                 "Insert at Caret" => Do(() => _helper.InsertTextAtCaret(el, input)),
@@ -60,50 +60,50 @@ namespace ApexComputerUse
                 "Undo" => Do(() => _helper.UndoText(el)),
                 "Clear" => Do(() => _helper.ClearText(el)),
 
-                // ── Keyboard ──────────────────────────────────────────
+                // -- Keyboard ------------------------------------------
                 "Send Keys" => Do(() => _helper.SendKeys(input)),
                 "Send Key" => Do(() => _helper.SendKey(ParseVKey(input))),
 
-                // ── ComboBox ──────────────────────────────────────────
+                // -- ComboBox ------------------------------------------
                 "Get Selected" => _helper.GetComboBoxSelected(el),
                 "Get All Items" => string.Join(", ", _helper.GetComboBoxItems(el)),
                 "Select Item (text)" => Do(() => _helper.SelectComboBoxItem(el, input)),
                 "Expand Dropdown" => Do(() => _helper.ExpandComboBox(el)),
                 "Collapse Dropdown" => Do(() => _helper.CollapseComboBox(el)),
 
-                // ── CheckBox ─────────────────────────────────────────
+                // -- CheckBox -----------------------------------------
                 "Get State" => _helper.IsCheckBoxChecked(el)?.ToString() ?? "indeterminate",
                 "Toggle" => Do(() => _helper.ToggleCheckBox(el)),
 
-                // ── RadioButton ───────────────────────────────────────
+                // -- RadioButton ---------------------------------------
                 "Is Selected" => _helper.IsRadioButtonSelected(el).ToString(),
                 "Select" => Do(() => _helper.SelectRadioButton(el)),
 
-                // ── ListBox ───────────────────────────────────────────
+                // -- ListBox -------------------------------------------
                 "Select by Text" => Do(() => _helper.SelectListBoxByText(el, input)),
                 "Select by Index" => Do(() => _helper.SelectListBoxByIndex(el, ParseInt(input))),
 
-                // ── Grid / ListView / DataGrid ────────────────────────
+                // -- Grid / ListView / DataGrid ------------------------
                 "Get Row Count" => _helper.GetGridRowCount(el).ToString(),
                 "Get Column Count" => _helper.GetGridColumnCount(el).ToString(),
                 "Get Cell (row,col)" => GetCell(el, input),
                 "Get Row Values (row)" => _helper.GetGridRowValues(el, ParseInt(input)),
                 "Select Row (index)" => Do(() => _helper.SelectGridRow(el, ParseInt(input))),
 
-                // ── TreeView ──────────────────────────────────────────
+                // -- TreeView ------------------------------------------
                 "Get Node Count" => _helper.GetTreeNodeCount(el).ToString(),
                 "Get Node Text (index)" => _helper.GetTreeNodeText(el, ParseInt(input)),
                 "Expand Node (index)" => Do(() => _helper.ExpandTreeNode(el, ParseInt(input))),
                 "Collapse Node (index)" => Do(() => _helper.CollapseTreeNode(el, ParseInt(input))),
                 "Select Node (index)" => Do(() => _helper.SelectTreeNode(el, ParseInt(input))),
 
-                // ── TabControl ────────────────────────────────────────
+                // -- TabControl ----------------------------------------
                 "Get Selected Tab" => _helper.GetSelectedTabName(el),
                 "Get Tab Count" => _helper.GetTabCount(el).ToString(),
                 "Select Tab (index)" => Do(() => _helper.SelectTab(el, ParseInt(input))),
                 "Select Tab (name)" => Do(() => _helper.SelectTabByName(el, input)),
 
-                // ── Slider / ProgressBar / RangeValue ─────────────────
+                // -- Slider / ProgressBar / RangeValue -----------------
                 "Get Slider Value" => _helper.GetSliderValue(el).ToString("F2"),
                 "Get Progress Value" => _helper.GetProgressBarValue(el).ToString("F2"),
                 "Set Slider Value" => Do(() => _helper.SetSliderValue(el, double.Parse(input))),
@@ -112,24 +112,24 @@ namespace ApexComputerUse
                 "Get Small Change" => _helper.GetSmallChange(el).ToString("F2"),
                 "Get Large Change" => _helper.GetLargeChange(el).ToString("F2"),
 
-                // ── Scroll ────────────────────────────────────────────
+                // -- Scroll --------------------------------------------
                 "Scroll Into View" => Do(() => _helper.ScrollIntoView(el)),
                 "Scroll Up" => _helper.ScrollUp(el, ParseIntOr(input, 3)),
                 "Scroll Down" => _helper.ScrollDown(el, ParseIntOr(input, 3)),
                 "Horizontal Scroll" => _helper.HorizontalScroll(el, ParseInt(input)),
 
-                // ── Drag and Drop ─────────────────────────────────────
+                // -- Drag and Drop -------------------------------------
                 "Drag to Element (target AutomationId)" => DragToElement(el, input),
                 "Drag to Point (x,y)" => Do(() => { var p = ParsePair(input); _helper.DragAndDropToPoint(el, (int)p.x, (int)p.y); }),
 
-                // ── Wait ──────────────────────────────────────────────
+                // -- Wait ----------------------------------------------
                 "Wait for Element" => WaitForElement(input),
 
-                // ── Screenshot ────────────────────────────────────────
+                // -- Screenshot ----------------------------------------
                 "Capture Element" => _helper.CaptureElement(el, CaptureFolder()),
                 "Capture Screen" => _helper.CaptureScreen(CaptureFolder()),
 
-                // ── OCR ───────────────────────────────────────────────
+                // -- OCR -----------------------------------------------
                 "OCR Element" => Ocr().OcrElement(el).ToString(),
                 "OCR Element + Save" => Ocr().OcrElementAndSave(el, CaptureFolder()).ToString(),
                 "OCR Region (x,y,w,h)" => OcrRegion(el, input),
@@ -206,3 +206,4 @@ namespace ApexComputerUse
         public void Dispose() => _ocr?.Dispose();
     }
 }
+

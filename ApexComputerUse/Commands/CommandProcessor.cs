@@ -1,9 +1,9 @@
-﻿using FlaUI.Core.AutomationElements;
+using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Definitions;
 
 namespace ApexComputerUse
 {
-    // CommandRequest, CommandResponse → CommandRequest.cs
+    // CommandRequest, CommandResponse -> CommandRequest.cs
 
     public partial class CommandProcessor : IDisposable
     {
@@ -13,7 +13,7 @@ namespace ApexComputerUse
 
         private readonly ElementIdGenerator _idGen = new() { UseIncrementalIds = false };
         private readonly Dictionary<int, AutomationElement> _elementMap    = new();
-        private readonly Dictionary<int, string>            _elementHashes = new();   // parallel to _elementMap — stores each element's hash so a subtree can be re-scanned without re-walking from the window root
+        private readonly Dictionary<int, string>            _elementHashes = new();   // parallel to _elementMap - stores each element's hash so a subtree can be re-scanned without re-walking from the window root
         private readonly Dictionary<AutomationElement, int> _elementReverse = new();  // fast-path for /find ID recovery; default equality uses UIA CompareElements via AutomationElement.Equals
         private readonly Queue<int>                         _elementInsertOrder = new();  // FIFO tracker so the 50k cap evicts oldest IDs instead of nuking the whole map
         private readonly Dictionary<int, Window>            _windowMap     = new();
@@ -44,7 +44,7 @@ namespace ApexComputerUse
 
         /// <summary>
         /// True while the model is generating a response (inference in progress).
-        /// Written from the inference worker, read from the UI status timer —
+        /// Written from the inference worker, read from the UI status timer -
         /// marked <c>volatile</c> so cross-thread reads see a fresh value without a lock.
         /// </summary>
         private volatile bool _isProcessing;
@@ -65,7 +65,7 @@ namespace ApexComputerUse
         /// <summary>Injected by Form1 after construction. Required for scene commands.</summary>
         public SceneStore? SceneStore { get; set; }
 
-        // ── Entry point ───────────────────────────────────────────────────
+        // -- Entry point ---------------------------------------------------
 
         public CommandResponse Process(CommandRequest req)
         {
@@ -73,7 +73,7 @@ namespace ApexComputerUse
 
             // AI inference (describe, ask, file, init) runs OUTSIDE _stateLock.
             // Inference can take 30+ seconds; holding the lock that long would block
-            // every other command (find, execute, status, …).
+            // every other command (find, execute, status, ...).
             // Serialisation of the model itself is handled by MtmdHelper's SemaphoreSlim.
             if (cmd == "ai")
             {
@@ -196,3 +196,4 @@ namespace ApexComputerUse
         }
     }
 }
+

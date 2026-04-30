@@ -10,7 +10,7 @@ namespace ApexComputerUse.Tests;
 /// </summary>
 public class LevenshteinTests
 {
-    // ── Boundary conditions ───────────────────────────────────────────────
+    // \-\- Boundary conditions \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 
     [Fact]
     public void BothEmpty_ReturnsZero()
@@ -28,7 +28,7 @@ public class LevenshteinTests
     public void IdenticalStrings_ReturnsZero()
         => Assert.Equal(0, ApexHelper.Levenshtein("notepad", "notepad"));
 
-    // ── Single-operation edits ────────────────────────────────────────────
+    // \-\- Single-operation edits \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 
     [Fact]
     public void OneDeletion_ReturnsOne()
@@ -42,7 +42,7 @@ public class LevenshteinTests
     public void OneSubstitution_ReturnsOne()
         => Assert.Equal(1, ApexHelper.Levenshtein("cat", "bat"));
 
-    // ── Classic examples ──────────────────────────────────────────────────
+    // \-\- Classic examples \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 
     [Fact]
     public void KittenToSitting_Returns3()
@@ -52,7 +52,7 @@ public class LevenshteinTests
     public void SaturdayToSunday_Returns3()
         => Assert.Equal(3, ApexHelper.Levenshtein("saturday", "sunday"));
 
-    // ── Symmetry ─────────────────────────────────────────────────────────
+    // \-\- Symmetry \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 
     [Theory]
     [InlineData("abc",  "xyz")]
@@ -61,7 +61,7 @@ public class LevenshteinTests
     public void IsSymmetric(string a, string b)
         => Assert.Equal(ApexHelper.Levenshtein(a, b), ApexHelper.Levenshtein(b, a));
 
-    // ── Application-domain cases ──────────────────────────────────────────
+    // \-\- Application-domain cases \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 
     [Fact]
     public void NotepadVsNotepadPlusPlus_SmallDistance()

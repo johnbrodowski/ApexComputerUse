@@ -6,11 +6,11 @@ namespace ApexComputerUse.Tests;
 /// <summary>
 /// Unit tests for <see cref="ElementIdGenerator"/>.
 /// These tests cover hash-based mode, incremental mode, Reset(), and thread safety.
-/// No FlaUI / UIA3 dependency — all helpers under test are pure computation.
+/// No FlaUI / UIA3 dependency \- all helpers under test are pure computation.
 /// </summary>
 public class ElementIdGeneratorTests
 {
-    // ── Hash-based mode (default: UseIncrementalIds = false) ──────────────
+    // \-\- Hash-based mode (default: UseIncrementalIds = false) \-\-\-\-\-\-\-\-\-\-\-\-\-\-
 
     [Fact]
     public void HashMode_SameHash_ReturnsSameId()
@@ -24,7 +24,7 @@ public class ElementIdGeneratorTests
     public void HashMode_DifferentFirstEightChars_DifferentIds()
     {
         var gen = new ElementIdGenerator { UseIncrementalIds = false };
-        // ConvertHashToId takes first 8 hex chars — ensure those differ
+        // ConvertHashToId takes first 8 hex chars \- ensure those differ
         int id1 = gen.GenerateIdFromHash("00000001" + new string('0', 24));
         int id2 = gen.GenerateIdFromHash("00000002" + new string('0', 24));
         Assert.NotEqual(id1, id2);
@@ -35,7 +35,7 @@ public class ElementIdGeneratorTests
     {
         // Implementation calls Math.Abs on the converted hex value.
         // 0x80000000 would overflow as signed, but the substring is only 8 chars = max 0xFFFFFFFF.
-        // Math.Abs of any parsed value should be ≥ 0.
+        // Math.Abs of any parsed value should be \? 0.
         var gen = new ElementIdGenerator { UseIncrementalIds = false };
         int id  = gen.GenerateIdFromHash("ffffffff" + new string('0', 24));
         Assert.True(id >= 0, $"Expected non-negative ID, got {id}");
@@ -51,7 +51,7 @@ public class ElementIdGeneratorTests
         Assert.Equal(g1.GenerateIdFromHash(hash), g2.GenerateIdFromHash(hash));
     }
 
-    // ── Incremental mode (UseIncrementalIds = true) ───────────────────────
+    // \-\- Incremental mode (UseIncrementalIds = true) \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 
     [Fact]
     public void IncrementalMode_FirstTwoHashes_GetIds1And2()
@@ -91,13 +91,13 @@ public class ElementIdGeneratorTests
         var gen = new ElementIdGenerator { UseIncrementalIds = true };
         gen.GenerateIdFromHash("h1");
         gen.GenerateIdFromHash("h2");
-        gen.GenerateIdFromHash("h1"); // duplicate — no new ID
+        gen.GenerateIdFromHash("h1"); // duplicate \- no new ID
 
         Assert.Equal(2, gen.CurrentMaxId);
         Assert.Equal(2, gen.UniqueHashCount);
     }
 
-    // ── Reset ─────────────────────────────────────────────────────────────
+    // \-\- Reset \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 
     [Fact]
     public void Reset_ClearsAllState()
@@ -125,7 +125,7 @@ public class ElementIdGeneratorTests
         Assert.Equal(1, id);
     }
 
-    // ── CurrentMaxId / UniqueHashCount properties ─────────────────────────
+    // \-\- CurrentMaxId / UniqueHashCount properties \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 
     [Fact]
     public void CurrentMaxId_InitiallyZero()
@@ -150,7 +150,7 @@ public class ElementIdGeneratorTests
         Assert.Equal(1, gen.UniqueHashCount);
     }
 
-    // ── Thread safety ─────────────────────────────────────────────────────
+    // \-\- Thread safety \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 
     [Fact]
     public async Task IncrementalMode_ConcurrentAccess_NoExceptionsAndCorrectCount()

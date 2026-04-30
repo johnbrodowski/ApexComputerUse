@@ -1,4 +1,4 @@
-﻿using FlaUI.Core;
+using FlaUI.Core;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Capturing;
 using FlaUI.Core.Definitions;
@@ -11,7 +11,7 @@ namespace ApexComputerUse
 {
     public partial class ApexHelper
     {
-        // ── Window ────────────────────────────────────────────────────────
+        // -- Window --------------------------------------------------------
 
         public Window? FindWindow(string titleContains)
         {
@@ -48,7 +48,7 @@ namespace ApexComputerUse
             return "Window pattern not supported";
         }
 
-        // ── Window fuzzy find ─────────────────────────────────────────────
+        // -- Window fuzzy find ---------------------------------------------
 
         public Window? FindWindowFuzzy(string title, out string matchedTitle, out bool isExact)
         {
@@ -60,7 +60,7 @@ namespace ApexComputerUse
             var exact = all.FirstOrDefault(w => w.Name.Equals(title, StringComparison.OrdinalIgnoreCase));
             if (exact != null) { matchedTitle = exact.Name; isExact = true; return exact.AsWindow(); }
 
-            // 2. Contains — if multiple match, prefer StartsWith over mid-string, then shortest name.
+            // 2. Contains - if multiple match, prefer StartsWith over mid-string, then shortest name.
             var contains = all.Where(w => w.Name.Contains(title, StringComparison.OrdinalIgnoreCase)).ToArray();
             if (contains.Length >= 1)
             {
@@ -82,7 +82,7 @@ namespace ApexComputerUse
             return closest.AsWindow();
         }
 
-        // ── Element fuzzy find ────────────────────────────────────────────
+        // -- Element fuzzy find --------------------------------------------
 
         public AutomationElement? FindElementFuzzy(
             Window window, string searchText, ControlType? filterType, bool searchById,
@@ -127,7 +127,7 @@ namespace ApexComputerUse
             return closest2;
         }
 
-        // ── Levenshtein ───────────────────────────────────────────────────
+        // -- Levenshtein ---------------------------------------------------
 
         public static int Levenshtein(string a, string b)
         {
@@ -144,7 +144,7 @@ namespace ApexComputerUse
             return d[a.Length, b.Length];
         }
 
-        // ── Element lookup ────────────────────────────────────────────────
+        // -- Element lookup ------------------------------------------------
 
         public AutomationElement? FindByAutomationId(Window window, string automationId) =>
             window.FindFirstDescendant(cf => cf.ByAutomationId(automationId));
@@ -179,7 +179,7 @@ namespace ApexComputerUse
             return $"Timeout waiting for page load (last title: {lastTitle ?? "unknown"})";
         }
 
-        // ── Discovery ─────────────────────────────────────────────────────
+        // -- Discovery -----------------------------------------------------
 
         public AutomationElement[] GetDesktopWindows() =>
             _automation.GetDesktop()
@@ -203,3 +203,4 @@ namespace ApexComputerUse
 
     }
 }
+

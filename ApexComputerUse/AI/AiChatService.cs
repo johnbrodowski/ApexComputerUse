@@ -101,7 +101,7 @@ public sealed class AiChatService
             _settings.DefaultProvider = provider;
             AiSettings.Save(_settings);
             AiSettings.ApplyToEnvironment(_settings);
-            _session = null;   // stale session — recreate on next send
+            _session = null;   // stale session \- recreate on next send
         }
     }
 
@@ -150,7 +150,7 @@ public sealed class AiChatService
             serverPort = _serverPort;
         }
 
-        // ── Agentic tool loop (only when a local server is available) ─────────
+        // \-\- Agentic tool loop (only when a local server is available) \-\-\-\-\-\-\-\-\-
         if (serverPort.HasValue)
         {
             const int maxIter = 8;
@@ -185,7 +185,7 @@ public sealed class AiChatService
             return;
         }
 
-        // ── Standard streaming path ───────────────────────────────────────────
+        // \-\- Standard streaming path \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
         var tcs = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 
         void HandleToken(object? _, TokenReceivedEventArgs e)
@@ -194,7 +194,7 @@ public sealed class AiChatService
         }
         void HandleCompleted(object? _, ResponseCompletedEventArgs e)
         {
-            try { onComplete($"{e.ProviderName}/{e.ModelName} · {e.TotalTokens} tokens · {e.TokensPerSecond:F1} t/s"); }
+            try { onComplete($"{e.ProviderName}/{e.ModelName} - {e.TotalTokens} tokens - {e.TokensPerSecond:F1} t/s"); }
             catch { }
             tcs.TrySetResult();
         }
@@ -285,14 +285,14 @@ public sealed class AiChatService
         You will receive the JSON result and may make follow-up calls. When you have enough information, give your final answer without any apex blocks.
 
         Key endpoints:
-        - GET /windows              — list all open windows
-        - GET /status               — currently selected element
-        - GET /elements             — element tree (add ?onscreen=true to filter visible)
-        - POST /find                — select element (fields: window, name, id, type)
-        - POST /exec                — act on element (field: action = gettext|click|type|keys|highlight|describe, value)
-        - POST /capture             — screenshot (field: action = "screen" for fullscreen)
-        - GET /sysinfo              — OS / hardware info
-        - GET /scenes               — list saved scenes
-        - POST /run                 — execute shell command (field: command; only if enabled)
+        - GET /windows              \- list all open windows
+        - GET /status               \- currently selected element
+        - GET /elements             \- element tree (add ?onscreen=true to filter visible)
+        - POST /find                \- select element (fields: window, name, id, type)
+        - POST /exec                \- act on element (field: action = gettext|click|type|keys|highlight|describe, value)
+        - POST /capture             \- screenshot (field: action = "screen" for fullscreen)
+        - GET /sysinfo              \- OS / hardware info
+        - GET /scenes               \- list saved scenes
+        - POST /run                 \- execute shell command (field: command; only if enabled)
         """;
 }

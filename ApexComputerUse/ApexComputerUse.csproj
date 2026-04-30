@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -57,7 +57,7 @@
     </ItemGroup>
     <Copy SourceFiles="@(_LlamaAvx2Dlls)" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" Condition="'@(_LlamaAvx2Dlls)' != ''" />
     <Message Text="Copied LLamaSharp CPU native (avx2) DLLs to $(TargetDir)" Importance="high" Condition="'@(_LlamaAvx2Dlls)' != ''" />
-    <Warning Text="LLamaSharp.Backend.Cpu avx2 DLLs not found at $(PkgLLamaSharp_Backend_Cpu)\LLamaSharpRuntimes\win-x64\native\avx2\ — native load will fail at runtime." Condition="'@(_LlamaAvx2Dlls)' == ''" />
+    <Warning Text="LLamaSharp.Backend.Cpu avx2 DLLs not found at $(PkgLLamaSharp_Backend_Cpu)\LLamaSharpRuntimes\win-x64\native\avx2\ \- native load will fail at runtime." Condition="'@(_LlamaAvx2Dlls)' == ''" />
   </Target>
 
 </Project>

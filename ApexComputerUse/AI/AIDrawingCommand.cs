@@ -15,27 +15,27 @@ namespace ApexComputerUse
     /// The engine renders all shapes onto a bitmap and returns a base-64 PNG string.
     ///
     /// Canvas sources
-    ///   "blank" / "white"  – solid white background (default)
-    ///   "black"            – solid black background
-    ///   "screen"           – live screenshot of the primary monitor
-    ///   "window"           – resolved by CommandProcessor before this class is called
-    ///   "element"          – resolved by CommandProcessor before this class is called
-    ///   &lt;base64&gt;           – decode and paint on top of the supplied image
+    ///   "blank" / "white"  \- solid white background (default)
+    ///   "black"            \- solid black background
+    ///   "screen"           \- live screenshot of the primary monitor
+    ///   "window"           \- resolved by CommandProcessor before this class is called
+    ///   "element"          \- resolved by CommandProcessor before this class is called
+    ///   &lt;base64&gt;           \- decode and paint on top of the supplied image
     ///
     /// Shape types
-    ///   rect     – rectangle (x, y, w, h)
-    ///   ellipse  – ellipse  (x, y, w, h)
-    ///   circle   – circle   (x, y, r)  — x/y are the centre
-    ///   line     – line     (x, y) → (x2, y2)
-    ///   arrow    – line with arrowhead at (x2, y2)
-    ///   text     – label    (x, y, text)
-    ///   polygon  – closed shape (points = [x1,y1, x2,y2, …])
-    ///   triangle – triangle (x, y, w, h) — bounding-box anchored, top-centre apex
-    ///   arc      – open arc (x, y, w, h, start_angle, sweep_angle)
+    ///   rect     \- rectangle (x, y, w, h)
+    ///   ellipse  \- ellipse  (x, y, w, h)
+    ///   circle   \- circle   (x, y, r)  \- x/y are the centre
+    ///   line     \- line     (x, y) \-> (x2, y2)
+    ///   arrow    \- line with arrowhead at (x2, y2)
+    ///   text     \- label    (x, y, text)
+    ///   polygon  \- closed shape (points = [x1,y1, x2,y2, \...])
+    ///   triangle \- triangle (x, y, w, h) \- bounding-box anchored, top-centre apex
+    ///   arc      \- open arc (x, y, w, h, start_angle, sweep_angle)
     /// </summary>
     public static class AIDrawingCommand
     {
-        // ── Public request / shape models ─────────────────────────────────
+        // \-\- Public request / shape models \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 
         public class DrawRequest
         {
@@ -66,7 +66,7 @@ namespace ApexComputerUse
             [JsonPropertyName("h")]             public float    H            { get; set; } = 60;
             /// Radius for circle (centre is x, y).
             [JsonPropertyName("r")]             public float    R            { get; set; } = 40;
-            /// Polygon point pairs: [x1,y1, x2,y2, …]
+            /// Polygon point pairs: [x1,y1, x2,y2, \...]
             [JsonPropertyName("points")]        public float[]? Points       { get; set; }
             /// Arc start angle in degrees, clockwise from 3 o'clock (GDI+ convention).
             [JsonPropertyName("start_angle")]   public float    StartAngle   { get; set; } = 0;
@@ -89,11 +89,11 @@ namespace ApexComputerUse
             [JsonPropertyName("font_bold")]     public bool     FontBold     { get; set; } = false;
             /// Optional background fill behind the text label.
             [JsonPropertyName("background")]    public string?  Background   { get; set; }
-            /// "left" | "center" | "right" — horizontal alignment anchor at x.
+            /// "left" | "center" | "right" \- horizontal alignment anchor at x.
             [JsonPropertyName("align")]         public string   Align        { get; set; } = "left";
         }
 
-        // ── Entry point ───────────────────────────────────────────────────
+        // \-\- Entry point \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 
         /// <summary>Render the request and return a base-64 PNG string (no data-URI prefix).</summary>
         public static string Render(DrawRequest req)
@@ -128,7 +128,7 @@ namespace ApexComputerUse
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
             ?? new DrawRequest();
 
-        // ── Built-in demo scene ───────────────────────────────────────────
+        // \-\- Built-in demo scene \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 
         /// <summary>
         /// Returns a pre-built space-scene <see cref="DrawRequest"/> that exercises
@@ -142,11 +142,11 @@ namespace ApexComputerUse
             Height     = 500,
             Shapes     =
             [
-                // ── Sky layers ─────────────────────────────────────────────
+                // \-\- Sky layers \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
                 // Horizon amber glow
                 new() { Type="rect", X=0, Y=350, W=800, H=150, Color="#3d1200", Fill=true, Opacity=0.70f },
 
-                // ── Stars ──────────────────────────────────────────────────
+                // \-\- Stars \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
                 new() { Type="circle", X=42,  Y=35,  R=2.0f, Color="#FFFFFF", Fill=true },
                 new() { Type="circle", X=118, Y=18,  R=1.5f, Color="#FFFFD0", Fill=true },
                 new() { Type="circle", X=198, Y=58,  R=2.0f, Color="#FFFFFF", Fill=true },
@@ -166,7 +166,7 @@ namespace ApexComputerUse
                 new() { Type="circle", X=258, Y=15,  R=1.0f, Color="#FFFFFF", Fill=true },
                 new() { Type="circle", X=568, Y=55,  R=1.5f, Color="#FFFFFF", Fill=true },
 
-                // ── Moon (upper-left) ──────────────────────────────────────
+                // \-\- Moon (upper-left) \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
                 new() { Type="circle", X=132, Y=118, R=54,   Color="#E8D4A0", Fill=true },
                 // Craters
                 new() { Type="circle", X=110, Y=100, R=10,   Color="#C8B070", Fill=true },
@@ -174,37 +174,37 @@ namespace ApexComputerUse
                 new() { Type="circle", X=122, Y=142, R=5,    Color="#C8B070", Fill=true },
                 new() { Type="circle", X=155, Y=105, R=4,    Color="#C8B070", Fill=true },
 
-                // ── Planet (upper-right) ───────────────────────────────────
+                // \-\- Planet (upper-right) \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
                 // Body
                 new() { Type="circle", X=652, Y=152, R=88,   Color="#5B21B6", Fill=true },
                 // Lighter cap highlight
                 new() { Type="circle", X=620, Y=122, R=34,   Color="#8B5CF6", Fill=true, Opacity=0.55f },
                 // Dark equatorial band
                 new() { Type="ellipse", X=600, Y=160, W=104, H=20, Color="#3B0764", Fill=true, Opacity=0.60f },
-                // Ring behind planet (draw first so it appears behind — we can't z-sort, so approximate)
+                // Ring behind planet (draw first so it appears behind \- we can't z-sort, so approximate)
                 new() { Type="ellipse", X=554, Y=144, W=196, H=38, Color="#B8860B", Fill=false, StrokeWidth=6 },
                 // Small moon orbiting the planet
                 new() { Type="circle", X=760, Y=108, R=16,   Color="#94A3B8", Fill=true },
                 new() { Type="circle", X=755, Y=103, R=6,    Color="#64748B", Fill=true },
 
-                // ── Background mountain silhouette ─────────────────────────
+                // \-\- Background mountain silhouette \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
                 new() { Type="polygon",
                         Points=[0,500, 0,330, 70,258, 150,312, 222,268, 302,342,
                                 370,288, 442,352, 512,258, 592,308, 660,248, 740,298,
                                 800,268, 800,500],
                         Color="#0d1b2a", Fill=true },
 
-                // ── Foreground mountain silhouette (darker) ────────────────
+                // \-\- Foreground mountain silhouette (darker) \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
                 new() { Type="polygon",
                         Points=[0,500, 0,398, 58,378, 122,402, 196,378, 268,404,
                                 342,378, 418,402, 492,372, 568,398, 642,372,
                                 718,398, 800,378, 800,500],
                         Color="#060d10", Fill=true },
 
-                // ── Ground ─────────────────────────────────────────────────
+                // \-\- Ground \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
                 new() { Type="rect", X=0, Y=462, W=800, H=38, Color="#020808", Fill=true },
 
-                // ── Rocket ─────────────────────────────────────────────────
+                // \-\- Rocket \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
                 // Body
                 new() { Type="polygon",
                         Points=[365,338, 360,260, 380,212, 400,260, 395,338],
@@ -230,26 +230,26 @@ namespace ApexComputerUse
                         Points=[368,338, 362,362, 380,350, 398,362, 392,338],
                         Color="#FFD700", Fill=true },
 
-                // ── Shooting star ──────────────────────────────────────────
+                // \-\- Shooting star \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
                 new() { Type="arrow", X=232, Y=74, X2=290, Y2=96,  Color="#FFFFFF", StrokeWidth=1.5f },
                 new() { Type="circle", X=232, Y=74, R=2, Color="#FFFFFF", Fill=true },
 
-                // ── Nebula cloud (large, very faint) ──────────────────────
+                // \-\- Nebula cloud (large, very faint) \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
                 new() { Type="circle", X=265, Y=185, R=110, Color="#1a0066", Fill=true, Opacity=0.18f },
                 new() { Type="circle", X=510, Y=95,  R=80,  Color="#003322", Fill=true, Opacity=0.14f },
 
-                // ── Title text ─────────────────────────────────────────────
+                // \-\- Title text \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
                 new() { Type="text", X=400, Y=10,
-                        Text="✦  DEEP  SPACE  ✦",
+                        Text="*  DEEP  SPACE  *",
                         Color="#DDD0FF", FontSize=22, FontBold=true, Align="center" },
             ]
         };
 
-        // ── Canvas factory ────────────────────────────────────────────────
+        // \-\- Canvas factory \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 
         private static Bitmap CreateCanvas(string canvas, string bgColor, int w, int h)
         {
-            // Base-64 image supplied — decode and use as background
+            // Base-64 image supplied \- decode and use as background
             if (!string.IsNullOrWhiteSpace(canvas)
                 && canvas != "blank" && canvas != "white"
                 && canvas != "black" && canvas != "screen")
@@ -284,7 +284,7 @@ namespace ApexComputerUse
             return bmp;
         }
 
-        // ── Shape dispatcher ──────────────────────────────────────────────
+        // \-\- Shape dispatcher \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 
         private static void DrawShape(Graphics g, ShapeCommand s)
         {
@@ -321,7 +321,7 @@ namespace ApexComputerUse
             finally { g.Restore(state); }
         }
 
-        // ── Individual shape renderers ────────────────────────────────────
+        // \-\- Individual shape renderers \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 
         private static void DrawRect(Graphics g, ShapeCommand s)
         {
@@ -447,7 +447,7 @@ namespace ApexComputerUse
             g.DrawArc(pen, rect, s.StartAngle, s.SweepAngle);
         }
 
-        // ── Bounding-box helper (shared by renderer and WinForms editor) ──
+        // \-\- Bounding-box helper (shared by renderer and WinForms editor) \-\-
 
         /// <summary>
         /// Returns the axis-aligned bounding rectangle of the shape in scene coordinates,
@@ -486,7 +486,7 @@ namespace ApexComputerUse
             return new RectangleF(minX, minY, Math.Max(1f, maxX - minX), Math.Max(1f, maxY - minY));
         }
 
-        // ── Helpers ───────────────────────────────────────────────────────
+        // \-\- Helpers \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 
         private static Pen MakePen(Color color, float width, bool dashed)
         {
@@ -555,11 +555,11 @@ namespace ApexComputerUse
             return Convert.ToBase64String(ms.ToArray());
         }
 
-        // ── Screen overlay ────────────────────────────────────────────────
+        // \-\- Screen overlay \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 
         /// <summary>
         /// Render the <see cref="DrawRequest"/> and show the result as a transparent,
-        /// click-through, topmost overlay — identical technique to UiMapRenderer.ShowOverlay.
+        /// click-through, topmost overlay \- identical technique to UiMapRenderer.ShowOverlay.
         /// Must be called on the UI thread (use BeginInvoke from non-UI contexts).
         /// </summary>
         public static void ShowOverlay(DrawRequest req)
@@ -586,7 +586,7 @@ namespace ApexComputerUse
             form.Show();
         }
 
-        // ── Overlay form ──────────────────────────────────────────────────
+        // \-\- Overlay form \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 
         private sealed class DrawOverlayForm : Form
         {

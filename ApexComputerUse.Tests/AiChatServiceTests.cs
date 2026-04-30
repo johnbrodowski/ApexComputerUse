@@ -9,7 +9,7 @@ namespace ApexComputerUse.Tests;
 /// </summary>
 public class AiChatServiceTests
 {
-    // ── ParseApexCalls — empty / no-match cases ───────────────────────────────
+    // -- ParseApexCalls - empty / no-match cases -------------------------------
 
     [Fact]
     public void ParseApexCalls_EmptyString_ReturnsEmpty()
@@ -31,7 +31,7 @@ public class AiChatServiceTests
         Assert.Empty(AiChatService.ParseApexCalls(text));
     }
 
-    // ── ParseApexCalls — GET ──────────────────────────────────────────────────
+    // -- ParseApexCalls - GET --------------------------------------------------
 
     [Fact]
     public void ParseApexCalls_GetNoBody_ParsesMethodAndPath()
@@ -55,7 +55,7 @@ public class AiChatServiceTests
         Assert.Equal("/elements?onscreen=true", calls[0].Path);
     }
 
-    // ── ParseApexCalls — POST with body ───────────────────────────────────────
+    // -- ParseApexCalls - POST with body ---------------------------------------
 
     [Fact]
     public void ParseApexCalls_PostWithJsonBody_ParsesAll()
@@ -84,7 +84,7 @@ public class AiChatServiceTests
         Assert.Equal("{\"action\":\"click\"}", calls[0].Body);
     }
 
-    // ── ParseApexCalls — method normalisation ─────────────────────────────────
+    // -- ParseApexCalls - method normalisation ---------------------------------
 
     [Theory]
     [InlineData("get",    "GET")]
@@ -101,7 +101,7 @@ public class AiChatServiceTests
         Assert.Equal(expectedMethod, calls[0].Method);
     }
 
-    // ── ParseApexCalls — multiple blocks ──────────────────────────────────────
+    // -- ParseApexCalls - multiple blocks --------------------------------------
 
     [Fact]
     public void ParseApexCalls_TwoBlocks_ReturnsBothInOrder()
@@ -145,7 +145,7 @@ public class AiChatServiceTests
         Assert.Equal(3, AiChatService.ParseApexCalls(text).Count);
     }
 
-    // ── ParseApexCalls — embedded in prose ────────────────────────────────────
+    // -- ParseApexCalls - embedded in prose ------------------------------------
 
     [Fact]
     public void ParseApexCalls_BlockEmbeddedInProse_IsExtracted()
@@ -166,7 +166,7 @@ public class AiChatServiceTests
         Assert.Equal("/windows", calls[0].Path);
     }
 
-    // ── BuildApexSystemPrompt ─────────────────────────────────────────────────
+    // -- BuildApexSystemPrompt -------------------------------------------------
 
     [Fact]
     public void BuildApexSystemPrompt_ContainsPort()
@@ -194,3 +194,4 @@ public class AiChatServiceTests
         Assert.Contains(endpoint, prompt);
     }
 }
+
