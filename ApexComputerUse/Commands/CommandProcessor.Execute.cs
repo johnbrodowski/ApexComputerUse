@@ -35,7 +35,7 @@ namespace ApexComputerUse
                 "gettext"  or "text"                 => _helper.GetText(el),
                 "getvalue" or "value"                => _helper.GetValue(el),
                 "getselectedtext"                    => _helper.GetSelectedText(el),
-                "type"     or "enter"                => Do(() => _helper.EnterText(el, input)),
+                "type"     or "enter"                => Do(() => _helper.EnterTextWithKeys(el, input)),
                 "insert"                             => Do(() => _helper.InsertTextAtCaret(el, input)),
                 "setvalue"                           => Do(() => _helper.SetValue(el, input)),
                 "clearvalue"                         => Do(() => _helper.ClearValue(el)),

@@ -48,6 +48,55 @@ namespace ApexComputerUse
             }
         }
 
+        /// <summary>
+        /// Types text into an element, then sends any {KEY} tokens embedded in the string.
+        /// Text is entered via clipboard paste; key tokens (e.g. {ENTER}, {TAB}) are pressed afterward.
+        /// Use this for inputs like "search query{ENTER}" where text and keys are combined.
+        /// </summary>
+        public void EnterTextWithKeys(AutomationElement el, string input)
+        {
+            input = NormalizeBracketKeyTokens(input);
+            if (!input.Contains('{'))
+            {
+                EnterText(el, input);
+                return;
+            }
+
+            var plainText  = new System.Text.StringBuilder();
+            var keyTokens  = new System.Text.StringBuilder();
+            int i = 0;
+            while (i < input.Length)
+            {
+                if (input[i] == '{')
+                {
+                    int end = input.IndexOf('}', i + 1);
+                    if (end > i)
+                    {
+                        string name = input.Substring(i + 1, end - i - 1);
+                        if (ParseVirtualKey(name).HasValue)
+                        {
+                            keyTokens.Append('{').Append(name).Append('}');
+                            i = end + 1;
+                            continue;
+                        }
+                    }
+                }
+                plainText.Append(input[i]);
+                i++;
+            }
+
+            if (plainText.Length > 0)
+                EnterText(el, plainText.ToString());
+
+            if (keyTokens.Length > 0)
+            {
+                BringContainerWindowToFront(el);
+                el.Focus();
+                Thread.Sleep(FocusDelayMs);
+                SendBraceKeys(keyTokens.ToString());
+            }
+        }
+
         public void EnterText(AutomationElement el, string text)
         {
             // Prefer Value pattern (same as setvalue) — avoids keyboard/focus issues entirely.
