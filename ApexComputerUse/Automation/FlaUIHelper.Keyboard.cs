@@ -23,6 +23,51 @@ namespace ApexComputerUse
         private const uint SWP_NOZORDER  = 0x0004;
         private const uint SWP_SHOWWINDOW = 0x0040;
 
+        [System.Runtime.InteropServices.DllImport("user32.dll", CharSet = System.Runtime.InteropServices.CharSet.Auto)]
+        private static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
+        private static extern int GetClassName(IntPtr hWnd, System.Text.StringBuilder lpClassName, int nMaxCount);
+
+        private delegate bool EnumChildProc(IntPtr hwnd, IntPtr lParam);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool EnumChildWindows(IntPtr hwndParent, EnumChildProc lpEnumFunc, IntPtr lParam);
+
+        private const uint WM_GETOBJECT = 0x003D;
+        private const int  OBJID_CLIENT = -4;
+
+        // Chromium-based browsers (Edge/Chrome) lazy-load their renderer accessibility tree.
+        // The DOM stays hidden from UIA until a client signals interest via WM_GETOBJECT(OBJID_CLIENT).
+        // We send the signal to the top-level window AND each Chrome_RenderWidgetHostHWND child,
+        // then briefly wait for the renderer process to populate the tree.
+        public static void WakeBrowserAccessibility(IntPtr browserHwnd)
+        {
+            if (browserHwnd == IntPtr.Zero) return;
+
+            SendMessage(browserHwnd, WM_GETOBJECT, IntPtr.Zero, new IntPtr(OBJID_CLIENT));
+
+            EnumChildWindows(browserHwnd, (hwnd, _) =>
+            {
+                var sb = new System.Text.StringBuilder(256);
+                GetClassName(hwnd, sb, sb.Capacity);
+                var cls = sb.ToString();
+                if (cls.StartsWith("Chrome_RenderWidgetHostHWND", StringComparison.Ordinal))
+                    SendMessage(hwnd, WM_GETOBJECT, IntPtr.Zero, new IntPtr(OBJID_CLIENT));
+                return true;
+            }, IntPtr.Zero);
+
+            Thread.Sleep(300);
+        }
+
+        public static bool IsChromiumWindow(IntPtr hwnd)
+        {
+            if (hwnd == IntPtr.Zero) return false;
+            var sb = new System.Text.StringBuilder(256);
+            GetClassName(hwnd, sb, sb.Capacity);
+            return sb.ToString().StartsWith("Chrome_WidgetWin", StringComparison.Ordinal);
+        }
+
         private static void BringContainerWindowToFront(AutomationElement el)
         {
             var cur = el;
