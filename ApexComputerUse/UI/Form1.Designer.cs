@@ -1,4 +1,4 @@
-namespace ApexComputerUse
+﻿namespace ApexComputerUse
 {
     partial class Form1
     {
@@ -360,7 +360,7 @@ namespace ApexComputerUse
             btnRun.Name = "btnRun";
             btnRun.Size = new Size(30, 28);
             btnRun.TabIndex = 1;
-            btnRun.Text = "?";
+            btnRun.Text = "▶";
             btnRun.Click += btnRun_Click;
             // 
             // btnClear
@@ -369,7 +369,7 @@ namespace ApexComputerUse
             btnClear.Name = "btnClear";
             btnClear.Size = new Size(26, 28);
             btnClear.TabIndex = 2;
-            btnClear.Text = "?";
+            btnClear.Text = "x";
             btnClear.Click += btnClear_Click;
             // 
             // lblStatus

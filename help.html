@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>ApexComputerUse - API Reference</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: monospace; font-size: 13px; background: #1e1e1e; color: #d4d4d4;
+         display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+  /* -- Header -- */
+  header { background: #252526; border-bottom: 1px solid #3c3c3c;
+           padding: .35em 1em; display: flex; align-items: center; gap: .8em; flex-shrink: 0; }
+  .brand  { color: #9cdcfe; font-size: .82em; }
+  .htitle { color: #c8c8c8; flex: 1; font-size: .85em; }
+  #search { background: #3c3c3c; border: 1px solid #555; color: #d4d4d4;
+            padding: .22em .5em; font: inherit; border-radius: 3px; width: 180px; }
+  #search:focus { outline: none; border-color: #4ec94e; }
+  #searchCount { font-size: .75em; color: #666; min-width: 60px; }
+  .json-link { color: #9cdcfe; font-size: .78em; text-decoration: none;
+               padding: .18em .5em; border: 1px solid #3c3c3c; border-radius: 3px; }
+  .json-link:hover { background: #2d2d30; }
+
+  /* -- Layout -- */
+  .layout { display: grid; grid-template-columns: 160px 1fr; flex: 1; overflow: hidden; min-height: 0; }
+
+  /* -- Sidebar nav -- */
+  nav { background: #252526; border-right: 1px solid #3c3c3c; overflow-y: auto; padding: .4em 0; }
+  .nav-item { display: block; padding: .28em .8em; color: #c8c8c8; text-decoration: none;
+              font-size: .78em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .nav-item:hover { background: #2a2d2e; color: #fff; }
+  .nav-item.active { color: #4ec94e; background: #1e2a1e; }
+  .nav-sep { height: 1px; background: #3c3c3c; margin: .3em 0; }
+
+  /* -- Main content -- */
+  main { overflow-y: auto; padding: 1em 1.5em 3em; scroll-behavior: smooth; }
+  section { margin-bottom: 2.2em; }
+  section.hidden { display: none; }
+  h2 { color: #4ec94e; font-size: .8em; text-transform: uppercase; letter-spacing: .07em;
+       margin-bottom: .5em; padding-bottom: .25em; border-bottom: 1px solid #3c3c3c;
+       display: flex; align-items: baseline; gap: .5em; }
+  h2 .count { color: #555; font-size: .85em; font-weight: normal; letter-spacing: 0; text-transform: none; }
+
+  /* -- Tables -- */
+  table { width: 100%; border-collapse: collapse; font-size: .82em; }
+  th    { text-align: left; color: #666; font-weight: normal; font-size: .85em;
+          padding: .15em .6em .3em; border-bottom: 1px solid #3c3c3c; }
+  td    { padding: .2em .6em; vertical-align: top; border-bottom: 1px solid #252526; }
+  tr:hover td { background: #252526; }
+  tr.hidden { display: none; }
+
+  td.method     { font-weight: bold; white-space: nowrap; padding-right: .4em; }
+  td.method.get  { color: #4ec94e; }
+  td.method.post { color: #9cdcfe; }
+  td.route      { color: #dcdcaa; white-space: nowrap; }
+  td.params     { color: #ce9178; font-size: .88em; }
+  td.action     { color: #9cdcfe; white-space: nowrap; }
+  td.aliases    { color: #666; white-space: nowrap; font-size: .9em; }
+  td.value      { color: #ce9178; white-space: nowrap; }
+  td.desc       { color: #d4d4d4; }
+
+  /* -- Highlight on search match -- */
+  mark { background: #2d4a1e; color: inherit; border-radius: 2px; }
+</style>
+</head>
+<body>
+<header>
+  <span class="brand">ApexComputerUse</span>
+  <span class="htitle">API Reference</span>
+  <input id="search" type="text" placeholder="filter..." autocomplete="off" spellcheck="false">
+  <span id="searchCount"></span>
+  <a id="jsonLink" href="/help.json" class="json-link" title="Machine-readable JSON">JSON ?</a>
+</header>
+<div class="layout">
+<nav id="nav">
+  <a href="#endpoints" class="nav-item">Endpoints</a>
+  <div class="nav-sep"></div>  <a href="#click" class="nav-item">Click / Mouse</a>
+  <a href="#keyboard" class="nav-item">Keyboard</a>
+  <a href="#focus" class="nav-item">Focus / State</a>
+  <a href="#text" class="nav-item">Text / Value</a>
+  <a href="#range" class="nav-item">Range / Slider</a>
+  <a href="#toggle" class="nav-item">Toggle</a>
+  <a href="#expand" class="nav-item">Expand / Collapse</a>
+  <a href="#selection" class="nav-item">Selection</a>
+  <a href="#combo" class="nav-item">ComboBox / ListBox</a>
+  <a href="#window" class="nav-item">Window</a>
+  <a href="#transform" class="nav-item">Transform</a>
+  <a href="#scroll" class="nav-item">Scroll</a>
+  <a href="#grid" class="nav-item">Grid / Table</a>
+  <a href="#capture" class="nav-item">Screenshot / OCR</a>
+  <a href="#wait" class="nav-item">Wait</a>
+</nav>
+<main id="main"><section id="endpoints">
+<h2>Endpoints <span class="count">HTTP routes</span></h2>
+<table>
+<thead><tr><th>Method</th><th>Route</th><th>Params / body</th><th>Description</th></tr></thead>
+<tbody><tr>
+  <td class="method get">GET</td>
+  <td class="route">/windows</td>
+  <td class="params"></td>
+  <td class="desc">List open windows with numeric IDs</td>
+</tr><tr>
+  <td class="method get">GET</td>
+  <td class="route">/status</td>
+  <td class="params"></td>
+  <td class="desc">Current window and element state</td>
+</tr><tr>
+  <td class="method get">GET</td>
+  <td class="route">/elements</td>
+  <td class="params">[type=ControlType] [id=mapId] [depth=n] [onscreen=true] [match=text] [collapseChains=true] [includePath=true] [properties=extra] [since=hash]</td>
+  <td class="desc">Element tree for current window; returns treeHash for polling</td>
+</tr><tr>
+  <td class="method post">POST</td>
+  <td class="route">/find</td>
+  <td class="params">window=&lt;title|id&gt; [id=&lt;automationId|mapId&gt;] [name=&lt;name&gt;] [type=&lt;ControlType&gt;]</td>
+  <td class="desc">Select a window and optionally an element - sets the current element pointer</td>
+</tr><tr>
+  <td class="method post">POST</td>
+  <td class="route">/exec</td>
+  <td class="params">action=&lt;action&gt; [value=&lt;input&gt;]</td>
+  <td class="desc">Execute an action on the current element</td>
+</tr><tr>
+  <td class="method post">POST</td>
+  <td class="route">/ocr</td>
+  <td class="params">[value=x,y,w,h]</td>
+  <td class="desc">OCR the current element or a screen region</td>
+</tr><tr>
+  <td class="method post">POST</td>
+  <td class="route">/capture</td>
+  <td class="params">[action=screen|window|element|elements] [value=id1,id2,...]</td>
+  <td class="desc">Screenshot; returns base64 PNG in data.result</td>
+</tr><tr>
+  <td class="method get">GET</td>
+  <td class="route">/uimap</td>
+  <td class="params"></td>
+  <td class="desc">Annotated screenshot with colour-coded element overlays</td>
+</tr><tr>
+  <td class="method get">GET</td>
+  <td class="route">/ping</td>
+  <td class="params"></td>
+  <td class="desc">Liveness check</td>
+</tr><tr>
+  <td class="method get">GET</td>
+  <td class="route">/health</td>
+  <td class="params"></td>
+  <td class="desc">Server health, uptime, and request counters</td>
+</tr><tr>
+  <td class="method get">GET</td>
+  <td class="route">/sysinfo</td>
+  <td class="params"></td>
+  <td class="desc">OS and machine info</td>
+</tr><tr>
+  <td class="method get">GET</td>
+  <td class="route">/help</td>
+  <td class="params">[group=&lt;id&gt;] [action=&lt;name&gt;]</td>
+  <td class="desc">This reference. Add ?group= or ?action= to filter; append .json for machine-readable output</td>
+</tr></tbody></table></section>
+<section id="click">
+<h2>Click / Mouse <span class="count">9 actions</span></h2>
+<table>
+<thead><tr><th>Action</th><th>Aliases</th><th>Value</th><th>Description</th></tr></thead>
+<tbody><tr data-action="click">
+  <td class="action">click</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">Smart click: Invoke-&gt;Toggle-&gt;SelectionItem-&gt;mouse</td>
+</tr><tr data-action="mouse-click">
+  <td class="action">mouse-click</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">Force mouse left click</td>
+</tr><tr data-action="right-click">
+  <td class="action">right-click</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">Right mouse click</td>
+</tr><tr data-action="double-click">
+  <td class="action">double-click</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">Double left click</td>
+</tr><tr data-action="middle-click">
+  <td class="action">middle-click</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">Middle mouse click</td>
+</tr><tr data-action="click-at">
+  <td class="action">click-at</td>
+  <td class="aliases"></td>
+  <td class="value">x,y</td>
+  <td class="desc">Click at pixel offset from element top-left</td>
+</tr><tr data-action="hover">
+  <td class="action">hover</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">Move mouse to element centre</td>
+</tr><tr data-action="drag">
+  <td class="action">drag</td>
+  <td class="aliases"></td>
+  <td class="value">x,y</td>
+  <td class="desc">Drag element to screen coordinates</td>
+</tr><tr data-action="highlight">
+  <td class="action">highlight</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">Draw orange highlight for 1 second</td>
+</tr></tbody></table></section>
+<section id="keyboard">
+<h2>Keyboard <span class="count">9 actions</span></h2>
+<table>
+<thead><tr><th>Action</th><th>Aliases</th><th>Value</th><th>Description</th></tr></thead>
+<tbody><tr data-action="type">
+  <td class="action">type</td>
+  <td class="aliases">enter</td>
+  <td class="value">text</td>
+  <td class="desc">Type text into element</td>
+</tr><tr data-action="insert">
+  <td class="action">insert</td>
+  <td class="aliases"></td>
+  <td class="value">text</td>
+  <td class="desc">Insert text at caret position</td>
+</tr><tr data-action="keys">
+  <td class="action">keys</td>
+  <td class="aliases"></td>
+  <td class="value">keys</td>
+  <td class="desc">Send keystrokes: {CTRL}/{ALT}/{SHIFT}/{KEY}, Ctrl+A, Enter, Tab, ...</td>
+</tr><tr data-action="selectall">
+  <td class="action">selectall</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">Select all text (Ctrl+A)</td>
+</tr><tr data-action="copy">
+  <td class="action">copy</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">Copy selection to clipboard</td>
+</tr><tr data-action="cut">
+  <td class="action">cut</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">Cut selection to clipboard</td>
+</tr><tr data-action="paste">
+  <td class="action">paste</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">Paste clipboard contents</td>
+</tr><tr data-action="undo">
+  <td class="action">undo</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">Undo last action</td>
+</tr><tr data-action="clear">
+  <td class="action">clear</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">Clear element text</td>
+</tr></tbody></table></section>
+<section id="focus">
+<h2>Focus / State <span class="count">6 actions</span></h2>
+<table>
+<thead><tr><th>Action</th><th>Aliases</th><th>Value</th><th>Description</th></tr></thead>
+<tbody><tr data-action="focus">
+  <td class="action">focus</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">Set keyboard focus to element</td>
+</tr><tr data-action="isenabled">
+  <td class="action">isenabled</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">Returns true/false - is element enabled</td>
+</tr><tr data-action="isvisible">
+  <td class="action">isvisible</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">Returns true/false - is element visible</td>
+</tr><tr data-action="describe">
+  <td class="action">describe</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">Full UIA property dump</td>
+</tr><tr data-action="patterns">
+  <td class="action">patterns</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">List supported UIA patterns</td>
+</tr><tr data-action="bounds">
+  <td class="action">bounds</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">Bounding rectangle</td>
+</tr></tbody></table></section>
+<section id="text">
+<h2>Text / Value <span class="count">6 actions</span></h2>
+<table>
+<thead><tr><th>Action</th><th>Aliases</th><th>Value</th><th>Description</th></tr></thead>
+<tbody><tr data-action="gettext">
+  <td class="action">gettext</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">Smart read: Text pattern -&gt; Value -&gt; Name</td>
+</tr><tr data-action="getvalue">
+  <td class="action">getvalue</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">Smart read: Value -&gt; Text -&gt; LegacyIAccessible -&gt; Name</td>
+</tr><tr data-action="setvalue">
+  <td class="action">setvalue</td>
+  <td class="aliases"></td>
+  <td class="value">text</td>
+  <td class="desc">Smart set: Value pattern -&gt; RangeValue -&gt; keyboard</td>
+</tr><tr data-action="clearvalue">
+  <td class="action">clearvalue</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">Set value to empty string</td>
+</tr><tr data-action="appendvalue">
+  <td class="action">appendvalue</td>
+  <td class="aliases"></td>
+  <td class="value">text</td>
+  <td class="desc">Append text to current value</td>
+</tr><tr data-action="getselectedtext">
+  <td class="action">getselectedtext</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">Selected text via Text pattern</td>
+</tr></tbody></table></section>
+<section id="range">
+<h2>Range / Slider <span class="count">3 actions</span></h2>
+<table>
+<thead><tr><th>Action</th><th>Aliases</th><th>Value</th><th>Description</th></tr></thead>
+<tbody><tr data-action="setrange">
+  <td class="action">setrange</td>
+  <td class="aliases"></td>
+  <td class="value">num</td>
+  <td class="desc">Set RangeValue pattern value</td>
+</tr><tr data-action="getrange">
+  <td class="action">getrange</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">Get current range value</td>
+</tr><tr data-action="rangeinfo">
+  <td class="action">rangeinfo</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">Min, max, step, large-change</td>
+</tr></tbody></table></section>
+<section id="toggle">
+<h2>Toggle <span class="count">4 actions</span></h2>
+<table>
+<thead><tr><th>Action</th><th>Aliases</th><th>Value</th><th>Description</th></tr></thead>
+<tbody><tr data-action="toggle">
+  <td class="action">toggle</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">Toggle current state</td>
+</tr><tr data-action="toggle-on">
+  <td class="action">toggle-on</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">Set toggle state to On</td>
+</tr><tr data-action="toggle-off">
+  <td class="action">toggle-off</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">Set toggle state to Off</td>
+</tr><tr data-action="gettoggle">
+  <td class="action">gettoggle</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">Get current state: On / Off / Indeterminate</td>
+</tr></tbody></table></section>
+<section id="expand">
+<h2>Expand / Collapse <span class="count">3 actions</span></h2>
+<table>
+<thead><tr><th>Action</th><th>Aliases</th><th>Value</th><th>Description</th></tr></thead>
+<tbody><tr data-action="expand">
+  <td class="action">expand</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">Expand via ExpandCollapse pattern</td>
+</tr><tr data-action="collapse">
+  <td class="action">collapse</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">Collapse via ExpandCollapse pattern</td>
+</tr><tr data-action="expandstate">
+  <td class="action">expandstate</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">Get current expand/collapse state</td>
+</tr></tbody></table></section>
+<section id="selection">
+<h2>Selection <span class="count">5 actions</span></h2>
+<table>
+<thead><tr><th>Action</th><th>Aliases</th><th>Value</th><th>Description</th></tr></thead>
+<tbody><tr data-action="select-item">
+  <td class="action">select-item</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">Select via SelectionItem pattern</td>
+</tr><tr data-action="addselect">
+  <td class="action">addselect</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">Add to multi-selection</td>
+</tr><tr data-action="removeselect">
+  <td class="action">removeselect</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">Remove from selection</td>
+</tr><tr data-action="isselected">
+  <td class="action">isselected</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">Check if currently selected</td>
+</tr><tr data-action="getselection">
+  <td class="action">getselection</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">Get selected items from container</td>
+</tr></tbody></table></section>
+<section id="combo">
+<h2>ComboBox / ListBox <span class="count">4 actions</span></h2>
+<table>
+<thead><tr><th>Action</th><th>Aliases</th><th>Value</th><th>Description</th></tr></thead>
+<tbody><tr data-action="select">
+  <td class="action">select</td>
+  <td class="aliases"></td>
+  <td class="value">text</td>
+  <td class="desc">Select item by text (multi-strategy)</td>
+</tr><tr data-action="select-index">
+  <td class="action">select-index</td>
+  <td class="aliases"></td>
+  <td class="value">n</td>
+  <td class="desc">Select by zero-based index</td>
+</tr><tr data-action="getitems">
+  <td class="action">getitems</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">List all items</td>
+</tr><tr data-action="getselecteditem">
+  <td class="action">getselecteditem</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">Get currently selected item text</td>
+</tr></tbody></table></section>
+<section id="window">
+<h2>Window <span class="count">4 actions</span></h2>
+<table>
+<thead><tr><th>Action</th><th>Aliases</th><th>Value</th><th>Description</th></tr></thead>
+<tbody><tr data-action="minimize">
+  <td class="action">minimize</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">Minimize window</td>
+</tr><tr data-action="maximize">
+  <td class="action">maximize</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">Maximize window</td>
+</tr><tr data-action="restore">
+  <td class="action">restore</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">Restore window to normal size</td>
+</tr><tr data-action="windowstate">
+  <td class="action">windowstate</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">Normal / Maximized / Minimized</td>
+</tr></tbody></table></section>
+<section id="transform">
+<h2>Transform <span class="count">2 actions</span></h2>
+<table>
+<thead><tr><th>Action</th><th>Aliases</th><th>Value</th><th>Description</th></tr></thead>
+<tbody><tr data-action="move">
+  <td class="action">move</td>
+  <td class="aliases"></td>
+  <td class="value">x,y</td>
+  <td class="desc">Move element via Transform pattern</td>
+</tr><tr data-action="resize">
+  <td class="action">resize</td>
+  <td class="aliases"></td>
+  <td class="value">w,h</td>
+  <td class="desc">Resize element via Transform pattern</td>
+</tr></tbody></table></section>
+<section id="scroll">
+<h2>Scroll <span class="count">7 actions</span></h2>
+<table>
+<thead><tr><th>Action</th><th>Aliases</th><th>Value</th><th>Description</th></tr></thead>
+<tbody><tr data-action="scroll-down">
+  <td class="action">scroll-down</td>
+  <td class="aliases"></td>
+  <td class="value">n[,visual]</td>
+  <td class="desc">Scroll down n steps (default 3); uses UIA Scroll pattern (invisible); add 'visual' to force mouse cursor</td>
+</tr><tr data-action="scroll-up">
+  <td class="action">scroll-up</td>
+  <td class="aliases"></td>
+  <td class="value">n[,visual]</td>
+  <td class="desc">Scroll up n steps; UIA pattern by default, 'visual' forces mouse cursor</td>
+</tr><tr data-action="scroll-left">
+  <td class="action">scroll-left</td>
+  <td class="aliases"></td>
+  <td class="value">n[,visual]</td>
+  <td class="desc">Horizontal scroll left</td>
+</tr><tr data-action="scroll-right">
+  <td class="action">scroll-right</td>
+  <td class="aliases"></td>
+  <td class="value">n[,visual]</td>
+  <td class="desc">Horizontal scroll right</td>
+</tr><tr data-action="scrollinto">
+  <td class="action">scrollinto</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">Scroll element into view via ScrollItem pattern</td>
+</tr><tr data-action="scrollpercent">
+  <td class="action">scrollpercent</td>
+  <td class="aliases"></td>
+  <td class="value">h,v</td>
+  <td class="desc">Scroll to horizontal/vertical percent (0-100)</td>
+</tr><tr data-action="getscrollinfo">
+  <td class="action">getscrollinfo</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">Current scroll position, range, and scrollability flags</td>
+</tr></tbody></table></section>
+<section id="grid">
+<h2>Grid / Table <span class="count">3 actions</span></h2>
+<table>
+<thead><tr><th>Action</th><th>Aliases</th><th>Value</th><th>Description</th></tr></thead>
+<tbody><tr data-action="griditem">
+  <td class="action">griditem</td>
+  <td class="aliases"></td>
+  <td class="value">row,col</td>
+  <td class="desc">Get item description at grid row, col (zero-based)</td>
+</tr><tr data-action="gridinfo">
+  <td class="action">gridinfo</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">Row and column counts</td>
+</tr><tr data-action="griditeminfo">
+  <td class="action">griditeminfo</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">Row, column, row-span, column-span for a grid item</td>
+</tr></tbody></table></section>
+<section id="capture">
+<h2>Screenshot / OCR <span class="count">3 actions</span></h2>
+<table>
+<thead><tr><th>Action</th><th>Aliases</th><th>Value</th><th>Description</th></tr></thead>
+<tbody><tr data-action="screenshot">
+  <td class="action">screenshot</td>
+  <td class="aliases">capture</td>
+  <td class="value"></td>
+  <td class="desc">Capture current element to PNG (base64 in data.result)</td>
+</tr><tr data-action="screen">
+  <td class="action">screen</td>
+  <td class="aliases"></td>
+  <td class="value"></td>
+  <td class="desc">Capture full screen to PNG</td>
+</tr><tr data-action="wait-page-load">
+  <td class="action">wait-page-load</td>
+  <td class="aliases">waitpageload</td>
+  <td class="value">seconds</td>
+  <td class="desc">Poll window title until page finishes loading (default 10s); returns title on success</td>
+</tr></tbody></table></section>
+<section id="wait">
+<h2>Wait <span class="count">1 actions</span></h2>
+<table>
+<thead><tr><th>Action</th><th>Aliases</th><th>Value</th><th>Description</th></tr></thead>
+<tbody><tr data-action="wait">
+  <td class="action">wait</td>
+  <td class="aliases"></td>
+  <td class="value">automationId</td>
+  <td class="desc">Wait up to timeout for element with this AutomationId to appear</td>
+</tr></tbody></table></section>
+</main>
+</div>
+<script>
+(function () {
+  const search   = document.getElementById('search');
+  const countEl  = document.getElementById('searchCount');
+  const jsonLink = document.getElementById('jsonLink');
+  const sections = Array.from(document.querySelectorAll('section'));
+  const navItems = Array.from(document.querySelectorAll('#nav .nav-item'));
+
+  // -- Active nav on scroll --
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        navItems.forEach(n => n.classList.remove('active'));
+        const a = document.querySelector(`#nav a[href="#${e.target.id}"]`);
+        if (a) a.classList.add('active');
+      }
+    });
+  }, { root: document.getElementById('main'), threshold: 0.1 });
+  sections.forEach(s => observer.observe(s));
+
+  // -- Filter --
+  search.addEventListener('input', function () {
+    const q = this.value.trim().toLowerCase();
+    jsonLink.href = q ? '/help.json?action=' + encodeURIComponent(q) : '/help.json';
+
+    let totalVisible = 0;
+
+    sections.forEach(sec => {
+      if (sec.id === 'endpoints') { sec.classList.remove('hidden'); return; }
+
+      const rows = Array.from(sec.querySelectorAll('tbody tr'));
+      let secVisible = 0;
+
+      rows.forEach(row => {
+        if (!q) { row.classList.remove('hidden'); secVisible++; return; }
+        const txt = row.textContent.toLowerCase();
+        if (txt.includes(q)) { row.classList.remove('hidden'); secVisible++; }
+        else                 { row.classList.add('hidden'); }
+      });
+
+      sec.classList.toggle('hidden', q !== '' && secVisible === 0);
+      totalVisible += secVisible;
+    });
+
+    countEl.textContent = q ? totalVisible + ' match' + (totalVisible === 1 ? '' : 'es') : '';
+  });
+
+  // Focus search on '/'
+  document.addEventListener('keydown', e => {
+    if (e.key === '/' && document.activeElement !== search) {
+      e.preventDefault(); search.focus(); search.select();
+    }
+    if (e.key === 'Escape') { search.value = ''; search.dispatchEvent(new Event('input')); search.blur(); }
+  });
+})();
+</script>
+</body></html>
