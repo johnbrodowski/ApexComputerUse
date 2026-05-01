@@ -300,7 +300,7 @@ namespace ApexComputerUse
                     var vk = ParseVirtualKey(name);
                     if (vk.HasValue)
                     {
-                        bool isMod = vk.Value is VirtualKeyShort.CONTROL or VirtualKeyShort.ALT or VirtualKeyShort.SHIFT;
+                        bool isMod = vk.Value is VirtualKeyShort.CONTROL or VirtualKeyShort.ALT or VirtualKeyShort.SHIFT or VirtualKeyShort.LWIN or VirtualKeyShort.RWIN;
                         if (isMod)
                             heldModifier = vk.Value;
                         else if (heldModifier.HasValue)
@@ -355,6 +355,7 @@ namespace ApexComputerUse
                 "ctrl" or "control"   => VirtualKeyShort.CONTROL,
                 "alt"                 => VirtualKeyShort.ALT,
                 "shift"               => VirtualKeyShort.SHIFT,
+                "win" or "windows"    => VirtualKeyShort.LWIN,
                 "f1"  => VirtualKeyShort.F1,  "f2"  => VirtualKeyShort.F2,
                 "f3"  => VirtualKeyShort.F3,  "f4"  => VirtualKeyShort.F4,
                 "f5"  => VirtualKeyShort.F5,  "f6"  => VirtualKeyShort.F6,

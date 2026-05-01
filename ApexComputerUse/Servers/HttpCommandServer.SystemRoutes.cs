@@ -218,6 +218,41 @@ namespace ApexComputerUse
             };
         }
 
+        private static ApexResult HandleWinRun(string? target, string? args)
+        {
+            if (string.IsNullOrWhiteSpace(target))
+                return new ApexResult { Success = false, Action = "winrun",
+                    Error = "target parameter is required (exe name, file path, or URI)" };
+
+            try
+            {
+                var psi = new ProcessStartInfo
+                {
+                    FileName        = target,
+                    UseShellExecute = true,
+                };
+                if (!string.IsNullOrWhiteSpace(args))
+                    psi.Arguments = args;
+
+                Process.Start(psi);
+                return new ApexResult
+                {
+                    Success = true,
+                    Action  = "winrun",
+                    Data    = new Dictionary<string, string>
+                    {
+                        ["target"] = target,
+                        ["args"]   = args ?? ""
+                    }
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ApexResult { Success = false, Action = "winrun",
+                    Error = $"Failed to launch '{target}': {ex.Message}" };
+            }
+        }
+
         private static bool IsSensitiveEnvKey(string key)
         {
             return key.Contains("KEY", StringComparison.OrdinalIgnoreCase)

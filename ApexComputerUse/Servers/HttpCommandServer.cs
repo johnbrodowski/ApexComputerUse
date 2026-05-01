@@ -522,6 +522,8 @@ namespace ApexComputerUse
                         ("GET", "/sysinfo") => HandleSysinfo(),
                         ("GET", "/env")     => HandleEnv(),
                         ("GET", "/ls")      => HandleLs(req.QueryString["path"]),
+                        ("GET",  "/winrun") => HandleWinRun(req.QueryString["target"], req.QueryString["args"]),
+                        ("POST", "/winrun") => HandleWinRun(ParseJsonString(body, "target"), ParseJsonString(body, "args")),
 
                         // Existing routes  adapted to ApexResult
                         ("GET", "/status")
