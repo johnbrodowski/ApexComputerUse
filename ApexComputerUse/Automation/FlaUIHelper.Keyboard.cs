@@ -199,6 +199,7 @@ namespace ApexComputerUse
         {
             keys = NormalizeBracketKeyTokens(keys);
 
+            BringContainerWindowToFront(el);
             el.Focus();
             Thread.Sleep(FocusDelayMs);
 

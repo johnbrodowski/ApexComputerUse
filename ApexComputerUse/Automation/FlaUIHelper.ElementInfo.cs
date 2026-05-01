@@ -115,7 +115,11 @@ namespace ApexComputerUse
 
         public void RightClickElement(AutomationElement el) => el.RightClick();
 
-        public void DoubleClickElement(AutomationElement el) => el.DoubleClick();
+        public void DoubleClickElement(AutomationElement el)
+        {
+            BringContainerWindowToFront(el);
+            el.DoubleClick();
+        }
 
         public void MiddleClickElement(AutomationElement el)
         {
