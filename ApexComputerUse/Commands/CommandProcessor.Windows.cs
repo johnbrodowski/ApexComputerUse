@@ -32,11 +32,6 @@ namespace ApexComputerUse
 
             var hwnd = CurrentWindow.Properties.NativeWindowHandle.ValueOrDefault;
 
-            // Chromium browsers (Edge/Chrome) hide their DOM from UIA until a client signals
-            // interest via WM_GETOBJECT. Wake the renderer's accessibility tree before scanning.
-            if (ApexHelper.IsChromiumWindow(hwnd))
-                ApexHelper.WakeBrowserAccessibility(hwnd);
-
             // Optional: start the scan at a previously-mapped element instead of the window root.
             // Lets callers progressively drill into a subtree without re-scanning the whole window.
             // When provided, the map is preserved (IDs remain stable across calls).
