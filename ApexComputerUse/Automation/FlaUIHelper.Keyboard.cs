@@ -19,9 +19,16 @@ namespace ApexComputerUse
         [System.Runtime.InteropServices.DllImport("user32.dll", SetLastError = true)]
         private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int x, int y, int cx, int cy, uint uFlags);
 
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool IsIconic(IntPtr hWnd);
+
         private const uint SWP_NOSIZE    = 0x0001;
         private const uint SWP_NOZORDER  = 0x0004;
         private const uint SWP_SHOWWINDOW = 0x0040;
+        private const int  SW_RESTORE    = 9;
 
 
         private static void BringContainerWindowToFront(AutomationElement el)
@@ -34,6 +41,15 @@ namespace ApexComputerUse
                     var hwnd = cur.Properties.NativeWindowHandle.ValueOrDefault;
                     if (hwnd != IntPtr.Zero)
                     {
+                        // Restore minimized windows first - SetForegroundWindow alone won't
+                        // un-minimize, and SetWindowPos with SWP_NOSIZE preserves the 0x0
+                        // size minimized windows report. Gate on IsIconic so we don't
+                        // un-maximize maximized windows.
+                        if (IsIconic(hwnd))
+                        {
+                            ShowWindow(hwnd, SW_RESTORE);
+                            Thread.Sleep(100);
+                        }
                         // Move off-screen windows into view so keyboard input reaches them.
                         var rect = cur.Properties.BoundingRectangle.ValueOrDefault;
                         if (rect.X < -100 || rect.Y < -100)

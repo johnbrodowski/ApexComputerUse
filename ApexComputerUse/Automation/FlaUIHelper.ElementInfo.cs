@@ -107,7 +107,17 @@ namespace ApexComputerUse
             if (el.Patterns.Invoke.TryGetPattern(out var invoke))     { invoke.Invoke(); return; }
             if (el.Patterns.Toggle.TryGetPattern(out var toggle))     { toggle.Toggle(); return; }
             if (el.Patterns.SelectionItem.TryGetPattern(out var si))  { si.Select(); return; }
-            el.Click();
+
+            // Mouse fallback needs a clickable point. Foreground/restore the container
+            // window first so off-screen or minimized windows become clickable, and
+            // translate FlaUI's bare NoClickablePointException into a useful message.
+            BringContainerWindowToFront(el);
+            try { el.Click(); }
+            catch (FlaUI.Core.Exceptions.NoClickablePointException)
+            {
+                throw new InvalidOperationException(
+                    "Element has no clickable point - it may be off-screen, zero-size, or fully covered by another window.");
+            }
         }
 
         /// <summary>Mouse-only left click (bypasses pattern logic).</summary>
