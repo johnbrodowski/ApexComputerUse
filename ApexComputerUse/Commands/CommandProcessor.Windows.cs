@@ -15,7 +15,8 @@ namespace ApexComputerUse
             var windows = _helper.GetDesktopWindows();
             var entries = windows.Select(w =>
             {
-                string hash = _idGen.GenerateElementHash(w, null, null, excludeName: true);
+                var hwnd = w.Properties.NativeWindowHandle.ValueOrDefault;
+                string hash = _idGen.GenerateElementHash(w, null, null, hwnd: hwnd, excludeName: true);
                 int id = _idGen.GenerateIdFromHash(hash);
                 _windowMap[id] = w.AsWindow();
                 return new { id, title = w.Properties.Name.ValueOrDefault ?? "" };

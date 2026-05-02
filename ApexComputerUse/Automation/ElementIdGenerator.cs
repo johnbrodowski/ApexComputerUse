@@ -140,6 +140,17 @@ namespace ApexComputerUse
                 sb.Append(siblingIndex);
             }
 
+            // HWND: include when the caller provides it (top-level windows). Windows of
+            // the same app share ControlType/Class/Process and so collide on hash without
+            // HWND. Including it makes window IDs unique within a session. Window IDs
+            // become session-scoped as a result, which is correct - HWNDs are not stable
+            // across sessions anyway.
+            if (hwnd.HasValue && hwnd.Value != IntPtr.Zero)
+            {
+                sb.Append("|hwnd:");
+                sb.Append(hwnd.Value.ToInt64());
+            }
+
             return ComputeHash(sb.ToString());
         }
 
