@@ -52,34 +52,47 @@ namespace ApexComputerUse
 
         public Window? FindWindowFuzzy(string title, out string matchedTitle, out bool isExact)
         {
+            // Snapshot Name once per window. UIA property reads can throw spuriously
+            // (EVENT_E_INTERNALEXCEPTION / 0x80040201) when the desktop tree mutates
+            // mid-call - reading Name 5-8 times per window across this pipeline made
+            // the failure routine. One read per window, wrapped in try/catch, behaves
+            // like GetDesktopWindows() (which doesn't throw in practice).
             var all = _automation.GetDesktop().FindAllChildren()
-                          .Where(w => !string.IsNullOrWhiteSpace(w.Name))
+                          .Select(w =>
+                          {
+                              string name;
+                              try { name = w.Name ?? ""; }
+                              catch { name = ""; }
+                              return (element: w, name);
+                          })
+                          .Where(t => !string.IsNullOrWhiteSpace(t.name))
                           .ToArray();
 
             // 1. Exact (case-insensitive)
-            var exact = all.FirstOrDefault(w => w.Name.Equals(title, StringComparison.OrdinalIgnoreCase));
-            if (exact != null) { matchedTitle = exact.Name; isExact = true; return exact.AsWindow(); }
+            var exact = all.FirstOrDefault(t => t.name.Equals(title, StringComparison.OrdinalIgnoreCase));
+            if (exact.element != null) { matchedTitle = exact.name; isExact = true; return exact.element.AsWindow(); }
 
             // 2. Contains - if multiple match, prefer StartsWith over mid-string, then shortest name.
-            var contains = all.Where(w => w.Name.Contains(title, StringComparison.OrdinalIgnoreCase)).ToArray();
+            var contains = all.Where(t => t.name.Contains(title, StringComparison.OrdinalIgnoreCase)).ToArray();
             if (contains.Length >= 1)
             {
                 var best = contains
-                    .OrderByDescending(w => w.Name.StartsWith(title, StringComparison.OrdinalIgnoreCase))
-                    .ThenBy(w => w.Name.Length)
+                    .OrderByDescending(t => t.name.StartsWith(title, StringComparison.OrdinalIgnoreCase))
+                    .ThenBy(t => t.name.Length)
                     .First();
-                matchedTitle = best.Name; isExact = false;
-                return best.AsWindow();
+                matchedTitle = best.name; isExact = false;
+                return best.element.AsWindow();
             }
 
             // 3. Closest Levenshtein (with distance threshold)
-            var closest = all.MinBy(w => Levenshtein(title.ToLower(), w.Name.ToLower()));
-            if (closest == null) { matchedTitle = ""; isExact = false; return null; }
-            int bestDist = Levenshtein(title.ToLower(), closest.Name.ToLower());
+            var titleLower = title.ToLower();
+            var closest    = all.Length == 0 ? default : all.MinBy(t => Levenshtein(titleLower, t.name.ToLower()));
+            if (closest.element == null) { matchedTitle = ""; isExact = false; return null; }
+            int bestDist = Levenshtein(titleLower, closest.name.ToLower());
             if (bestDist > (int)(title.Length * 0.6)) { matchedTitle = ""; isExact = false; return null; }
-            matchedTitle = closest.Name;
+            matchedTitle = closest.name;
             isExact = false;
-            return closest.AsWindow();
+            return closest.element.AsWindow();
         }
 
         // -- Element fuzzy find --------------------------------------------
