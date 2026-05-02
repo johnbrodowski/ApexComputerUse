@@ -23,7 +23,11 @@ namespace ApexComputerUse
                 using var doc = JsonDocument.Parse(json);
                 Populate(r, doc.RootElement);
             }
-            catch (Exception ex) { AppLog.Debug($"[JsonMapper] Malformed JSON - {ex.Message}"); }
+            catch (Exception ex)
+            {
+                AppLog.Debug($"[JsonMapper] Malformed JSON - {ex.Message}");
+                r.JsonParseError = ex.Message;
+            }
             return r;
         }
 

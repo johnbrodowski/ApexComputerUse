@@ -26,6 +26,11 @@ namespace ApexComputerUse
         public string? Properties     { get; set; }
 
         public string? ChangedSince   { get; set; }
+
+        // Set by JSON mappers when the body fails to parse - lets the dispatcher emit
+        // a clean "Invalid JSON: ..." error instead of letting blank fields surface as
+        // misleading downstream messages like "'action' is required".
+        public string? JsonParseError { get; set; }
     }
 
     public class CommandResponse

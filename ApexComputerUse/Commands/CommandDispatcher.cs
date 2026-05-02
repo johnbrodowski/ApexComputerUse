@@ -18,6 +18,13 @@ namespace ApexComputerUse
 
         public CommandResponse Dispatch(CommandRequest req)
         {
+            // Surface JSON parse failures before they masquerade as missing-field errors.
+            // The mapper sets JsonParseError when the request body could not be parsed;
+            // dispatching with blank fields would yield a misleading "'action' is required"
+            // (or similar) downstream.
+            if (!string.IsNullOrEmpty(req.JsonParseError))
+                return new CommandResponse { Success = false, Message = $"Invalid JSON: {req.JsonParseError}" };
+
             try
             {
                 return _processor.Process(req);
