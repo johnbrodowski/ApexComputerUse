@@ -120,6 +120,8 @@ Interaction:
 
 Keyboard and text:
 - `type`, `keys`, `setvalue`, `insert`
+  - `keys` supports `{ENTER}`, `{TAB}`, `{ESC}`, `{F5}`, `{DELETE}`, `{WIN}`, `Ctrl+A`, `Alt+F4`, etc.
+  - `{WIN}` sends the Windows key; `{WIN}{E}` opens File Explorer.
 - `gettext`, `getvalue`, `getselectedtext`
 - `clearvalue`, `appendvalue`, `selectall`, `copy`, `cut`, `paste`, `undo`, `clear`
 
@@ -178,9 +180,21 @@ Notes:
 - `success=false` responses return HTTP 400 for command errors.
 - Missing/invalid API key returns HTTP 401.
 
-## 9) Fast Recovery
+## 9) Launching Applications
+
+Use `GET /winrun?target=<path>` or `POST /winrun` with `{"target":"...","args":"..."}` to launch any app, file, or URI via ShellExecute. Always enabled — no config required. Fire-and-forget (no stdout).
+
+Examples:
+- Open File Explorer: `GET /winrun?target=explorer.exe`
+- Open a folder: `POST /winrun` `{"target":"C:\\Users\\Public"}`
+- Open a URL: `POST /winrun` `{"target":"https://example.com"}`
+
+After launch, call `GET /windows` and wait for the new window to appear before calling `find`.
+
+## 10) Fast Recovery
 
 - `No window found`: refresh `windows`, use the current title or window ID.
 - `No element found`: call `elements?onscreen=true`, then search by ID or exact exposed name.
 - Action hits wrong target: run `find` again in the intended window before `exec`.
 - Nothing happens after `setvalue` in browser: send `keys` with `{ENTER}`.
+- App not open: use `/winrun` to launch it, then poll `windows` until it appears.

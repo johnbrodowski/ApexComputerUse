@@ -58,6 +58,7 @@ curl "http://localhost:8080/exec.json?action=gettext"
 | `GET` | `/env` | All environment variables |
 | `GET` | `/ls?path=<dir>` | Directory listing (defaults to CWD) |
 | `GET`/`POST` | `/run?cmd=<command>` | Run shell command via `cmd.exe /c`, 30s timeout. **Disabled by default** — needs `EnableShellRun=true` or `APEX_ENABLE_SHELL_RUN=true`. Response includes `cmd`, `stdout`, `stderr`, `exit_code`. |
+| `GET`/`POST` | `/winrun?target=<path>&args=<args>` | Launch any executable, file, or URI via `ShellExecute` (always enabled). Use for GUI apps, Explorer, browsers, URIs. POST body: `{"target":"...","args":"..."}`. Fire-and-forget — no stdout capture. |
 | `POST` | `/run-tests` | Trigger bundled integration test runner |
 | `POST` | `/shutdown` | Stop the HTTP server |
 | `GET` | `/help` | Full server command reference |
