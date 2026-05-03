@@ -31,6 +31,18 @@ namespace ApexComputerUse
         {
             if (CurrentWindow == null) return Fail("No window selected. Use 'find window=X' first.");
 
+            // UWP windows (Calculator, Settings, etc.) unload their visual tree when
+            // minimized - UIA then reports only the Window root with no descendants.
+            // Restore first so the caller sees the tree they asked for. Gated on
+            // Minimized so non-minimized windows aren't touched (no focus-steal on
+            // every /elements call).
+            if (CurrentWindow.Patterns.Window.TryGetPattern(out var wp)
+                && wp.WindowVisualState.ValueOrDefault == WindowVisualState.Minimized)
+            {
+                wp.SetWindowVisualState(WindowVisualState.Normal);
+                System.Threading.Thread.Sleep(150);
+            }
+
             var hwnd = CurrentWindow.Properties.NativeWindowHandle.ValueOrDefault;
 
             // Optional: start the scan at a previously-mapped element instead of the window root.
