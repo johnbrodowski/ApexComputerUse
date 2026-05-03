@@ -16,6 +16,7 @@ namespace ApexComputerUse
         private readonly HttpListener        _listener  = new();
         private readonly CommandProcessor    _processor;
         private readonly CommandDispatcher   _dispatcher;
+        private readonly EventBroker         _events;
         private readonly SceneStore          _store;
         private readonly AiChatService?      _chatService;
         private readonly ClientStore?        _clientStore;
@@ -72,6 +73,9 @@ namespace ApexComputerUse
             Port            = port;
             _processor      = processor;
             _dispatcher     = new CommandDispatcher(processor);
+            // Event broker shares stable IDs with /windows by snapshotting through the processor.
+            // Idle by default - the poll thread only runs while at least one /events client is connected.
+            _events         = new EventBroker(processor.SnapshotDesktopWindows);
             _store          = store;
             _chatService    = chatService;
             _clientStore    = clientStore;
@@ -252,7 +256,7 @@ namespace ApexComputerUse
 
             // Diagnostics - gated by AllowDiagnostics; loopback always gets _fullPermissions so
             // localhost callers are unaffected.
-            if (path is "/ping" or "/metrics" or "/sysinfo" or "/env" or "/ls" or "/help" or "/status" or "/settings" or "/file")
+            if (path is "/ping" or "/metrics" or "/sysinfo" or "/env" or "/ls" or "/help" or "/status" or "/settings" or "/file" or "/events")
                 return p.AllowDiagnostics;
 
             if (path is "/run") return p.AllowShellRun;
@@ -437,6 +441,15 @@ namespace ApexComputerUse
                 if (method == "POST" && path == "/chat/send")
                 {
                     await HandleChatSendAsync(req, res, body);
+                    return;
+                }
+
+                // Desktop event stream - long-lived SSE response. Streams window-created /
+                // window-closed / window-title-changed events. Server-side filtered by
+                // ?types=<csv> and optional ?windowId=<id>.
+                if (method == "GET" && path == "/events")
+                {
+                    await HandleEventsAsync(req, res);
                     return;
                 }
 
@@ -628,6 +641,7 @@ namespace ApexComputerUse
         public void Dispose()
         {
             Stop();
+            try { _events.Dispose();  } catch { }
             try { _listener.Close(); } catch { }
         }
     }

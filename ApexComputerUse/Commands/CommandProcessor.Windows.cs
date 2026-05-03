@@ -27,6 +27,35 @@ namespace ApexComputerUse
             return Ok($"{entries.Count} open window(s)", json);
         }
 
+        /// <summary>
+        /// Lightweight window snapshot for the event broker. Reuses the same hash-based stable
+        /// IDs as <see cref="CmdListWindows"/> so events reference IDs that match /windows.
+        /// Does not mutate <c>_windowMap</c> - the broker poll thread must not interfere with
+        /// interactive find/exec operations on the main thread.
+        /// </summary>
+        public List<(int id, string title)> SnapshotDesktopWindows()
+        {
+            var result = new List<(int, string)>();
+            try
+            {
+                var windows = _helper.GetDesktopWindows();
+                foreach (var w in windows)
+                {
+                    try
+                    {
+                        var hwnd = w.Properties.NativeWindowHandle.ValueOrDefault;
+                        string hash = _idGen.GenerateElementHash(w, null, null, hwnd: hwnd, excludeName: true);
+                        int id = _idGen.GenerateIdFromHash(hash);
+                        string title = w.Properties.Name.ValueOrDefault ?? "";
+                        result.Add((id, title));
+                    }
+                    catch { /* element disappeared mid-enumeration */ }
+                }
+            }
+            catch (Exception ex) { AppLog.Debug($"[Snapshot] desktop enumeration failed: {ex.Message}"); }
+            return result;
+        }
+
         private CommandResponse CmdListElements(CommandRequest req)
         {
             if (CurrentWindow == null) return Fail("No window selected. Use 'find window=X' first.");
