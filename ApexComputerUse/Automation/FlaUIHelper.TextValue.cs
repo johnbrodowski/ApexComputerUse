@@ -16,42 +16,64 @@ namespace ApexComputerUse
         /// <summary>
         /// Gets element text: Text pattern -> Value pattern -> Name property.
         /// </summary>
-        public string GetText(AutomationElement el)
+        public string GetText(AutomationElement el) => GetText(el, out _);
+
+        /// <summary>
+        /// Gets element text and reports which UIA pattern supplied the result. Source values:
+        /// "TextPattern", "ValuePattern", "LegacyIAccessible", "Name". Lets agents distinguish a
+        /// legitimate text read from a degenerate Name fallback.
+        /// </summary>
+        public string GetText(AutomationElement el, out string source)
         {
             if (el.Patterns.Text.TryGetPattern(out var tp))
-                return tp.DocumentRange.GetText(-1);
+            { source = "TextPattern"; return tp.DocumentRange.GetText(-1); }
             if (el.Patterns.Value.TryGetPattern(out var vp))
-                return vp.Value.ValueOrDefault ?? "";
+            { source = "ValuePattern"; return vp.Value.ValueOrDefault ?? ""; }
             if (el.Patterns.LegacyIAccessible.TryGetPattern(out var la))
             {
                 var v = la.Value.ValueOrDefault;
-                if (!string.IsNullOrEmpty(v)) return v;
+                if (!string.IsNullOrEmpty(v)) { source = "LegacyIAccessible"; return v; }
             }
+            source = "Name";
             return el.Properties.Name.ValueOrDefault ?? "";
         }
 
         /// <summary>
         /// Gets element value: Value pattern -> Text pattern -> LegacyIAccessible -> Name.
         /// </summary>
-        public string GetValue(AutomationElement el)
+        public string GetValue(AutomationElement el) => GetValue(el, out _);
+
+        /// <summary>
+        /// Gets element value and reports which UIA pattern supplied the result. Source values:
+        /// "ValuePattern", "TextPattern", "LegacyIAccessible", "Name".
+        /// </summary>
+        public string GetValue(AutomationElement el, out string source)
         {
             if (el.Patterns.Value.TryGetPattern(out var vp))
-                return vp.Value.ValueOrDefault ?? "";
+            { source = "ValuePattern"; return vp.Value.ValueOrDefault ?? ""; }
             if (el.Patterns.Text.TryGetPattern(out var tp))
-                return tp.DocumentRange.GetText(-1);
+            { source = "TextPattern"; return tp.DocumentRange.GetText(-1); }
             if (el.Patterns.LegacyIAccessible.TryGetPattern(out var la))
             {
                 var v = la.Value.ValueOrDefault;
-                if (!string.IsNullOrEmpty(v)) return v;
+                if (!string.IsNullOrEmpty(v)) { source = "LegacyIAccessible"; return v; }
             }
+            source = "Name";
             return el.Properties.Name.ValueOrDefault ?? "";
         }
 
         /// <summary>Gets the currently selected text via Text pattern selection ranges.</summary>
-        public string GetSelectedText(AutomationElement el)
+        public string GetSelectedText(AutomationElement el) => GetSelectedText(el, out _);
+
+        /// <summary>
+        /// Gets the currently selected text and reports the source pattern.
+        /// Source is "TextPattern" on success, "None" when the pattern is not supported.
+        /// </summary>
+        public string GetSelectedText(AutomationElement el, out string source)
         {
             if (!el.Patterns.Text.TryGetPattern(out var tp))
-                return "Text pattern not supported";
+            { source = "None"; return "Text pattern not supported"; }
+            source = "TextPattern";
             var selections = tp.GetSelection();
             return selections.Length > 0
                 ? string.Join("", selections.Select(s => s.GetText(-1)))

@@ -252,7 +252,7 @@ namespace ApexComputerUse
 
             // Diagnostics - gated by AllowDiagnostics; loopback always gets _fullPermissions so
             // localhost callers are unaffected.
-            if (path is "/ping" or "/metrics" or "/sysinfo" or "/env" or "/ls" or "/help" or "/status" or "/settings")
+            if (path is "/ping" or "/metrics" or "/sysinfo" or "/env" or "/ls" or "/help" or "/status" or "/settings" or "/file")
                 return p.AllowDiagnostics;
 
             if (path is "/run") return p.AllowShellRun;
@@ -522,6 +522,10 @@ namespace ApexComputerUse
                         ("GET", "/sysinfo") => HandleSysinfo(),
                         ("GET", "/env")     => HandleEnv(),
                         ("GET", "/ls")      => HandleLs(req.QueryString["path"]),
+                        // Read-only file content. Disabled by default - controlled by EnableFileIo
+                        // and constrained to FileIoAllowedRoots.
+                        ("GET", "/file")    => HandleFileRead(req.QueryString["path"]),
+                        ("POST","/file")    => HandleFileRead(ParseJsonString(body, "path")),
                         ("GET",  "/winrun") => HandleWinRun(req.QueryString["target"], req.QueryString["args"]),
                         ("POST", "/winrun") => HandleWinRun(ParseJsonString(body, "target"), ParseJsonString(body, "args")),
 

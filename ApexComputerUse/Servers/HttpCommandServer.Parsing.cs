@@ -48,6 +48,11 @@ namespace ApexComputerUse
                 CollapseChains = string.Equals(req.QueryString["collapseChains"], "true", StringComparison.OrdinalIgnoreCase),
                 IncludePath    = string.Equals(req.QueryString["includePath"],    "true", StringComparison.OrdinalIgnoreCase),
                 Properties     = req.QueryString["properties"],
+                Property       = req.QueryString["property"],
+                Predicate      = req.QueryString["predicate"],
+                Expected       = req.QueryString["expected"],
+                Timeout        = int.TryParse(req.QueryString["timeout"],  out int _t) ? _t : null,
+                Interval       = int.TryParse(req.QueryString["interval"], out int _i) ? _i : null,
             };
 
         private static CommandRequest FromJson(string json, string command, string? action = null)

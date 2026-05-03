@@ -304,6 +304,15 @@ namespace ApexComputerUse
                 if (string.IsNullOrEmpty(valueOut))    valueOut    = null;
                 if (string.IsNullOrEmpty(helpTextOut)) helpTextOut = null;
 
+                // ClassName - read when match= is active (so MatchesNode can scan it) or when the
+                // caller asked for properties=extra. Default scans skip it to keep payloads tight.
+                string? classNameOut = null;
+                if (options.MatchAll || options.IncludeExtra)
+                {
+                    try { classNameOut = el.Properties.ClassName.ValueOrDefault; } catch { }
+                    if (string.IsNullOrEmpty(classNameOut)) classNameOut = null;
+                }
+
                 return new ElementNode
                 {
                     Id                = id,
@@ -317,6 +326,7 @@ namespace ApexComputerUse
                     Path              = path,
                     Value             = valueOut,
                     HelpText          = helpTextOut,
+                    ClassName         = classNameOut,
                     IsOffscreen       = (options.MatchAll && elementIsOffscreen) ? true : null
                 };
             }
@@ -374,6 +384,7 @@ namespace ApexComputerUse
             public string?             Path              { get; init; }  // ancestor breadcrumb, e.g. "Chrome > Document > Form" - set only when the caller requested IncludePath
             public string?             Value             { get; init; }  // Value pattern content - set only when the caller requested properties=extra
             public string?             HelpText          { get; init; }  // HelpText property - set only when the caller requested properties=extra
+            public string?             ClassName         { get; init; }  // ClassName property - populated when match= is set (so match scans it) or properties=extra is requested
             public bool?               IsOffscreen       { get; init; }  // set only when true - element is off-viewport but included via match= scan
         }
 
@@ -460,6 +471,7 @@ namespace ApexComputerUse
             if (!string.IsNullOrEmpty(node.Name)         && node.Name.Contains(needle,         StringComparison.OrdinalIgnoreCase)) return true;
             if (!string.IsNullOrEmpty(node.AutomationId) && node.AutomationId.Contains(needle, StringComparison.OrdinalIgnoreCase)) return true;
             if (!string.IsNullOrEmpty(node.Value)        && node.Value.Contains(needle,        StringComparison.OrdinalIgnoreCase)) return true;
+            if (!string.IsNullOrEmpty(node.ClassName)    && node.ClassName.Contains(needle,    StringComparison.OrdinalIgnoreCase)) return true;
             return false;
         }
 
@@ -520,7 +532,9 @@ namespace ApexComputerUse
                 DescendantCount   = node.DescendantCount,
                 Path              = node.Path,
                 Value             = node.Value,
-                HelpText          = node.HelpText
+                HelpText          = node.HelpText,
+                ClassName         = node.ClassName,
+                IsOffscreen       = node.IsOffscreen
             };
 
         private static int CountNodes(ElementNode? node)

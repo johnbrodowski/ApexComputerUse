@@ -126,6 +126,112 @@ namespace ApexComputerUse
             return new ApexResult { Success = true, Action = "env", Data = data };
         }
 
+        // -- /file: read-only file content -----------------------------------
+        // Gated by EnableFileIo; constrained to FileIoAllowedRoots. Refuses paths above 1 MB,
+        // directories, missing files, and anything that doesn't canonicalize to an allowed root.
+        // Returns text content for known text extensions; base64 for everything else.
+        private const long FileReadMaxBytes = 1L * 1024 * 1024;
+        private static readonly HashSet<string> s_textExtensions = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ".cs", ".csx", ".vb", ".fs", ".fsx",
+            ".txt", ".md", ".log",
+            ".json", ".xml", ".yml", ".yaml", ".toml", ".ini", ".config", ".env",
+            ".csproj", ".sln", ".props", ".targets",
+            ".ps1", ".psm1", ".psd1", ".cmd", ".bat", ".sh",
+            ".py", ".rb", ".pl", ".lua",
+            ".js", ".mjs", ".cjs", ".ts", ".tsx", ".jsx",
+            ".html", ".htm", ".css", ".scss", ".less",
+            ".sql", ".rs", ".go", ".java", ".kt", ".swift", ".c", ".h", ".cpp", ".hpp", ".cc",
+            ".gitignore", ".editorconfig", ".dockerignore"
+        };
+
+        private static ApexResult HandleFileRead(string? requestedPath)
+        {
+            var cfg = AppConfig.Current;
+            if (!cfg.EnableFileIo)
+                return new ApexResult { Success = false, Action = "file",
+                    Error = "File I/O is disabled. Set EnableFileIo=true (or APEX_ENABLE_FILE_IO=true) to enable." };
+
+            if (string.IsNullOrWhiteSpace(requestedPath))
+                return new ApexResult { Success = false, Action = "file", Error = "path parameter is required" };
+
+            string canonical;
+            try { canonical = Path.GetFullPath(requestedPath); }
+            catch { return new ApexResult { Success = false, Action = "file", Error = "Invalid path." }; }
+
+            // Allowed-roots whitelist (defense-in-depth alongside canonicalization).
+            // Empty list = fail-closed - reject all paths even when EnableFileIo=true.
+            if (cfg.FileIoAllowedRoots.Length == 0)
+                return new ApexResult { Success = false, Action = "file",
+                    Error = "FileIoAllowedRoots is empty - configure at least one allowed directory." };
+
+            bool inRoot = false;
+            foreach (var root in cfg.FileIoAllowedRoots)
+            {
+                string canonicalRoot;
+                try { canonicalRoot = Path.GetFullPath(root); } catch { continue; }
+                // Trailing-separator guard: "C:\foo" must not match "C:\foobar".
+                if (!canonicalRoot.EndsWith(Path.DirectorySeparatorChar))
+                    canonicalRoot += Path.DirectorySeparatorChar;
+                if (canonical.StartsWith(canonicalRoot, StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(canonical + Path.DirectorySeparatorChar, canonicalRoot, StringComparison.OrdinalIgnoreCase))
+                { inRoot = true; break; }
+            }
+            if (!inRoot)
+                return new ApexResult { Success = false, Action = "file",
+                    Error = $"Path is not within any FileIoAllowedRoots entry: {canonical}" };
+
+            FileInfo fi;
+            try { fi = new FileInfo(canonical); }
+            catch (Exception ex)
+            {
+                return new ApexResult { Success = false, Action = "file", Error = ex.Message };
+            }
+            if ((fi.Attributes & FileAttributes.Directory) == FileAttributes.Directory)
+                return new ApexResult { Success = false, Action = "file", Error = "Path is a directory, not a file." };
+            if (!fi.Exists)
+                return new ApexResult { Success = false, Action = "file", Error = $"File not found: {canonical}" };
+            if (fi.Length > FileReadMaxBytes)
+                return new ApexResult { Success = false, Action = "file",
+                    Error = $"File exceeds maximum size of {FileReadMaxBytes} bytes (size={fi.Length})." };
+
+            byte[] bytes;
+            try { bytes = File.ReadAllBytes(canonical); }
+            catch (Exception ex)
+            {
+                return new ApexResult { Success = false, Action = "file", Error = ex.Message };
+            }
+
+            string ext      = Path.GetExtension(canonical);
+            bool   isText   = s_textExtensions.Contains(ext);
+            string encoding = isText ? "utf8" : "base64";
+            string content;
+            if (isText)
+            {
+                // Strip a UTF-8 BOM if present so the content matches what an editor would show.
+                int offset = 0;
+                if (bytes.Length >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF) offset = 3;
+                content = Encoding.UTF8.GetString(bytes, offset, bytes.Length - offset);
+            }
+            else
+            {
+                content = Convert.ToBase64String(bytes);
+            }
+
+            return new ApexResult
+            {
+                Success = true,
+                Action  = "file",
+                Data    = new Dictionary<string, string>
+                {
+                    ["path"]     = canonical,
+                    ["size"]     = fi.Length.ToString(),
+                    ["encoding"] = encoding,
+                    ["content"]  = content
+                }
+            };
+        }
+
         private static ApexResult HandleLs(string? requestedPath)
         {
             string dir;

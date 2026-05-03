@@ -16,6 +16,9 @@ namespace ApexComputerUse
     ///   APEX_PIPE_NAME         string Named-pipe name (default ApexComputerUse)
     ///   APEX_LOG_LEVEL         string Serilog minimum level: Debug/Information/Warning/Error
     ///   APEX_ENABLE_SHELL_RUN  bool   Enable the /run shell-execution endpoint (default false)
+    ///   APEX_ENABLE_FILE_IO    bool   Enable the /file read-only endpoint (default false)
+    ///   APEX_FILE_IO_ALLOWED_ROOTS  semicolon- or comma-separated list of directories
+    ///                                that /file requests must canonicalize within
     ///   APEX_MODEL_PATH        string Default LLM model .gguf path
     ///   APEX_MMPROJ_PATH       string Default multimodal projector .gguf path
     ///   APEX_API_KEY           string HTTP API key (overrides auto-generated key)
@@ -40,6 +43,16 @@ namespace ApexComputerUse
         public string TelegramToken   { get; init; } = "";
         public string TestRunnerExePath    { get; init; } = "";
         public string TestRunnerConfigPath { get; init; } = "";
+
+        // -- File I/O endpoint (read-only) --------------------------------------
+        // EnableFileIo gates the /file route. Disabled by default. Kept separate from
+        // EnableShellRun because shell execution and file reads are different risk surfaces -
+        // some deployments want one but not the other.
+        // FileIoAllowedRoots is a list of canonicalized directories that file paths must live
+        // within. Empty means "fail closed - refuse all paths". Defense in depth alongside
+        // path canonicalization.
+        public bool     EnableFileIo       { get; init; } = false;
+        public string[] FileIoAllowedRoots { get; init; } = Array.Empty<string>();
 
         // -- Singleton -----------------------------------------------------
 
@@ -104,7 +117,20 @@ namespace ApexComputerUse
                 TelegramToken  = Str(root,  "TelegramToken")  ?? cfg.TelegramToken,
                 TestRunnerExePath    = Str(root, "TestRunnerExePath")    ?? cfg.TestRunnerExePath,
                 TestRunnerConfigPath = Str(root, "TestRunnerConfigPath") ?? cfg.TestRunnerConfigPath,
+                EnableFileIo         = Bool(root, "EnableFileIo")        ?? cfg.EnableFileIo,
+                FileIoAllowedRoots   = ReadStringArray(root, "FileIoAllowedRoots") ?? cfg.FileIoAllowedRoots,
             };
+        }
+
+        // -- String-array reader for JSON layer (used by FileIoAllowedRoots) ----
+        private static string[]? ReadStringArray(JsonElement root, string key)
+        {
+            if (!root.TryGetProperty(key, out var p) || p.ValueKind != JsonValueKind.Array) return null;
+            var list = new List<string>();
+            foreach (var el in p.EnumerateArray())
+                if (el.ValueKind == JsonValueKind.String && el.GetString() is { Length: > 0 } s)
+                    list.Add(s);
+            return list.ToArray();
         }
 
         // -- Environment variable overlay ----------------------------------
@@ -132,6 +158,11 @@ namespace ApexComputerUse
                 TelegramToken  = E("TELEGRAM_TOKEN")    ?? cfg.TelegramToken,
                 TestRunnerExePath    = E("TEST_RUNNER_EXE_PATH")    ?? cfg.TestRunnerExePath,
                 TestRunnerConfigPath = E("TEST_RUNNER_CONFIG_PATH") ?? cfg.TestRunnerConfigPath,
+                EnableFileIo         = E("ENABLE_FILE_IO") is { } fIo ? ParseBool(fIo) : cfg.EnableFileIo,
+                // CSV form: APEX_FILE_IO_ALLOWED_ROOTS="C:\Users\me\src;D:\projects"
+                FileIoAllowedRoots   = E("FILE_IO_ALLOWED_ROOTS") is { } fr
+                    ? fr.Split(new[]{';', ','}, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                    : cfg.FileIoAllowedRoots,
             };
         }
     }

@@ -80,6 +80,34 @@ namespace ApexComputerUse
             r.OnscreenOnly   = root.Bool("onscreen")       ?? r.OnscreenOnly;
             r.CollapseChains = root.Bool("collapseChains") ?? r.CollapseChains;
             r.IncludePath    = root.Bool("includePath")    ?? r.IncludePath;
+
+            // waitfor fields
+            r.Property  = root.Str("property")  ?? r.Property;
+            r.Predicate = root.Str("predicate") ?? r.Predicate;
+            r.Expected  = root.Str("expected")  ?? r.Expected;
+            if (root.TryGetProperty("timeout", out var tEl) &&
+                tEl.ValueKind == JsonValueKind.Number &&
+                tEl.TryGetInt32(out int tVal)) r.Timeout = tVal;
+            if (root.TryGetProperty("interval", out var iEl) &&
+                iEl.ValueKind == JsonValueKind.Number &&
+                iEl.TryGetInt32(out int iVal)) r.Interval = iVal;
+
+            // Batch mode: actions[] is a list of sub-requests. Each entry is recursively
+            // populated with the same field set; missing "cmd" is left blank and defaults
+            // to "execute" in the batch runner.
+            if (root.TryGetProperty("actions", out var aEl) && aEl.ValueKind == JsonValueKind.Array)
+            {
+                var list = new List<CommandRequest>();
+                foreach (var step in aEl.EnumerateArray())
+                {
+                    if (step.ValueKind != JsonValueKind.Object) continue;
+                    var sub = new CommandRequest { Command = step.Str("cmd") ?? step.Str("command") ?? "" };
+                    Populate(sub, step);
+                    list.Add(sub);
+                }
+                r.Actions = list;
+            }
+            r.StopOnError = root.Bool("stop_on_error") ?? root.Bool("stopOnError") ?? r.StopOnError;
         }
     }
 }

@@ -147,6 +147,18 @@ namespace ApexComputerUse
         private static CommandResponse Ok(string msg, string? data = null) =>
             new() { Success = true,  Message = msg, Data = data };
 
+        // Variant that attaches structured extras (merged into the final response Data dict
+        // by ApexResult.From). Used for actions like gettext that want to expose the source
+        // UIA pattern alongside the bare text.
+        private static CommandResponse OkWithExtras(string msg, string? data, Dictionary<string, string> extras) =>
+            new() { Success = true, Message = msg, Data = data, Extras = extras };
+
+        // Failure variant that attaches structured error data (merged into ApexResult.ErrorData
+        // and surfaced as the response field "error_data"). Lets pattern-using actions report
+        // supported_patterns / element_state without losing the human-readable error string.
+        private static CommandResponse FailWithData(string msg, Dictionary<string, object> errorData) =>
+            new() { Success = false, Message = msg, ErrorData = errorData };
+
         /// <summary>
         /// Returns false if the cached AutomationElement is no longer valid (e.g. the
         /// target app closed or navigated away).  Uses a lightweight property read so the

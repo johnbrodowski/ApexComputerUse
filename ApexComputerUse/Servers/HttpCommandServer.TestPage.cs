@@ -202,6 +202,12 @@ namespace ApexComputerUse
                           <option>Group</option><option>Document</option>
                         </select>
                       </div>
+                      <div class="frow" title="Global match across Name, AutomationId, Value, ClassName - includes offscreen elements. Recommended over manual drill-down.">
+                        <input type="text" id="matchInput" placeholder="Match (Name/AutoId/Value/ClassName)..." style="flex:1"
+                               onkeydown="if(event.key==='Enter'){loadElements();}">
+                        <button onclick="loadElements()">Match</button>
+                        <button onclick="document.getElementById('matchInput').value='';loadElements();" title="Clear">x</button>
+                      </div>
                       <select class="lst" id="elemList" size="20" onchange="onElemSelect()"></select>
                     </div>
                   </aside>
@@ -429,8 +435,10 @@ namespace ApexComputerUse
                   if (!curWin) return;
                   const onscreen = document.getElementById('onscreen').checked;
                   const type     = document.getElementById('typeFilter').value;
+                  const match    = (document.getElementById('matchInput')?.value || '').trim();
                   let url = '/elements?onscreen=' + (onscreen ? 'true' : 'false');
-                  if (type) url += '&type=' + encodeURIComponent(type);
+                  if (type)  url += '&type=' + encodeURIComponent(type);
+                  if (match) url += '&match=' + encodeURIComponent(match) + '&includePath=true&depth=1';
                   try {
                     const r   = await call('GET', url);
                     const raw = r.data && r.data.result ? r.data.result : 'null';

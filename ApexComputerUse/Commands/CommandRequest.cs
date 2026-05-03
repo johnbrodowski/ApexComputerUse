@@ -27,6 +27,23 @@ namespace ApexComputerUse
 
         public string? ChangedSince   { get; set; }
 
+        // -- waitfor exec action (action=waitfor) --------------------------
+        // Predicate-based polling: wait until <Property> on the current element <Predicate> <Expected>.
+        // E.g. property=value predicate=contains expected="built successfully" timeout=15000.
+        public string? Property        { get; set; }   // value | text | name | isvisible | isenabled
+        public string? Predicate       { get; set; }   // equals | contains | not-empty | visible | gone
+        public string? Expected        { get; set; }   // expected value (used by equals/contains)
+        public int?    Timeout         { get; set; }   // total timeout in ms (default 10000)
+        public int?    Interval        { get; set; }   // poll interval in ms (default 200)
+
+        // -- Batch mode (/exec) --------------------------------------------
+        // When Actions is non-null, /exec runs each entry as a full sub-request. Each entry is
+        // a CommandRequest (recursive shape); its `cmd` field defaults to "execute" so simple
+        // batches read as just [{action:"type",value:"hello"},{action:"click"}]. Mid-batch
+        // find/capture/ocr work because each entry can specify any cmd.
+        public List<CommandRequest>? Actions { get; set; }
+        public bool? StopOnError { get; set; }   // default true: first failure stops the batch
+
         // Set by JSON mappers when the body fails to parse - lets the dispatcher emit
         // a clean "Invalid JSON: ..." error instead of letting blank fields surface as
         // misleading downstream messages like "'action' is required".
@@ -38,6 +55,17 @@ namespace ApexComputerUse
         public bool    Success { get; set; }
         public string  Message { get; set; } = "";
         public string? Data    { get; set; }
+
+        // Optional structured side-channel for handlers that want to surface extra fields
+        // alongside Data (e.g. gettext returning the source UIA pattern). Merged into the
+        // final ApexResult.Data dictionary by ApexResult.From. Null when nothing was attached.
+        public Dictionary<string, string>? Extras { get; set; }
+
+        // Optional structured error payload (e.g. supported_patterns + element_state when an
+        // action fails because the element doesn't support the required pattern). Surfaces as
+        // ApexResult.ErrorData -> response field "error_data". Null on success or when an
+        // error has no structured detail.
+        public Dictionary<string, object>? ErrorData { get; set; }
 
         public string ToText() =>
             Data != null

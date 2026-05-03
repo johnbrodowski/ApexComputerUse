@@ -42,7 +42,12 @@ namespace ApexComputerUse
               ask      prompt=<text>
             status
             windows
-            elements [type=<ControlType>]
+            elements [type=<ControlType>] [match=<text>] [includePath=true] [depth=<n>] [id=<elementId>] [onscreen=true] [collapseChains=true] [properties=extra]
+              -- RECOMMENDED FIRST: elements?match=<text>&includePath=true&depth=1
+                 Globally searches Name, AutomationId, Value, and ClassName across the entire window
+                 tree (including offscreen elements) and returns matches with ancestor breadcrumbs.
+                 Eliminates most hierarchical drill-down. Use depth/id only when you need a wider tree
+                 view or to expand a specific subtree.
             uimap
             help
 
@@ -137,7 +142,12 @@ namespace ApexComputerUse
               screenshot / capture
 
               --- Wait ---
-              wait  value=<automationId>
+              wait     value=<automationId>          wait for element with this AutomationId to appear
+              waitfor  property=<p> predicate=<pred> [expected=<text>] [timeout=<ms>] [interval=<ms>]
+                                                    poll the current element until predicate matches
+                       property:  value | text | name | isvisible | isenabled
+                       predicate: equals | contains | not-empty | visible | gone
+                       defaults:  timeout=10000  interval=200
             """);
 
     }

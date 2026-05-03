@@ -222,9 +222,11 @@ This lets an AI agent navigate to the relevant section of a large page without f
 Modern web pages often wrap every visible element in several identity-less `Pane`/`Group`/`Custom` nodes and produce deep trees with many one-child chains. Two opt-in `/elements` parameters strip that noise:
 
 ```bash
-# Text search across Name, AutomationId, and Value — one call returns every
-# match with its ancestor path plus `depth` levels of descendants under each.
-curl "http://localhost:8080/elements?match=add+to+cart&onscreen=true&depth=1"
+# RECOMMENDED: global text search — replaces almost all hierarchical drill-down.
+# Searches Name, AutomationId, Value, AND ClassName across the entire window tree
+# (including offscreen elements). Returns every match with its ancestor path plus
+# `depth` levels of descendants. Combine with includePath=true for breadcrumbs.
+curl "http://localhost:8080/elements?match=add+to+cart&onscreen=true&depth=1&includePath=true"
 
 # Collapse "1-in-1-in-1" wrapper chains. A wrapper is skipped only when it has
 # exactly one child, no name, no AutomationId, and its control type is Pane,
@@ -710,8 +712,8 @@ curl "http://localhost:8080/elements?id=<elementId>&depth=2&onscreen=true"
 # Filter by ControlType
 curl "http://localhost:8080/elements?type=Button"
 
-# Text search across Name, AutomationId, and Value — returns only matching
-# branches, each wrapped in its ancestor path, with `depth` levels below.
+# Text search across Name, AutomationId, Value, and ClassName — returns only
+# matching branches, each wrapped in its ancestor path, with `depth` levels below.
 curl "http://localhost:8080/elements?match=add+to+cart&onscreen=true&depth=1"
 
 # Collapse identity-less single-child Pane/Group/Custom wrapper chains

@@ -62,7 +62,7 @@ namespace ApexComputerUse
 
         private static string RenderJson(ApexResult r) =>
             JsonSerializer.Serialize(
-                new { success = r.Success, action = r.Action, data = r.Data, error = r.Error },
+                new { success = r.Success, action = r.Action, data = r.Data, error = r.Error, error_data = r.ErrorData },
                 s_indented);
 
         private static string RenderText(ApexResult r)
@@ -74,13 +74,16 @@ namespace ApexComputerUse
             if (r.Data  is not null)
                 foreach (var kv in r.Data)
                     sb.AppendLine($"{kv.Key}: {kv.Value}");
+            if (r.ErrorData is not null)
+                foreach (var kv in r.ErrorData)
+                    sb.AppendLine($"error_data.{kv.Key}: {kv.Value}");
             return sb.ToString();
         }
 
         private static string RenderHtml(ApexResult r)
         {
             string embeddedJson = JsonSerializer.Serialize(
-                new { success = r.Success, action = r.Action, data = r.Data, error = r.Error },
+                new { success = r.Success, action = r.Action, data = r.Data, error = r.Error, error_data = r.ErrorData },
                 new JsonSerializerOptions { WriteIndented = true });
             // Prevent </script> injection in embedded JSON
             embeddedJson = embeddedJson.Replace("</", @"<\/", StringComparison.Ordinal);
@@ -92,6 +95,9 @@ namespace ApexComputerUse
             if (r.Data  is not null)
                 foreach (var kv in r.Data)
                     sb.AppendLine($"{kv.Key}: {WebUtility.HtmlEncode(kv.Value)}");
+            if (r.ErrorData is not null)
+                foreach (var kv in r.ErrorData)
+                    sb.AppendLine($"error_data.{kv.Key}: {WebUtility.HtmlEncode(kv.Value?.ToString() ?? "")}");
 
             string title  = WebUtility.HtmlEncode(r.Action);
             string color  = r.Success ? "#4ec94e" : "#e05252";
@@ -125,6 +131,17 @@ namespace ApexComputerUse
                 foreach (var kv in r.Data)
                 {
                     string line = $"{kv.Key}: {kv.Value}";
+                    while (line.Length > 90)
+                    {
+                        lines.Add(line[..90]);
+                        line = "  " + line[90..];
+                    }
+                    lines.Add(line);
+                }
+            if (r.ErrorData is not null)
+                foreach (var kv in r.ErrorData)
+                {
+                    string line = $"error_data.{kv.Key}: {kv.Value}";
                     while (line.Length > 90)
                     {
                         lines.Add(line[..90]);
