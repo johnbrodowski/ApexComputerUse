@@ -125,6 +125,9 @@ namespace ApexComputerUse
             }
 
             int? maxDepth = (req.Depth.HasValue && req.Depth.Value >= 0) ? req.Depth : null;
+            // match= scans the whole tree to find any matching node; honoring Depth here would
+            // prune the scan before FilterTreeByMatch runs and hide deep matches.
+            if (!string.IsNullOrEmpty(req.Match)) maxDepth = null;
 
             var options = new ScanOptions
             {

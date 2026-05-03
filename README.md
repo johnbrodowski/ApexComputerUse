@@ -226,6 +226,10 @@ Modern web pages often wrap every visible element in several identity-less `Pane
 # Searches Name, AutomationId, Value, AND ClassName across the entire window tree
 # (including offscreen elements). Returns every match with its ancestor path plus
 # `depth` levels of descendants. Combine with includePath=true for breadcrumbs.
+# The parameter name is `match=` — there is NO separate `global=true` flag; `match=`
+# alone forces a full-tree scan and the tester-friendly behaviour described above.
+# When `match=` is set, `depth=` is ignored (otherwise depth pruning would hide deep
+# matches before they could be found).
 curl "http://localhost:8080/elements?match=add+to+cart&onscreen=true&depth=1&includePath=true"
 
 # Collapse "1-in-1-in-1" wrapper chains. A wrapper is skipped only when it has
@@ -635,12 +639,19 @@ All endpoints return the same canonical structure:
 {
   "success": true,
   "action": "ping",
-  "data": { "key": "value", ... },
-  "error": null
+  "data":   { "key": "value", ... },
+  "error":  null,
+  "error_data": null
 }
 ```
 
 HTTP status: **200** on success, **400** on error.
+
+`error_data` is an additive object populated on failures (null when there is no error). Its shape is action-specific — for example, action-execution failures may carry `failed_pattern`, `supported_patterns`, `element_state`, and a remediation `hint`; `waitfor` timeouts carry `timeout_ms`, `predicate`, `property`, `expected`, and `last_observed`; `wait-window` timeouts carry `last_observed_titles`. Existing callers that only read `success` / `data` / `error` continue to work unchanged.
+
+`gettext` and `getvalue` responses include a `source` field inside `data` — one of `TextPattern`, `ValuePattern`, `LegacyIAccessible`, or `Name` — naming the UIA accessor that produced the text. Inside batch step results this appears as `extras.source`.
+
+Element nodes returned by `/elements` and `/find` include `className` alongside `id`, `controlType`, `name`, `automationId`, `frameworkId`, `isEnabled`, `isOffscreen`, and `boundingRectangle`. `match=` searches `className` along with the other text fields.
 
 ---
 
@@ -1212,6 +1223,46 @@ Element JSON includes bounding rectangles:
 | `isvisible` | — | — | Returns `True` or `False` |
 | `wait` | — | automationId | Wait for element with given AutomationId to appear |
 | `wait-page-load` | `waitpageload` | seconds (default 10) | Poll window title until browser page finishes loading; returns page title on success |
+
+### Wait
+
+| Action | Aliases | Value | Description |
+|---|---|---|---|
+| `waitfor` | — | see below | Poll the **current element** until predicate satisfied or timeout |
+| `wait-window` | — | see below | Poll the **desktop window list** until a window title satisfies predicate |
+
+`waitfor` parameters: `predicate=<equals|contains|not-empty|visible|gone>`, optional `property=<value|text|name|isvisible|isenabled>`, optional `expected=<text>`, optional `timeout=<ms>` (default 10000), optional `interval=<ms>` (default 200, min 50). `visible` and `gone` are element-level — they ignore `property` and `expected`. The success response includes `elapsed_ms`, `property`, and `predicate` inside `data`. On timeout, `error_data.last_observed` carries the value at the last poll (`"offscreen"`/`"visible"` for `visible`, `"present"` for `gone`-while-still-present, otherwise the property string).
+
+`wait-window` parameters: `predicate=<equals|contains|not-empty|gone>`, `expected=<title-substring>` (required for all but `not-empty`), optional `timeout=<ms>` (default 10000), optional `interval=<ms>` (default 250). On match, the new window is registered in the window map and set as the current window — the next `/find` or `/elements` call resolves it without needing a `window=` field. Timeout `error_data.last_observed_titles` is the array of titles seen at the last poll, useful for debugging.
+
+```bash
+# Wait for a debug console window to appear after launching an app
+curl -X POST http://localhost:8080/exec -H "X-Api-Key: <key>" \
+  -d '{"action":"wait-window","predicate":"contains","expected":"Debug Console","timeout":15000}'
+
+# Wait for the current text element to contain a specific value
+curl -X POST http://localhost:8080/exec -H "X-Api-Key: <key>" \
+  -d '{"action":"waitfor","predicate":"contains","property":"value","expected":"OK","timeout":5000}'
+
+# Wait for the current element to become visible
+curl -X POST http://localhost:8080/exec -H "X-Api-Key: <key>" \
+  -d '{"action":"waitfor","predicate":"visible","timeout":3000}'
+```
+
+### Batch (multiple actions in one /exec call)
+
+Send `actions=[...]` to `/exec` to run several commands sequentially in one round trip. Each entry is a full sub-request — `cmd` defaults to `"execute"`, so simple action lists need only `action` and (where relevant) `value`. The optional `stop_on_error` field defaults to `true`: the first failing step ends the batch and remaining steps are skipped.
+
+```bash
+curl -X POST http://localhost:8080/exec -H "X-Api-Key: <key>" \
+  -d '{"actions":[
+        {"action":"clear"},
+        {"action":"type","value":"hello"},
+        {"action":"keys","value":"{CTRL}s"}
+      ]}'
+```
+
+The response's `data.result` contains `stop_on_error`, `total_steps`, `executed`, `succeeded`, and a `results` array. Each entry has `step`, `cmd`, `action`, `success`, `data`, `extras` (e.g. `source` for `gettext`/`getvalue` steps), and `message`.
 
 ### Text / Value
 

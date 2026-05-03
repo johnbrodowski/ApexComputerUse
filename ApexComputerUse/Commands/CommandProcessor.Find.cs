@@ -182,6 +182,11 @@ namespace ApexComputerUse
 
             if (string.IsNullOrWhiteSpace(req.Action)) return Fail("'action' is required.");
 
+            // wait-window polls the desktop window list, not an element - dispatch before the
+            // current-element guard so callers don't need a stale find first.
+            if (string.Equals(req.Action, "wait-window", StringComparison.OrdinalIgnoreCase))
+                return RunWaitWindow(req);
+
             // If a numeric element ID was provided directly (e.g. element=123 or id=123),
             // look it up in the map so callers don't need a separate /find round-trip.
             AutomationElement? target = CurrentElement;
@@ -361,6 +366,8 @@ namespace ApexComputerUse
                 return Fail("waitfor requires a 'predicate' (equals, contains, not-empty, visible, gone).");
             if (!elementLevel && string.IsNullOrEmpty(property))
                 return Fail("waitfor predicate '" + predicate + "' requires a 'property' (value, text, name, isvisible, isenabled).");
+            if (!elementLevel && property is not ("value" or "text" or "name" or "isvisible" or "isenabled"))
+                return Fail($"waitfor property '{property}' is not supported. Valid: value, text, name, isvisible, isenabled.");
             if (predicate is "equals" or "contains" && string.IsNullOrEmpty(expected))
                 return Fail("waitfor predicate '" + predicate + "' requires an 'expected' value.");
 
@@ -375,6 +382,7 @@ namespace ApexComputerUse
                 {
                     if (!elementValid)
                         return Ok($"waitfor satisfied in {sw.ElapsedMilliseconds}ms (element gone)");
+                    lastObserved = "present";
                 }
                 else if (!elementValid)
                 {
@@ -387,6 +395,7 @@ namespace ApexComputerUse
                 {
                     bool offscreen = false;
                     try { offscreen = el.Properties.IsOffscreen.ValueOrDefault; } catch { }
+                    lastObserved = offscreen ? "offscreen" : "visible";
                     if (!offscreen)
                         return Ok($"waitfor satisfied in {sw.ElapsedMilliseconds}ms (visible)");
                 }
@@ -440,6 +449,116 @@ namespace ApexComputerUse
                 ["last_observed"]  = lastObserved
             };
             return FailWithData($"waitfor timed out after {timeoutMs}ms (predicate={predicate})", errData);
+        }
+
+        // -- wait-window: poll the desktop window list ---------------------------
+
+        /// <summary>
+        /// Polls the OS window list until a window title satisfies the predicate, or timeout.
+        /// Independent of the current-element pointer - lets callers wait for newly-created
+        /// windows (e.g. a debug console after launching an app) without a hand-rolled sleep.
+        /// On success, sets <see cref="CurrentWindow"/> and registers the id in
+        /// <c>_windowMap</c> so the next /find or /elements call resolves it.
+        /// Predicates: equals | contains | not-empty | gone.
+        /// </summary>
+        private CommandResponse RunWaitWindow(CommandRequest req)
+        {
+            string predicate = (req.Predicate ?? "").ToLowerInvariant();
+            string expected  = req.Expected ?? "";
+            int    timeoutMs  = req.Timeout  ?? 10_000;
+            int    intervalMs = Math.Max(50, req.Interval ?? 250);
+
+            if (string.IsNullOrEmpty(predicate))
+                return Fail("wait-window requires a 'predicate' (equals, contains, not-empty, gone).");
+            if (predicate is not ("equals" or "contains" or "not-empty" or "gone"))
+                return Fail($"wait-window predicate '{predicate}' is not supported. Valid: equals, contains, not-empty, gone.");
+            if (predicate is "equals" or "contains" or "gone" && string.IsNullOrEmpty(expected))
+                return Fail($"wait-window predicate '{predicate}' requires an 'expected' value.");
+
+            var sw = Stopwatch.StartNew();
+            List<string> lastTitles = new();
+            while (sw.ElapsedMilliseconds < timeoutMs)
+            {
+                FlaUI.Core.AutomationElements.AutomationElement[] windows;
+                try { windows = _helper.GetDesktopWindows(); }
+                catch { windows = Array.Empty<FlaUI.Core.AutomationElements.AutomationElement>(); }
+
+                lastTitles.Clear();
+                FlaUI.Core.AutomationElements.AutomationElement? matched = null;
+                string matchedTitle = "";
+
+                foreach (var w in windows)
+                {
+                    string title;
+                    try { title = w.Properties.Name.ValueOrDefault ?? ""; }
+                    catch { continue; }
+                    lastTitles.Add(title);
+
+                    bool isMatch = predicate switch
+                    {
+                        "equals"    => string.Equals(title, expected, StringComparison.Ordinal),
+                        "contains"  => title.Contains(expected, StringComparison.OrdinalIgnoreCase),
+                        "not-empty" => !string.IsNullOrEmpty(title),
+                        _           => false
+                    };
+                    if (isMatch)
+                    {
+                        matched      = w;
+                        matchedTitle = title;
+                        break;
+                    }
+                }
+
+                if (predicate == "gone")
+                {
+                    // Success when no window currently matches `expected`.
+                    bool anyMatch = lastTitles.Any(t =>
+                        t.Contains(expected, StringComparison.OrdinalIgnoreCase));
+                    if (!anyMatch)
+                        return OkWithExtras(
+                            $"wait-window satisfied in {sw.ElapsedMilliseconds}ms (gone)", "",
+                            new Dictionary<string, string>
+                            {
+                                ["predicate"]  = predicate,
+                                ["elapsed_ms"] = sw.ElapsedMilliseconds.ToString()
+                            });
+                }
+                else if (matched != null)
+                {
+                    // Register the matched window in the map and make it current so the next
+                    // /find element call doesn't need a redundant window= field.
+                    var hwnd = matched.Properties.NativeWindowHandle.ValueOrDefault;
+                    string hash = _idGen.GenerateElementHash(matched, null, null, hwnd: hwnd, excludeName: true);
+                    int id = _idGen.GenerateIdFromHash(hash);
+                    var asWindow = matched.AsWindow();
+                    _windowMap[id] = asWindow;
+                    CurrentWindow  = asWindow;
+                    _windowDesc    = matchedTitle;
+
+                    return OkWithExtras(
+                        $"wait-window satisfied in {sw.ElapsedMilliseconds}ms",
+                        id.ToString(),
+                        new Dictionary<string, string>
+                        {
+                            ["window_id"]  = id.ToString(),
+                            ["title"]      = matchedTitle,
+                            ["predicate"]  = predicate,
+                            ["elapsed_ms"] = sw.ElapsedMilliseconds.ToString()
+                        });
+                }
+
+                Thread.Sleep(intervalMs);
+            }
+
+            // Timeout - return the titles we last saw so the caller can debug.
+            var errData = new Dictionary<string, object>
+            {
+                ["timeout_ms"]            = timeoutMs,
+                ["predicate"]             = predicate,
+                ["expected"]              = expected,
+                ["last_observed_titles"]  = lastTitles.ToArray()
+            };
+            return FailWithData($"wait-window timed out after {timeoutMs}ms (predicate={predicate})", errData);
         }
 
         // -- Batch dispatcher --------------------------------------------------

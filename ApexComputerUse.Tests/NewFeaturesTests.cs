@@ -132,6 +132,30 @@ public class NewFeaturesTests
         Assert.Equal(250,       req.Interval);
     }
 
+    // -- Round 2 #2: wait-window field parsing -----------------------------
+
+    [Fact]
+    public void JsonMapper_AcceptsWaitWindowFields()
+    {
+        const string json = """
+            {
+              "action": "wait-window",
+              "predicate": "contains",
+              "expected": "Debug Console",
+              "timeout": 15000,
+              "interval": 250
+            }
+            """;
+        var req = CommandRequestJsonMapper.FromJson(json, "execute");
+        // wait-window reuses waitfor's request fields; confirm the action string itself
+        // round-trips and the shared fields are still parsed (no Property required).
+        Assert.Equal("wait-window", req.Action);
+        Assert.Equal("contains",    req.Predicate);
+        Assert.Equal("Debug Console", req.Expected);
+        Assert.Equal(15000,         req.Timeout);
+        Assert.Equal(250,           req.Interval);
+    }
+
     // -- #8 ApexResult.ErrorData round-trip --------------------------------
 
     [Fact]
