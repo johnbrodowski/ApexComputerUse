@@ -114,6 +114,8 @@ curl -H "X-Api-Key: <key>" "http://localhost:8081/elements?onscreen=true"
 ### 7. Prefer numeric IDs over names
 Once you have a window or element ID from `/windows` or `/elements`, use it directly. It's faster, unambiguous, and bypasses fuzzy matching.
 
+If `/find` returns `success:false` with `error_data.candidates`, do not repeat the same fuzzy name. Pick a candidate from the response, preferably by numeric ID after scanning `/elements`.
+
 ```bash
 # By ID (preferred)
 -d '{"window":1306926730,"name":"Address and search bar"}'
@@ -172,6 +174,17 @@ curl ... /find -d '{"window":"<window>","name":"<any element in that window>"}'
 curl ... /exec -d '{"action":"keys","value":"Ctrl+{ENTER}"}'
 ```
 
+### Start a Visual Studio debug run
+```bash
+# F5/debug target
+curl ... /find -d '{"window":"<Visual Studio window>","name":"Debug Target","type":"SplitButton"}'
+curl ... /exec -d '{"action":"keys","value":"{F5}"}'
+
+# Ctrl+F5/no-debug target
+curl ... /find -d '{"window":"<Visual Studio window>","name":"Start Without Debugging","type":"Button"}'
+curl ... /exec -d '{"action":"keys","value":"Ctrl+{F5}"}'
+```
+
 ### Read text from an element
 ```bash
 curl ... /find -d '{"window":"<window>","name":"<element>"}'
@@ -200,6 +213,7 @@ Navigate to this URL, then find the "Message Body" element and send with `Ctrl+{
 |---|---|---|
 | `No window found` | Window title changed or was closed | Call `/windows`, get updated title |
 | `No element found` | Name wrong, element offscreen, page not loaded | Browse `/elements`, try without type filter |
+| `Low-confidence match` / `Ambiguous match` | Fuzzy search found candidates but none were safe to auto-select | Use `error_data.candidates` or scan `/elements` and retry by numeric ID |
 | Action succeeds but nothing happens | Wrong element was targeted | Re-check last `/find` result, scope to correct window |
 | `setvalue` typed text but didn't navigate | Missing `keys {ENTER}` step | Add `{"action":"keys","value":"{ENTER}"}` after setvalue |
 | Keys went to wrong application | Last found element was in a different window | Find an element in the correct window first |
@@ -214,6 +228,8 @@ Navigate to this URL, then find the "Message Body" element and send with `Ctrl+{
 | Type text into a field | `find` field → `click` → `type` value |
 | Press Enter / Tab / Escape | `find` element in target window → `keys {ENTER}` |
 | Send a keyboard shortcut | `find` element in target window → `keys Ctrl+S` etc. |
+| Start Visual Studio debugging | `find name="Debug Target" type="SplitButton"` → `keys {F5}` |
+| Start Visual Studio without debugging | `find name="Start Without Debugging" type="Button"` → `keys Ctrl+{F5}` |
 | Click a button | `find` button → `click` |
 | Read what's on screen | `ai/ask` with a question |
 | Know what elements exist | `/elements?onscreen=true` |

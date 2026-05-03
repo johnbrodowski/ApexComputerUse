@@ -13,11 +13,27 @@ namespace ApexComputerUse
     {
         // -- Element info --------------------------------------------------
 
-        public string Describe(AutomationElement el) =>
-            $"Name={el.Properties.Name.ValueOrDefault}  ControlType={el.Properties.ControlType.ValueOrDefault}  " +
-            $"AutomationId={el.Properties.AutomationId.ValueOrDefault}  " +
-            $"Enabled={el.Properties.IsEnabled.ValueOrDefault}  Offscreen={el.Properties.IsOffscreen.ValueOrDefault}  " +
-            $"Class={el.Properties.ClassName.ValueOrDefault}  Framework={el.Properties.FrameworkId.ValueOrDefault}";
+        public string Describe(AutomationElement el)
+        {
+            string name = SafeReadProperty(() => el.Properties.Name.ValueOrDefault ?? "");
+            string controlType = SafeReadProperty(() => el.Properties.ControlType.ValueOrDefault.ToString(), "Unknown");
+            string automationId = SafeReadProperty(() => el.Properties.AutomationId.ValueOrDefault ?? "");
+            string enabled = SafeReadProperty(() => el.Properties.IsEnabled.ValueOrDefault.ToString(), "False");
+            string offscreen = SafeReadProperty(() => el.Properties.IsOffscreen.ValueOrDefault.ToString(), "False");
+            string className = SafeReadProperty(() => el.Properties.ClassName.ValueOrDefault ?? "");
+            string framework = SafeReadProperty(() => el.Properties.FrameworkId.ValueOrDefault ?? "");
+
+            return $"Name={name}  ControlType={controlType}  " +
+                   $"AutomationId={automationId}  " +
+                   $"Enabled={enabled}  Offscreen={offscreen}  " +
+                   $"Class={className}  Framework={framework}";
+        }
+
+        private static string SafeReadProperty(Func<string> read, string fallback = "")
+        {
+            try { return read() ?? fallback; }
+            catch { return fallback; }
+        }
 
         /// <summary>
         /// Reads the Value pattern content if the element supports it; returns null otherwise.

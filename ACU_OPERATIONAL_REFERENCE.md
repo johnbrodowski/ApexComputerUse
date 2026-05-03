@@ -121,7 +121,7 @@ curl -H "X-Api-Key: <key>" "http://localhost:8081/find?window=Notepad&name=Text+
 
 **Tips:**
 - Prefer numeric IDs when available — faster, unambiguous, no fuzzy matching
-- Window title matching is fuzzy; element name matching is also fuzzy if exact fails
+- Window title/name matching is conservative: exact and strong matches succeed, but low-confidence or ambiguous fuzzy matches return `success:false` with `error_data.candidates` instead of guessing
 - `/find` with only a `window` field selects the window itself as the current element
 
 ---
@@ -163,6 +163,8 @@ curl -H "X-Api-Key: <key>" "http://localhost:8081/exec?action=gettext"
 |---|---|---|
 | `keys` | text | Send keystrokes. Supports `{ENTER}`, `{ESC}`, `{TAB}`, `{F5}`, `{CTRL}`, `{ALT}`, `{SHIFT}`, `Ctrl+A`, `Alt+F4`, `Ctrl+{ENTER}`, etc. |
 | `focus` | — | Set keyboard focus on the element |
+
+**Visual Studio run handoff:** F5/debug targets `name="Debug Target"` with `type="SplitButton"`. Ctrl+F5/no-debug targets `name="Start Without Debugging"` with `type="Button"`. Prefer numeric IDs from `/elements` once discovered.
 
 **`keys` examples:**
 ```bash

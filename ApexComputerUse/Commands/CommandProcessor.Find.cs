@@ -20,12 +20,19 @@ namespace ApexComputerUse
             if (int.TryParse(req.Window, out int windowMapId) && _windowMap.TryGetValue(windowMapId, out var mappedWindow))
             {
                 window = mappedWindow;
-                wTitle = window.Properties.Name.ValueOrDefault ?? req.Window;
+                wTitle = SafeElementString(() => window.Properties.Name.ValueOrDefault ?? req.Window, req.Window);
                 wExact = true;
             }
             else
             {
-                window = _helper.FindWindowFuzzy(req.Window, out wTitle, out wExact);
+                var windowMatch = _helper.FindWindowFuzzyDetailed(req.Window);
+                if (!windowMatch.Success)
+                    return FailWithData(
+                        BuildFuzzyFailureMessage("window", req.Window, windowMatch.Status),
+                        BuildFuzzyErrorData("window", req.Window, windowMatch.Status, windowMatch.Candidates));
+                window = windowMatch.Element;
+                wTitle = windowMatch.MatchedValue;
+                wExact = windowMatch.IsExact;
             }
             if (window == null) return Fail($"No window found for '{req.Window}'.");
 
@@ -75,27 +82,69 @@ namespace ApexComputerUse
             {
                 if (!IsElementValid(mappedEl))
                     return Fail($"Element [map:{mappedId}] is stale - the target app has changed state. Run 'find' again.");
-                try
-                {
-                    CurrentElement = mappedEl;
-                    _elementDesc   = _helper.Describe(mappedEl);
-                    return Ok($"Window: {wTitle}{wNote} | Element [map:{mappedId}]",
-                              BuildFindElementJson(mappedEl, includeExtra, mappedId));
-                }
-                catch { return Fail($"Element [map:{mappedId}] became stale during access. Run 'find' again."); }
+                CurrentElement = mappedEl;
+                _elementDesc   = _helper.Describe(mappedEl);
+                return Ok($"Window: {wTitle}{wNote} | Element [map:{mappedId}]",
+                          BuildFindElementJson(mappedEl, includeExtra, mappedId));
             }
 
-            var el = _helper.FindElementFuzzy(window, searchVal, filter, byId,
-                         out string eValue, out bool eExact);
+            var elementMatch = _helper.FindElementFuzzyDetailed(window, searchVal, filter, byId);
 
-            if (el == null) return Fail($"No element found for '{searchVal}'.");
+            if (!elementMatch.Success || elementMatch.Element == null)
+                return FailWithData(
+                    BuildFuzzyFailureMessage("element", searchVal, elementMatch.Status),
+                    BuildFuzzyErrorData("element", searchVal, elementMatch.Status, elementMatch.Candidates));
 
+            var el = elementMatch.Element;
             CurrentElement = el;
             _elementDesc   = _helper.Describe(el);
-            string eNote   = eExact ? "" : $" (fuzzy '{searchVal}' -> '{eValue}')";
+            string eNote   = elementMatch.IsExact ? "" : $" (fuzzy '{searchVal}' -> '{elementMatch.MatchedValue}')";
 
             return Ok($"Window: {wTitle}{wNote} | Element{eNote}",
                       BuildFindElementJson(el, includeExtra));
+        }
+
+        private static string BuildFuzzyFailureMessage(string scope, string query, FuzzyMatchStatus status)
+        {
+            string reason = status switch
+            {
+                FuzzyMatchStatus.Ambiguous => "Ambiguous match",
+                FuzzyMatchStatus.LowConfidence => "Low-confidence match",
+                FuzzyMatchStatus.NoCandidates or FuzzyMatchStatus.NoMatch => $"No {scope} found",
+                _ => "No acceptable match"
+            };
+            return $"{reason} for '{query}'. Use a numeric ID or choose one of the candidates.";
+        }
+
+        private static Dictionary<string, object> BuildFuzzyErrorData(
+            string scope,
+            string query,
+            FuzzyMatchStatus status,
+            IReadOnlyList<FuzzyMatchCandidate> candidates)
+        {
+            string reason = status switch
+            {
+                FuzzyMatchStatus.Ambiguous => "ambiguous",
+                FuzzyMatchStatus.LowConfidence => "low_confidence",
+                FuzzyMatchStatus.NoCandidates => "no_candidates",
+                FuzzyMatchStatus.NoMatch => "no_match",
+                _ => "not_accepted"
+            };
+            return new Dictionary<string, object>
+            {
+                ["reason"] = reason,
+                ["query"] = query,
+                ["scope"] = scope,
+                ["candidates"] = candidates.Select(c => new Dictionary<string, object>
+                {
+                    ["name"] = c.Name,
+                    ["automationId"] = c.AutomationId,
+                    ["controlType"] = c.ControlType,
+                    ["matchType"] = c.MatchType,
+                    ["score"] = c.Score,
+                    ["distance"] = c.Distance
+                }).ToArray()
+            };
         }
 
         /// <summary>
@@ -121,12 +170,20 @@ namespace ApexComputerUse
                 // Fast path - reverse index is O(1) average. Falls back to the linear scan
                 // below if the dictionary misses (e.g. FlaUI returned a new instance with a
                 // different hash code), which is still correct via Equals (UIA CompareElements).
-                if (_elementReverse.TryGetValue(el, out int mapped)) id = mapped;
-                else
+                try
+                {
+                    if (_elementReverse.TryGetValue(el, out int mapped)) id = mapped;
+                }
+                catch { /* UIA CompareElements can throw when the target tree mutates */ }
+                if (id == null)
                 {
                     foreach (var kv in _elementMap)
                     {
-                        if (kv.Value.Equals(el)) { id = kv.Key; break; }
+                        try
+                        {
+                            if (kv.Value.Equals(el)) { id = kv.Key; break; }
+                        }
+                        catch { /* stale map entry - skip it */ }
                     }
                 }
             }
@@ -171,6 +228,12 @@ namespace ApexComputerUse
             };
 
             return System.Text.Json.JsonSerializer.Serialize(payload, FormatAdapter.s_indentedCamel);
+        }
+
+        private static string SafeElementString(Func<string> read, string fallback = "")
+        {
+            try { return read() ?? fallback; }
+            catch { return fallback; }
         }
 
         private CommandResponse CmdExecute(CommandRequest req)

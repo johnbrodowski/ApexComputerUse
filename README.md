@@ -511,7 +511,7 @@ curl -X POST http://localhost:8080/find \
      -d '{"window":42,"id":105}'
 ```
 
-Using numeric IDs is faster and unambiguous — the element is resolved directly from the in-memory map without any search or fuzzy logic. Every `find` call also auto-focuses the matched window.
+Using numeric IDs is faster and unambiguous — the element is resolved directly from the in-memory map without any search or fuzzy logic. Every `find` call also auto-focuses the matched window. When a title/name search is low-confidence or ambiguous, `/find` now refuses to guess and returns `error_data.candidates`; choose one of those candidates or use IDs from `/windows` and `/elements`.
 
 ---
 
@@ -760,6 +760,10 @@ curl -X POST http://localhost:8080/find \
 curl -X POST http://localhost:8080/find \
      -H "Content-Type: application/json" \
      -d '{"window":42,"id":105}'
+
+# Visual Studio handoff targets:
+# F5/debug: find name="Debug Target" type="SplitButton", then exec keys {F5}
+# Ctrl+F5/no-debug: find name="Start Without Debugging" type="Button", then exec keys Ctrl+{F5}
 
 # Type text into the found element
 curl -X POST http://localhost:8080/execute \
@@ -1223,6 +1227,8 @@ Element JSON includes bounding rectangles:
 | `isvisible` | — | — | Returns `True` or `False` |
 | `wait` | — | automationId | Wait for element with given AutomationId to appear |
 | `wait-page-load` | `waitpageload` | seconds (default 10) | Poll window title until browser page finishes loading; returns page title on success |
+
+**Visual Studio run buttons:** for a test handoff, target `name="Debug Target"` with `type="SplitButton"` for the F5/debug path, and `name="Start Without Debugging"` with `type="Button"` for the Ctrl+F5/no-debug path. Prefer numeric element IDs after an `/elements` scan to avoid fuzzy matching entirely.
 
 ### Wait
 

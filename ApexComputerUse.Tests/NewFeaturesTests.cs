@@ -185,6 +185,41 @@ public class NewFeaturesTests
     }
 
     [Fact]
+    public void ApexResult_From_PreservesFuzzyCandidateErrorData()
+    {
+        var candidates = new[]
+        {
+            new Dictionary<string, object>
+            {
+                ["name"] = "Search",
+                ["automationId"] = "",
+                ["controlType"] = "Button",
+                ["matchType"] = "fuzzy",
+                ["score"] = 0.42
+            }
+        };
+        var cr = new CommandResponse
+        {
+            Success = false,
+            Message = "Low-confidence match for 'Start'. Use a numeric ID or choose one of the candidates.",
+            ErrorData = new Dictionary<string, object>
+            {
+                ["reason"] = "low_confidence",
+                ["query"] = "Start",
+                ["scope"] = "element",
+                ["candidates"] = candidates
+            }
+        };
+
+        var result = ApexResult.From("find", cr);
+
+        Assert.False(result.Success);
+        Assert.NotNull(result.ErrorData);
+        Assert.Equal("low_confidence", result.ErrorData!["reason"]);
+        Assert.Same(candidates, result.ErrorData["candidates"]);
+    }
+
+    [Fact]
     public void ApexResult_From_PromotesExtras_IntoData_DictionaryUsed_ForGetTextSource()
     {
         var cr = new CommandResponse

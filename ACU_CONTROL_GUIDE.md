@@ -126,7 +126,7 @@ curl -X POST http://localhost:8080/find \
   -d '{"window":42,"id":105}'
 ```
 
-Every `/find` call auto-focuses the matched window. The response's `element` object contains `id`, `controlType`, `name`, `automationId`, `className`, `frameworkId`, `isEnabled`, `isOffscreen`, `boundingRectangle`, plus `value`/`helpText` when `properties=extra` is set.
+Every `/find` call auto-focuses the matched window. The response's `element` object contains `id`, `controlType`, `name`, `automationId`, `className`, `frameworkId`, `isEnabled`, `isOffscreen`, `boundingRectangle`, plus `value`/`helpText` when `properties=extra` is set. Low-confidence or ambiguous fuzzy searches return `success:false` with `error_data.candidates` instead of guessing; choose a candidate or use numeric IDs.
 
 ### Request fields (and aliases)
 
@@ -184,6 +184,8 @@ curl -X POST http://localhost:8080/execute -d '{"action":"gettext"}'
 | `isvisible` | — | — | `True`/`False` |
 | `wait` | — | automationId | Wait for element to appear |
 | `wait-page-load` | `waitpageload` | seconds (default 10) | Poll browser title until page finishes loading |
+
+**Visual Studio run handoff:** F5/debug targets `name="Debug Target"` with `type="SplitButton"`. Ctrl+F5/no-debug targets `name="Start Without Debugging"` with `type="Button"`. After an `/elements` scan, prefer those numeric IDs to bypass fuzzy matching.
 
 #### Text / Value
 | Action | Aliases | Value | Description |
@@ -419,9 +421,10 @@ curl http://localhost:8080/scenes/{id}/render
 2. **Scan small.** `GET /elements.json?onscreen=true&depth=2&collapseChains=true` first. Drill in by ID only when needed.
 3. **Search instead of browse.** `?match=<text>` is usually faster than reading the whole tree.
 4. **Use numeric IDs after the first scan.** They're SHA-256-stable across the session and skip all fuzzy matching.
-5. **Verify state, don't assume.** After an action, `gettext`/`getvalue`/`isselected`/`gettoggle` confirms it landed.
-6. **Offscreen matches:** `match=` always searches offscreen too. If a match has `"isOffscreen": true`, run `exec action=scrollinto` against its ID before interacting.
-7. **`.json` everywhere.** Saves you parsing HTML wrappers.
+5. **Treat fuzzy candidate failures as a stop sign.** If `/find` returns `error_data.candidates`, pick a candidate by ID instead of retrying the same broad name.
+6. **Verify state, don't assume.** After an action, `gettext`/`getvalue`/`isselected`/`gettoggle` confirms it landed.
+7. **Offscreen matches:** `match=` always searches offscreen too. If a match has `"isOffscreen": true`, run `exec action=scrollinto` against its ID before interacting.
+8. **`.json` everywhere.** Saves you parsing HTML wrappers.
 
 ---
 

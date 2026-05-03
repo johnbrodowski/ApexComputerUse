@@ -9,6 +9,35 @@ using FlaUI.UIA3;
 
 namespace ApexComputerUse
 {
+    public enum FuzzyMatchStatus
+    {
+        NoCandidates,
+        NoMatch,
+        Exact,
+        Accepted,
+        LowConfidence,
+        Ambiguous
+    }
+
+    public sealed record FuzzyMatchCandidate(
+        string Name,
+        string AutomationId,
+        string ControlType,
+        string MatchType,
+        double Score,
+        int Distance);
+
+    public sealed class FuzzyMatchResult<T>
+        where T : class
+    {
+        public FuzzyMatchStatus Status { get; init; }
+        public T? Element { get; init; }
+        public string MatchedValue { get; init; } = "";
+        public bool IsExact => Status == FuzzyMatchStatus.Exact;
+        public IReadOnlyList<FuzzyMatchCandidate> Candidates { get; init; } = Array.Empty<FuzzyMatchCandidate>();
+        public bool Success => Element != null && Status is FuzzyMatchStatus.Exact or FuzzyMatchStatus.Accepted;
+    }
+
     public partial class ApexHelper
     {
         // -- Window --------------------------------------------------------
@@ -52,6 +81,14 @@ namespace ApexComputerUse
 
         public Window? FindWindowFuzzy(string title, out string matchedTitle, out bool isExact)
         {
+            var result = FindWindowFuzzyDetailed(title);
+            matchedTitle = result.MatchedValue;
+            isExact = result.IsExact;
+            return result.Success ? result.Element : null;
+        }
+
+        public FuzzyMatchResult<Window> FindWindowFuzzyDetailed(string title)
+        {
             // Snapshot Name once per window. UIA property reads can throw spuriously
             // (EVENT_E_INTERNALEXCEPTION / 0x80040201) when the desktop tree mutates
             // mid-call - reading Name 5-8 times per window across this pipeline made
@@ -68,31 +105,11 @@ namespace ApexComputerUse
                           .Where(t => !string.IsNullOrWhiteSpace(t.name))
                           .ToArray();
 
-            // 1. Exact (case-insensitive)
-            var exact = all.FirstOrDefault(t => t.name.Equals(title, StringComparison.OrdinalIgnoreCase));
-            if (exact.element != null) { matchedTitle = exact.name; isExact = true; return exact.element.AsWindow(); }
-
-            // 2. Contains - if multiple match, prefer StartsWith over mid-string, then shortest name.
-            var contains = all.Where(t => t.name.Contains(title, StringComparison.OrdinalIgnoreCase)).ToArray();
-            if (contains.Length >= 1)
-            {
-                var best = contains
-                    .OrderByDescending(t => t.name.StartsWith(title, StringComparison.OrdinalIgnoreCase))
-                    .ThenBy(t => t.name.Length)
-                    .First();
-                matchedTitle = best.name; isExact = false;
-                return best.element.AsWindow();
-            }
-
-            // 3. Closest Levenshtein (with distance threshold)
-            var titleLower = title.ToLower();
-            var closest    = all.Length == 0 ? default : all.MinBy(t => Levenshtein(titleLower, t.name.ToLower()));
-            if (closest.element == null) { matchedTitle = ""; isExact = false; return null; }
-            int bestDist = Levenshtein(titleLower, closest.name.ToLower());
-            if (bestDist > (int)(title.Length * 0.6)) { matchedTitle = ""; isExact = false; return null; }
-            matchedTitle = closest.name;
-            isExact = false;
-            return closest.element.AsWindow();
+            var ranked = RankTextCandidates(
+                title,
+                all.Select(t => new FuzzyMatchCandidateSource<AutomationElement>(
+                    t.element, t.name, "", "Window")));
+            return BuildElementResult(title, ranked, t => t.Source.AsWindow());
         }
 
         // -- Element fuzzy find --------------------------------------------
@@ -101,6 +118,15 @@ namespace ApexComputerUse
             Window window, string searchText, ControlType? filterType, bool searchById,
             out string matchedValue, out bool isExact)
         {
+            var result = FindElementFuzzyDetailed(window, searchText, filterType, searchById);
+            matchedValue = result.MatchedValue;
+            isExact = result.IsExact;
+            return result.Success ? result.Element : null;
+        }
+
+        public FuzzyMatchResult<AutomationElement> FindElementFuzzyDetailed(
+            Window window, string searchText, ControlType? filterType, bool searchById)
+        {
             AutomationElement[] all;
             try
             {
@@ -108,36 +134,158 @@ namespace ApexComputerUse
                     ? Task.Run(() => window.FindAllDescendants(cf => cf.ByControlType(filterType.Value)))
                     : Task.Run(() => window.FindAllDescendants());
                 if (!fetchTask.Wait(5000) || fetchTask.Result == null)
-                    { matchedValue = ""; isExact = false; return null; }
+                    return new FuzzyMatchResult<AutomationElement> { Status = FuzzyMatchStatus.NoCandidates };
                 all = fetchTask.Result;
             }
-            catch { matchedValue = ""; isExact = false; return null; }
+            catch { return new FuzzyMatchResult<AutomationElement> { Status = FuzzyMatchStatus.NoCandidates }; }
 
-            if (all.Length == 0) { matchedValue = ""; isExact = false; return null; }
+            if (all.Length == 0)
+                return new FuzzyMatchResult<AutomationElement> { Status = FuzzyMatchStatus.NoCandidates };
 
-            Func<AutomationElement, string> getValue = searchById
-                ? el => el.Properties.AutomationId.ValueOrDefault ?? ""
-                : el => el.Properties.Name.ValueOrDefault ?? "";
+            var sources = new List<FuzzyMatchCandidateSource<AutomationElement>>();
+            foreach (var el in all)
+            {
+                string name = SafeRead(() => el.Properties.Name.ValueOrDefault ?? "");
+                string automationId = SafeRead(() => el.Properties.AutomationId.ValueOrDefault ?? "");
+                string controlType = SafeRead(() => el.Properties.ControlType.ValueOrDefault.ToString(), "Unknown");
+                string primary = searchById ? automationId : name;
+                if (string.IsNullOrWhiteSpace(primary)) continue;
+                sources.Add(new FuzzyMatchCandidateSource<AutomationElement>(el, primary, automationId, controlType, name));
+            }
 
-            var exactEl = all.FirstOrDefault(el =>
-                getValue(el).Equals(searchText, StringComparison.OrdinalIgnoreCase));
-            if (exactEl != null) { matchedValue = getValue(exactEl); isExact = true; return exactEl; }
+            var ranked = RankTextCandidates(searchText, sources);
+            return BuildElementResult(searchText, ranked, t => t.Source);
+        }
 
-            var cont = all.Where(el =>
-                getValue(el).Contains(searchText, StringComparison.OrdinalIgnoreCase) &&
-                !string.IsNullOrEmpty(getValue(el))).ToArray();
-            if (cont.Length == 1) { matchedValue = getValue(cont[0]); isExact = false; return cont[0]; }
+        public static IReadOnlyList<FuzzyMatchCandidate> RankTextCandidates(
+            string query,
+            IEnumerable<(string Value, string AutomationId, string ControlType)> candidates)
+        {
+            return RankTextCandidates(
+                    query,
+                    candidates.Select(c => new FuzzyMatchCandidateSource<object>(
+                        new object(), c.Value, c.AutomationId, c.ControlType)))
+                .Select(t => t.Candidate)
+                .ToArray();
+        }
 
-            var cands = all.Where(el => !string.IsNullOrEmpty(getValue(el))).ToArray();
-            if (cands.Length == 0) { matchedValue = ""; isExact = false; return null; }
+        public static FuzzyMatchStatus ClassifyRankedCandidates(IReadOnlyList<FuzzyMatchCandidate> ranked)
+        {
+            if (ranked.Count == 0) return FuzzyMatchStatus.NoCandidates;
+            var best = ranked[0];
+            if (best.MatchType == "exact") return FuzzyMatchStatus.Exact;
+            if (best.Score < 0.78) return FuzzyMatchStatus.LowConfidence;
+            if (ranked.Count > 1 && best.Score - ranked[1].Score < 0.08)
+                return FuzzyMatchStatus.Ambiguous;
+            if (best.MatchType == "prefix" && best.Score >= 0.84) return FuzzyMatchStatus.Accepted;
+            if (best.MatchType == "substring" && best.Score >= 0.86) return FuzzyMatchStatus.Accepted;
+            return FuzzyMatchStatus.LowConfidence;
+        }
 
-            var closest2 = cands.MinBy(el => Levenshtein(searchText.ToLower(), getValue(el).ToLower()))!;
-            int bestDist2 = Levenshtein(searchText.ToLower(), getValue(closest2).ToLower());
-            if (bestDist2 > (int)(searchText.Length * 0.6))
-                { matchedValue = ""; isExact = false; return null; }
-            matchedValue = getValue(closest2);
-            isExact = false;
-            return closest2;
+        private sealed record FuzzyMatchCandidateSource<T>(
+            T Source,
+            string Value,
+            string AutomationId,
+            string ControlType,
+            string? DisplayName = null);
+
+        private sealed record RankedFuzzyMatch<T>(
+            T Source,
+            string Value,
+            FuzzyMatchCandidate Candidate);
+
+        private static FuzzyMatchResult<TOut> BuildElementResult<TIn, TOut>(
+            string query,
+            IReadOnlyList<RankedFuzzyMatch<TIn>> ranked,
+            Func<RankedFuzzyMatch<TIn>, TOut> convert)
+            where TOut : class
+        {
+            var candidates = ranked.Select(t => t.Candidate).ToArray();
+            var status = ClassifyRankedCandidates(candidates);
+            if (status is FuzzyMatchStatus.Exact or FuzzyMatchStatus.Accepted)
+            {
+                var best = ranked[0];
+                return new FuzzyMatchResult<TOut>
+                {
+                    Status = status,
+                    Element = convert(best),
+                    MatchedValue = best.Value,
+                    Candidates = candidates
+                };
+            }
+
+            return new FuzzyMatchResult<TOut>
+            {
+                Status = status == FuzzyMatchStatus.NoCandidates ? FuzzyMatchStatus.NoCandidates :
+                    (candidates.Length == 0 ? FuzzyMatchStatus.NoMatch : status),
+                MatchedValue = "",
+                Candidates = candidates
+            };
+        }
+
+        private static IReadOnlyList<RankedFuzzyMatch<T>> RankTextCandidates<T>(
+            string query,
+            IEnumerable<FuzzyMatchCandidateSource<T>> candidates)
+        {
+            string q = (query ?? "").Trim();
+            if (string.IsNullOrEmpty(q)) return Array.Empty<RankedFuzzyMatch<T>>();
+            string qLower = q.ToLowerInvariant();
+
+            return candidates
+                .Select(c =>
+                {
+                    string value = c.Value.Trim();
+                    string valueLower = value.ToLowerInvariant();
+                    int distance = Levenshtein(qLower, valueLower);
+                    string matchType;
+                    double score;
+
+                    if (value.Equals(q, StringComparison.OrdinalIgnoreCase))
+                    {
+                        matchType = "exact";
+                        score = 1.0;
+                    }
+                    else if (value.StartsWith(q, StringComparison.OrdinalIgnoreCase))
+                    {
+                        matchType = "prefix";
+                        score = 0.94 - Math.Min(0.12, (value.Length - q.Length) / Math.Max(value.Length, 1d) * 0.12);
+                    }
+                    else
+                    {
+                        int index = valueLower.IndexOf(qLower, StringComparison.Ordinal);
+                        if (index >= 0)
+                        {
+                            matchType = "substring";
+                            score = 0.87 - Math.Min(0.12, index / Math.Max(value.Length, 1d) * 0.12);
+                        }
+                        else
+                        {
+                            matchType = "fuzzy";
+                            score = 1.0 - (distance / (double)Math.Max(qLower.Length, valueLower.Length));
+                        }
+                    }
+
+                    score = Math.Clamp(score, 0, 1);
+                    var candidate = new FuzzyMatchCandidate(
+                        c.DisplayName ?? value,
+                        c.AutomationId,
+                        c.ControlType,
+                        matchType,
+                        Math.Round(score, 3),
+                        distance);
+                    return new RankedFuzzyMatch<T>(c.Source, value, candidate);
+                })
+                .Where(t => t.Candidate.Score >= 0.35)
+                .OrderByDescending(t => t.Candidate.Score)
+                .ThenBy(t => t.Candidate.Name.Length)
+                .Take(5)
+                .ToArray();
+        }
+
+        private static string SafeRead(Func<string> read, string fallback = "")
+        {
+            try { return read() ?? fallback; }
+            catch { return fallback; }
         }
 
         // -- Levenshtein ---------------------------------------------------
