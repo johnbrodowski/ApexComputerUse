@@ -299,6 +299,10 @@ if (!string.IsNullOrWhiteSpace(config.WebBaseUrl))
 
 await Task.Delay(3000, ct);  // give GUIs time to render before scanning
 
+// Bridge port derived from BridgeBaseUrl (used both in serve mode and regular cycles)
+var bridgePort = Uri.TryCreate(config.BridgeBaseUrl, UriKind.Absolute, out var bridgeUri) && bridgeUri.Port > 0
+    ? bridgeUri.Port.ToString() : "";
+
 // -- Serve mode ----------------------------------------------------------------
 // When --serve is set, replace the cycle loop with a long-running HTTP control
 // surface (see ControlServer.cs). External callers drive per-test execution,
@@ -325,11 +329,12 @@ if (cliServe)
     TestSuite?      currentSuite  = null;
 
 var bridgeEnvServe = string.IsNullOrWhiteSpace(config.BridgeApiKey)
-    ? new Dictionary<string, string> { ["APEX_HTTP_AUTOSTART"] = "true" }
+    ? new Dictionary<string, string> { ["APEX_HTTP_AUTOSTART"] = "true", ["APEX_HTTP_PORT"] = bridgePort }
     : new Dictionary<string, string>
       {
-          ["APEX_API_KEY"] = config.BridgeApiKey,
-          ["APEX_HTTP_AUTOSTART"] = "true"
+          ["APEX_API_KEY"]       = config.BridgeApiKey,
+          ["APEX_HTTP_AUTOSTART"] = "true",
+          ["APEX_HTTP_PORT"]     = bridgePort
       };
 
     async Task<ProcessManager> StartBridge(CancellationToken innerCt)
@@ -499,11 +504,12 @@ while (cycle < maxCycles && !ct.IsCancellationRequested)
     // 2. Launch ApexComputerUse ---------------------------------------------------
     await using var bridge = new ProcessManager("ApexComputerUse", config.BridgeExePath, isGui: true);
     var bridgeEnv = string.IsNullOrWhiteSpace(config.BridgeApiKey)
-        ? new Dictionary<string, string> { ["APEX_HTTP_AUTOSTART"] = "true" }
+        ? new Dictionary<string, string> { ["APEX_HTTP_AUTOSTART"] = "true", ["APEX_HTTP_PORT"] = bridgePort }
         : new Dictionary<string, string>
           {
-              ["APEX_API_KEY"] = config.BridgeApiKey,
-              ["APEX_HTTP_AUTOSTART"] = "true"
+              ["APEX_API_KEY"]       = config.BridgeApiKey,
+              ["APEX_HTTP_AUTOSTART"] = "true",
+              ["APEX_HTTP_PORT"]     = bridgePort
           };
     await bridge.StartAsync(ct, bridgeEnv);
 
