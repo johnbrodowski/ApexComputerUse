@@ -151,7 +151,7 @@ namespace ApexComputerUse
                     Thread.Sleep(50);
                     if (Math.Abs(p.Value.ValueOrDefault - value) < 0.5) return;
                 }
-                catch { /* fall through to Value / keyboard fallback */ }
+                catch (Exception ex) { CommandProcessor.LogSwallowed("SetRangeValue/RangeValuePattern", ex); }
             }
             // Fallback: write via Value pattern (e.g. WinForms TrackBar exposes Value not RangeValue)
             if (el.Patterns.Value.TryGetPattern(out var vp) && !vp.IsReadOnly.ValueOrDefault)
@@ -165,7 +165,7 @@ namespace ApexComputerUse
                     if (double.TryParse(vp.Value.ValueOrDefault, out var v2) &&
                         Math.Abs(v2 - value) < 0.5) return;
                 }
-                catch { /* fall through */ }
+                catch (Exception ex) { CommandProcessor.LogSwallowed("SetRangeValue/ValuePattern", ex); }
             }
             // Fallback: WinForms NumericUpDown - set value via child Edit element
             var childEdit = el.FindAllChildren()
@@ -179,7 +179,7 @@ namespace ApexComputerUse
                     if (double.TryParse(cvp.Value.ValueOrDefault, out var v3) &&
                         Math.Abs(v3 - value) < 0.5) return;
                 }
-                catch { /* fall through to keyboard */ }
+                catch (Exception ex) { CommandProcessor.LogSwallowed("SetRangeValue/childEditValuePattern", ex); }
             }
             // Keyboard fallback for controls like WinForms TrackBar whose Value pattern is
             // present but read-only (pattern writes are silently ignored). Press Home to reach
@@ -193,10 +193,19 @@ namespace ApexComputerUse
             Thread.Sleep(50);
             double step = double.TryParse(GetRangeValue(el), out double afterOne) && afterOne > min
                           ? afterOne - min : 1;
+            // Guard against a degenerate step (control didn't respond to Right). Without this,
+            // Math.Round(... / 0) yields infinity and the loop iterates int.MaxValue times.
+            if (Math.Abs(step) < 1e-9)
+                throw new InvalidOperationException(
+                    "Range step probe returned zero. Control didn't respond to keyboard input - cannot use keyboard fallback.");
             Keyboard.Press(VirtualKeyShort.HOME); Keyboard.Release(VirtualKeyShort.HOME);
             Thread.Sleep(30);
             int steps = (int)Math.Round((value - min) / step);
-            for (int i = 0; i < Math.Max(0, steps); i++)
+            // Cap the iteration count well above any sane control range so a misbehaving
+            // step probe (e.g. Slider that wraps or saturates) can't lock the dispatch thread.
+            int cap   = 10_000;
+            int bound = Math.Min(Math.Max(0, steps), cap);
+            for (int i = 0; i < bound; i++)
             {
                 Keyboard.Press(VirtualKeyShort.RIGHT); Keyboard.Release(VirtualKeyShort.RIGHT);
                 Thread.Sleep(10);
@@ -258,17 +267,32 @@ namespace ApexComputerUse
             };
         }
 
-        /// <summary>Sets a toggle element to a specific on (true) or off (false) state.</summary>
+        /// <summary>
+        /// Sets a toggle element to a specific on (true) or off (false) state. Validates the
+        /// post-toggle state on every path — historically the Toggle-pattern branch fired and
+        /// returned without checking, so a silent no-op (broken WPF binding, disabled control)
+        /// looked like success. Now we re-read and retry up to 3 times before failing loudly.
+        /// </summary>
         public void SetToggleState(AutomationElement el, bool targetOn)
         {
             if (el.Patterns.Toggle.TryGetPattern(out var p))
             {
-                var state = p.ToggleState.ValueOrDefault;
-                bool isOn = state == ToggleState.On;
-                if (isOn != targetOn) p.Toggle();
-                // Handle 3-state: if we toggled to Indeterminate, toggle once more
-                if (p.ToggleState.ValueOrDefault == ToggleState.Indeterminate) p.Toggle();
-                return;
+                for (int attempt = 0; attempt < 3; attempt++)
+                {
+                    var state = p.ToggleState.ValueOrDefault;
+                    bool isOn = state == ToggleState.On;
+                    if (isOn == targetOn) return;
+                    p.Toggle();
+                    Thread.Sleep(50);
+                    // 3-state checkboxes: pass through Indeterminate with one more toggle.
+                    if (p.ToggleState.ValueOrDefault == ToggleState.Indeterminate)
+                    {
+                        p.Toggle();
+                        Thread.Sleep(50);
+                    }
+                }
+                throw new InvalidOperationException(
+                    $"Toggle pattern accepted Toggle() but state did not converge to {(targetOn ? "On" : "Off")} after 3 attempts (current: {p.ToggleState.ValueOrDefault}).");
             }
 
             for (int i = 0; i < 3; i++)

@@ -51,11 +51,27 @@ namespace ApexComputerUse
             return match?.AsWindow();
         }
 
-        public void MoveWindow(Window window, int x, int y) =>
-            window.Patterns.Transform.Pattern.Move(x, y);
+        // Top-level windows often don't expose Transform - WinForms / WPF main windows usually
+        // implement WindowPattern but not TransformPattern, so direct .Pattern access throws an
+        // unhelpful NRE. Probe with TryGetPattern and surface a typed NotSupportedException
+        // (caught by BuildErrorData to attach pattern hints in the response).
+        public void MoveWindow(Window window, int x, int y)
+        {
+            if (!window.Patterns.Transform.TryGetPattern(out var p))
+                throw new NotSupportedException("Transform pattern not supported on this window. Most top-level WinForms/WPF windows can only be moved via the OS (drag title bar / Win+arrow); use 'minimize' / 'maximize' / 'restore' for state changes.");
+            if (!p.CanMove.ValueOrDefault)
+                throw new NotSupportedException("Window declares Transform but reports CanMove=false.");
+            p.Move(x, y);
+        }
 
-        public void ResizeWindow(Window window, double width, double height) =>
-            window.Patterns.Transform.Pattern.Resize(width, height);
+        public void ResizeWindow(Window window, double width, double height)
+        {
+            if (!window.Patterns.Transform.TryGetPattern(out var p))
+                throw new NotSupportedException("Transform pattern not supported on this window. Use 'maximize' / 'restore' instead, or resize via OS (drag border / Win+arrow).");
+            if (!p.CanResize.ValueOrDefault)
+                throw new NotSupportedException("Window declares Transform but reports CanResize=false.");
+            p.Resize(width, height);
+        }
 
         public void MinimizeWindow(Window window) =>
             window.Patterns.Window.Pattern.SetWindowVisualState(WindowVisualState.Minimized);
@@ -313,15 +329,22 @@ namespace ApexComputerUse
         public AutomationElement? FindByName(Window window, string name) =>
             window.FindFirstDescendant(cf => cf.ByName(name));
 
-        public AutomationElement? WaitForElement(Window window, string automationId, int timeoutMs = 5000) =>
-            Retry.WhileNull(
+        // Pass timeoutMs <= 0 to use the configured default (APEX_WAITFOR_TIMEOUT_MS).
+        public AutomationElement? WaitForElement(Window window, string automationId, int timeoutMs = 0)
+        {
+            int effective = timeoutMs > 0 ? timeoutMs : AppConfig.Current.WaitForTimeoutMs;
+            return Retry.WhileNull(
                 () => window.FindFirstDescendant(cf => cf.ByAutomationId(automationId)),
-                TimeSpan.FromMilliseconds(timeoutMs),
+                TimeSpan.FromMilliseconds(effective),
                 TimeSpan.FromMilliseconds(200)
             ).Result;
+        }
 
-        public string WaitPageLoad(Window window, int timeoutSeconds = 10)
+        // Pass timeoutSeconds <= 0 to use the configured default (APEX_WAITPAGE_TIMEOUT_MS / 1000).
+        public string WaitPageLoad(Window window, int timeoutSeconds = 0)
         {
+            if (timeoutSeconds <= 0)
+                timeoutSeconds = Math.Max(1, AppConfig.Current.WaitPageTimeoutMs / 1000);
             var deadline = DateTime.UtcNow.AddSeconds(timeoutSeconds);
             string? lastTitle = null;
             DateTime? stableAt = null;

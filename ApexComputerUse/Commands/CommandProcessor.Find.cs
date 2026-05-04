@@ -38,7 +38,7 @@ namespace ApexComputerUse
 
             CurrentWindow = window;
             _windowDesc   = wTitle;
-            try { window.Focus(); } catch { /* window may not support focus */ }
+            try { window.Focus(); } catch (Exception ex) { LogSwallowed("CmdFind/window.Focus", ex); }
             string wNote  = wExact ? "" : $" (fuzzy for '{req.Window}')";
 
             bool includeExtra = string.Equals(req.Properties, "extra", StringComparison.OrdinalIgnoreCase);
@@ -56,7 +56,7 @@ namespace ApexComputerUse
                         var t = Task.Run(() => window.FindFirstDescendant(cf => cf.ByControlType(typeOnly.Value)));
                         byType = t.Wait(5000) ? t.Result : null;
                     }
-                    catch { /* stale window - fall through to null check */ }
+                    catch (Exception ex) { LogSwallowed("CmdFind/findFirstByControlType", ex); }
 
                     if (byType == null)
                         return Fail($"No element of type '{req.SearchType}' found in '{wTitle}'.");
@@ -89,9 +89,15 @@ namespace ApexComputerUse
                         return Fail($"Element [map:{mappedId}] is stale and no live ancestor was cached. Run 'find' again.");
                     CurrentElement = recovered;
                     _elementDesc   = _helper.Describe(recovered);
-                    return Ok(
-                        $"Window: {wTitle}{wNote} | Element [map:{mappedId}] was stale; fell back to live ancestor [map:{recoveredId}] {hops} hop(s) up",
-                        BuildFindElementJson(recovered, includeExtra, recoveredId.Value));
+                    // hops==0 + recoveredId==mappedId is the descriptor-refind signal: same id,
+                    // freshly rediscovered under a live ancestor. Otherwise it's a parent walk.
+                    string warning = (hops == 0 && recoveredId == mappedId)
+                        ? $"Element [map:{mappedId}] handle was stale; rediscovered the same element by descriptor."
+                        : $"Original element [map:{mappedId}] was stale; fell back to live ancestor [map:{recoveredId}] {hops} hop(s) up.";
+                    return OkWithWarning(
+                        $"Window: {wTitle}{wNote} | Element [map:{recoveredId}]",
+                        BuildFindElementJson(recovered, includeExtra, recoveredId.Value),
+                        warning);
                 }
                 CurrentElement = mappedEl;
                 _elementDesc   = _helper.Describe(mappedEl);
@@ -185,7 +191,7 @@ namespace ApexComputerUse
                 {
                     if (_elementReverse.TryGetValue(el, out int mapped)) id = mapped;
                 }
-                catch { /* UIA CompareElements can throw when the target tree mutates */ }
+                catch (Exception ex) { LogSwallowed("BuildFindElementJson/reverseLookup", ex); }
                 if (id == null)
                 {
                     foreach (var kv in _elementMap)
@@ -194,7 +200,7 @@ namespace ApexComputerUse
                         {
                             if (kv.Value.Equals(el)) { id = kv.Key; break; }
                         }
-                        catch { /* stale map entry - skip it */ }
+                        catch (Exception ex) { LogSwallowed("BuildFindElementJson/mapEqualsScan", ex); }
                     }
                 }
             }
@@ -206,7 +212,7 @@ namespace ApexComputerUse
                 if (b.Width > 0 || b.Height > 0)
                     rect = new BoundingRect { X = (int)b.X, Y = (int)b.Y, Width = (int)b.Width, Height = (int)b.Height };
             }
-            catch { /* stale - leave rect null */ }
+            catch (Exception ex) { LogSwallowed("BuildFindElementJson/boundingRect", ex); }
 
             string ct       = "Unknown";
             string name     = "";
@@ -287,7 +293,9 @@ namespace ApexComputerUse
                     return Fail("The selected element is stale and no live ancestor was cached. Run 'find' again.");
                 target           = recovered;
                 CurrentElement   = recovered;
-                fallbackNote     = $"FALLBACK: original element [map:{targetId}] was stale; ran action on live ancestor [map:{recoveredId}] {hops} hop(s) up.\n";
+                fallbackNote = (hops == 0 && recoveredId == targetId)
+                    ? $"Element [map:{targetId}] handle was stale; rediscovered the same element by descriptor before running the action."
+                    : $"Original element [map:{targetId}] was stale; ran action on live ancestor [map:{recoveredId}] {hops} hop(s) up.";
             }
 
             // Source-emitting text reads are handled inline so the response can carry the
@@ -318,22 +326,49 @@ namespace ApexComputerUse
             // Wrap the action call so we can attach structured error data when the failure is
             // a missing UIA pattern (the most common cause of action errors). Other exceptions
             // pass through with the bare message as before so we don't swallow useful context.
+            // _lastActionWarning is reset before the call so a stale warning from a previous
+            // request can't bleed in; it's set by helpers like WarnIgnoredValue inside RunAction.
+            _lastActionWarning = null;
             string result;
             try
             {
-                result = RunAction(target, CurrentWindow, req.Action!, req.Value ?? "");
+                // Transient-retry wrapper handles the common SPA / refresh case where the
+                // accessibility tree briefly mutates and a second attempt succeeds. Semantic
+                // exceptions (NoClickablePoint, NotSupportedException, etc.) bypass the retry
+                // and surface immediately so BuildErrorData can attach pattern hints.
+                var capturedTarget = target;
+                var capturedWindow = CurrentWindow;
+                var capturedAction = req.Action!;
+                var capturedValue  = req.Value ?? "";
+                result = RetryTransient(
+                    () => RunAction(capturedTarget, capturedWindow, capturedAction, capturedValue),
+                    AppConfig.Current.RetryAttempts);
             }
             catch (Exception ex)
             {
+                _lastActionWarning = null;
                 var errorData = BuildErrorData(target, actionLower);
                 return errorData != null
                     ? FailWithData(ex.Message, errorData)
                     : Fail(ex.Message);
             }
-            string combined = (fallbackNote + result).TrimEnd();
-            return string.IsNullOrEmpty(combined)
-                ? Ok($"'{req.Action}' executed.")
-                : Ok($"'{req.Action}' executed.", combined);
+            string? actionWarning = _lastActionWarning;
+            _lastActionWarning = null;
+
+            // Combine fallback recovery note (from outer stale check) with any per-action
+            // warning (from RunAction helpers like WarnIgnoredValue). At most one is usually
+            // set; if both fire we concatenate so neither signal is lost.
+            string? combinedWarning = (fallbackNote, actionWarning) switch
+            {
+                ("", null)              => null,
+                ("", var w)             => w,
+                (var f, null)           => f,
+                (var f, var w)          => f + " " + w
+            };
+            string? trimmedResult = string.IsNullOrEmpty(result) ? null : result;
+            return string.IsNullOrEmpty(combinedWarning)
+                ? Ok($"'{req.Action}' executed.", trimmedResult)
+                : OkWithWarning($"'{req.Action}' executed.", trimmedResult, combinedWarning);
         }
 
         // -- Structured error data ------------------------------------------------
@@ -448,7 +483,12 @@ namespace ApexComputerUse
             string property  = (req.Property  ?? "").ToLowerInvariant();
             string expected  = req.Expected ?? "";
             int    timeoutMs = req.Timeout  ?? 10_000;
-            int    intervalMs = Math.Max(50, req.Interval ?? 200);
+            // When the caller doesn't specify Interval, we use progressive backoff:
+            // 50ms x2, 100ms x2, 200ms x2, 400ms ... cap 500ms. Saves CPU on long waits without
+            // sacrificing fast detection on near-immediate transitions. If the caller passes
+            // Interval explicitly, honour it as a fixed cadence (back-compat).
+            bool   useBackoff = req.Interval == null;
+            int    intervalMs = Math.Max(50, req.Interval ?? 50);
 
             // Predicates that don't need a property (operate on the element itself).
             bool elementLevel = predicate is "visible" or "gone";
@@ -464,6 +504,7 @@ namespace ApexComputerUse
 
             var sw = Stopwatch.StartNew();
             string lastObserved = "";
+            int tick = 0;
             while (sw.ElapsedMilliseconds < timeoutMs)
             {
                 bool elementValid = IsElementValid(el);
@@ -479,7 +520,7 @@ namespace ApexComputerUse
                 {
                     // Other predicates can't read a stale element - keep polling in case a
                     // re-resolved element appears, but most likely we'll just timeout cleanly.
-                    Thread.Sleep(intervalMs);
+                    Thread.Sleep(useBackoff ? PollBackoffMs(tick++) : intervalMs);
                     continue;
                 }
                 else if (predicate == "visible")
@@ -527,7 +568,7 @@ namespace ApexComputerUse
                                 ["elapsed_ms"]    = sw.ElapsedMilliseconds.ToString()
                             });
                 }
-                Thread.Sleep(intervalMs);
+                Thread.Sleep(useBackoff ? PollBackoffMs(tick++) : intervalMs);
             }
 
             // Timeout - return failure with the last observed value so the caller can debug.
@@ -557,7 +598,9 @@ namespace ApexComputerUse
             string predicate = (req.Predicate ?? "").ToLowerInvariant();
             string expected  = req.Expected ?? "";
             int    timeoutMs  = req.Timeout  ?? 10_000;
-            int    intervalMs = Math.Max(50, req.Interval ?? 250);
+            // Same backoff strategy as RunWaitFor: progressive when caller didn't pin Interval.
+            bool   useBackoff = req.Interval == null;
+            int    intervalMs = Math.Max(50, req.Interval ?? 50);
 
             if (string.IsNullOrEmpty(predicate))
                 return Fail("wait-window requires a 'predicate' (equals, contains, not-empty, gone).");
@@ -568,6 +611,7 @@ namespace ApexComputerUse
 
             var sw = Stopwatch.StartNew();
             List<string> lastTitles = new();
+            int tick = 0;
             while (sw.ElapsedMilliseconds < timeoutMs)
             {
                 FlaUI.Core.AutomationElements.AutomationElement[] windows;
@@ -638,7 +682,7 @@ namespace ApexComputerUse
                         });
                 }
 
-                Thread.Sleep(intervalMs);
+                Thread.Sleep(useBackoff ? PollBackoffMs(tick++) : intervalMs);
             }
 
             // Timeout - return the titles we last saw so the caller can debug.

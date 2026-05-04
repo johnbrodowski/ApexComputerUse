@@ -45,17 +45,18 @@ namespace ApexComputerUse
                         // un-minimize, and SetWindowPos with SWP_NOSIZE preserves the 0x0
                         // size minimized windows report. Gate on IsIconic so we don't
                         // un-maximize maximized windows.
+                        int settle = AppConfig.Current.ForegroundSettleMs;
                         if (IsIconic(hwnd))
                         {
                             ShowWindow(hwnd, SW_RESTORE);
-                            Thread.Sleep(100);
+                            Thread.Sleep(settle);
                         }
                         // Move off-screen windows into view so keyboard input reaches them.
                         var rect = cur.Properties.BoundingRectangle.ValueOrDefault;
                         if (rect.X < -100 || rect.Y < -100)
                         {
                             SetWindowPos(hwnd, IntPtr.Zero, 100, 100, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
-                            Thread.Sleep(100);
+                            Thread.Sleep(settle);
                         }
                         SetForegroundWindow(hwnd);
                     }

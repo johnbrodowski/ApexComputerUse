@@ -11,6 +11,28 @@ namespace ApexComputerUse
 {
     public partial class ApexHelper
     {
+        // -- ComboBox helpers ----------------------------------------------
+
+        /// <summary>
+        /// Polls the ExpandCollapse state until it reports Expanded or the timeout elapses.
+        /// Replaces blind Thread.Sleep(300) after Expand() — fast combos proceed in ~25ms,
+        /// slow ones still get up to <paramref name="timeoutMs"/>. No-op if the element
+        /// doesn't expose ExpandCollapse (caller already did its best with Expand()).
+        /// </summary>
+        private static void WaitUntilExpanded(AutomationElement el, int timeoutMs)
+        {
+            if (!el.Patterns.ExpandCollapse.TryGetPattern(out var ecp)) { Thread.Sleep(50); return; }
+            var deadline = DateTime.UtcNow.AddMilliseconds(timeoutMs);
+            while (DateTime.UtcNow < deadline)
+            {
+                ExpandCollapseState s;
+                try { s = ecp.ExpandCollapseState.ValueOrDefault; }
+                catch (Exception ex) { CommandProcessor.LogSwallowed("WaitUntilExpanded/readState", ex); return; }
+                if (s == ExpandCollapseState.Expanded) return;
+                Thread.Sleep(25);
+            }
+        }
+
         // -- ComboBox / ListBox (multi-strategy) ---------------------------
 
         /// <summary>
@@ -114,8 +136,10 @@ namespace ApexComputerUse
                 {
                     if (el.Patterns.ExpandCollapse.TryGetPattern(out var ecp)) ecp.Expand();
                 }
-                catch { }
-                Thread.Sleep(300);
+                catch (Exception ex) { CommandProcessor.LogSwallowed("SelectByIndex/Expand", ex); }
+                // Poll for the Expanded state instead of a blind 300ms sleep. Slow combos
+                // (heavy data binding) get up to 1s; fast ones proceed in ~25ms.
+                WaitUntilExpanded(el, 1000);
 
                 var children = el.FindAllChildren(cf => cf.ByControlType(ControlType.ListItem));
                 if (children.Length == 0)
@@ -135,10 +159,12 @@ namespace ApexComputerUse
                 {
                     if (children[index].Patterns.SelectionItem.TryGetPattern(out var sp)) sp.Select();
                     else children[index].Click();
-                    try { if (el.Patterns.ExpandCollapse.TryGetPattern(out var ecp2)) ecp2.Collapse(); } catch { }
+                    try { if (el.Patterns.ExpandCollapse.TryGetPattern(out var ecp2)) ecp2.Collapse(); }
+                    catch (Exception ex) { CommandProcessor.LogSwallowed("SelectByIndex/CollapseAfterSelect", ex); }
                     return;
                 }
-                try { if (el.Patterns.ExpandCollapse.TryGetPattern(out var ecp3)) ecp3.Collapse(); } catch { }
+                try { if (el.Patterns.ExpandCollapse.TryGetPattern(out var ecp3)) ecp3.Collapse(); }
+                catch (Exception ex) { CommandProcessor.LogSwallowed("SelectByIndex/CollapseOnRangeError", ex); }
                 throw new InvalidOperationException($"Index {index} out of range (found {children.Length} items)");
             }
             var listBox = el.AsListBox();
@@ -168,7 +194,7 @@ namespace ApexComputerUse
                     string? sel = combo.SelectedItem?.Text;
                     if (sel != null) return sel;
                 }
-                catch { /* SelectionItem pattern not supported - fall through */ }
+                catch (Exception ex) { CommandProcessor.LogSwallowed("GetComboBoxSelected/SelectedItem", ex); }
             }
             var listBox = el.AsListBox();
             if (listBox != null)
@@ -178,7 +204,7 @@ namespace ApexComputerUse
                     var sel = listBox.SelectedItems;
                     if (sel.Length > 0) return sel[0].Text;
                 }
-                catch { /* fall through */ }
+                catch (Exception ex) { CommandProcessor.LogSwallowed("GetComboBoxSelected/listBoxSelectedItems", ex); }
             }
             return "(none)";
         }

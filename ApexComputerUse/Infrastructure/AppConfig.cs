@@ -24,6 +24,11 @@ namespace ApexComputerUse
     ///   APEX_API_KEY           string HTTP API key (overrides auto-generated key)
     ///   APEX_ALLOWED_CHAT_IDS  string Comma-separated Telegram chat IDs whitelist
     ///   APEX_TELEGRAM_TOKEN    string Telegram bot token
+    ///   APEX_WAITFOR_TIMEOUT_MS    int   Default /waitfor timeout in ms (default 5000)
+    ///   APEX_WAITPAGE_TIMEOUT_MS   int   Default /wait-page-load timeout in ms (default 10000)
+    ///   APEX_RETRY_ATTEMPTS        int   Action retry attempts on transient COM errors (default 2, capped 5)
+    ///   APEX_SCAN_CHILD_TIMEOUT_MS int   Per FindAllChildren call ms cap during /elements (default 2000)
+    ///   APEX_FOREGROUND_SETTLE_MS  int   Sleep after SetForegroundWindow / restore in ms (default 100)
     ///
     /// User preference overrides (model paths, API key, etc.) are stored separately
     /// in <c>%APPDATA%\ApexComputerUse\settings.json</c> and take highest priority in the GUI.
@@ -53,6 +58,16 @@ namespace ApexComputerUse
         // path canonicalization.
         public bool     EnableFileIo       { get; init; } = false;
         public string[] FileIoAllowedRoots { get; init; } = Array.Empty<string>();
+
+        // -- Reliability knobs --------------------------------------------------
+        // Tunables for UI-automation timing. Defaults match the previously-hardcoded
+        // values across FlaUIHelper / CommandProcessor; deployments hitting flaky
+        // browser SPAs or slow apps can extend these without recompiling.
+        public int WaitForTimeoutMs    { get; init; } = 5000;   // /waitfor default deadline
+        public int WaitPageTimeoutMs   { get; init; } = 10000;  // /wait-page-load default deadline
+        public int RetryAttempts       { get; init; } = 2;      // RetryTransient attempts (1-5)
+        public int ScanChildTimeoutMs  { get; init; } = 2000;   // per FindAllChildren during /elements
+        public int ForegroundSettleMs  { get; init; } = 100;    // sleep after foreground/restore
 
         // -- Singleton -----------------------------------------------------
 
@@ -119,6 +134,11 @@ namespace ApexComputerUse
                 TestRunnerConfigPath = Str(root, "TestRunnerConfigPath") ?? cfg.TestRunnerConfigPath,
                 EnableFileIo         = Bool(root, "EnableFileIo")        ?? cfg.EnableFileIo,
                 FileIoAllowedRoots   = ReadStringArray(root, "FileIoAllowedRoots") ?? cfg.FileIoAllowedRoots,
+                WaitForTimeoutMs     = Int(root, "WaitForTimeoutMs")     ?? cfg.WaitForTimeoutMs,
+                WaitPageTimeoutMs    = Int(root, "WaitPageTimeoutMs")    ?? cfg.WaitPageTimeoutMs,
+                RetryAttempts        = Int(root, "RetryAttempts")        ?? cfg.RetryAttempts,
+                ScanChildTimeoutMs   = Int(root, "ScanChildTimeoutMs")   ?? cfg.ScanChildTimeoutMs,
+                ForegroundSettleMs   = Int(root, "ForegroundSettleMs")   ?? cfg.ForegroundSettleMs,
             };
         }
 
@@ -163,6 +183,11 @@ namespace ApexComputerUse
                 FileIoAllowedRoots   = E("FILE_IO_ALLOWED_ROOTS") is { } fr
                     ? fr.Split(new[]{';', ','}, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
                     : cfg.FileIoAllowedRoots,
+                WaitForTimeoutMs     = E("WAITFOR_TIMEOUT_MS")    is { } w1 && int.TryParse(w1, out int v1) ? v1 : cfg.WaitForTimeoutMs,
+                WaitPageTimeoutMs    = E("WAITPAGE_TIMEOUT_MS")   is { } w2 && int.TryParse(w2, out int v2) ? v2 : cfg.WaitPageTimeoutMs,
+                RetryAttempts        = E("RETRY_ATTEMPTS")        is { } r  && int.TryParse(r,  out int vr) ? Math.Clamp(vr, 1, 5) : cfg.RetryAttempts,
+                ScanChildTimeoutMs   = E("SCAN_CHILD_TIMEOUT_MS") is { } sc && int.TryParse(sc, out int vs) ? vs : cfg.ScanChildTimeoutMs,
+                ForegroundSettleMs   = E("FOREGROUND_SETTLE_MS")  is { } fs && int.TryParse(fs, out int vf) ? vf : cfg.ForegroundSettleMs,
             };
         }
     }

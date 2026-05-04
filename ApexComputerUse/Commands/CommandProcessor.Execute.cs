@@ -116,14 +116,21 @@ namespace ApexComputerUse
 
         // Surfaces an in-band warning when callers pass a 'value' to an element-only click
         // action. A common AI/agent failure mode is treating 'click' like other computer-use
-        // APIs that take coordinates - the value silently dropped and the click landed on
-        // whatever the current element was (often a top-level Window). Returning a warning
-        // string here puts it in data.result so the caller can self-correct.
-        private static string WarnIgnoredValue(string input, string action) =>
-            string.IsNullOrWhiteSpace(input) ? "" :
-            $"WARNING: '{action}' clicks the current element and ignores 'value'. " +
-            $"For pixel coordinates use 'clickat' (offset from element top-left). " +
-            $"To click a specific control, call /elements then /find that element first.";
+        // APIs that take coordinates - the value is silently dropped and the click lands on
+        // whatever the current element was (often a top-level Window). The warning text is
+        // stashed on the instance and threaded into the response as data.warning by CmdExecute.
+        // Lock-protected because all command dispatch is serialized through _stateLock.
+        private string? _lastActionWarning;
+
+        private string WarnIgnoredValue(string input, string action)
+        {
+            if (string.IsNullOrWhiteSpace(input)) return "";
+            _lastActionWarning =
+                $"'{action}' clicks the current element and ignores 'value'. " +
+                $"For pixel coordinates use 'clickat' (offset from element top-left). " +
+                $"To click a specific control, call /elements then /find that element first.";
+            return "";
+        }
 
         private string WaitFor(string automationId)
         {
@@ -165,7 +172,10 @@ namespace ApexComputerUse
         }
 
         private const int ScanMaxDepth    = 25;
-        private const int ScanChildTimeout = 2000; // ms per FindAllChildren call
+        // Per-call deadline for FindAllChildren during /elements scans. Default 2000ms can
+        // be overridden via APEX_SCAN_CHILD_TIMEOUT_MS for slow-tree apps. Read each scan
+        // so the value is hot-swappable without restart.
+        private static int ScanChildTimeout => AppConfig.Current.ScanChildTimeoutMs;
 
         /// <summary>
         /// Bundle of options threaded through <see cref="ScanElementsIntoMap"/>. Kept as a
@@ -239,12 +249,21 @@ namespace ApexComputerUse
                         _elementHashes.Remove(evictId);
                         _elementReverse.Remove(evicted);
                         _elementParents.Remove(evictId);
+                        _elementDescriptors.Remove(evictId);
                     }
                 }
 
                 bool truncate = options.MaxDepth.HasValue && depth >= options.MaxDepth.Value;
 
                 string nameProp = el.Properties.Name.ValueOrDefault ?? "";
+
+                // Descriptor cache populated now that nameProp is available. Used as the
+                // second rung of stale-recovery (descriptor-based re-find under a recovered
+                // ancestor when parent-walk lands on a generic Group/Pane).
+                _elementDescriptors[id] = new ElementDescriptor(
+                    ct.ToString(),
+                    nameProp,
+                    el.Properties.AutomationId.ValueOrDefault ?? "");
 
                 // Build the ancestor breadcrumb - each level is "ControlType" if Name is empty,
                 // otherwise "Name". Root is just the root's label. Only materialised when the
@@ -375,7 +394,7 @@ namespace ApexComputerUse
                     if (onscreenOnly && c.Properties.IsOffscreen.ValueOrDefault) continue;
                     total += 1 + CountDescendantsBelow(c, onscreenOnly, depth + 1);
                 }
-                catch { /* stale child - skip */ }
+                catch (Exception ex) { LogSwallowed("CountDescendantsBelow/staleChild", ex); }
             }
             return total;
         }

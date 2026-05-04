@@ -65,47 +65,86 @@ namespace ApexComputerUse
 
         public string GetBoundingRect(AutomationElement el)
         {
-            var r = el.BoundingRectangle;
-            return $"X={r.X}  Y={r.Y}  Width={r.Width}  Height={r.Height}";
+            // Stale-guarded: a dead UIA proxy throws COMException / ElementNotAvailableException
+            // on property access. Return a sentinel rather than crash the dispatcher; recovery
+            // happens upstream in CommandProcessor (parent-walk).
+            try
+            {
+                var r = el.BoundingRectangle;
+                return $"X={r.X}  Y={r.Y}  Width={r.Width}  Height={r.Height}";
+            }
+            catch (Exception ex)
+            {
+                CommandProcessor.LogSwallowed("GetBoundingRect/staleProxy", ex);
+                return "(unavailable)";
+            }
         }
 
         public string GetSupportedPatterns(AutomationElement el)
         {
+            // Each IsSupported probe can throw on a stale proxy; wrap individually so a single
+            // dead pattern doesn't void the whole list. Falls back to "(none)" when the element
+            // is wholly unreachable.
             var supported = new List<string>();
-            if (el.Patterns.Invoke.IsSupported)         supported.Add("Invoke");
-            if (el.Patterns.Value.IsSupported)          supported.Add("Value");
-            if (el.Patterns.RangeValue.IsSupported)     supported.Add("RangeValue");
-            if (el.Patterns.Selection.IsSupported)      supported.Add("Selection");
-            if (el.Patterns.SelectionItem.IsSupported)  supported.Add("SelectionItem");
-            if (el.Patterns.Toggle.IsSupported)         supported.Add("Toggle");
-            if (el.Patterns.ExpandCollapse.IsSupported) supported.Add("ExpandCollapse");
-            if (el.Patterns.Grid.IsSupported)           supported.Add("Grid");
-            if (el.Patterns.GridItem.IsSupported)       supported.Add("GridItem");
-            if (el.Patterns.Table.IsSupported)          supported.Add("Table");
-            if (el.Patterns.Scroll.IsSupported)         supported.Add("Scroll");
-            if (el.Patterns.ScrollItem.IsSupported)     supported.Add("ScrollItem");
-            if (el.Patterns.Transform.IsSupported)      supported.Add("Transform");
-            if (el.Patterns.Transform2.IsSupported)     supported.Add("Transform2");
-            if (el.Patterns.Dock.IsSupported)           supported.Add("Dock");
-            if (el.Patterns.Text.IsSupported)           supported.Add("Text");
-            if (el.Patterns.Window.IsSupported)         supported.Add("Window");
-            if (el.Patterns.MultipleView.IsSupported)   supported.Add("MultipleView");
-            if (el.Patterns.VirtualizedItem.IsSupported)supported.Add("VirtualizedItem");
-            if (el.Patterns.Annotation.IsSupported)     supported.Add("Annotation");
+            void Probe(string label, Func<bool> check)
+            {
+                try { if (check()) supported.Add(label); }
+                catch (Exception ex) { CommandProcessor.LogSwallowed($"GetSupportedPatterns/{label}", ex); }
+            }
+            Probe("Invoke",          () => el.Patterns.Invoke.IsSupported);
+            Probe("Value",           () => el.Patterns.Value.IsSupported);
+            Probe("RangeValue",      () => el.Patterns.RangeValue.IsSupported);
+            Probe("Selection",       () => el.Patterns.Selection.IsSupported);
+            Probe("SelectionItem",   () => el.Patterns.SelectionItem.IsSupported);
+            Probe("Toggle",          () => el.Patterns.Toggle.IsSupported);
+            Probe("ExpandCollapse",  () => el.Patterns.ExpandCollapse.IsSupported);
+            Probe("Grid",            () => el.Patterns.Grid.IsSupported);
+            Probe("GridItem",        () => el.Patterns.GridItem.IsSupported);
+            Probe("Table",           () => el.Patterns.Table.IsSupported);
+            Probe("Scroll",          () => el.Patterns.Scroll.IsSupported);
+            Probe("ScrollItem",      () => el.Patterns.ScrollItem.IsSupported);
+            Probe("Transform",       () => el.Patterns.Transform.IsSupported);
+            Probe("Transform2",      () => el.Patterns.Transform2.IsSupported);
+            Probe("Dock",            () => el.Patterns.Dock.IsSupported);
+            Probe("Text",            () => el.Patterns.Text.IsSupported);
+            Probe("Window",          () => el.Patterns.Window.IsSupported);
+            Probe("MultipleView",    () => el.Patterns.MultipleView.IsSupported);
+            Probe("VirtualizedItem", () => el.Patterns.VirtualizedItem.IsSupported);
+            Probe("Annotation",      () => el.Patterns.Annotation.IsSupported);
             return supported.Count > 0 ? string.Join(", ", supported) : "(none)";
         }
 
-        /// <summary>Returns whether the element is enabled.</summary>
-        public string IsElementEnabled(AutomationElement el) =>
-            el.Properties.IsEnabled.ValueOrDefault.ToString();
+        /// <summary>Returns whether the element is enabled. Stale-safe: returns "False" on COM failure.</summary>
+        public string IsElementEnabled(AutomationElement el)
+        {
+            try { return el.Properties.IsEnabled.ValueOrDefault.ToString(); }
+            catch (Exception ex)
+            {
+                CommandProcessor.LogSwallowed("IsElementEnabled/staleProxy", ex);
+                return "False";
+            }
+        }
 
-        /// <summary>Returns whether the element is visible (not off-screen).</summary>
-        public string IsElementVisible(AutomationElement el) =>
-            (!el.Properties.IsOffscreen.ValueOrDefault).ToString();
+        /// <summary>Returns whether the element is visible (not off-screen). Stale-safe: returns "False" on COM failure.</summary>
+        public string IsElementVisible(AutomationElement el)
+        {
+            try { return (!el.Properties.IsOffscreen.ValueOrDefault).ToString(); }
+            catch (Exception ex)
+            {
+                CommandProcessor.LogSwallowed("IsElementVisible/staleProxy", ex);
+                return "False";
+            }
+        }
 
         // -- Focus ---------------------------------------------------------
 
-        public void SetFocus(AutomationElement el) => el.Focus();
+        public void SetFocus(AutomationElement el)
+        {
+            // WPF / WinForms controls often refuse Focus() unless their hosting window
+            // is foreground; bring it forward first so callers see consistent behaviour.
+            BringContainerWindowToFront(el);
+            el.Focus();
+        }
 
         public string GetFocusedElement()
         {
@@ -137,9 +176,19 @@ namespace ApexComputerUse
         }
 
         /// <summary>Mouse-only left click (bypasses pattern logic).</summary>
-        public void MouseClickElement(AutomationElement el) => el.Click();
+        public void MouseClickElement(AutomationElement el)
+        {
+            // Mouse input is window-scoped: clicks land in whichever window is foreground.
+            // Bring the container forward so the click reaches the intended target.
+            BringContainerWindowToFront(el);
+            el.Click();
+        }
 
-        public void RightClickElement(AutomationElement el) => el.RightClick();
+        public void RightClickElement(AutomationElement el)
+        {
+            BringContainerWindowToFront(el);
+            el.RightClick();
+        }
 
         public void DoubleClickElement(AutomationElement el)
         {
@@ -149,6 +198,7 @@ namespace ApexComputerUse
 
         public void MiddleClickElement(AutomationElement el)
         {
+            BringContainerWindowToFront(el);
             var pt = el.GetClickablePoint();
             Mouse.Click(pt, MouseButton.Middle);
         }
@@ -156,6 +206,7 @@ namespace ApexComputerUse
         /// <summary>Click at x,y offset from the element's top-left corner.</summary>
         public void ClickAtOffset(AutomationElement el, int offsetX, int offsetY)
         {
+            BringContainerWindowToFront(el);
             var r = el.BoundingRectangle;
             Mouse.Click(new System.Drawing.Point((int)r.X + offsetX, (int)r.Y + offsetY));
         }

@@ -16,6 +16,15 @@ namespace ApexComputerUse
         private readonly Dictionary<int, string>            _elementHashes = new();   // parallel to _elementMap - stores each element's hash so a subtree can be re-scanned without re-walking from the window root
         private readonly Dictionary<AutomationElement, int> _elementReverse = new();  // fast-path for /find ID recovery; default equality uses UIA CompareElements via AutomationElement.Equals
         private readonly Dictionary<int, int>               _elementParents = new();  // child id -> parent id; used to walk up to a live ancestor when an element goes stale (graceful-fallback recovery)
+
+        // Captured descriptor (controlType + name + automationId) for each scanned element.
+        // Used as a second recovery rung after parent-walk: if we walked >1 hop or landed on a
+        // Window, we can scope a re-find under that ancestor by descriptor and prefer the unique
+        // match over a generic ancestor handle. Cached at scan time when the element is fresh.
+        private readonly Dictionary<int, ElementDescriptor> _elementDescriptors = new();
+
+        private readonly record struct ElementDescriptor(string ControlType, string Name, string AutomationId);
+
         private readonly Queue<int>                         _elementInsertOrder = new();  // FIFO tracker so the 50k cap evicts oldest IDs instead of nuking the whole map
         private readonly Dictionary<int, Window>            _windowMap     = new();
         private IntPtr _mappedWindowHandle = IntPtr.Zero;
@@ -169,6 +178,11 @@ namespace ApexComputerUse
         private static CommandResponse OkWithExtras(string msg, string? data, Dictionary<string, string> extras) =>
             new() { Success = true, Message = msg, Data = data, Extras = extras };
 
+        // Soft-advisory variant: success path that also flags an in-band warning (graceful
+        // fallback used, optional value field ignored, etc.). Surfaces as ApexResult.Data["warning"].
+        private static CommandResponse OkWithWarning(string msg, string? data, string warning) =>
+            new() { Success = true, Message = msg, Data = data, Warning = warning };
+
         // Failure variant that attaches structured error data (merged into ApexResult.ErrorData
         // and surfaced as the response field "error_data"). Lets pattern-using actions report
         // supported_patterns / element_state without losing the human-readable error string.
@@ -186,29 +200,193 @@ namespace ApexComputerUse
             catch { return false; }
         }
 
+        // -- Diagnostics: swallowed-exception telemetry ----------------------
+        // Many sites catch and intentionally fall through (stale UIA proxies, mid-enumeration
+        // tree mutations, optional pattern probes). Historically those catches were silent;
+        // we now bump a counter and emit a Debug log so failures stop being invisible.
+        // Counter is exposed via /metrics for runtime diagnosis without requiring log scrape.
+        private static long _swallowedExCount;
+        public static long  SwallowedExceptions => Volatile.Read(ref _swallowedExCount);
+
+        internal static void LogSwallowed(string site, Exception ex)
+        {
+            Interlocked.Increment(ref _swallowedExCount);
+            AppLog.Debug($"[{site}] swallowed: {ex.GetType().Name}: {ex.Message}");
+        }
+
+        // -- Transient retry --------------------------------------------------
+        // Wraps an action call so a single transient COM / UIA timeout doesn't immediately
+        // surface as a failure. Browser SPAs and apps that rebuild their accessibility tree
+        // between events emit these intermittently; one retry usually clears them.
+        //
+        // Retries ONLY on COMException, ElementNotAvailableException, TimeoutException -
+        // i.e. signals of stale / busy proxies, not semantic failures. Semantic exceptions
+        // (NoClickablePoint, NotSupportedException, ArgumentException, etc.) propagate
+        // immediately so BuildErrorData can attach pattern hints to the response.
+        //
+        // attempts is 1-based total tries; default 2 = single retry. Cap at 5.
+        private static T RetryTransient<T>(Func<T> op, int attempts = 2)
+        {
+            if (attempts < 1) attempts = 1;
+            if (attempts > 5) attempts = 5;
+            for (int i = 0; ; i++)
+            {
+                try { return op(); }
+                catch (System.Runtime.InteropServices.COMException ex) when (i < attempts - 1)
+                {
+                    LogSwallowed("RetryTransient/COMException", ex);
+                    Thread.Sleep(50 * (i + 1));
+                }
+                catch (FlaUI.Core.Exceptions.ElementNotAvailableException ex) when (i < attempts - 1)
+                {
+                    LogSwallowed("RetryTransient/ElementNotAvailable", ex);
+                    Thread.Sleep(50 * (i + 1));
+                }
+                catch (TimeoutException ex) when (i < attempts - 1)
+                {
+                    LogSwallowed("RetryTransient/Timeout", ex);
+                    Thread.Sleep(50 * (i + 1));
+                }
+            }
+        }
+
+        // Action overload (no return value) - thin shim around the generic helper.
+        private static void RetryTransient(Action op, int attempts = 2) =>
+            RetryTransient<bool>(() => { op(); return true; }, attempts);
+
+        // -- Polling backoff schedule -----------------------------------------
+        // Progressive backoff for /waitfor and /wait-window when the caller didn't pin
+        // an explicit Interval. Schedule: 50, 50, 100, 100, 200, 200, 400, 400, 500 ...
+        // Saves CPU on long waits (e.g. 30s polling at 50ms = 600 ticks vs ~80 with backoff)
+        // while keeping the first few ticks fast for near-immediate transitions.
+        // No jitter - this is single-process / single-client so thundering-herd doesn't apply.
+        private static int PollBackoffMs(int tick)
+        {
+            if (tick < 0) tick = 0;
+            int step = tick / 2;          // double every 2 ticks
+            if (step > 4) step = 4;       // 50<<4 = 800, but cap below to 500
+            int delay = 50 << step;       // 50, 100, 200, 400, 800
+            return Math.Min(delay, 500);
+        }
+
         /// <summary>
-        /// Graceful-fallback recovery for a stale element. Walks up the cached parent chain
-        /// (populated during /elements scans) and returns the first ancestor that is still
-        /// valid. Lets callers complete actions like 'keys' or 'focus' against a live ancestor
-        /// instead of getting an outright failure when the target app refreshes the tree
-        /// (a common case for browser canvases and SPA route changes).
+        /// Graceful-fallback recovery for a stale element. Two rungs:
+        ///   Rung 1 - parent walk: climb the cached parent chain to the first live ancestor.
+        ///   Rung 2 - descriptor re-find (when rung 1 surfaced a generic ancestor): scope a
+        ///            FindFirst under that ancestor for an element matching the original
+        ///            element's (controlType, name, automationId). Only accepted when the
+        ///            descriptor matches uniquely; otherwise we fall back to the rung-1 result.
+        ///
+        /// Letting actions land on the original-equivalent element (e.g. a re-rendered START
+        /// button) preserves their intended semantics; landing on a generic Group ancestor
+        /// often does not (canvas keystroke handlers don't bubble through a Pane).
         ///
         /// Returns (null, null, hops) when no live ancestor is cached - caller should then
         /// emit the original stale-element error so the agent re-scans.
         /// </summary>
         private (AutomationElement? element, int? id, int hops) TryRecoverViaParent(int staleId)
         {
+            // Snapshot the original descriptor before walking - even if it's evicted later we
+            // can still try descriptor-based re-find with what we had.
+            _elementDescriptors.TryGetValue(staleId, out var originalDescriptor);
+
             int hops = 0;
             int currentId = staleId;
             while (_elementParents.TryGetValue(currentId, out int parentId))
             {
                 hops++;
                 if (_elementMap.TryGetValue(parentId, out var parent) && IsElementValid(parent))
+                {
+                    // Rung 2: try descriptor re-find under this ancestor when the original
+                    // descriptor has at least one disambiguating field. Skip the lookup for
+                    // the trivial 1-hop-to-immediate-parent case where descriptor matching
+                    // would just rediscover the same dead handle, and skip when the descriptor
+                    // is too generic (no name, no automationId) - matching too many siblings
+                    // is worse than a clean parent fallback.
+                    bool worthDescriptorSearch = hops >= 1
+                        && (!string.IsNullOrEmpty(originalDescriptor.Name)
+                            || !string.IsNullOrEmpty(originalDescriptor.AutomationId));
+                    if (worthDescriptorSearch)
+                    {
+                        var match = TryDescriptorRefind(parent, originalDescriptor);
+                        if (match != null)
+                        {
+                            // Index the rediscovered element under the same id so subsequent
+                            // recoveries find it directly via _elementMap. The id stays stable
+                            // because the descriptor + parent are unchanged.
+                            _elementMap[staleId]     = match;
+                            _elementReverse[match]   = staleId;
+                            return (match, staleId, 0); // hops=0 to signal "exact descriptor match"
+                        }
+                    }
                     return (parent, parentId, hops);
+                }
                 currentId = parentId;
                 if (hops > 20) break; // sanity cap - typical UIA trees are <15 deep; guards against pathological cycles
             }
             return (null, null, hops);
+        }
+
+        /// <summary>
+        /// Searches under <paramref name="root"/> for a single descendant matching the cached
+        /// descriptor. Returns the match if exactly one is found; null if zero or ambiguous
+        /// (two or more matches mean the agent originally selected one specific instance and
+        /// we'd be guessing which to substitute).
+        /// </summary>
+        private AutomationElement? TryDescriptorRefind(AutomationElement root, ElementDescriptor desc)
+        {
+            try
+            {
+                AutomationElement[] matches;
+                try
+                {
+                    if (!string.IsNullOrEmpty(desc.AutomationId))
+                    {
+                        matches = root.FindAllDescendants(cf => cf.ByAutomationId(desc.AutomationId));
+                    }
+                    else
+                    {
+                        // Name-based re-find. ControlType filter narrows the search to avoid
+                        // false matches with same-named elements of different types (a Text
+                        // label vs a Button labeled the same).
+                        matches = root.FindAllDescendants(cf => cf.ByName(desc.Name));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogSwallowed("TryDescriptorRefind/FindAllDescendants", ex);
+                    return null;
+                }
+
+                if (matches.Length == 0) return null;
+
+                // Filter by control type when we have it - reduces ambiguity.
+                AutomationElement[] filtered = matches;
+                if (!string.IsNullOrEmpty(desc.ControlType))
+                {
+                    var typed = new List<AutomationElement>(matches.Length);
+                    foreach (var m in matches)
+                    {
+                        try
+                        {
+                            if (string.Equals(m.Properties.ControlType.ValueOrDefault.ToString(),
+                                              desc.ControlType, StringComparison.OrdinalIgnoreCase))
+                                typed.Add(m);
+                        }
+                        catch (Exception ex) { LogSwallowed("TryDescriptorRefind/controlTypeFilter", ex); }
+                    }
+                    if (typed.Count > 0) filtered = typed.ToArray();
+                }
+
+                // Accept only on a unique match - two same-descriptor elements means the agent
+                // originally picked one and we don't know which.
+                return filtered.Length == 1 ? filtered[0] : null;
+            }
+            catch (Exception ex)
+            {
+                LogSwallowed("TryDescriptorRefind/outer", ex);
+                return null;
+            }
         }
 
         /// <summary>

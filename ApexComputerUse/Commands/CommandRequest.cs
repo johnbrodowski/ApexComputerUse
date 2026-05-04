@@ -56,6 +56,12 @@ namespace ApexComputerUse
         public string  Message { get; set; } = "";
         public string? Data    { get; set; }
 
+        // Optional caller-facing advisory string. Use this for soft signals like graceful-fallback
+        // notes ("ran on parent ancestor") or hints that a 'value' field was ignored. Surfaces as
+        // ApexResult.Data["warning"] so machine readers can branch on it without parsing free text
+        // out of Data. Null when no advisory applies. Distinct from ErrorData (hard failure detail).
+        public string? Warning { get; set; }
+
         // Optional structured side-channel for handlers that want to surface extra fields
         // alongside Data (e.g. gettext returning the source UIA pattern). Merged into the
         // final ApexResult.Data dictionary by ApexResult.From. Null when nothing was attached.

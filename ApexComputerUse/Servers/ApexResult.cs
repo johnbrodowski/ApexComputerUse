@@ -21,6 +21,13 @@ namespace ApexComputerUse
                 data ??= new Dictionary<string, string>();
                 data["message"] = cr.Message;
             }
+            // Soft advisory (graceful-fallback notes, ignored-value hints). Promoted to a
+            // dedicated key so callers can inspect data.warning without parsing Data text.
+            if (!string.IsNullOrEmpty(cr.Warning))
+            {
+                data ??= new Dictionary<string, string>();
+                data["warning"] = cr.Warning;
+            }
             // Merge handler-supplied extras (e.g. gettext source). Extras win on key collision
             // so handlers can deliberately override a default field.
             if (cr.Extras != null)

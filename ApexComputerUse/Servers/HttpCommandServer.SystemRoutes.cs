@@ -77,10 +77,11 @@ namespace ApexComputerUse
                 Action  = "metrics",
                 Data    = new Dictionary<string, string>
                 {
-                    ["total_requests"]   = Volatile.Read(ref _totalRequests).ToString(),
-                    ["error_requests"]   = Volatile.Read(ref _errorRequests).ToString(),
-                    ["active_requests"]  = Volatile.Read(ref _activeRequests).ToString(),
-                    ["routes"]           = JsonSerializer.Serialize(routes, FormatAdapter.s_compact)
+                    ["total_requests"]       = Volatile.Read(ref _totalRequests).ToString(),
+                    ["error_requests"]       = Volatile.Read(ref _errorRequests).ToString(),
+                    ["active_requests"]      = Volatile.Read(ref _activeRequests).ToString(),
+                    ["swallowed_exceptions"] = CommandProcessor.SwallowedExceptions.ToString(),
+                    ["routes"]               = JsonSerializer.Serialize(routes, FormatAdapter.s_compact)
                 }
             };
         }
