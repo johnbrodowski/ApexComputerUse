@@ -12,8 +12,8 @@ namespace ApexComputerUse
             return action.ToLowerInvariant() switch
             {
                 // -- Click / Mouse -----------------------------------------
-                "click"                              => Do(() => _helper.ClickElement(el)),
-                "mouse-click" or "mouseclick"        => Do(() => _helper.MouseClickElement(el)),
+                "click"                              => Do(() => _helper.ClickElement(el))      + WarnIgnoredValue(input, "click"),
+                "mouse-click" or "mouseclick"        => Do(() => _helper.MouseClickElement(el)) + WarnIgnoredValue(input, "mouseclick"),
                 "invoke"                             => Do(() => _helper.InvokeButton(el)),
                 "right-click" or "rightclick"        => Do(() => _helper.RightClickElement(el)),
                 "double-click" or "doubleclick"      => Do(() => _helper.DoubleClickElement(el)),
@@ -113,6 +113,17 @@ namespace ApexComputerUse
                 _ => $"Unknown action '{action}'. Send 'help' for a list."
             };
         }
+
+        // Surfaces an in-band warning when callers pass a 'value' to an element-only click
+        // action. A common AI/agent failure mode is treating 'click' like other computer-use
+        // APIs that take coordinates - the value silently dropped and the click landed on
+        // whatever the current element was (often a top-level Window). Returning a warning
+        // string here puts it in data.result so the caller can self-correct.
+        private static string WarnIgnoredValue(string input, string action) =>
+            string.IsNullOrWhiteSpace(input) ? "" :
+            $"WARNING: '{action}' clicks the current element and ignores 'value'. " +
+            $"For pixel coordinates use 'clickat' (offset from element top-left). " +
+            $"To click a specific control, call /elements then /find that element first.";
 
         private string WaitFor(string automationId)
         {
