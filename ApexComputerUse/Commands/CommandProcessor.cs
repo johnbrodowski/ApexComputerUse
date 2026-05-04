@@ -20,7 +20,22 @@ namespace ApexComputerUse
         private readonly Dictionary<int, Window>            _windowMap     = new();
         private IntPtr _mappedWindowHandle = IntPtr.Zero;
 
-        public AutomationElement? CurrentElement { get; private set; }
+        private AutomationElement? _currentElement;
+        // Captured at the moment CurrentElement is assigned, while the element is still fresh
+        // and reverse-mappable. Stale UIA proxies fail equality/hash lookups, so we can't rely
+        // on _elementReverse to recover the id later - we have to remember it up front.
+        private int?               _currentElementId;
+        public AutomationElement? CurrentElement
+        {
+            get => _currentElement;
+            private set
+            {
+                _currentElement = value;
+                _currentElementId = (value != null && _elementReverse.TryGetValue(value, out int id))
+                    ? id
+                    : (int?)null;
+            }
+        }
         public Window?            CurrentWindow  { get; private set; }
 
         /// <summary>

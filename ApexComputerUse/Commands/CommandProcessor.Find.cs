@@ -263,12 +263,14 @@ namespace ApexComputerUse
 
             // If a numeric element ID was provided directly (e.g. element=123 or id=123),
             // look it up in the map so callers don't need a separate /find round-trip.
-            AutomationElement? target = CurrentElement;
+            AutomationElement? target   = CurrentElement;
+            int?               targetId = _currentElementId;  // cached at CurrentElement-set time; survives staleness
             if (!string.IsNullOrWhiteSpace(req.AutomationId) &&
                 int.TryParse(req.AutomationId, out int elemId) &&
                 _elementMap.TryGetValue(elemId, out var mappedEl))
             {
-                target = mappedEl;
+                target   = mappedEl;
+                targetId = elemId;
             }
 
             if (target == null) return Fail("No element selected. Use 'find' first or pass element=<id>.");
@@ -278,12 +280,14 @@ namespace ApexComputerUse
             string fallbackNote = "";
             if (!IsElementValid(target))
             {
-                var (recovered, recoveredId, hops) = TryRecoverViaParent(target);
+                if (targetId == null)
+                    return Fail("The selected element is stale and no id was cached for recovery. Run 'find' again.");
+                var (recovered, recoveredId, hops) = TryRecoverViaParent(targetId.Value);
                 if (recovered == null || recoveredId == null)
                     return Fail("The selected element is stale and no live ancestor was cached. Run 'find' again.");
                 target           = recovered;
                 CurrentElement   = recovered;
-                fallbackNote     = $"FALLBACK: original element was stale; ran action on live ancestor [map:{recoveredId}] {hops} hop(s) up.\n";
+                fallbackNote     = $"FALLBACK: original element [map:{targetId}] was stale; ran action on live ancestor [map:{recoveredId}] {hops} hop(s) up.\n";
             }
 
             // Source-emitting text reads are handled inline so the response can carry the
