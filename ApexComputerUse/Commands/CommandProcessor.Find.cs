@@ -81,7 +81,18 @@ namespace ApexComputerUse
             if (byId && int.TryParse(searchVal, out int mappedId) && _elementMap.TryGetValue(mappedId, out var mappedEl))
             {
                 if (!IsElementValid(mappedEl))
-                    return Fail($"Element [map:{mappedId}] is stale - the target app has changed state. Run 'find' again.");
+                {
+                    // Graceful fallback: walk the cached parent chain for a still-live ancestor
+                    // before giving up. Common after browser SPA route changes / canvas refreshes.
+                    var (recovered, recoveredId, hops) = TryRecoverViaParent(mappedId);
+                    if (recovered == null || recoveredId == null)
+                        return Fail($"Element [map:{mappedId}] is stale and no live ancestor was cached. Run 'find' again.");
+                    CurrentElement = recovered;
+                    _elementDesc   = _helper.Describe(recovered);
+                    return Ok(
+                        $"Window: {wTitle}{wNote} | Element [map:{mappedId}] was stale; fell back to live ancestor [map:{recoveredId}] {hops} hop(s) up",
+                        BuildFindElementJson(recovered, includeExtra, recoveredId.Value));
+                }
                 CurrentElement = mappedEl;
                 _elementDesc   = _helper.Describe(mappedEl);
                 return Ok($"Window: {wTitle}{wNote} | Element [map:{mappedId}]",
@@ -261,7 +272,19 @@ namespace ApexComputerUse
             }
 
             if (target == null) return Fail("No element selected. Use 'find' first or pass element=<id>.");
-            if (!IsElementValid(target)) return Fail("The selected element is stale - the target app has changed state. Run 'find' again.");
+            // Stale-element graceful fallback: rather than punt back to the caller, walk the
+            // cached parent chain for a still-live ancestor and run the action against it.
+            // The fallback note below surfaces in data.result so the caller can see what happened.
+            string fallbackNote = "";
+            if (!IsElementValid(target))
+            {
+                var (recovered, recoveredId, hops) = TryRecoverViaParent(target);
+                if (recovered == null || recoveredId == null)
+                    return Fail("The selected element is stale and no live ancestor was cached. Run 'find' again.");
+                target           = recovered;
+                CurrentElement   = recovered;
+                fallbackNote     = $"FALLBACK: original element was stale; ran action on live ancestor [map:{recoveredId}] {hops} hop(s) up.\n";
+            }
 
             // Source-emitting text reads are handled inline so the response can carry the
             // UIA pattern (TextPattern / ValuePattern / LegacyIAccessible / Name) that
@@ -303,9 +326,10 @@ namespace ApexComputerUse
                     ? FailWithData(ex.Message, errorData)
                     : Fail(ex.Message);
             }
-            return string.IsNullOrEmpty(result)
+            string combined = (fallbackNote + result).TrimEnd();
+            return string.IsNullOrEmpty(combined)
                 ? Ok($"'{req.Action}' executed.")
-                : Ok($"'{req.Action}' executed.", result);
+                : Ok($"'{req.Action}' executed.", combined);
         }
 
         // -- Structured error data ------------------------------------------------

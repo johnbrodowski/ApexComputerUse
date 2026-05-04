@@ -15,6 +15,7 @@ namespace ApexComputerUse
         private readonly Dictionary<int, AutomationElement> _elementMap    = new();
         private readonly Dictionary<int, string>            _elementHashes = new();   // parallel to _elementMap - stores each element's hash so a subtree can be re-scanned without re-walking from the window root
         private readonly Dictionary<AutomationElement, int> _elementReverse = new();  // fast-path for /find ID recovery; default equality uses UIA CompareElements via AutomationElement.Equals
+        private readonly Dictionary<int, int>               _elementParents = new();  // child id -> parent id; used to walk up to a live ancestor when an element goes stale (graceful-fallback recovery)
         private readonly Queue<int>                         _elementInsertOrder = new();  // FIFO tracker so the 50k cap evicts oldest IDs instead of nuking the whole map
         private readonly Dictionary<int, Window>            _windowMap     = new();
         private IntPtr _mappedWindowHandle = IntPtr.Zero;
@@ -168,6 +169,47 @@ namespace ApexComputerUse
         {
             try { return el.Properties.ProcessId.ValueOrDefault > 0; }
             catch { return false; }
+        }
+
+        /// <summary>
+        /// Graceful-fallback recovery for a stale element. Walks up the cached parent chain
+        /// (populated during /elements scans) and returns the first ancestor that is still
+        /// valid. Lets callers complete actions like 'keys' or 'focus' against a live ancestor
+        /// instead of getting an outright failure when the target app refreshes the tree
+        /// (a common case for browser canvases and SPA route changes).
+        ///
+        /// Returns (null, null, hops) when no live ancestor is cached - caller should then
+        /// emit the original stale-element error so the agent re-scans.
+        /// </summary>
+        private (AutomationElement? element, int? id, int hops) TryRecoverViaParent(int staleId)
+        {
+            int hops = 0;
+            int currentId = staleId;
+            while (_elementParents.TryGetValue(currentId, out int parentId))
+            {
+                hops++;
+                if (_elementMap.TryGetValue(parentId, out var parent) && IsElementValid(parent))
+                    return (parent, parentId, hops);
+                currentId = parentId;
+                if (hops > 20) break; // sanity cap - typical UIA trees are <15 deep; guards against pathological cycles
+            }
+            return (null, null, hops);
+        }
+
+        /// <summary>
+        /// Lookup variant for cases where the caller has the AutomationElement reference but
+        /// not its cached id (e.g. the /exec stale-check site, where target may be CurrentElement).
+        /// Wrapped in try/catch because UIA equality on a stale COM proxy can throw.
+        /// </summary>
+        private (AutomationElement? element, int? id, int hops) TryRecoverViaParent(AutomationElement stale)
+        {
+            int staleId;
+            try
+            {
+                if (!_elementReverse.TryGetValue(stale, out staleId)) return (null, null, 0);
+            }
+            catch { return (null, null, 0); }
+            return TryRecoverViaParent(staleId);
         }
 
         private static CommandResponse Fail(string msg) =>

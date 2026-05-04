@@ -224,6 +224,7 @@ namespace ApexComputerUse
                 _elementMap[id]     = el;
                 _elementHashes[id]  = hash;
                 _elementReverse[el] = id;
+                if (parentId.HasValue) _elementParents[id] = parentId.Value; // cache parent for stale-element recovery
                 if (isNewId) _elementInsertOrder.Enqueue(id);
 
                 // FIFO eviction at the cap - preserves most recently inserted IDs instead of
@@ -237,6 +238,7 @@ namespace ApexComputerUse
                         _elementMap.Remove(evictId);
                         _elementHashes.Remove(evictId);
                         _elementReverse.Remove(evicted);
+                        _elementParents.Remove(evictId);
                     }
                 }
 
