@@ -257,8 +257,9 @@ namespace ApexComputerUse
                 try
                 {
                     byte[] bytes = Convert.FromBase64String(canvas);
-                    using var ms = new MemoryStream(bytes);
-                    return new Bitmap(Image.FromStream(ms));
+                    using var ms  = new MemoryStream(bytes);
+                    using var img = Image.FromStream(ms);
+                    return new Bitmap(img);
                 }
                 catch { /* fall through to blank */ }
             }

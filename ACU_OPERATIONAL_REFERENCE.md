@@ -1,17 +1,17 @@
 # ApexComputerUse — Operational Reference
 
-> **Auto-start:** the HTTP server starts automatically when the app launches (`HttpAutoStart = true`, `HttpBindAll = true`). No manual click required. On first launch a UAC prompt configures the URL ACL and firewall rule once.
+> **Auto-start:** the HTTP server starts automatically when the app launches (`HttpAutoStart = true`). By default it binds to localhost only (`HttpBindAll = false`). On first launch a UAC prompt configures the URL ACL and firewall rule once.
 
 ## Authentication
 
-API key: d4x7kiS8XeeWxJ0XFNdrs7k_upavnAOS
+API key: `<key>` (resolves from `appsettings.json` → `APEX_API_KEY` env var → `%APPDATA%\ApexComputerUse\settings.json`; auto-generated on first run if absent).
 
 Every request requires the API key from the **Remote Control** tab. Three equivalent methods:
 
 ```bash
-curl -H "X-Api-Key: <key>" http://localhost:8081/ping
-curl -H "Authorization: Bearer <key>" http://localhost:8081/ping
-curl "http://localhost:8081/ping?apiKey=<key>"
+curl -H "X-Api-Key: <key>" http://localhost:8080/ping
+curl -H "Authorization: Bearer <key>" http://localhost:8080/ping
+curl "http://localhost:8080/ping?apiKey=<key>"
 ```
 
 Missing or invalid key returns **HTTP 401**. The interactive console at `GET /` pre-fills the key automatically.
@@ -28,23 +28,23 @@ ping → windows → find → exec → find → exec → ...
 
 ```bash
 # 1. Confirm server is up
-curl -H "X-Api-Key: <key>" http://localhost:8081/ping
+curl -H "X-Api-Key: <key>" http://localhost:8080/ping
 
 # 2. List open windows (get IDs and titles)
-curl -H "X-Api-Key: <key>" http://localhost:8081/windows
+curl -H "X-Api-Key: <key>" http://localhost:8080/windows
 
 # 3. Find a window and element
-curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/find \
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8080/find \
   -H "Content-Type: application/json" \
   -d '{"window":"Notepad","name":"Text Editor","type":"Edit"}'
 
 # 4. Execute an action on the found element
-curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/exec \
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8080/exec \
   -H "Content-Type: application/json" \
   -d '{"action":"type","value":"Hello World"}'
 
 # 5. Current selection state
-curl -H "X-Api-Key: <key>" http://localhost:8081/status
+curl -H "X-Api-Key: <key>" http://localhost:8080/status
 ```
 
 ---
@@ -53,19 +53,19 @@ curl -H "X-Api-Key: <key>" http://localhost:8081/status
 
 ```bash
 # List all open windows with stable IDs
-curl -H "X-Api-Key: <key>" http://localhost:8081/windows
+curl -H "X-Api-Key: <key>" http://localhost:8080/windows
 
 # All elements in the last found window (nested JSON with IDs + bounding boxes)
-curl -H "X-Api-Key: <key>" http://localhost:8081/elements
+curl -H "X-Api-Key: <key>" http://localhost:8080/elements
 
 # Onscreen elements only — prunes offscreen subtrees (~80% fewer elements on browser pages)
-curl -H "X-Api-Key: <key>" "http://localhost:8081/elements?onscreen=true"
+curl -H "X-Api-Key: <key>" "http://localhost:8080/elements?onscreen=true"
 
 # Filter by ControlType
-curl -H "X-Api-Key: <key>" "http://localhost:8081/elements?onscreen=true&type=Button"
+curl -H "X-Api-Key: <key>" "http://localhost:8080/elements?onscreen=true&type=Button"
 
 # UI map — returns colour-coded PNG of element tree (base64)
-curl -H "X-Api-Key: <key>" http://localhost:8081/uimap
+curl -H "X-Api-Key: <key>" http://localhost:8080/uimap
 ```
 
 Element JSON shape:
@@ -88,26 +88,26 @@ Locates a window and optionally an element. Sets the current context for all sub
 
 ```bash
 # By window title only (fuzzy match)
-curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/find \
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8080/find \
   -d '{"window":"Notepad"}'
 
 # By window + element name + ControlType filter
-curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/find \
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8080/find \
   -H "Content-Type: application/json" \
   -d '{"window":"Calculator","name":"Equals","type":"Button"}'
 
 # By window + AutomationId
-curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/find \
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8080/find \
   -H "Content-Type: application/json" \
   -d '{"window":"Calculator","id":"equalButton"}'
 
 # By numeric IDs (fastest — direct map lookup, no fuzzy search)
-curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/find \
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8080/find \
   -H "Content-Type: application/json" \
   -d '{"window":1466489411,"id":105}'
 
 # Via GET (no body required)
-curl -H "X-Api-Key: <key>" "http://localhost:8081/find?window=Notepad&name=Text+Editor&type=Edit"
+curl -H "X-Api-Key: <key>" "http://localhost:8080/find?window=Notepad&name=Text+Editor&type=Edit"
 ```
 
 **Find fields:**
@@ -131,12 +131,12 @@ curl -H "X-Api-Key: <key>" "http://localhost:8081/find?window=Notepad&name=Text+
 Runs an action on the last found element.
 
 ```bash
-curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/exec \
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8080/exec \
   -H "Content-Type: application/json" \
   -d '{"action":"click"}'
 
 # Via GET shorthand
-curl -H "X-Api-Key: <key>" "http://localhost:8081/exec?action=gettext"
+curl -H "X-Api-Key: <key>" "http://localhost:8080/exec?action=gettext"
 ```
 
 ---
@@ -291,20 +291,20 @@ Returns a base64-encoded PNG in the `data.result` field.
 
 ```bash
 # Current element (requires prior find)
-curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/capture
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8080/capture
 
 # Full screen
-curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/capture \
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8080/capture \
   -H "Content-Type: application/json" \
   -d '{"action":"screen"}'
 
 # Current window
-curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/capture \
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8080/capture \
   -H "Content-Type: application/json" \
   -d '{"action":"window"}'
 
 # Multiple elements stitched vertically (comma-separated numeric IDs)
-curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/capture \
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8080/capture \
   -H "Content-Type: application/json" \
   -d '{"action":"elements","value":"42,105,106"}'
 ```
@@ -317,10 +317,10 @@ Requires `tessdata\eng.traineddata` next to the executable. Download from [githu
 
 ```bash
 # OCR the current element
-curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/ocr
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8080/ocr
 
 # OCR a region (x,y,width,height) within the element
-curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/ocr \
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8080/ocr \
   -H "Content-Type: application/json" \
   -d '{"value":"0,0,300,50"}'
 ```
@@ -333,28 +333,28 @@ Local multimodal LLM (LFM2.5-VL). No cloud API required. Use **Download All** on
 
 ```bash
 # Check model status
-curl -H "X-Api-Key: <key>" http://localhost:8081/ai/status
+curl -H "X-Api-Key: <key>" http://localhost:8080/ai/status
 
 # Load model (run once per session)
-curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/ai/init \
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8080/ai/init \
   -H "Content-Type: application/json" \
   -d '{"model":"C:\\models\\LFM2.5-VL.gguf","proj":"C:\\models\\mmproj.gguf"}'
 
 # Describe current element (captures it as image, sends to model)
-curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/ai/describe
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8080/ai/describe
 
 # Describe with a custom prompt
-curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/ai/describe \
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8080/ai/describe \
   -H "Content-Type: application/json" \
   -d '{"prompt":"List every button you can see."}'
 
 # Ask a specific question about the current element
-curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/ai/ask \
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8080/ai/ask \
   -H "Content-Type: application/json" \
   -d '{"prompt":"What number is shown on the display?"}'
 
 # Describe an image file on disk
-curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/ai/file \
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8080/ai/file \
   -H "Content-Type: application/json" \
   -d '{"value":"C:\\screenshots\\app.png","prompt":"What dialog is shown?"}'
 ```
@@ -369,18 +369,18 @@ Streaming chat over HTTP — same 8 providers as the desktop AI Chat window (Ope
 
 ```bash
 # Browser chat UI
-curl -H "X-Api-Key: <key>" http://localhost:8081/chat
+curl -H "X-Api-Key: <key>" http://localhost:8080/chat
 
 # Provider + session status
-curl -H "X-Api-Key: <key>" http://localhost:8081/chat/status
+curl -H "X-Api-Key: <key>" http://localhost:8080/chat/status
 
 # Send a message (response streams back)
-curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/chat/send \
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8080/chat/send \
   -H "Content-Type: application/json" \
   -d '{"message":"Hello"}'
 
 # Clear the conversation
-curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/chat/reset
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8080/chat/reset
 ```
 
 ---
@@ -391,7 +391,7 @@ Renders GDI+ shapes to a base64 PNG on demand.
 
 ```bash
 # Draw shapes — value is a JSON string
-curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/draw \
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8080/draw \
   -H "Content-Type: application/json" \
   -d '{
     "value": "{\"canvas\":\"blank\",\"width\":400,\"height\":300,\"shapes\":[
@@ -401,10 +401,10 @@ curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/draw \
   }'
 
 # Built-in demo scene
-curl -H "X-Api-Key: <key>" http://localhost:8081/draw/demo
+curl -H "X-Api-Key: <key>" http://localhost:8080/draw/demo
 
 # Show as full-screen overlay for N milliseconds
-curl -H "X-Api-Key: <key>" "http://localhost:8081/draw/demo?overlay=true&ms=6000"
+curl -H "X-Api-Key: <key>" "http://localhost:8080/draw/demo?overlay=true&ms=6000"
 ```
 
 Result is in `data.result` as base64 PNG.
@@ -438,43 +438,43 @@ Desktop editor: **Tools → Scene Editor**
 
 ```bash
 # Create a scene
-curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/scenes \
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8080/scenes \
   -H "Content-Type: application/json" \
   -d '{"name":"My Scene","width":800,"height":600,"background":"#1a1a2e"}'
 
 # List scenes
-curl -H "X-Api-Key: <key>" http://localhost:8081/scenes
+curl -H "X-Api-Key: <key>" http://localhost:8080/scenes
 
 # Get a scene
-curl -H "X-Api-Key: <key>" http://localhost:8081/scenes/{id}
+curl -H "X-Api-Key: <key>" http://localhost:8080/scenes/{id}
 
 # Add a layer
-curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/scenes/{id}/layers \
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8080/scenes/{id}/layers \
   -H "Content-Type: application/json" \
   -d '{"name":"Background"}'
 
 # Add a shape to a layer
-curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/scenes/{id}/layers/{lid}/shapes \
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8080/scenes/{id}/layers/{lid}/shapes \
   -H "Content-Type: application/json" \
   -d '{"shape":{"type":"circle","x":400,"y":300,"r":80,"color":"royalblue","fill":true},"name":"Planet"}'
 
 # Render scene → base64 PNG
-curl -H "X-Api-Key: <key>" http://localhost:8081/scenes/{id}/render
+curl -H "X-Api-Key: <key>" http://localhost:8080/scenes/{id}/render
 
 # Patch shape geometry (after user drags — never clobbers color/style)
-curl -H "X-Api-Key: <key>" -X PATCH http://localhost:8081/scenes/{id}/layers/{lid}/shapes/{sid} \
+curl -H "X-Api-Key: <key>" -X PATCH http://localhost:8080/scenes/{id}/layers/{lid}/shapes/{sid} \
   -H "Content-Type: application/json" \
   -d '{"x":420,"y":310}'
 
 # Move shape to different layer
-curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/scenes/{id}/shapes/{sid}/move \
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8080/scenes/{id}/shapes/{sid}/move \
   -H "Content-Type: application/json" \
   -d '{"target_layer_id":"{newLayerId}"}'
 
 # Delete shape / layer / scene
-curl -H "X-Api-Key: <key>" -X DELETE http://localhost:8081/scenes/{id}/layers/{lid}/shapes/{sid}
-curl -H "X-Api-Key: <key>" -X DELETE http://localhost:8081/scenes/{id}/layers/{lid}
-curl -H "X-Api-Key: <key>" -X DELETE http://localhost:8081/scenes/{id}
+curl -H "X-Api-Key: <key>" -X DELETE http://localhost:8080/scenes/{id}/layers/{lid}/shapes/{sid}
+curl -H "X-Api-Key: <key>" -X DELETE http://localhost:8080/scenes/{id}/layers/{lid}
+curl -H "X-Api-Key: <key>" -X DELETE http://localhost:8080/scenes/{id}
 ```
 
 ### Scene route reference
@@ -497,29 +497,29 @@ Scenes are persisted to `<exe>/scenes/{id}.json`.
 ## System Routes
 
 ```bash
-curl http://localhost:8081/health                            # unauthenticated liveness (no API key required)
-curl -H "X-Api-Key: <key>" http://localhost:8081/ping        # authenticated health check
-curl -H "X-Api-Key: <key>" http://localhost:8081/metrics     # per-route request counters
-curl -H "X-Api-Key: <key>" http://localhost:8081/sysinfo     # OS, machine, user, CPU, CLR
-curl -H "X-Api-Key: <key>" http://localhost:8081/env         # all environment variables
-curl -H "X-Api-Key: <key>" http://localhost:8081/ls          # directory listing (cwd)
-curl -H "X-Api-Key: <key>" "http://localhost:8081/ls?path=C:\\Users"
-curl -H "X-Api-Key: <key>" http://localhost:8081/help        # full endpoint reference
+curl http://localhost:8080/health                            # unauthenticated liveness (no API key required)
+curl -H "X-Api-Key: <key>" http://localhost:8080/ping        # authenticated health check
+curl -H "X-Api-Key: <key>" http://localhost:8080/metrics     # per-route request counters
+curl -H "X-Api-Key: <key>" http://localhost:8080/sysinfo     # OS, machine, user, CPU, CLR
+curl -H "X-Api-Key: <key>" http://localhost:8080/env         # all environment variables
+curl -H "X-Api-Key: <key>" http://localhost:8080/ls          # directory listing (cwd)
+curl -H "X-Api-Key: <key>" "http://localhost:8080/ls?path=C:\\Users"
+curl -H "X-Api-Key: <key>" http://localhost:8080/help        # full endpoint reference
 
 # Trigger the integration test runner (TestApplications/TestRunner)
-curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/run-tests
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8080/run-tests
 
 # Graceful server shutdown
-curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/shutdown
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8080/shutdown
 
 # Shell execution — disabled by default
 # Enable: set EnableShellRun=true in appsettings.json or APEX_ENABLE_SHELL_RUN=true
 # Primary query parameter
-curl -H "X-Api-Key: <key>" "http://localhost:8081/run?command=whoami"
+curl -H "X-Api-Key: <key>" "http://localhost:8080/run?command=whoami"
 # Backward-compatible alias
-curl -H "X-Api-Key: <key>" "http://localhost:8081/run?cmd=whoami"
+curl -H "X-Api-Key: <key>" "http://localhost:8080/run?cmd=whoami"
 # JSON body form
-curl -H "X-Api-Key: <key>" -X POST http://localhost:8081/run \
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8080/run \
      -H "Content-Type: application/json" \
      -d '{"command":"whoami"}'
 ```
@@ -548,11 +548,11 @@ HTTP **200** on success, **400** on error.
 Append to any URL or use `?format=`:
 
 ```bash
-curl http://localhost:8081/status.json     # JSON only
-curl http://localhost:8081/status.txt      # plain text
-curl http://localhost:8081/status.html     # HTML with embedded JSON (default)
-curl http://localhost:8081/status.pdf      # PDF document
-curl "http://localhost:8081/ping?format=json"
+curl http://localhost:8080/status.json     # JSON only
+curl http://localhost:8080/status.txt      # plain text
+curl http://localhost:8080/status.html     # HTML with embedded JSON (default)
+curl http://localhost:8080/status.pdf      # PDF document
+curl "http://localhost:8080/ping?format=json"
 ```
 
 HTML responses embed `<script type="application/json" id="apex-result">` — any agent that can fetch a webpage gets structured JSON without a vision model.
@@ -563,7 +563,7 @@ HTML responses embed `<script type="application/json" id="apex-result">` — any
 
 ```json
 {
-  "HttpPort":       8081,
+  "HttpPort":       8080,
   "HttpBindAll":    false,
   "PipeName":       "ApexComputerUse",
   "LogLevel":       "Information",
@@ -578,7 +578,7 @@ HTML responses embed `<script type="application/json" id="apex-result">` — any
 
 | Variable | Default | Description |
 |---|---|---|
-| `APEX_HTTP_PORT` | `8081` | HTTP listen port |
+| `APEX_HTTP_PORT` | `8080` | HTTP listen port |
 | `APEX_HTTP_BIND_ALL` | `false` | `true` to bind all interfaces (network access) |
 | `APEX_API_KEY` | auto-generated | Override the API key |
 | `APEX_ENABLE_SHELL_RUN` | `false` | Enable `/run` endpoint |

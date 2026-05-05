@@ -7,7 +7,7 @@
 
 ![.NET](https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet) ![Platform](https://img.shields.io/badge/platform-Windows-0078D4?logo=windows) ![License](https://img.shields.io/badge/license-MIT-green)
 
-ApexComputerUse reads the **Windows accessibility tree** (the same data the OS exposes to screen readers) and serves it over a plain **HTTP REST API**. Any AI agent — in any language, on any machine — can find, inspect, and control any desktop app or browser by making simple HTTP requests. No screenshots. No pixel coordinates. No cloud dependency. In recent tests, excluding 3D games, accuracy averages **99%** on web and desktop tasks.
+ApexComputerUse reads the **Windows accessibility tree** (the same data the OS exposes to screen readers) and serves it over a plain **HTTP REST API**. Any AI agent — in any language, on any machine — can find, inspect, and control any desktop app or browser by making simple HTTP requests. No screenshots. No pixel coordinates. No cloud dependency.
 
 **5–20 tokens per action** instead of 1,000–3,500 for a screenshot. A full browser page in onscreen-only mode is ~126 elements of compact JSON — less than the cost of a single screenshot of the same page.
 
@@ -278,6 +278,7 @@ Truncated nodes (ones whose children were cut off by `depth`) now also emit `des
 - **System utility routes** — `/health` (unauthenticated), `/ping`, `/metrics`, `/sysinfo`, `/env`, `/ls`, `/run`, `/run-tests`, `/shutdown` for AI agents that need OS-level context without a separate tool
 - **Embedded AI chat in the Chat tab** — the Chat tab opens the streaming HTML chat UI (`/chat`) in your default browser; click **Open In Browser** to launch it. The HTML page handles streaming, provider/model display, and session reset natively.
 - **AI Chat over HTTP** — streaming chat UI at `GET /chat` backed by `/chat/send`, `/chat/status`, `/chat/reset`; same 8 providers as the desktop AI Chat window; also accessible from any browser
+- **Agentic tool loop in AI Chat** — when the local HTTP server is running, the AI can issue ApexComputerUse API calls inside ` ```apex ` code blocks; results are fed back automatically for up to 8 turns until the AI produces a clean answer (`AiChatService.SendAsync` + `SetLocalServer`)
 - **Auto-start on launch** — HTTP server starts automatically (`HttpAutoStart=true` by default), binds to localhost by default (`HttpBindAll=false`), and can be switched to all-interfaces mode with one-time netsh setup (URL ACL + Firewall rule)
 - **Auto-download setup** — Model tab "Download All" button fetches the LFM2.5-VL model, projector, and Tesseract data to fixed local paths on first launch
 

@@ -19,6 +19,7 @@ namespace ApexComputerUse
         private readonly ChatTabController _chat;
         private readonly ModelTabController _model;
         private readonly ClientsTabController _clients;
+        private readonly FindExecuteTabController _findExec;
 
         /// <summary>
         /// Shared log-forwarding delegate for processor + all I/O servers.
@@ -34,119 +35,6 @@ namespace ApexComputerUse
         private static readonly string SettingsFile = Path.Combine(SettingsDir, "settings.json");
         private bool _netshConfigured;
         private int  _netshPort;
-
-        private static readonly Dictionary<string, string[]> ControlActions = new()
-        {
-            ["Window"] =
-            [
-                "Describe", "Get Bounding Rect", "Get Supported Patterns",
-                "Minimize", "Maximize", "Restore", "Close",
-                "Move (x,y)", "Resize (w,h)"
-            ],
-            ["Button"] =
-            [
-                "Invoke", "Describe", "Get Bounding Rect", "Get Supported Patterns",
-                "Click", "Right-Click", "Double-Click", "Hover", "Set Focus"
-            ],
-            ["TextBox"] =
-            [
-                "Get Text", "Enter Text", "Set Value",
-                "Select All", "Copy", "Cut", "Paste", "Undo", "Clear",
-                "Insert at Caret", "Scroll Into View",
-                "Describe", "Get Bounding Rect", "Get Supported Patterns"
-            ],
-            ["PasswordBox"] =
-            [
-                "Enter Text", "Clear", "Describe"
-            ],
-            ["Label"] =
-            [
-                "Get Text", "Describe", "Get Bounding Rect"
-            ],
-            ["ComboBox"] =
-            [
-                "Get Selected", "Get All Items", "Select Item (text)",
-                "Expand Dropdown", "Collapse Dropdown",
-                "Describe", "Get Supported Patterns"
-            ],
-            ["CheckBox"] =
-            [
-                "Get State", "Toggle", "Set Focus",
-                "Describe", "Get Bounding Rect"
-            ],
-            ["RadioButton"] =
-            [
-                "Is Selected", "Select", "Set Focus",
-                "Describe", "Get Bounding Rect"
-            ],
-            ["ListBox"] =
-            [
-                "Get Selected", "Get All Items",
-                "Select by Text", "Select by Index",
-                "Describe", "Get Supported Patterns"
-            ],
-            ["ListView"] =
-            [
-                "Get Row Count", "Get Column Count",
-                "Get Cell (row,col)", "Get Row Values (row)", "Select Row (index)",
-                "Describe", "Get Supported Patterns"
-            ],
-            ["DataGrid"] =
-            [
-                "Get Row Count", "Get Column Count",
-                "Get Cell (row,col)", "Get Row Values (row)", "Select Row (index)",
-                "Describe", "Get Supported Patterns"
-            ],
-            ["TreeView"] =
-            [
-                "Get Node Count", "Get Node Text (index)",
-                "Expand Node (index)", "Collapse Node (index)", "Select Node (index)",
-                "Describe", "Get Supported Patterns"
-            ],
-            ["Menu / MenuItem"] =
-            [
-                "Invoke", "Expand", "Open Context Menu",
-                "Describe", "Get Bounding Rect"
-            ],
-            ["TabControl"] =
-            [
-                "Get Selected Tab", "Get Tab Count",
-                "Select Tab (index)", "Select Tab (name)",
-                "Describe", "Get Supported Patterns"
-            ],
-            ["Slider"] =
-            [
-                "Get Slider Value", "Set Slider Value", "Get Min", "Get Max",
-                "Get Small Change", "Get Large Change",
-                "Describe", "Get Supported Patterns"
-            ],
-            ["ProgressBar"] =
-            [
-                "Get Progress Value", "Get Min", "Get Max",
-                "Describe", "Get Bounding Rect"
-            ],
-            ["Hyperlink"] =
-            [
-                "Invoke", "Describe", "Get Bounding Rect"
-            ],
-            ["Any Element"] =
-            [
-                "Describe", "Get Bounding Rect", "Get Supported Patterns",
-                "Get Value (pattern)", "Set Value (pattern)",
-                "Click", "Right-Click", "Double-Click", "Hover",
-                "Set Focus", "Scroll Into View",
-                "Select All", "Copy", "Cut", "Paste", "Undo", "Clear",
-                "Insert at Caret", "Invoke (pattern)",
-                "Expand", "Collapse",
-                "Scroll Up", "Scroll Down", "Horizontal Scroll",
-                "Capture Element", "Capture Screen",
-                "Drag to Element (target AutomationId)", "Drag to Point (x,y)",
-                "Wait for Element",
-                "Send Key", "Send Keys",
-                "Get Focused Element",
-                "OCR Element", "OCR Element + Save", "OCR Region (x,y,w,h)", "OCR File"
-            ],
-        };
 
         public Form1()
         {
@@ -195,20 +83,15 @@ namespace ApexComputerUse
                 () => txtApiKey.Text,
                 (text, color) => { lblStatClients.Text = text; lblStatClients.ForeColor = color; });
 
-            // Action control-type picker
-            cmbControlType.Items.AddRange(ControlActions.Keys.ToArray<object>());
-            cmbControlType.SelectedIndex = 0;
-
-            // Search-type filter: "All" + every ControlType except Unknown
-            cmbSearchType.Items.Add("All");
-            foreach (ControlType ct in Enum.GetValues<ControlType>())
-                if (ct != ControlType.Unknown)
-                    cmbSearchType.Items.Add(ct.ToString());
-            cmbSearchType.SelectedIndex = 0;
+            _findExec = new FindExecuteTabController(
+                _processor, _helper, _executor, Log,
+                cmbControlType, cmbAction, cmbSearchType,
+                txtWindowName, txtElementId, txtElementName, txtInput);
 
             _processor.SceneStore = _sceneStore;
 
             LoadSettings();
+            _findExec.Init();
             _chat.Init();
             _clients.Init();
 
@@ -497,18 +380,7 @@ namespace ApexComputerUse
             }, TaskContinuationOptions.OnlyOnFaulted);
         }
 
-        // -- Control-type picker -------------------------------------------
-
-        private void cmbControlType_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            cmbAction.Items.Clear();
-            if (cmbControlType.SelectedItem is string type && ControlActions.TryGetValue(type, out var actions))
-                cmbAction.Items.AddRange(actions.ToArray<object>());
-            if (cmbAction.Items.Count > 0)
-                cmbAction.SelectedIndex = 0;
-        }
-
-        // -- Command input -------------------------------------------------
+        // -- Console tab ---------------------------------------------------
 
         private void txtCommand_KeyDown(object sender, KeyEventArgs e)
         {
@@ -527,97 +399,11 @@ namespace ApexComputerUse
             catch (Exception ex) { Log($"Error: {ex.Message}"); }
         }
 
-        // -- Find ----------------------------------------------------------
+        // -- Find & Execute tab (delegated) --------------------------------
 
-        private void btnFind_Click(object sender, EventArgs e)
-        {
-            _processor.SetCurrentTarget(null, null);
-            try
-            {
-                string title = txtWindowName.Text.Trim();
-                if (string.IsNullOrEmpty(title)) { Log("Enter a Window Name."); return; }
-
-                var window = _helper.FindWindowFuzzy(title, out string matchedTitle, out bool windowExact);
-                if (window == null) { Log($"No window found for \"{title}\"."); return; }
-
-                if (!windowExact)
-                {
-                    var answer = MessageBox.Show(
-                        $"No exact window match.\nUse closest match?\n\n\"{matchedTitle}\"",
-                        "Closest Window Match", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                    if (answer == DialogResult.No) { Log("Window match rejected."); return; }
-                }
-                Log($"Window ({(windowExact ? "exact" : "fuzzy")}): \"{window.Name}\"");
-
-                string autoId = txtElementId.Text.Trim();
-                string name   = txtElementName.Text.Trim();
-
-                if (string.IsNullOrEmpty(autoId) && string.IsNullOrEmpty(name))
-                {
-                    _processor.SetCurrentTarget(window, window);
-                    Log($"Targeting window: {_helper.Describe(window)}");
-                    return;
-                }
-
-                ControlType? filterType = null;
-                if (cmbSearchType.SelectedItem is string st && st != "All")
-                    filterType = Enum.Parse<ControlType>(st);
-
-                bool searchById  = !string.IsNullOrEmpty(autoId);
-                string searchVal = searchById ? autoId : name;
-
-                var el = _helper.FindElementFuzzy(
-                    window, searchVal, filterType, searchById,
-                    out string matchedValue, out bool elementExact);
-
-                if (el == null)
-                {
-                    _processor.SetCurrentTarget(window, null);
-                    Log($"No element found for \"{searchVal}\".");
-                    return;
-                }
-
-                if (!elementExact)
-                {
-                    string field = searchById ? "AutomationId" : "Name";
-                    var answer = MessageBox.Show(
-                        $"No exact element match for \"{searchVal}\".\nUse closest match?\n\n{field}: \"{matchedValue}\"",
-                        "Closest Element Match", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                    if (answer == DialogResult.No)
-                    {
-                        _processor.SetCurrentTarget(window, null);
-                        Log("Element match rejected.");
-                        return;
-                    }
-                }
-
-                _processor.SetCurrentTarget(window, el);
-                Log($"Element ({(elementExact ? "exact" : "fuzzy")}): {_helper.Describe(el)}");
-            }
-            catch (Exception ex) { Log($"Error: {ex.Message}"); }
-        }
-
-        // -- Execute -------------------------------------------------------
-
-        private void btnExecute_Click(object sender, EventArgs e)
-        {
-            var element = _processor.CurrentElement;
-            if (element == null) { Log("Find an element first."); return; }
-            if (!CommandProcessor.IsElementValid(element))
-            {
-                Log("Element is no longer available (target app closed or changed). Run 'Find' again.");
-                _processor.SetCurrentTarget(_processor.CurrentWindow, null);
-                return;
-            }
-            string action = cmbAction.SelectedItem?.ToString() ?? "";
-            string input  = txtInput.Text.Trim();
-            try
-            {
-                string result = _executor.Execute(element, action, input);
-                Log(string.IsNullOrEmpty(result) ? $"'{action}' done." : $"Result: {result}");
-            }
-            catch (Exception ex) { Log($"Error: {ex.Message}"); }
-        }
+        private void cmbControlType_SelectedIndexChanged(object sender, EventArgs e) => _findExec.ControlTypeChanged();
+        private void btnFind_Click(object sender, EventArgs e)    => _findExec.Find();
+        private void btnExecute_Click(object sender, EventArgs e) => _findExec.Execute();
 
         // -- Server tab ----------------------------------------------------
 

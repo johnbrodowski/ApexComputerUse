@@ -92,6 +92,7 @@ namespace ApexComputerUse
             _isProcessing = true;
             try
             {
+                // Task.Run avoids a SynchronizationContext deadlock; safe on any calling thread.
                 string result = Task.Run(async () => await _mtmd.DescribeElementAsync(element, prompt))
                                     .GetAwaiter().GetResult();
                 return Ok("AI description", result);
@@ -116,6 +117,7 @@ namespace ApexComputerUse
             _isProcessing = true;
             try
             {
+                // Task.Run avoids a SynchronizationContext deadlock; safe on any calling thread.
                 string result = Task.Run(async () => await _mtmd.DescribeImageAsync(path, prompt))
                                     .GetAwaiter().GetResult();
                 return Ok($"AI file description ({Path.GetFileName(path)})", result);
@@ -132,6 +134,7 @@ namespace ApexComputerUse
             _isProcessing = true;
             try
             {
+                // Task.Run avoids a SynchronizationContext deadlock; safe on any calling thread.
                 string result = Task.Run(async () => await _mtmd.DescribeElementAsync(element, prompt))
                                     .GetAwaiter().GetResult();
                 return Ok("AI answer", result);
