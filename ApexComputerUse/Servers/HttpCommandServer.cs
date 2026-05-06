@@ -416,6 +416,13 @@ namespace ApexComputerUse
                     return;
                 }
 
+                // Remote desktop page  served directly
+                if (method == "GET" && path == "/remote")
+                {
+                    await ServeRemotePage(res);
+                    return;
+                }
+
                                 // Help reference page
                 if (method == "GET" && path == "/help" && format is "html")
                 {
