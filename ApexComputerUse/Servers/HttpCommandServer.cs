@@ -17,6 +17,7 @@ namespace ApexComputerUse
         private readonly CommandProcessor    _processor;
         private readonly CommandDispatcher   _dispatcher;
         private readonly EventBroker         _events;
+        private RegionMonitorRunner?         _monitorRunner;
         private readonly SceneStore          _store;
         private readonly AiChatService?      _chatService;
         private readonly ClientStore?        _clientStore;
@@ -84,6 +85,16 @@ namespace ApexComputerUse
             _bindAll        = bindAll;
             _testRunnerExePath    = string.IsNullOrWhiteSpace(testRunnerExePath)    ? null : testRunnerExePath.Trim();
             _testRunnerConfigPath = string.IsNullOrWhiteSpace(testRunnerConfigPath) ? null : testRunnerConfigPath.Trim();
+
+            // Region-monitor runner — only constructable once we have both store + broker.
+            // Wired through the processor so non-HTTP code paths (named pipe, GUI) can also
+            // access it via processor.MonitorRunner.
+            if (processor.RegionMonitors != null)
+            {
+                _monitorRunner = new RegionMonitorRunner(processor.RegionMonitors, _events);
+                processor.MonitorRunner = _monitorRunner;
+                _monitorRunner.Start();
+            }
         }
 
         // Lifecycle
@@ -584,6 +595,15 @@ namespace ApexComputerUse
                     return;
                 }
 
+                // Region-monitor routes
+                var monitorResult = TryHandleMonitorRoute(method, path, body, req);
+                if (monitorResult != null)
+                {
+                    statusCode = await WriteResponse(res, monitorResult, format);
+                    if (statusCode >= 400) Interlocked.Increment(ref _errorRequests);
+                    return;
+                }
+
                 // /run is async  handled before the sync switch
                 if (path == "/run")
                 {
@@ -724,6 +744,7 @@ namespace ApexComputerUse
         public void Dispose()
         {
             Stop();
+            try { _monitorRunner?.Dispose(); } catch { }
             try { _events.Dispose();  } catch { }
             try { _listener.Close(); } catch { }
         }

@@ -100,6 +100,12 @@ namespace ApexComputerUse
         /// <summary>Injected by Form1 after construction. Backs the regionmap commands.</summary>
         public RegionMapStore? RegionMaps { get; set; }
 
+        /// <summary>Injected by Form1 after construction. Backs the region-monitor commands.</summary>
+        public RegionMonitorStore? RegionMonitors { get; set; }
+
+        /// <summary>Injected by HttpCommandServer after construction; null in service-only mode.</summary>
+        public RegionMonitorRunner? MonitorRunner { get; set; }
+
         /// <summary>
         /// Looks up the cached element hash for a numeric id (only valid for elements
         /// that were emitted by the most recent /elements scan). Used by the annotation
@@ -223,6 +229,7 @@ namespace ApexComputerUse
                         "annotations"       => CmdListAnnotations(req),
                         "excluded"          => CmdListExcluded(),
                         "regionmap"         => CmdRegionMap(req),
+                        "monitor"           => CmdMonitor(req),
                         "help"              => CmdHelp(),
                         "capture"           => CmdCapture(req),
                         _ => Fail($"Unknown command '{req.Command}'. Try 'help'.")

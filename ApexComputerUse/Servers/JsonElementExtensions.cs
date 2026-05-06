@@ -27,6 +27,12 @@ namespace ApexComputerUse
             return p.ValueKind == JsonValueKind.Number ? (float?)p.GetSingle() : null;
         }
 
+        public static double? Dbl(this JsonElement el, string name)
+        {
+            if (!el.TryGetProperty(name, out var p)) return null;
+            return p.ValueKind == JsonValueKind.Number ? (double?)p.GetDouble() : null;
+        }
+
         public static bool? Bool(this JsonElement el, string name)
         {
             if (!el.TryGetProperty(name, out var p)) return null;
