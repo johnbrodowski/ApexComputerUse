@@ -90,6 +90,76 @@ namespace ApexComputerUse
         /// <summary>Injected by Form1 after construction. Required for scene commands.</summary>
         public SceneStore? SceneStore { get; set; }
 
+        /// <summary>
+        /// Injected by Form1 after construction. When non-null, the element-tree scan
+        /// will skip elements whose hash is marked Excluded (unless the request explicitly
+        /// asks for Unfiltered=true) and attach the persisted Note (if any) to each emitted node.
+        /// </summary>
+        public ElementAnnotationStore? ElementAnnotations { get; set; }
+
+        /// <summary>Injected by Form1 after construction. Backs the regionmap commands.</summary>
+        public RegionMapStore? RegionMaps { get; set; }
+
+        /// <summary>
+        /// Looks up the cached element hash for a numeric id (only valid for elements
+        /// that were emitted by the most recent /elements scan). Used by the annotation
+        /// HTTP routes so callers can pass either an id (convenient) or a hash (stable).
+        /// Held inside <see cref="_stateLock"/> to coordinate with concurrent scans.
+        /// </summary>
+        public bool TryResolveHash(int id, out string hash)
+        {
+            lock (_stateLock)
+            {
+                if (_elementHashes.TryGetValue(id, out var h) && !string.IsNullOrEmpty(h))
+                {
+                    hash = h;
+                    return true;
+                }
+                hash = "";
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Snapshot of the cached descriptor for a previously-scanned element id.
+        /// Used by the annotation routes to enrich an annotation record with a
+        /// human-readable label (controlType / name / automationId) at write time.
+        /// </summary>
+        public bool TryResolveDescriptor(int id, out string controlType, out string name, out string automationId)
+        {
+            lock (_stateLock)
+            {
+                if (_elementDescriptors.TryGetValue(id, out var d))
+                {
+                    controlType  = d.ControlType;
+                    name         = d.Name;
+                    automationId = d.AutomationId;
+                    return true;
+                }
+                controlType = name = automationId = "";
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Returns the absolute screen bounds of the currently-mapped CurrentWindow,
+        /// or null if no window is selected. Used by /regionmap helpers to build
+        /// canvas-sized DrawRequests that match the on-screen overlay.
+        /// </summary>
+        public (int x, int y, int w, int h)? GetCurrentWindowBounds()
+        {
+            lock (_stateLock)
+            {
+                if (CurrentWindow == null) return null;
+                try
+                {
+                    var b = CurrentWindow.BoundingRectangle;
+                    return ((int)b.X, (int)b.Y, (int)b.Width, (int)b.Height);
+                }
+                catch { return null; }
+            }
+        }
+
         // -- Entry point ---------------------------------------------------
 
         public CommandResponse Process(CommandRequest req)
@@ -146,6 +216,13 @@ namespace ApexComputerUse
                         "uimap"             => CmdRenderMap(),
                         "draw"              => CmdDraw(req),
                         "scene"             => CmdScene(req),
+                        "annotate"          => CmdAnnotate(req),
+                        "unannotate"        => CmdUnannotate(req),
+                        "exclude"           => CmdExclude(req),
+                        "unexclude"         => CmdUnexclude(req),
+                        "annotations"       => CmdListAnnotations(req),
+                        "excluded"          => CmdListExcluded(),
+                        "regionmap"         => CmdRegionMap(req),
                         "help"              => CmdHelp(),
                         "capture"           => CmdCapture(req),
                         _ => Fail($"Unknown command '{req.Command}'. Try 'help'.")

@@ -509,6 +509,15 @@ namespace ApexComputerUse
                     return;
                 }
 
+                // Annotation + region-map routes — same dispatch shape as scene routes
+                var annotationResult = TryHandleAnnotationRoute(method, path, body, req);
+                if (annotationResult != null)
+                {
+                    statusCode = await WriteResponse(res, annotationResult, format);
+                    if (statusCode >= 400) Interlocked.Increment(ref _errorRequests);
+                    return;
+                }
+
                 // /run is async  handled before the sync switch
                 if (path == "/run")
                 {
@@ -564,6 +573,7 @@ namespace ApexComputerUse
                                 AutomationId   = req.QueryString["id"],       // numeric  expands a subtree from a previously-mapped element
                                 Depth          = int.TryParse(req.QueryString["depth"], out int _elemDepth) ? _elemDepth : null,
                                 OnscreenOnly   = string.Equals(req.QueryString["onscreen"],       "true", StringComparison.OrdinalIgnoreCase),
+                                Unfiltered     = string.Equals(req.QueryString["unfiltered"],    "true", StringComparison.OrdinalIgnoreCase),
                                 // " Browser-friendly tree shaping (opt-in; see README) "
                                 Match          = req.QueryString["match"],                        // text-search Name/AutomationId/Value
                                 CollapseChains = string.Equals(req.QueryString["collapseChains"], "true", StringComparison.OrdinalIgnoreCase),

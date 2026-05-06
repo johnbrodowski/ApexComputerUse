@@ -135,7 +135,8 @@ namespace ApexComputerUse
                 MatchAll     = !string.IsNullOrEmpty(req.Match),
                 MaxDepth     = maxDepth,
                 IncludePath  = req.IncludePath,
-                IncludeExtra = string.Equals(req.Properties, "extra", StringComparison.OrdinalIgnoreCase)
+                IncludeExtra = string.Equals(req.Properties, "extra", StringComparison.OrdinalIgnoreCase),
+                Unfiltered   = req.Unfiltered
             };
 
             var root = ScanElementsIntoMap(

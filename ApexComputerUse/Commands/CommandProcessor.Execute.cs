@@ -188,6 +188,7 @@ namespace ApexComputerUse
             public int?    MaxDepth        { get; init; }
             public bool    IncludePath     { get; init; }
             public bool    IncludeExtra    { get; init; }  // properties=extra -> value + helpText
+            public bool    Unfiltered      { get; init; }  // when true, ignore the Excluded flag on annotations so the AI can rediscover hidden elements
         }
 
         private ElementNode? ScanElementsIntoMap(
@@ -226,6 +227,17 @@ namespace ApexComputerUse
                               excludeName: isWindowOrPane, siblingIndex: siblingIndex);
                     id = _idGen.GenerateIdFromHash(hash);
                 }
+
+                // Persistent exclusion: the AI has previously asked us to hide this element
+                // (and its subtree) from default /elements responses. Pass unfiltered=true to
+                // bypass — required so the AI can find an excluded element to un-exclude it.
+                // depth==0 is the scan root and is never auto-excluded; otherwise the user could
+                // hide a window root and then have no way to start any scan there.
+                if (depth > 0 && !options.Unfiltered
+                    && ElementAnnotations != null
+                    && ElementAnnotations.IsExcluded(hash))
+                    return null;
+
                 // Drop the old reverse entry first - FlaUI hands out a fresh AutomationElement
                 // instance on each scan even though the resulting hash/id is the same, so the
                 // previously-mapped instance would otherwise leak in _elementReverse forever.
@@ -345,6 +357,13 @@ namespace ApexComputerUse
                     if (string.IsNullOrEmpty(classNameOut)) classNameOut = null;
                 }
 
+                // Attach a persisted Note if the AI has annotated this element previously.
+                // null when no annotation exists; JsonIgnoreCondition.WhenWritingNull keeps the
+                // default tree shape unchanged for callers that never used /annotate.
+                string? noteOut = null;
+                if (ElementAnnotations != null && ElementAnnotations.TryGetNote(hash, out var attachedNote))
+                    noteOut = attachedNote;
+
                 return new ElementNode
                 {
                     Id                = id,
@@ -359,6 +378,7 @@ namespace ApexComputerUse
                     Value             = valueOut,
                     HelpText          = helpTextOut,
                     ClassName         = classNameOut,
+                    Note              = noteOut,
                     IsOffscreen       = (options.MatchAll && elementIsOffscreen) ? true : null
                 };
             }
@@ -417,6 +437,7 @@ namespace ApexComputerUse
             public string?             Value             { get; init; }  // Value pattern content - set only when the caller requested properties=extra
             public string?             HelpText          { get; init; }  // HelpText property - set only when the caller requested properties=extra
             public string?             ClassName         { get; init; }  // ClassName property - populated when match= is set (so match scans it) or properties=extra is requested
+            public string?             Note              { get; init; }  // persisted free-form annotation attached via POST /annotate; null = no note
             public bool?               IsOffscreen       { get; init; }  // set only when true - element is off-viewport but included via match= scan
         }
 

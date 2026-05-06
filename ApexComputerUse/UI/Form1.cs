@@ -10,6 +10,8 @@ namespace ApexComputerUse
         private readonly CommandProcessor _processor = new();
         private readonly CommandDispatcher _dispatcher;
         private readonly SceneStore _sceneStore = new();
+        private readonly ElementAnnotationStore _elementAnnotations = new();
+        private readonly RegionMapStore _regionMaps = new();
         private readonly AiChatService _chatService = new();
         private readonly DownloadManager _downloader = new();
         private readonly ActionExecutor _executor;
@@ -88,7 +90,9 @@ namespace ApexComputerUse
                 cmbControlType, cmbAction, cmbSearchType,
                 txtWindowName, txtElementId, txtElementName, txtInput);
 
-            _processor.SceneStore = _sceneStore;
+            _processor.SceneStore         = _sceneStore;
+            _processor.ElementAnnotations = _elementAnnotations;
+            _processor.RegionMaps         = _regionMaps;
 
             LoadSettings();
             _findExec.Init();

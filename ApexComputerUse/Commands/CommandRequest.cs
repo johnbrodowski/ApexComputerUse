@@ -8,6 +8,7 @@ namespace ApexComputerUse
         public string? ElementName  { get; set; }
         public string? SearchType   { get; set; }   // "All" or a ControlType name
         public bool    OnscreenOnly { get; set; }   // true = exclude IsOffscreen elements
+        public bool    Unfiltered   { get; set; }   // true = include elements that the AI has previously marked as excluded
         public string? Action       { get; set; }
         public string? Value        { get; set; }
         public string? ModelPath    { get; set; }   // ai init - LLM model .gguf path

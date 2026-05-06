@@ -47,7 +47,12 @@ namespace ApexComputerUse
             AppLog.Info($"[Service] Starting - HTTP port {cfg.HttpPort}, pipe '{cfg.PipeName}'");
 
             _store     = new SceneStore();
-            _processor = new CommandProcessor { SceneStore = _store };
+            _processor = new CommandProcessor
+            {
+                SceneStore         = _store,
+                ElementAnnotations = new ElementAnnotationStore(),
+                RegionMaps         = new RegionMapStore()
+            };
             _processor.OnLog += AppLog.FromOnLog;
 
             _http = new HttpCommandServer(cfg.HttpPort, _processor, _store,
