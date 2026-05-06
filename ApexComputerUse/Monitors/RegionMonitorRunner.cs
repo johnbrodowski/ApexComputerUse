@@ -201,7 +201,7 @@ namespace ApexComputerUse
                     {
                         FireEvent(m, i, r, pct);
                         // Replace baseline so we don't keep re-firing on the same delta.
-                        _baselines[i].Dispose();
+                        _baselines[i]?.Dispose();
                         _baselines[i] = shot;
                         _store.RecordFire(m.Id, i, pct);
                     }

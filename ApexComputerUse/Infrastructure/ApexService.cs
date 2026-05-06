@@ -51,7 +51,8 @@ namespace ApexComputerUse
             {
                 SceneStore         = _store,
                 ElementAnnotations = new ElementAnnotationStore(),
-                RegionMaps         = new RegionMapStore()
+                RegionMaps         = new RegionMapStore(),
+                RegionMonitors     = new RegionMonitorStore()
             };
             _processor.OnLog += AppLog.FromOnLog;
 

@@ -12,6 +12,7 @@ namespace ApexComputerUse
         private readonly SceneStore _sceneStore = new();
         private readonly ElementAnnotationStore _elementAnnotations = new();
         private readonly RegionMapStore _regionMaps = new();
+        private readonly RegionMonitorStore _regionMonitors = new();
         private readonly AiChatService _chatService = new();
         private readonly DownloadManager _downloader = new();
         private readonly ActionExecutor _executor;
@@ -93,6 +94,7 @@ namespace ApexComputerUse
             _processor.SceneStore         = _sceneStore;
             _processor.ElementAnnotations = _elementAnnotations;
             _processor.RegionMaps         = _regionMaps;
+            _processor.RegionMonitors     = _regionMonitors;
 
             LoadSettings();
             _findExec.Init();
