@@ -17,9 +17,9 @@ namespace ApexComputerUse
         public sealed record EventEnvelope(
             long           Seq,
             string         Type,
-            int            WindowId,
-            string         Title,
-            DateTimeOffset Time);
+            DateTimeOffset Time,
+            int?           WindowId,
+            IReadOnlyDictionary<string, object?> Data);
 
         public sealed class Subscriber : IDisposable
         {
@@ -151,8 +151,29 @@ namespace ApexComputerUse
 
         private void Emit(string type, int windowId, string title)
         {
+            var data = new Dictionary<string, object?>
+            {
+                ["id"]    = windowId,
+                ["title"] = title
+            };
+            EmitInternal(type, data, windowId);
+        }
+
+        /// <summary>
+        /// Emit a custom event for non-window subsystems (region monitors, etc.).
+        /// The data dictionary is serialized as the SSE payload alongside seq/time.
+        /// </summary>
+        public void Emit(string type, IDictionary<string, object?> data, int? windowId = null)
+        {
+            // Defensive copy so the caller can't mutate after dispatch.
+            var snapshot = new Dictionary<string, object?>(data);
+            EmitInternal(type, snapshot, windowId);
+        }
+
+        private void EmitInternal(string type, IReadOnlyDictionary<string, object?> data, int? windowId)
+        {
             long seq = Interlocked.Increment(ref _seq);
-            var env = new EventEnvelope(seq, type, windowId, title, DateTimeOffset.UtcNow);
+            var env = new EventEnvelope(seq, type, DateTimeOffset.UtcNow, windowId, data);
 
             // Snapshot subscribers under the lock so we don't hold it while writing to channels
             // (channel writes can block under back-pressure if FullMode were Wait; we use DropOldest).
@@ -160,8 +181,9 @@ namespace ApexComputerUse
             lock (_gate) { snapshot = _subscribers.ToList(); }
             foreach (var s in snapshot)
             {
-                if (s.TypeFilter   != null && !s.TypeFilter.Contains(type))     continue;
-                if (s.WindowFilter.HasValue && s.WindowFilter.Value != windowId) continue;
+                if (s.TypeFilter != null && !s.TypeFilter.Contains(type)) continue;
+                if (s.WindowFilter.HasValue
+                    && (!windowId.HasValue || s.WindowFilter.Value != windowId.Value)) continue;
                 s.Channel.Writer.TryWrite(env);
             }
         }

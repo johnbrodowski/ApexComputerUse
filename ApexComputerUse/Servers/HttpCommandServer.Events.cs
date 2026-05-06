@@ -86,13 +86,14 @@ namespace ApexComputerUse
 
                     if (envelope != null)
                     {
-                        string payload = JsonSerializer.Serialize(new
+                        // Payload = data dict + seq + time. Window events carry id/title in Data;
+                        // monitor events carry their own keys. Frontends parse on event type.
+                        var dict = new Dictionary<string, object?>(envelope.Data)
                         {
-                            seq   = envelope.Seq,
-                            id    = envelope.WindowId,
-                            title = envelope.Title,
-                            time  = envelope.Time.ToString("o")
-                        });
+                            ["seq"]  = envelope.Seq,
+                            ["time"] = envelope.Time.ToString("o")
+                        };
+                        string payload = JsonSerializer.Serialize(dict);
                         await WriteFrameAsync(stream, $"event: {envelope.Type}\ndata: {payload}\n\n")
                             .ConfigureAwait(false);
                     }
