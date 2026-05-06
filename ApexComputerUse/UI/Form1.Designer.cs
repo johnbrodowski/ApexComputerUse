@@ -71,6 +71,9 @@
             lblHttpStatus = new Label();
             lblApiKey = new Label();
             txtApiKey = new TextBox();
+            chkPublicHelp = new CheckBox();
+            lblHelpRateLimit = new Label();
+            numHelpRateLimit = new NumericUpDown();
             btnCopyApiKey = new Button();
             lblBotToken = new Label();
             txtBotToken = new TextBox();
@@ -125,6 +128,7 @@
             tabPageFind.SuspendLayout();
             tabPageRemote.SuspendLayout();
             grpRemote.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)numHelpRateLimit).BeginInit();
             tabPageModel.SuspendLayout();
             grpModelPaths.SuspendLayout();
             grpDownload.SuspendLayout();
@@ -582,6 +586,9 @@
             grpRemote.Controls.Add(lblTelegramStatus);
             grpRemote.Controls.Add(lblAllowedChatIds);
             grpRemote.Controls.Add(txtAllowedChatIds);
+            grpRemote.Controls.Add(chkPublicHelp);
+            grpRemote.Controls.Add(lblHelpRateLimit);
+            grpRemote.Controls.Add(numHelpRateLimit);
             grpRemote.Controls.Add(lblPipeName);
             grpRemote.Controls.Add(txtPipeName);
             grpRemote.Controls.Add(btnStartPipe);
@@ -592,6 +599,40 @@
             grpRemote.TabIndex = 0;
             grpRemote.TabStop = false;
             grpRemote.Text = "Remote Control";
+            // -- Tooltips for all interactive controls in grpRemote --
+            toolTipRemote.SetToolTip(txtHttpPort,
+                "TCP port the HTTP server listens on. Defaults to 8080. Change requires restart of the HTTP server.");
+            toolTipRemote.SetToolTip(btnStartHttp,
+                "Start or stop the HTTP command server.");
+            toolTipRemote.SetToolTip(lblHttpStatus,
+                "Current HTTP server state.");
+            toolTipRemote.SetToolTip(txtApiKey,
+                "Required for every HTTP request except /health (and /help when 'Public /help' is on). Leave blank to disable auth (not recommended).");
+            toolTipRemote.SetToolTip(btnCopyApiKey,
+                "Copy the API key to the clipboard.");
+            toolTipRemote.SetToolTip(txtBotToken,
+                "Telegram bot token from @BotFather. Required to start the Telegram controller.");
+            toolTipRemote.SetToolTip(btnStartTelegram,
+                "Start or stop the Telegram bot controller.");
+            toolTipRemote.SetToolTip(lblTelegramStatus,
+                "Current Telegram bot state.");
+            toolTipRemote.SetToolTip(txtAllowedChatIds,
+                "Comma-separated Telegram chat IDs allowed to issue commands. Leave blank to allow any chat that knows the bot token.");
+            toolTipRemote.SetToolTip(lblHelpRateLimit,
+                "Maximum unauthenticated requests per minute per IP for /help when 'Public /help' is on.");
+            toolTipRemote.SetToolTip(numHelpRateLimit,
+                "Requests per minute per IP. Sliding 60-second window. Loopback and API-keyed callers are not rate-limited.");
+            toolTipRemote.SetToolTip(txtPipeName,
+                "Windows named-pipe name. Other clients connect to \\\\.\\pipe\\<name>. Defaults to ApexComputerUse.");
+            toolTipRemote.SetToolTip(btnStartPipe,
+                "Start or stop the named-pipe command server.");
+            toolTipRemote.SetToolTip(lblPipeStatus,
+                "Current named-pipe server state.");
+            toolTipRemote.SetToolTip(lblHttpPort, "TCP port the HTTP server listens on.");
+            toolTipRemote.SetToolTip(lblApiKey, "Required for every HTTP request unless 'Public /help' covers the route.");
+            toolTipRemote.SetToolTip(lblBotToken, "Telegram bot token from @BotFather.");
+            toolTipRemote.SetToolTip(lblAllowedChatIds, "Whitelist of Telegram chat IDs allowed to issue commands.");
+            toolTipRemote.SetToolTip(lblPipeName, "Windows named-pipe name.");
             // 
             // lblHttpPort
             // 
@@ -696,16 +737,16 @@
             // 
             btnStartTelegram.Location = new Point(357, 99);
             btnStartTelegram.Name = "btnStartTelegram";
-            btnStartTelegram.Size = new Size(120, 29);
+            btnStartTelegram.Size = new Size(100, 29);
             btnStartTelegram.TabIndex = 6;
             btnStartTelegram.Text = "Start Telegram";
             btnStartTelegram.Click += btnStartTelegram_Click;
-            // 
+            //
             // lblTelegramStatus
-            // 
+            //
             lblTelegramStatus.AutoSize = true;
             lblTelegramStatus.ForeColor = Color.Gray;
-            lblTelegramStatus.Location = new Point(8, 168);
+            lblTelegramStatus.Location = new Point(465, 104);
             lblTelegramStatus.Name = "lblTelegramStatus";
             lblTelegramStatus.Size = new Size(119, 17);
             lblTelegramStatus.TabIndex = 7;
@@ -727,9 +768,42 @@
             txtAllowedChatIds.PlaceholderText = "123456789,987654321 (leave blank to allow all)";
             txtAllowedChatIds.Size = new Size(395, 25);
             txtAllowedChatIds.TabIndex = 16;
-            // 
+            //
+            // chkPublicHelp
+            //
+            chkPublicHelp.AutoSize = true;
+            chkPublicHelp.Location = new Point(8, 165);
+            chkPublicHelp.Name = "chkPublicHelp";
+            chkPublicHelp.Size = new Size(180, 21);
+            chkPublicHelp.TabIndex = 22;
+            chkPublicHelp.Text = "Public /help (no API key)";
+            chkPublicHelp.UseVisualStyleBackColor = true;
+            toolTipRemote.SetToolTip(chkPublicHelp,
+                "When checked, GET /help is served without an API key (rate-limited per IP).");
+            chkPublicHelp.CheckedChanged += chkPublicHelp_CheckedChanged;
+            //
+            // lblHelpRateLimit
+            //
+            lblHelpRateLimit.AutoSize = true;
+            lblHelpRateLimit.Location = new Point(220, 167);
+            lblHelpRateLimit.Name = "lblHelpRateLimit";
+            lblHelpRateLimit.Size = new Size(110, 17);
+            lblHelpRateLimit.TabIndex = 23;
+            lblHelpRateLimit.Text = "Rate limit (req/min):";
+            //
+            // numHelpRateLimit
+            //
+            numHelpRateLimit.Location = new Point(345, 164);
+            numHelpRateLimit.Maximum = 10000;
+            numHelpRateLimit.Minimum = 1;
+            numHelpRateLimit.Name = "numHelpRateLimit";
+            numHelpRateLimit.Size = new Size(70, 25);
+            numHelpRateLimit.TabIndex = 24;
+            numHelpRateLimit.Value = 30;
+            numHelpRateLimit.ValueChanged += numHelpRateLimit_ValueChanged;
+            //
             // lblPipeName
-            // 
+            //
             lblPipeName.AutoSize = true;
             lblPipeName.Location = new Point(8, 194);
             lblPipeName.Name = "lblPipeName";
@@ -1102,6 +1176,7 @@
             tabPageRemote.PerformLayout();
             grpRemote.ResumeLayout(false);
             grpRemote.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)numHelpRateLimit).EndInit();
             tabPageModel.ResumeLayout(false);
             grpModelPaths.ResumeLayout(false);
             grpModelPaths.PerformLayout();
@@ -1191,7 +1266,10 @@
         private System.Windows.Forms.Button    btnRemoveFirewall;
         private System.Windows.Forms.Label     lblHttpStatus;
         private System.Windows.Forms.Label     lblApiKey;
-        private System.Windows.Forms.TextBox   txtApiKey;
+        private System.Windows.Forms.TextBox       txtApiKey;
+        private System.Windows.Forms.CheckBox      chkPublicHelp;
+        private System.Windows.Forms.Label         lblHelpRateLimit;
+        private System.Windows.Forms.NumericUpDown numHelpRateLimit;
         private System.Windows.Forms.Button    btnCopyApiKey;
         private System.Windows.Forms.Label     lblBotToken;
         private System.Windows.Forms.TextBox   txtBotToken;

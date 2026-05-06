@@ -1,6 +1,27 @@
-# ApexComputerUse — AI Agent Reference
+# ApexComputerUse — Control Guide
+
+Comprehensive reference for driving ApexComputerUse from any HTTP client (curl, AI agent, automation script). This is the merged successor to the old `ACU_AI_CONTROL_GUIDE.md`.
 
 ApexComputerUse exposes the Windows UI Automation tree over a plain HTTP REST API. You drive any desktop app or browser by finding windows/elements (by title, name, AutomationId, or stable numeric ID) and executing actions against them. Default base URL: `http://localhost:8080`.
+
+> **Live, always-current reference:** `GET /help` on the running server returns the auto-generated endpoint reference. If this document and `/help` disagree, trust `/help` — it's generated from the routing table.
+
+---
+
+## Rules of Thumb
+
+These are the failure modes you'll hit if you ignore them. Internalize them before doing anything else.
+
+1. **Always scope `/find` with `window`.** Without it, fuzzy matching may find an element with the same name in the wrong window.
+2. **Actions target the last found element.** If anything has changed (page navigated, window switched, dialog opened), call `/find` again before `/exec`.
+3. **`keys` types into the last found element.** If you `/find`'d a Calculator button and then send `{ENTER}`, it goes to Calculator — not the browser you actually want.
+4. **Browser URL navigation = `setvalue` *plus* `keys {ENTER}`.** `setvalue` alone fills the address bar but does not navigate.
+5. **Re-check window titles after navigation.** A browser window's title changes on every page load; the old title/ID stops matching.
+6. **Use `?onscreen=true` on `/elements`.** Cuts ~80% of the tree on browser pages and is almost always what you want.
+7. **Prefer numeric IDs over names** once you have them from `/windows` or `/elements`. Faster, no fuzzy matching, no ambiguity.
+8. **Treat fuzzy "candidate" responses as a stop sign.** If `/find` returns `error_data.candidates`, pick one by ID — don't repeat the same ambiguous name.
+9. **Verify, don't assume.** After an action, read it back: `gettext`, `getvalue`, `gettoggle`, or `/status`.
+10. **Always request JSON** (`?format=json` or `Accept: application/json` or `.json` extension) for programmatic clients.
 
 ## Authentication
 
@@ -412,6 +433,65 @@ curl -X POST http://localhost:8080/scenes/{id}/layers/{lid}/shapes \
 # Render
 curl http://localhost:8080/scenes/{id}/render
 ```
+
+---
+
+## Annotations & Filtering
+
+Persistent notes and exclusion filters keyed by stable element hash. Notes appear in `/elements` output; excluded subtrees disappear unless you pass `?unfiltered=true`. Stored at `%LOCALAPPDATA%\ApexComputerUse\annotations\elements.json`.
+
+| Method | Route | Description |
+|---|---|---|
+| `POST` | `/annotate` | Body `{"id":<n>,"note":"..."}` or `{"hash":"...","note":"..."}` |
+| `POST` | `/unannotate` | Remove note |
+| `POST` | `/exclude` | Hide subtree from `/elements` |
+| `POST` | `/unexclude` | Restore subtree |
+| `GET`  | `/annotations` | List all annotations |
+| `GET`  | `/excluded` | List excluded elements |
+
+```bash
+curl -X POST http://localhost:8080/annotate \
+  -d '{"id":1726054963,"note":"main menu - skip in scans"}'
+curl -X POST http://localhost:8080/exclude  -d '{"id":216323806}'
+curl "http://localhost:8080/elements?unfiltered=true"   # see excluded subtrees
+```
+
+The hash incorporates control type + name + AutomationId + tree position, so annotations stick across sessions.
+
+---
+
+## Region Maps
+
+Persistent named pixel-coordinate grids tied to a window or element-hash. Designed for canvas-rendered content (board games, emulators, video players) where individual cells are not UIA elements. Calibrate once, reuse coordinates forever.
+
+| Method | Route | Description |
+|---|---|---|
+| `GET` / `POST` | `/regionmap` | List / create. Filter list with `?window=<title>` or `?hash=<elementHash>` |
+| `GET` / `PUT` / `PATCH` / `DELETE` | `/regionmap/{id}` | Get / update / delete |
+| `POST` | `/regionmap/{id}/overlay` | Show grid as click-through screen overlay |
+| `POST` | `/regionmap/{id}/render` | Returns base64 PNG of screen (or window) with grid drawn over it |
+| `POST` | `/regionmap/{id}/cell` | Body `{"row":r,"col":c}` → `{x,y}` for `click-at` |
+
+Calibration loop:
+```bash
+# 1. Create a rough grid
+curl -X POST http://localhost:8080/regionmap \
+  -d '{"name":"checkers","windowTitle":"Checkers - Edge",
+       "originX":420,"originY":180,"cellWidth":64,"cellHeight":64,"rows":8,"cols":8}'
+
+# 2. Render grid over the actual window — base64 PNG comes back in data.result
+curl -X POST http://localhost:8080/regionmap/{id}/render -d '{"canvas":"window"}'
+
+# 3. Adjust origin / cell size based on what the image shows
+curl -X PUT http://localhost:8080/regionmap/{id} -d '{"originX":425,"originY":182}'
+
+# 4. Once aligned, click cells by row/col
+curl -X POST http://localhost:8080/regionmap/{id}/cell -d '{"row":3,"col":4}'
+# → x,y returned, then:
+curl -X POST http://localhost:8080/exec -d '{"action":"click-at","value":"717,406"}'
+```
+
+`render` modes: `"screen"` (default, full primary screen) or `"window"` (current window only — call `/find` first; coords auto-translated to window-local). Cell coordinates are screen-absolute. When the window moves, re-anchor by updating `originX`/`originY`.
 
 ---
 

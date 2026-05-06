@@ -2,6 +2,60 @@
 
 All notable changes to ApexComputerUse are documented in this file.
 
+## [0.15.0] — 2026-05-06
+
+### Added
+
+#### Element Annotations & Filtering
+- New `ElementAnnotation` model and `ElementAnnotationStore` — per-element notes and exclusion flags keyed by stable element hash, persisted at `%LOCALAPPDATA%\ApexComputerUse\annotations\elements.json`. Empty records auto-GC'd.
+- New verbs in `CommandProcessor.Annotations.cs`: `annotate`, `unannotate`, `exclude`, `unexclude`, `annotations`, `excluded`
+- New HTTP routes: `POST /annotate`, `POST /unannotate`, `POST /exclude`, `POST /unexclude`, `GET /annotations`, `GET /excluded`
+- Notes appear as a `note` field on `/elements` output; excluded subtrees are skipped during scan (root never excluded — `depth > 0` guard)
+- New query param `?unfiltered=true` on `/elements` bypasses the exclusion filter
+- 7 new unit tests in `ElementAnnotationStoreTests.cs`
+
+#### Region Maps
+- New `RegionMap` model and `RegionMapStore` — persistent named pixel-coordinate grids tied to a window or stable element hash. One file per map under `<exe>/regionmaps/{id}.json`
+- Built for AI self-calibration loops on canvas-rendered content (board games, emulators, video timelines) where individual cells are not UIA elements
+- Static helpers: `CellToPixel(map, row, col)` returns cell center; `BuildGridDrawRequest(...)` produces a re-usable draw request for both overlay and render paths
+- New verbs in `CommandProcessor.RegionMaps.cs`: `regionmap` umbrella with sub-actions `list|get|delete|overlay|render|cell`
+- New HTTP routes in `HttpCommandServer.AnnotationRoutes.cs`:
+  - `GET|POST /regionmap` — list/create
+  - `GET|PUT|PATCH|DELETE /regionmap/{id}` — per-map ops
+  - `POST /regionmap/{id}/overlay` — click-through screen overlay
+  - `POST /regionmap/{id}/render` — base64 PNG of screen (or current window) with grid drawn over it; supports `{"canvas":"screen"}` (default) or `{"canvas":"window"}` (auto-translates grid coords to window-local)
+  - `POST /regionmap/{id}/cell` — `{row, col}` → `{x, y}` for `click-at`
+- 10 new unit tests in `RegionMapStoreTests.cs` (incl. corner-case cell-coord math)
+
+#### Public /help Page
+- New optional setting `PublicHelpPage` (default `false`): when on, `GET /help` is reachable without an API key
+- New setting `PublicHelpRateLimit` (default `30` req/min/IP): sliding 60-second per-IP window protects the unauthenticated route
+- Returns HTTP 429 with `Retry-After: 60` when limit exceeded
+- Loopback callers and API-keyed callers always have full access (never rate-limited)
+- New `RuntimeFlags` static — mutable mirror of `AppConfig` values seeded at startup, allows GUI changes to take effect without restart
+- GUI controls in Remote Control tab: `chkPublicHelp` checkbox + `numHelpRateLimit` numeric input. Persisted in `%APPDATA%\ApexComputerUse\settings.json` alongside other user prefs.
+- `appsettings.json` keys: `PublicHelpPage`, `PublicHelpRateLimit`. Env: `APEX_PUBLIC_HELP_PAGE`, `APEX_PUBLIC_HELP_RATE_LIMIT`.
+
+### Changed
+
+#### UI
+- Remote Control tab cleaned up: `lblTelegramStatus` moved from (8, 168) — was overlapping the new public-help checkbox — to (465, 104) on the bot-token row. `btnStartTelegram` shrunk from 120 to 100 wide to make room.
+- Added tooltips to all interactive controls in Remote Control tab (HTTP port/start, API key, Copy, bot token, Start Telegram, allowed chat IDs, public help, rate limit, pipe name, Start Pipe, status labels).
+
+#### Documentation
+- New `LICENSE`: PolyForm Noncommercial 1.0.0. Source-available; commercial use requires a separate license.
+- New `THIRD_PARTY_NOTICES.md`: license attributions for all 9 NuGet dependencies (FlaUI, Serilog, LLamaSharp, Telegram.Bot, Tesseract, etc.). MIT and Apache 2.0 obligations met inline.
+- Merged `ACU_AI_CONTROL_GUIDE.md` into `ACU_CONTROL_GUIDE.md` (deleted the former) — single comprehensive guide. Added "Rules of Thumb" section + Annotations + Region Maps coverage.
+- Slimmed `ACU_SYSTEM_PROMPT.md` from 9 KB → 3.8 KB. Now points at the auto-generated `/help` page for endpoint reference instead of duplicating tables that drift. Retains auth, mental model, 10 critical rules, minimal control loop.
+- Updated `ACU_OPERATIONAL_REFERENCE.md` for staleness: added `/winrun`, annotations, region maps, `note` field, `?unfiltered`, `PublicHelpPage`/`PublicHelpRateLimit` config keys.
+
+### Fixed
+
+- `CommandProcessor.ScanElementsIntoMap` now consults `ElementAnnotationStore` to skip excluded subtrees and attach notes during scan; existing `/elements` callers see no behavioral change unless annotations exist.
+- `RegionMap.canvas:"window"` mode correctly translates screen-absolute grid coords into window-local space before drawing, so the grid lines up with the captured window image.
+
+---
+
 ## [0.14.0] — 2026-04-27
 
 ### Added

@@ -64,6 +64,9 @@ curl -H "X-Api-Key: <key>" "http://localhost:8080/elements?onscreen=true"
 # Filter by ControlType
 curl -H "X-Api-Key: <key>" "http://localhost:8080/elements?onscreen=true&type=Button"
 
+# Bypass exclusion filter — shows annotations-excluded subtrees too
+curl -H "X-Api-Key: <key>" "http://localhost:8080/elements?unfiltered=true"
+
 # UI map — returns colour-coded PNG of element tree (base64)
 curl -H "X-Api-Key: <key>" http://localhost:8080/uimap
 ```
@@ -76,6 +79,7 @@ Element JSON shape:
   "name": "Text Editor",
   "automationId": "15",
   "boundingRectangle": { "x": 0, "y": 30, "width": 800, "height": 600 },
+  "note": "annotation text (only present if annotated)",
   "children": [...]
 }
 ```
@@ -494,6 +498,111 @@ Scenes are persisted to `<exe>/scenes/{id}.json`.
 
 ---
 
+## Launch Apps (`/winrun`)
+
+Launches any executable, file, folder, or URI via `ShellExecute`. Always enabled — no config required. Fire-and-forget; no stdout capture.
+
+```bash
+# Open File Explorer
+curl -H "X-Api-Key: <key>" "http://localhost:8080/winrun?target=explorer.exe"
+
+# Open a folder
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8080/winrun \
+  -H "Content-Type: application/json" \
+  -d '{"target":"C:\\Users\\Public"}'
+
+# Open a URL in the default browser
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8080/winrun \
+  -d '{"target":"https://example.com"}'
+
+# Launch with arguments
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8080/winrun \
+  -d '{"target":"notepad.exe","args":"C:\\readme.txt"}'
+```
+
+After launch, poll `/windows` until the new window appears, then call `/find`.
+
+---
+
+## Annotations & Filtering (`/annotate`, `/exclude`)
+
+Persistent per-element notes and exclusion filters keyed by stable element hash. Survives across sessions. Notes show up in `/elements` output as a `note` field; excluded subtrees disappear from `/elements` until you pass `?unfiltered=true`.
+
+| Method | Route | Body | Description |
+|---|---|---|---|
+| `POST` | `/annotate` | `{"id":<numeric>,"note":"..."}` or `{"hash":"...","note":"..."}` | Attach a note |
+| `POST` | `/unannotate` | `{"id":<numeric>}` | Remove note |
+| `POST` | `/exclude` | `{"id":<numeric>}` | Hide subtree from `/elements` |
+| `POST` | `/unexclude` | `{"id":<numeric>}` | Restore subtree |
+| `GET`  | `/annotations` | — | List all annotations |
+| `GET`  | `/excluded` | — | List excluded elements |
+
+```bash
+# Annotate the current MenuBar (id from a recent /elements scan)
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8080/annotate \
+  -H "Content-Type: application/json" \
+  -d '{"id":1726054963,"note":"main menu - skip in scans"}'
+
+# Hide a noisy status bar from future /elements output
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8080/exclude \
+  -H "Content-Type: application/json" \
+  -d '{"id":216323806}'
+
+# To find an excluded element again, use ?unfiltered=true
+curl -H "X-Api-Key: <key>" "http://localhost:8080/elements?unfiltered=true"
+```
+
+Stored at `%LOCALAPPDATA%\ApexComputerUse\annotations\elements.json`. The hash is derived from control type + name + AutomationId + tree position, so annotations stick to the same element across runs.
+
+---
+
+## Region Maps (`/regionmap`)
+
+Persistent named pixel-coordinate grids tied to a window or stable element hash. Built for AI self-calibration: overlay grid → screenshot → adjust → store, then re-use saved cell coordinates next session via `click-at`. Useful for canvas-rendered content (board games, emulators, video timelines) where individual cells aren't UIA elements.
+
+| Method | Route | Description |
+|---|---|---|
+| `GET` | `/regionmap` | List maps. Filter with `?window=<title>` or `?hash=<elementHash>` |
+| `POST` | `/regionmap` | Create a map |
+| `GET` | `/regionmap/{id}` | Get one map |
+| `PUT` / `PATCH` | `/regionmap/{id}` | Update geometry / labels / notes |
+| `DELETE` | `/regionmap/{id}` | Delete |
+| `POST` | `/regionmap/{id}/overlay` | Show the grid as a click-through screen overlay (calibration) |
+| `POST` | `/regionmap/{id}/render` | Return base64 PNG of screen (or window) with grid drawn over it |
+| `POST` | `/regionmap/{id}/cell` | `{"row":r,"col":c}` → returns center `(x,y)` for `click-at` |
+
+```bash
+# Create an 8x8 grid for a checkers board
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8080/regionmap \
+  -H "Content-Type: application/json" \
+  -d '{"name":"checkers","windowTitle":"Checkers - Edge",
+       "originX":420,"originY":180,"cellWidth":64,"cellHeight":64,"rows":8,"cols":8}'
+
+# Calibration loop: render grid over screen → inspect → adjust
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8080/regionmap/{id}/render \
+  -H "Content-Type: application/json" \
+  -d '{"canvas":"window"}'      # or "screen" for full-screen capture
+
+# Tweak after looking at the rendered image
+curl -H "X-Api-Key: <key>" -X PUT http://localhost:8080/regionmap/{id} \
+  -d '{"originX":425,"originY":182}'
+
+# Once aligned, get pixel coords for a cell
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8080/regionmap/{id}/cell \
+  -d '{"row":3,"col":4}'
+# → data: { row: 3, col: 4, x: 717, y: 406, coords: "717,406" }
+
+# Then click that pixel via the current element's click-at
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8080/exec \
+  -d '{"action":"click-at","value":"717,406"}'
+```
+
+`render` returns base64 PNG in `data.result`. `canvas` defaults to `"screen"` (full primary screen capture); `"window"` captures only the current window (must call `/find` first) and translates grid coords into window-local space.
+
+Cell coordinates are screen-absolute. When the window moves, re-anchor by calling `/find` and updating `originX`/`originY` based on the new window position. Stored at `<exe>/regionmaps/{id}.json`.
+
+---
+
 ## System Routes
 
 ```bash
@@ -570,7 +679,9 @@ HTML responses embed `<script type="application/json" id="apex-result">` — any
   "EnableShellRun": false,
   "ApiKey":         "",
   "ModelPath":      "",
-  "MmProjPath":     ""
+  "MmProjPath":     "",
+  "PublicHelpPage": false,
+  "PublicHelpRateLimit": 30
 }
 ```
 
@@ -585,6 +696,8 @@ HTML responses embed `<script type="application/json" id="apex-result">` — any
 | `APEX_LOG_LEVEL` | `Information` | `Debug` / `Information` / `Warning` / `Error` |
 | `APEX_MODEL_PATH` | — | Path to vision `.gguf` file |
 | `APEX_MMPROJ_PATH` | — | Path to multimodal projector `.gguf` file |
+| `APEX_PUBLIC_HELP_PAGE` | `false` | Allow `GET /help` without API key (rate-limited per IP) |
+| `APEX_PUBLIC_HELP_RATE_LIMIT` | `30` | Public-help requests per minute per IP (sliding 60s window) |
 
 Logs: `%LOCALAPPDATA%\ApexComputerUse\Logs\apex-YYYYMMDD.log` (daily rotation, 7-day retention).
 

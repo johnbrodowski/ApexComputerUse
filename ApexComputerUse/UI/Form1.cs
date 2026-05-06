@@ -125,6 +125,10 @@ namespace ApexComputerUse
                         if (!string.IsNullOrWhiteSpace(s.AllowedChatIds)) txtAllowedChatIds.Text = s.AllowedChatIds;
                         _netshConfigured = s.NetshConfigured;
                         _netshPort       = s.NetshPort;
+                        chkPublicHelp.Checked = s.PublicHelpPage;
+                        numHelpRateLimit.Value = Math.Clamp(s.PublicHelpRateLimit, 1, 10000);
+                        RuntimeFlags.PublicHelpPage      = s.PublicHelpPage;
+                        RuntimeFlags.PublicHelpRateLimit = (int)numHelpRateLimit.Value;
                     }
                 }
             }
@@ -154,9 +158,11 @@ namespace ApexComputerUse
                     ModelPath        = txtModelPath.Text,
                     ProjPath         = txtProjPath.Text,
                     ApiKey           = txtApiKey.Text,
-                    AllowedChatIds   = txtAllowedChatIds.Text,
-                    NetshConfigured  = _netshConfigured,
-                    NetshPort        = _netshPort
+                    AllowedChatIds      = txtAllowedChatIds.Text,
+                    NetshConfigured     = _netshConfigured,
+                    NetshPort           = _netshPort,
+                    PublicHelpPage      = chkPublicHelp.Checked,
+                    PublicHelpRateLimit = (int)numHelpRateLimit.Value
                 };
                 // Atomic write: a crash mid-write would otherwise corrupt settings.json,
                 // and a corrupt file is treated as missing - wiping out the saved API key.
@@ -415,6 +421,18 @@ namespace ApexComputerUse
         private void btnStartPipe_Click(object sender, EventArgs e)      => _servers.TogglePipe();
         private void btnStartTelegram_Click(object sender, EventArgs e)  => _servers.ToggleTelegram();
         private void btnCopyApiKey_Click(object sender, EventArgs e)     => _servers.CopyApiKey();
+
+        private void chkPublicHelp_CheckedChanged(object sender, EventArgs e)
+        {
+            RuntimeFlags.PublicHelpPage = chkPublicHelp.Checked;
+            SaveSettings();
+        }
+
+        private void numHelpRateLimit_ValueChanged(object sender, EventArgs e)
+        {
+            RuntimeFlags.PublicHelpRateLimit = (int)numHelpRateLimit.Value;
+            SaveSettings();
+        }
 
         // -- Chat tab ------------------------------------------------------
 

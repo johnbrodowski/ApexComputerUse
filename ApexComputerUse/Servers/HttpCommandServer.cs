@@ -231,6 +231,48 @@ namespace ApexComputerUse
             AllowDiagnostics = false
         };
 
+        // Diagnostics-only permission set granted to unauthenticated public-help requests.
+        // Combined with the path filter (must be /help) this only ever serves the help page.
+        private static readonly ClientPermissions _diagnosticsOnly = new()
+        {
+            AllowAutomation = false, AllowCapture = false, AllowAi    = false,
+            AllowScenes     = false, AllowShellRun = false, AllowClients = false,
+            AllowDiagnostics = true
+        };
+
+        // Per-IP rate limit window for public /help (sliding 60-second bucket).
+        // Bounded by natural IP cardinality on a localhost server; no eviction needed.
+        private static readonly Dictionary<string, (int count, DateTime windowStart)> _helpRateLimits = new();
+        private static readonly object _helpRateLimitsLock = new();
+
+        private static bool IsPublicHelpRequest(HttpListenerRequest req)
+        {
+            if (!RuntimeFlags.PublicHelpPage) return false;
+            if (!string.Equals(req.HttpMethod, "GET", StringComparison.OrdinalIgnoreCase)) return false;
+            string p = req.Url?.AbsolutePath?.TrimEnd('/') ?? "";
+            return p.Equals("/help", StringComparison.OrdinalIgnoreCase)
+                || p.StartsWith("/help.", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool TryAllowPublicHelp(string clientIp)
+        {
+            int limit = RuntimeFlags.PublicHelpRateLimit;
+            if (limit <= 0) return false;
+            var now = DateTime.UtcNow;
+            lock (_helpRateLimitsLock)
+            {
+                if (!_helpRateLimits.TryGetValue(clientIp, out var entry)
+                    || (now - entry.windowStart) > TimeSpan.FromMinutes(1))
+                {
+                    _helpRateLimits[clientIp] = (1, now);
+                    return true;
+                }
+                if (entry.count >= limit) return false;
+                _helpRateLimits[clientIp] = (entry.count + 1, entry.windowStart);
+                return true;
+            }
+        }
+
         private ClientPermissions ResolvePermissions(HttpListenerRequest req)
         {
             // Loopback (localhost / 127.0.0.1 / ::1) always gets full access.
@@ -245,6 +287,9 @@ namespace ApexComputerUse
             // Unknown non-loopback caller: if they have a valid API key, grant full access.
             // The API key is the authentication - the client list is for per-client restriction only.
             if (IsAuthenticated(req)) return _fullPermissions;
+
+            // Public /help fallback: diagnostics only, gated by rate limit at the auth stage.
+            if (IsPublicHelpRequest(req)) return _diagnosticsOnly;
 
             return _noPermissions;
         }
@@ -307,8 +352,29 @@ namespace ApexComputerUse
                 return;
             }
 
+            // Public /help: bypass auth subject to per-IP rate limit. Other endpoints fall through
+            // to the normal auth gate below.
+            if (IsPublicHelpRequest(req) && !IsAuthenticated(req))
+            {
+                if (!TryAllowPublicHelp(clientIp))
+                {
+                    statusCode = 429;
+                    Interlocked.Increment(ref _errorRequests);
+                    res.StatusCode      = 429;
+                    res.ContentType     = "application/json; charset=utf-8";
+                    res.Headers["Retry-After"] = "60";
+                    var rlBody = Encoding.UTF8.GetBytes(
+                        """{"success":false,"error":"Rate limit exceeded for /help. Try again in a minute or supply an API key."}""");
+                    res.ContentLength64 = rlBody.Length;
+                    try   { await res.OutputStream.WriteAsync(rlBody); }
+                    finally { res.Close(); }
+                    return;
+                }
+                // fall through — auth gate skipped via IsPublicHelpRequest check below
+            }
+
             // Auth gate
-            if (!IsAuthenticated(req))
+            if (!IsAuthenticated(req) && !IsPublicHelpRequest(req))
             {
                 statusCode = 401;
                 Interlocked.Increment(ref _errorRequests);

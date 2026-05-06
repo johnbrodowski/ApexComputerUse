@@ -49,6 +49,13 @@ namespace ApexComputerUse
         public string TestRunnerExePath    { get; init; } = "";
         public string TestRunnerConfigPath { get; init; } = "";
 
+        // -- Public /help page (optional, rate-limited) -------------------------
+        // When true, GET /help is reachable without an API key. Per-IP rate limit
+        // (requests per minute) protects against abuse. Other endpoints are
+        // unaffected. Loopback callers already have full access regardless.
+        public bool PublicHelpPage      { get; init; } = false;
+        public int  PublicHelpRateLimit { get; init; } = 30;   // req/min/IP
+
         // -- File I/O endpoint (read-only) --------------------------------------
         // EnableFileIo gates the /file route. Disabled by default. Kept separate from
         // EnableShellRun because shell execution and file reads are different risk surfaces -
@@ -132,6 +139,8 @@ namespace ApexComputerUse
                 TelegramToken  = Str(root,  "TelegramToken")  ?? cfg.TelegramToken,
                 TestRunnerExePath    = Str(root, "TestRunnerExePath")    ?? cfg.TestRunnerExePath,
                 TestRunnerConfigPath = Str(root, "TestRunnerConfigPath") ?? cfg.TestRunnerConfigPath,
+                PublicHelpPage       = Bool(root, "PublicHelpPage")      ?? cfg.PublicHelpPage,
+                PublicHelpRateLimit  = Int(root, "PublicHelpRateLimit")  ?? cfg.PublicHelpRateLimit,
                 EnableFileIo         = Bool(root, "EnableFileIo")        ?? cfg.EnableFileIo,
                 FileIoAllowedRoots   = ReadStringArray(root, "FileIoAllowedRoots") ?? cfg.FileIoAllowedRoots,
                 WaitForTimeoutMs     = Int(root, "WaitForTimeoutMs")     ?? cfg.WaitForTimeoutMs,
@@ -178,6 +187,8 @@ namespace ApexComputerUse
                 TelegramToken  = E("TELEGRAM_TOKEN")    ?? cfg.TelegramToken,
                 TestRunnerExePath    = E("TEST_RUNNER_EXE_PATH")    ?? cfg.TestRunnerExePath,
                 TestRunnerConfigPath = E("TEST_RUNNER_CONFIG_PATH") ?? cfg.TestRunnerConfigPath,
+                PublicHelpPage       = E("PUBLIC_HELP_PAGE")        is { } phb ? ParseBool(phb)       : cfg.PublicHelpPage,
+                PublicHelpRateLimit  = E("PUBLIC_HELP_RATE_LIMIT")  is { } phr && int.TryParse(phr, out int phv) ? phv : cfg.PublicHelpRateLimit,
                 EnableFileIo         = E("ENABLE_FILE_IO") is { } fIo ? ParseBool(fIo) : cfg.EnableFileIo,
                 // CSV form: APEX_FILE_IO_ALLOWED_ROOTS="C:\Users\me\src;D:\projects"
                 FileIoAllowedRoots   = E("FILE_IO_ALLOWED_ROOTS") is { } fr
