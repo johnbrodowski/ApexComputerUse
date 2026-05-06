@@ -271,7 +271,7 @@ public class NewFeaturesTests
         Assert.Contains(collected, e => e.Type == "window-created"        && e.WindowId == 3);
         Assert.Contains(collected, e => e.Type == "window-closed"         && e.WindowId == 2);
         Assert.Contains(collected, e => e.Type == "window-title-changed"  && e.WindowId == 3
-                                                                            && e.Title == "C-renamed");
+                                                                            && (string?)e.Data["title"] == "C-renamed");
     }
 
     [Fact]
