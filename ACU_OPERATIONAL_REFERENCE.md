@@ -603,6 +603,57 @@ Cell coordinates are screen-absolute. When the window moves, re-anchor by callin
 
 ---
 
+## Region Monitors (`/monitor`)
+
+Persistent screen-region change watchers. Each monitor holds an array of regions; the runner captures every region on the monitor's interval, diffs against the previous capture, and fires an SSE event on `/events` when any region's diff exceeds the threshold. Built for indicators UIA can't see — LEDs, custom-rendered status icons, video frames, hardware lights.
+
+| Method | Route | Description |
+|---|---|---|
+| `GET` | `/monitor` | List monitors |
+| `POST` | `/monitor` | Create. Body: `{name, regions:[{x,y,width,height,label?}], intervalMs, thresholdPct, tolerance, enabled?}` |
+| `GET`/`PUT`/`DELETE` | `/monitor/{id}` | Get / update / delete |
+| `POST` | `/monitor/{id}/start` | Enable + begin polling |
+| `POST` | `/monitor/{id}/stop` | Disable |
+| `POST` | `/monitor/{id}/check` | One-shot diff vs current baselines (returns per-region pct array) |
+| `POST` | `/monitor/{id}/snapshot?index=N` | Base64 PNG of region N right now |
+
+```bash
+# 1. Create a monitor over two indicator lights
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8080/monitor \
+  -H "Content-Type: application/json" \
+  -d '{"name":"power-leds",
+       "regions":[
+         {"x":820,"y":140,"width":24,"height":24,"label":"main-led"},
+         {"x":860,"y":140,"width":24,"height":24,"label":"alert-led"}
+       ],
+       "intervalMs":500,"thresholdPct":5.0,"tolerance":8}'
+
+# 2. Subscribe to fires (separate shell — long-lived SSE connection)
+curl -N -H "X-Api-Key: <key>" "http://localhost:8080/events?types=monitor.fired"
+
+# 3. Start polling
+curl -H "X-Api-Key: <key>" -X POST http://localhost:8080/monitor/{id}/start
+
+# 4. When a region changes more than thresholdPct, an event arrives:
+#    event: monitor.fired
+#    data: {"monitorId":"...","name":"power-leds","regionIndex":0,"label":"main-led",
+#           "x":820,"y":140,"width":24,"height":24,"percentDiff":18.7,"threshold":5.0,
+#           "seq":42,"time":"..."}
+
+# 5. Inspect what changed (returns base64 PNG of the region right now)
+curl -H "X-Api-Key: <key>" -X POST "http://localhost:8080/monitor/{id}/snapshot?index=0"
+```
+
+**Diff metric:** per-pixel, max-channel-difference > `tolerance` counts as a "changed pixel"; percent = `changed / total * 100`. Default `tolerance=8` ignores antialiasing and minor compression noise.
+
+**Backpressure:** overlapping ticks are skipped (no queue); `intervalMs` is floored at 100ms. First tick per region establishes the baseline (no fire on first capture).
+
+**Telemetry without subscribing:** `GET /monitor/{id}` returns `lastFiredUtc`, `lastPercentDiff`, `lastRegionIndex`, `hitCount` for inspection.
+
+Stored at `%LOCALAPPDATA%\ApexComputerUse\monitors\{id}.json`.
+
+---
+
 ## System Routes
 
 ```bash

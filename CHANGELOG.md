@@ -27,6 +27,27 @@ All notable changes to ApexComputerUse are documented in this file.
   - `POST /regionmap/{id}/cell` — `{row, col}` → `{x, y}` for `click-at`
 - 10 new unit tests in `RegionMapStoreTests.cs` (incl. corner-case cell-coord math)
 
+#### Region Monitors
+- New `RegionMonitor` model and `RegionMonitorStore` — persistent per-region screen-change watchers, one file per monitor under `%LOCALAPPDATA%\ApexComputerUse\monitors\{id}.json`. Each monitor holds an array of `MonitorRegion` so one logical "watch" can cover multiple indicators (LEDs, status icons, etc.) with independent diffs.
+- New `RegionMonitorRunner` — background dispatcher; one Task per enabled monitor; per-region capture → diff vs previous → fire SSE event when over threshold. First tick is the baseline (no fire). Disabled monitors are not polled. Region-count changes handled at runtime. Diff via `LockBits + Marshal.Copy` — per-pixel max-channel-difference > tolerance counts as "changed".
+- New verbs in `CommandProcessor.Monitors.cs`: `monitor` umbrella with sub-actions `list|get|delete|start|stop|check`.
+- New HTTP routes in `HttpCommandServer.MonitorRoutes.cs`:
+  - `GET|POST /monitor` — list/create
+  - `GET|PUT|DELETE /monitor/{id}` — per-monitor CRUD
+  - `POST /monitor/{id}/start` / `/stop` — toggle enabled
+  - `POST /monitor/{id}/check` — manual one-shot diff vs current baselines
+  - `POST /monitor/{id}/snapshot?index=N` — base64 PNG of region N right now
+- Notifications via the existing `/events` SSE stream as `monitor.fired` events: `{monitorId, name, regionIndex, label, x, y, width, height, percentDiff, threshold, seq, time}`.
+- Defaults: `intervalMs=1000` (floor 100ms), `thresholdPct=5.0`, `tolerance=8`, `enabled=false`.
+- Last-fire telemetry persisted on the monitor: `lastFiredUtc`, `lastPercentDiff`, `lastRegionIndex`, `hitCount`.
+- 11 new unit tests in `RegionMonitorStoreTests.cs` covering CRUD, telemetry, persistence, and diff math.
+
+#### EventBroker generalization
+- `EventEnvelope` reshaped: `int? WindowId` plus `IReadOnlyDictionary<string, object?> Data` replace the fixed `WindowId`/`Title` fields. Window events still carry `id`/`title` inside `Data`; non-window subsystems attach arbitrary payloads.
+- New public `EventBroker.Emit(string type, IDictionary<string, object?> data, int? windowId = null)` for non-window emitters (region monitors today, anything else later).
+- SSE serializer in `HttpCommandServer.Events.cs` now flattens `Data` into the frame payload alongside `seq`/`time` — both event families render uniformly.
+- `JsonElementExtensions.Dbl(name)` helper added for parsing `thresholdPct`.
+
 #### Public /help Page
 - New optional setting `PublicHelpPage` (default `false`): when on, `GET /help` is reachable without an API key
 - New setting `PublicHelpRateLimit` (default `30` req/min/IP): sliding 60-second per-IP window protects the unauthenticated route

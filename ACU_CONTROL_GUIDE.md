@@ -495,6 +495,47 @@ curl -X POST http://localhost:8080/exec -d '{"action":"click-at","value":"717,40
 
 ---
 
+## Region Monitors
+
+Persistent screen-region change watchers. Each monitor holds an array of regions, polled on its own interval and diffed pixel-by-pixel against the previous capture. When any region exceeds the threshold, a `monitor.fired` event lands on the `/events` SSE stream. Designed for indicators UIA can't see — LEDs, custom status icons, video frames.
+
+| Method | Route | Description |
+|---|---|---|
+| `GET` / `POST` | `/monitor` | List / create |
+| `GET` / `PUT` / `DELETE` | `/monitor/{id}` | Get / update / delete |
+| `POST` | `/monitor/{id}/start` / `/stop` | Toggle enabled |
+| `POST` | `/monitor/{id}/check` | One-shot diff vs current baselines |
+| `POST` | `/monitor/{id}/snapshot?index=N` | Base64 PNG of region N right now |
+
+```bash
+# Create
+curl -X POST http://localhost:8080/monitor -d '{
+  "name":"dashboard",
+  "regions":[{"x":820,"y":140,"width":24,"height":24,"label":"power"}],
+  "intervalMs":500,"thresholdPct":5.0,"tolerance":8}'
+
+# Subscribe to fires (separate shell)
+curl -N "http://localhost:8080/events?types=monitor.fired"
+
+# Start polling
+curl -X POST http://localhost:8080/monitor/{id}/start
+
+# Fire payload over SSE:
+# event: monitor.fired
+# data: {"monitorId":"...","name":"dashboard","regionIndex":0,"label":"power",
+#        "x":820,"y":140,"width":24,"height":24,"percentDiff":18.7,"threshold":5,
+#        "seq":42,"time":"..."}
+```
+
+- **Diff:** per-pixel, max-channel-difference > `tolerance` counts as a changed pixel; percent = `changed / total * 100`. Default `tolerance=8`.
+- **Backpressure:** overlapping ticks skipped (no queue). Min `intervalMs=100`.
+- **Baseline:** first tick per region, no fire — establishes the comparison reference.
+- **Telemetry without subscribing:** `GET /monitor/{id}` returns `hitCount`, `lastPercentDiff`, `lastFiredUtc`, `lastRegionIndex`.
+
+Stored at `%LOCALAPPDATA%\ApexComputerUse\monitors\{id}.json`.
+
+---
+
 ## Workflow tips
 
 1. **Start cheap.** `GET /windows.json` → pick window → `POST /find` with the numeric window ID.
